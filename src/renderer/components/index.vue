@@ -4,52 +4,52 @@
       <img class="logo" :src="require('../assets/logo.png')"/>
       <div class="title">洋芋田图像工具箱</div>
       <div class="flex-space"></div>
-      <div class="control-button interactable">
-        <span class="fa fa-question-circle icon"></span>
+      <div class="control-button interactable" @click="open('/about')">
+        <span class="fa fa-question-circle"></span>
         <div>关于</div>
       </div>
       <div class="control-button interactable" @click="hide">
-        <span class="fa fa-angle-double-down icon"></span>
+        <span class="fa fa-angle-double-down"></span>
         <div>隐藏</div>
       </div>
-      <div class="control-button interactable" @click="exit">
-        <span class="fa fa-sign-out-alt icon"></span>
+      <div class="control-button interactable" @click="close">
+        <span class="fa fa-sign-out-alt"></span>
         <div>退出</div>
       </div>
     </div>
     <div id="cards-holder" class="interactable">
       <div id="scroll">
         <div class="space">&nbsp;</div>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
-        <el-card shadow="always" class="card">
-          <span class="fa fa-sign-out-alt icon"></span>
-          <div class="title">水印工具</div>
-          <div class="mask">喝海河</div>
-        </el-card>
+        <div class="container" @click="open('/watermark')">
+          <el-card shadow="always" class="card">
+            <i class="fas fa-feather icon"></i>
+            <div class="title">添加水印</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card shadow="always" class="card">
+            <span class="fas fa-crop icon"></span>
+            <div class="title">裁剪工具</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card shadow="always" class="card">
+            <span class="fas fa-compress icon"></span>
+            <div class="title">尺寸压缩</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card shadow="always" class="card">
+            <span class="fas fa-magic icon"></span>
+            <div class="title">滤镜美化</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card shadow="always" class="card">
+            <span class="fas fa-database icon"></span>
+            <div class="title">图像瘦身</div>
+          </el-card>
+        </div>
         <div class="space">&nbsp;</div>
       </div>
     </div>
@@ -61,20 +61,18 @@ const ipcRenderer = require('electron').ipcRenderer
 
 export default {
   name: 'index',
-  data () {
-    return {
-      
-    }
-  },
   methods: {
     hide() {
       ipcRenderer.send('minimize')
     },
-    exit() {
-      ipcRenderer.send('exit')
+    close() {
+      ipcRenderer.send('close')
     },
     open (path) {
       ipcRenderer.send('open', path)
+    },
+    showDeveloping () {
+      this.$message("功能正在开发中")
     }
   },
   mounted() {
@@ -88,7 +86,10 @@ export default {
 
 <style lang="scss">
 #index {
+  width: 100%;
+  height: 100%;
   padding: 60px;
+  box-sizing: border-box;
   
   #title-bar {
     display: flex;
@@ -115,10 +116,9 @@ export default {
       width: 32px;
       margin-left: 10px;
       margin-right: 10px;
-      color: #606266;
       transition: 0.2s;
       
-      .icon {
+      svg {
         font-size: 20px;
         margin: 5px;
       }
@@ -146,55 +146,47 @@ export default {
       padding-bottom: 15px;
       box-sizing: border-box;
       
-      .card {
-        width: 200px;
-        height: 200px;
-        flex-shrink: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+      .container {
         margin: 10px;
-        position: relative;
-        cursor: pointer;
-        font-size: 14px;
-        color: #606266;
-        text-align: center;
         
-        .icon {
-          font-size: 80px;
-        }
-        
-        .title {
-          font-size: 16px;
-        }
-        
-        .mask {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          left: 0;
-          top: 0;
-          z-index: 1;
-          background-color: #2196F3;
-          color: #FFFFFF;
-          opacity: 0;
-          transition: 0.2s;
+        .card {
+          width: 200px;
+          height: 200px;
+          flex-shrink: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
+          cursor: pointer;
+          font-size: 14px;
+          color: #606266;
+          text-align: center;
+          
+          .icon {
+            font-size: 80px;
+          }
+          
+          .title {
+            font-size: 16px;
+            margin-top: 10px;
+          }
           
           &:hover {
-            opacity: 1;
+            transform: scale(1.05);
+            color: #2196F3;
           }
           
           &:active {
             filter: brightness(0.9);
-          } 
-        }
-        
-        &:first-child {
-          margin-left: 0;
-        }
-        
-        &:last-child {
-          margin-right: 0;
+          }
+          
+          &:first-child {
+            margin-left: 0;
+          }
+          
+          &:last-child {
+            margin-right: 0;
+          }
         }
       }
       
@@ -251,7 +243,5 @@ export default {
       background-image: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
     }
   }
-  
-  
 }
 </style>

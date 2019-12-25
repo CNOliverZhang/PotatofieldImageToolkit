@@ -9,70 +9,61 @@ if (process.env.NODE_ENV !== 'development') {
 }
 
 const windows = new Set;
-
-let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
+const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-function createMainWindow () {
-  /**
-   * Initial window options
-   */
-  mainWindow = new BrowserWindow({
-    height: 500,
-    width: 800,
-    frame: false,
-    fullscreenable: false,
-    resizable: true,
-    show: false
-  })
-
-  mainWindow.loadURL(winURL)
-  
-  mainWindow.on('ready-to-show', function () {
-    mainWindow.show()
-  })
-
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
-}
-
 function createWindow(path) {
+  let x, y
+  const currentWindow = BrowserWindow.getFocusedWindow()
+  if (currentWindow) {
+    const [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
+    x = currentWindowX + 30
+    y = currentWindowY + 30
+  }
   let newWindow = new BrowserWindow({
+    x,
+    y,
     height: 500,
     width: 800,
     frame: false,
     fullscreenable: false,
     resizable: true,
     show: false
-  });
+  })
 
-  newWindow.loadFile('app/index.html');
+  newWindow.loadURL(baseURL + '/#' + path)
 
-  newWindow.once('ready-to-show', () => {
-    newWindow.show();
-  });
+  newWindow.once('ready-to-show', function () {
+    newWindow.show()
+  })
 
   newWindow.on('closed', () => {
-    windows.delete(newWindow); //从已关闭的窗口Set中移除引用
-    newWindow = null;
+    windows.delete(newWindow)
+    newWindow = null
   });
 
-  windows.add(newWindow); //将窗口添加到已打开时设置的窗口
-  return newWindow;
+  windows.add(newWindow)
+  return newWindow
 }
 
-ipcMain.on('minimize', function() {
-  mainWindow.minimize();
+ipcMain.on('minimize', function () {
+  let currentWindow = BrowserWindow.getFocusedWindow()
+  currentWindow.minimize();
 })
 
-ipcMain.on('exit', function() {
-  mainWindow.close();
+ipcMain.on('close', function () {
+  let currentWindow = BrowserWindow.getFocusedWindow()
+  currentWindow.close();
 })
 
-app.on('ready', createMainWindow)
+ipcMain.on('open', function (event, path) {
+  createWindow(path)
+})
+
+app.on('ready', function () {
+  createWindow('/')
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -80,9 +71,9 @@ app.on('window-all-closed', () => {
   }
 })
 
-app.on('activate', () => {
-  if (mainWindow === null) {
-    createMainWindow()
+app.on('activate', (event, hasVisibleWindows) => {
+  if (!hasVisibleWindows) {
+    createWindow('/')
   }
 })
 

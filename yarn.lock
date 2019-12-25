@@ -29,7 +29,7 @@
   dependencies:
     "@fortawesome/fontawesome-common-types" "^0.1.7"
 
-"@fortawesome/fontawesome-free-solid@^5.0.13":
+"@fortawesome/fontawesome-free-solid@5.0.13":
   version "5.0.13"
   resolved "https://registry.npm.taobao.org/@fortawesome/fontawesome-free-solid/download/@fortawesome/fontawesome-free-solid-5.0.13.tgz#24b61aaf471a9d34a5364b052d64a516285ba894"
   integrity sha1-JLYar0canTSlNksFLWSlFihbqJQ=

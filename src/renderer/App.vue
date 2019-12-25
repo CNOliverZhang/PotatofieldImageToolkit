@@ -16,16 +16,17 @@
     src: url('./assets/SourceHanSansSC-ExtraLight.otf');
   }
   
-  #app {
+  body {
+    margin: 0;
+    border: 0;
     font-family: "SourceHanSansSC";
     cursor: default;
     -webkit-app-region: drag;
     user-select: none;
+    color: #606266;
   }
   
-  body {
-    margin: 0;
-    border: 0;
+  #app {
     width: 100vw;
     height: 100vh;
   }

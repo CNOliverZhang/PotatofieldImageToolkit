@@ -53,7 +53,7 @@
   "dependencies": {
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-regular": "^5.0.13",
-    "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@fortawesome/fontawesome-free-solid": "5.0.13",
     "@fortawesome/fontawesome-svg-core": "^1.2.26",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "axios": "^0.18.0",
