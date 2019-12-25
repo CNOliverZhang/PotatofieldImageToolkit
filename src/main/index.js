@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -18,17 +18,32 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
-    useContentSize: true,
-    width: 1000
+    height: 500,
+    width: 800,
+    frame: false,
+    fullscreenable: false,
+    resizable: true,
+    show: false
   })
 
   mainWindow.loadURL(winURL)
+  
+  mainWindow.on('ready-to-show', function () {
+    mainWindow.show()
+  })
 
   mainWindow.on('closed', () => {
     mainWindow = null
   })
 }
+
+ipcMain.on('minimize', function() {
+  mainWindow.minimize();
+})
+
+ipcMain.on('exit', function() {
+  mainWindow.close();
+})
 
 app.on('ready', createWindow)
 

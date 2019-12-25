@@ -7,8 +7,20 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'landing-page',
-      component: require('@/components/LandingPage').default
+      name: 'index',
+      component: require('@/components/index').default
+    },
+    {
+      path: 'watermark',
+      name: 'watermark',
+      component: require('@/components/watermark').default,
+      children: [
+        {
+          path: 'watermark/editor',
+          name: 'watermarkEditor',
+          component: require('@/components/watermark/editor').default
+        }
+      ]
     },
     {
       path: '*',
