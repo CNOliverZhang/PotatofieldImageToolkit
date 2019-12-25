@@ -18,40 +18,40 @@
       </div>
     </div>
     <div id="cards-holder" class="interactable">
-      
-          <div class="space">&nbsp;</div>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <el-card shadow="always" class="card">
-            <span class="fa fa-sign-out-alt icon"></span>
-            <div class="title">水印工具</div>
-            <div class="mask">喝海河</div>
-          </el-card>
-          <div class="space">&nbsp;</div>
-      
+      <div id="scroll">
+        <div class="space">&nbsp;</div>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <el-card shadow="always" class="card">
+          <span class="fa fa-sign-out-alt icon"></span>
+          <div class="title">水印工具</div>
+          <div class="mask">喝海河</div>
+        </el-card>
+        <div class="space">&nbsp;</div>
+      </div>
     </div>
   </div>
 </template>
@@ -67,11 +67,6 @@ export default {
     }
   },
   methods: {
-    mouseScroll(event) {
-      console.log(event)
-      console.log(this.$refs.scroll.scrollLeft)
-      this.$refs.scroll.scrollLeft -= 10
-    },
     hide() {
       ipcRenderer.send('minimize')
     },
@@ -83,9 +78,8 @@ export default {
     }
   },
   mounted() {
-    document.getElementById('cards-holder').addEventListener('mousewheel', function(event) {
-      console.log(1)
-      document.getElementById('cards-holder').scrollLeft -= event.wheelDelta
+    document.getElementById('scroll').addEventListener('mousewheel', function(event) {
+      document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
     })
   }
@@ -141,80 +135,105 @@ export default {
   
   #cards-holder {
     width: 100%;
-    margin-top: 60px;
+    margin-top: 50px;
     position: relative;
-    overflow-x: scroll;display: flex;
     
     #scroll {
-      
-    }
-    
-    .card {
-      width: 200px;
-      height: 200px;
-      flex-shrink: 0;
+      overflow-y: hidden;
+      overflow-x: auto;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: 10px;
-      position: relative;
-      cursor: pointer;
-      font-size: 14px;
-      color: #606266;
-      text-align: center;
+      padding-top: 15px;
+      padding-bottom: 15px;
+      box-sizing: border-box;
       
-      .icon {
-        font-size: 80px;
-      }
-      
-      .title {
-        font-size: 16px;
-      }
-      
-      .mask {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        z-index: 1;
-        background-color: #2196F3;
-        color: #FFFFFF;
-        opacity: 0;
-        transition: 0.2s;
+      .card {
+        width: 200px;
+        height: 200px;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 10px;
+        position: relative;
+        cursor: pointer;
+        font-size: 14px;
+        color: #606266;
+        text-align: center;
         
-        &:hover {
-          opacity: 1;
+        .icon {
+          font-size: 80px;
         }
         
-        &:active {
-          filter: brightness(0.9);
-        } 
+        .title {
+          font-size: 16px;
+        }
+        
+        .mask {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          left: 0;
+          top: 0;
+          z-index: 1;
+          background-color: #2196F3;
+          color: #FFFFFF;
+          opacity: 0;
+          transition: 0.2s;
+          
+          &:hover {
+            opacity: 1;
+          }
+          
+          &:active {
+            filter: brightness(0.9);
+          } 
+        }
+        
+        &:first-child {
+          margin-left: 0;
+        }
+        
+        &:last-child {
+          margin-right: 0;
+        }
       }
       
-      &:first-child {
-        margin-left: 0;
+      .space {
+        width: 16px;
+        height: 100%;
       }
       
-      &:last-child {
-        margin-right: 0;
+      &::-webkit-scrollbar {
+        height: 10px;
+        z-index: 3;
       }
-    }
-    
-    .space {
-      width: 30px;
-      height: 100%;
-    }
-    
-    .el-scrollbar__bar {
-      z-index: 3;
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0);
+        z-index: 3;
+        
+        &:hover {
+          background-color: #EBEEF5;
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #DCDFE6;
+        z-index: 3;
+        
+        &:hover {
+          background-color: #C0C4CC;
+        }
+      }
     }
     
     &:before {
       content: '';
       position: absolute;
       width: 15px;
-      height: 100%;
+      height: calc(100% - 10px);
       top: 0;
       left: 0;
       z-index: 2;
@@ -225,7 +244,7 @@ export default {
       content: '';
       position: absolute;
       width: 15px;
-      height: 100%;
+      height: calc(100% - 10px);
       top: 0;
       right: 0;
       z-index: 2;

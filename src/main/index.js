@@ -8,12 +8,14 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
+const windows = new Set;
+
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-function createWindow () {
+function createMainWindow () {
   /**
    * Initial window options
    */
@@ -37,6 +39,31 @@ function createWindow () {
   })
 }
 
+function createWindow(path) {
+  let newWindow = new BrowserWindow({
+    height: 500,
+    width: 800,
+    frame: false,
+    fullscreenable: false,
+    resizable: true,
+    show: false
+  });
+
+  newWindow.loadFile('app/index.html');
+
+  newWindow.once('ready-to-show', () => {
+    newWindow.show();
+  });
+
+  newWindow.on('closed', () => {
+    windows.delete(newWindow); //从已关闭的窗口Set中移除引用
+    newWindow = null;
+  });
+
+  windows.add(newWindow); //将窗口添加到已打开时设置的窗口
+  return newWindow;
+}
+
 ipcMain.on('minimize', function() {
   mainWindow.minimize();
 })
@@ -45,7 +72,7 @@ ipcMain.on('exit', function() {
   mainWindow.close();
 })
 
-app.on('ready', createWindow)
+app.on('ready', createMainWindow)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -55,7 +82,7 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (mainWindow === null) {
-    createWindow()
+    createMainWindow()
   }
 })
 

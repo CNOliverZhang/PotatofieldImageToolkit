@@ -11,12 +11,17 @@ export default new Router({
       component: require('@/components/index').default
     },
     {
-      path: 'watermark',
+      path: '/about',
+      name: 'about',
+      component: require('@/components/about').default
+    },
+    {
+      path: '/watermark',
       name: 'watermark',
       component: require('@/components/watermark').default,
       children: [
         {
-          path: 'watermark/editor',
+          path: '/watermark/editor',
           name: 'watermarkEditor',
           component: require('@/components/watermark/editor').default
         }
