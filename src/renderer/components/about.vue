@@ -52,7 +52,7 @@ export default {
     margin-right: 0;
     
     .el-tabs__nav-scroll {
-      background-color: #EBEEF5;
+      background-color: #606266;
       
       .el-tabs__nav {
         border: 0;
@@ -64,7 +64,7 @@ export default {
           width: 150px;
           height: 50px;
           line-height: 50px;
-          color: #606266;
+          color: #DCDFE6;
           text-align: center;
           border: 0;
           transition: 0.2s;
@@ -82,8 +82,12 @@ export default {
             align-items: flex-end;
           }
           
-          &:hover:not(.is-disabled) {
-            color: #2196F3;
+          &:hover:not(.is-disabled):not(.is-active) {
+            color: #FFFFFF;
+          }
+          
+          &:active:not(.is-disabled):not(.is-active) {
+            filter: brightness(0.9);
           }
         }
       }
@@ -110,7 +114,7 @@ export default {
       }
       
       &:hover {
-        color: #2196F3;
+        color: #FFFFFF;
       }
       
       &:active {

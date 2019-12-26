@@ -206,7 +206,7 @@ export default {
         z-index: 3;
         
         &:hover {
-          background-color: #EBEEF5;
+          background-color: #DCDFE6;//#EBEEF5;
         }
       }
       
@@ -216,7 +216,7 @@ export default {
         z-index: 3;
         
         &:hover {
-          background-color: #C0C4CC;
+          background-color: #606266;//#C0C4CC;
         }
       }
     }
