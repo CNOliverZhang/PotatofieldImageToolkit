@@ -8,13 +8,15 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-const windows = new Set;
+const windows = new Set
+const windowTitles = new Set
 const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
 
-function createWindow(path) {
-  let x, y
+function createWindow(args) {
+  let x, y = 0
+  let title = args.title
   const currentWindow = BrowserWindow.getFocusedWindow()
   if (currentWindow) {
     const [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
@@ -22,8 +24,9 @@ function createWindow(path) {
     y = currentWindowY + 30
   }
   let newWindow = new BrowserWindow({
-    x,
-    y,
+    title: title,
+    x: x,
+    y: y,
     height: 500,
     width: 800,
     frame: false,
@@ -32,37 +35,49 @@ function createWindow(path) {
     show: false
   })
 
-  newWindow.loadURL(baseURL + '/#' + path)
+  newWindow.loadURL(baseURL + '/#' + args.path)
 
   newWindow.once('ready-to-show', function () {
     newWindow.show()
   })
 
   newWindow.on('closed', () => {
+    windowTitles.delete(args.title)
     windows.delete(newWindow)
     newWindow = null
-  });
+  })
 
   windows.add(newWindow)
+  windowTitles.add(args.title)
   return newWindow
 }
 
 ipcMain.on('minimize', function () {
   let currentWindow = BrowserWindow.getFocusedWindow()
-  currentWindow.minimize();
+  currentWindow.minimize()
 })
 
 ipcMain.on('close', function () {
   let currentWindow = BrowserWindow.getFocusedWindow()
-  currentWindow.close();
+  currentWindow.close()
 })
 
-ipcMain.on('open', function (event, path) {
-  createWindow(path)
+ipcMain.on('open', function (event, args) {
+  if (windowTitles.has(args.title)) {
+    event.sender.send('same-window-exists')
+    return
+  }
+  createWindow({
+    title: args.title,
+    path: args.path
+  })
 })
 
 app.on('ready', function () {
-  createWindow('/')
+  createWindow({
+    title: '洋芋田图像工具箱',
+    path: '/'
+  })
 })
 
 app.on('window-all-closed', () => {
@@ -73,7 +88,10 @@ app.on('window-all-closed', () => {
 
 app.on('activate', (event, hasVisibleWindows) => {
   if (!hasVisibleWindows) {
-    createWindow('/')
+    createWindow({
+      title: '洋芋田图像工具箱',
+      path: '/'
+    })
   }
 })
 

@@ -4,7 +4,7 @@
       <img class="logo" :src="require('../assets/logo.png')"/>
       <div class="title">洋芋田图像工具箱</div>
       <div class="flex-space"></div>
-      <div class="control-button interactable" @click="open('/about')">
+      <div class="control-button interactable" @click="open('/about', '关于')">
         <span class="fa fa-question-circle"></span>
         <div>关于</div>
       </div>
@@ -20,7 +20,7 @@
     <div id="cards-holder" class="interactable">
       <div id="scroll">
         <div class="space">&nbsp;</div>
-        <div class="container" @click="open('/watermark')">
+        <div class="container" @click="open('/watermark', '水印工具')">
           <el-card shadow="always" class="card">
             <i class="fas fa-feather icon"></i>
             <div class="title">添加水印</div>
@@ -68,10 +68,19 @@ export default {
     close() {
       ipcRenderer.send('close')
     },
-    open (path) {
-      ipcRenderer.send('open', path)
+    open (path, title) {
+      let that = this
+      ipcRenderer.send('open', {
+        title: title,
+        path: path
+      })
+      ipcRenderer.once('same-window-exists', function () {
+        that.$message.closeAll()
+        that.$message("不支持同时打开两个相同窗口")
+      })
     },
     showDeveloping () {
+      this.$message.closeAll()
       this.$message("功能正在开发中")
     }
   },
@@ -214,6 +223,7 @@ export default {
         border-radius: 5px;
         background-color: #DCDFE6;
         z-index: 3;
+        transition: 0.2s;
         
         &:hover {
           background-color: #606266;//#C0C4CC;

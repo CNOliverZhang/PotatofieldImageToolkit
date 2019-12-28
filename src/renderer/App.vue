@@ -18,7 +18,6 @@
   
   body {
     margin: 0;
-    border: 0;
     font-family: "SourceHanSansSC";
     cursor: default;
     -webkit-app-region: drag;
