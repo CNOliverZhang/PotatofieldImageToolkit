@@ -2,7 +2,8 @@
   "name": "potatofield-image-toolkit",
   "version": "1.0.0",
   "author": "张志毅",
-  "description": "一个为摄影师设计的图片工具箱",
+  "description": "一个为摄影师设计的图片工具箱。",
+  "copyright": "Copyright © 2019 张志毅",
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
@@ -17,7 +18,7 @@
     "postinstall": ""
   },
   "build": {
-    "productName": "potatofield-image-toolkit",
+    "productName": "洋芋田图像工具箱",
     "appId": "cn.potatofield.imagetoolkit",
     "directories": {
       "output": "build"
@@ -25,6 +26,14 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./build/icons/icon.ico",
+      "uninstallerIcon": "./build/icons/icon.ico",
+      "createDesktopShortcut": true,
+      "shortcutName": "洋芋田图像工具箱"
+    },
     "dmg": {
       "contents": [
         {
@@ -41,10 +50,12 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": "dmg"
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "target": "nsis"
     },
     "linux": {
       "icon": "build/icons"
