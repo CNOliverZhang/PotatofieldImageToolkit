@@ -28,20 +28,26 @@
         </div>
         <div class="container" @click="showDeveloping">
           <el-card shadow="always" class="card">
+            <i class="fas fa-images icon"></i>
+            <div class="title">长图拼接</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card shadow="always" class="card">
             <span class="fas fa-crop icon"></span>
             <div class="title">裁剪工具</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card shadow="always" class="card">
-            <span class="fas fa-compress icon"></span>
-            <div class="title">尺寸压缩</div>
+            <span class="fas fa-magic icon"></span>
+            <div class="title">滤镜美化</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card shadow="always" class="card">
-            <span class="fas fa-magic icon"></span>
-            <div class="title">滤镜美化</div>
+            <span class="fas fa-compress icon"></span>
+            <div class="title">尺寸压缩</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
@@ -215,7 +221,7 @@ export default {
         z-index: 3;
         
         &:hover {
-          background-color: #DCDFE6;//#EBEEF5;
+          background-color: #F5F7FA;
         }
       }
       
@@ -226,7 +232,7 @@ export default {
         transition: 0.2s;
         
         &:hover {
-          background-color: #606266;//#C0C4CC;
+          background-color: #C0C4CC;
         }
       }
     }
