@@ -11,7 +11,7 @@
           </el-upload>
           <div v-if="fileList.length != 0" class="file-list">
             <div class="list">
-              <div v-for="(file, index) in fileList" :key="file.name" class="file">
+              <div v-for="(file, index) in fileList" :key="file.fullpath" class="file">
                 <div class="filename">{{ file.name + '.' + file.ext }}</div>
                 <div @click="handleDelete(index)">
                   <i class="fas fa-trash-alt delete"></i>
@@ -204,6 +204,7 @@ export default {
       let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
       if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
         that.fileList.push({
+          fullpath: file.raw.path,
           path: path,
           name: name,
           ext: ext
