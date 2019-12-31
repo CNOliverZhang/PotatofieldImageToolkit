@@ -19,13 +19,11 @@ export default new Router({
       path: '/watermark',
       name: 'watermark',
       component: require('@/pages/watermark').default,
-      children: [
-        {
-          path: '/watermark/editor',
-          name: 'watermarkEditor',
-          component: require('@/pages/watermark/editor').default
-        }
-      ]
+    },
+    {
+      path: '/watermark/editor',
+      name: 'watermarkEditor',
+      component: require('@/pages/watermark/editor').default
     },
     {
       path: '*',

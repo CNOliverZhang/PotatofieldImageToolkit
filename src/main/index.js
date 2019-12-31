@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 
 /**
  * Set `__static` path to static files in production
@@ -17,6 +17,12 @@ const baseURL = process.env.NODE_ENV === 'development'
 function createWindow(args) {
   let x, y = 0
   let title = args.title
+  let modal = false
+  let parent = null
+  if (args.modal) {
+    modal = true
+    parent = args.parent
+  }
   const currentWindow = BrowserWindow.getFocusedWindow()
   if (currentWindow) {
     const [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
@@ -32,7 +38,9 @@ function createWindow(args) {
     frame: false,
     fullscreenable: false,
     resizable: true,
-    show: false
+    show: false,
+    parent: parent,
+    modal: modal
   })
 
   newWindow.loadURL(baseURL + '/#' + args.path)
@@ -67,9 +75,29 @@ ipcMain.on('open', function (event, args) {
     event.sender.send('same-window-exists')
     return
   }
-  createWindow({
-    title: args.title,
-    path: args.path
+  if (args.modal) {
+    createWindow({
+      title: args.title,
+      path: args.path,
+      parent: BrowserWindow.getFocusedWindow(),
+      modal: true
+    })
+  } else {
+    createWindow({
+      title: args.title,
+      path: args.path
+    })
+  }
+})
+
+ipcMain.on('select-folder', function (event) {
+  dialog.showOpenDialog({
+    title: "选择文件夹",
+    properties: ['openDirectory']
+  }, function (folder) {
+    if (folder) {
+      event.returnValue = folder[0]
+    }
   })
 })
 

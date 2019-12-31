@@ -5,8 +5,9 @@ const dialogConstructor = Vue.extend(dialog)
 
 function showDialog(args) {
   let dialogElement = document.getElementById('dialog')
+  let dialogDom
   if (!dialogElement) {
-    let dialogDom = new dialogConstructor({
+    dialogDom = new dialogConstructor({
       el: document.createElement('div'),
       data() {
         return {
@@ -15,6 +16,7 @@ function showDialog(args) {
           text: args.text ? args.text : '',
           list: args.list ? args.list : [],
           showCancel: args.showCancel ? args.showCancel : false,
+          showConfirm: args.showConfirm === false ? false : true,
           confirmText: args.confirmText ? args.confirmText : '确定',
           cancelText: args.cancelText ? args.cancelText : '取消',
           confirmFunction: args.confirmFunction ? args.confirmFunction : function () {},
@@ -25,6 +27,7 @@ function showDialog(args) {
     dialogDom.$el.id = 'dialog'
     document.body.appendChild(dialogDom.$el)
   }
+  return dialogDom
 }
 
 function registryDialog() {

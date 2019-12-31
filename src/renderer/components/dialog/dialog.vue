@@ -21,9 +21,9 @@
       <div v-if="text != ''" class="text">{{ text }}</div>
       <div v-if="list.length != 0" v-for="item in list" :key="item" class="list-item">{{ item }}</div>
     </div>
-    <span slot="footer">
+    <span v-if="showCancel || showConfirm" slot="footer">
       <el-button v-if="showCancel" size="mini" @click="cancel">{{ cancelText }}</el-button>
-      <el-button type="primary" size="mini" @click="confirm">{{ confirmText }}</el-button>
+      <el-button v-if="showConfirm" type="primary" size="mini" @click="confirm">{{ confirmText }}</el-button>
     </span>
   </el-dialog>
 </template>
@@ -38,6 +38,7 @@ export default {
       text: '',
       list: [],
       showCancel: false,
+      showConfirm: true,
       confirmText: '确定',
       cancelText: '取消',
       confirmFunction: function () {},
@@ -52,6 +53,10 @@ export default {
     },
     confirm() {
       this.confirmFunction()
+      document.body.removeChild(this.$el)
+      this.$destroy()
+    },
+    close() {
       document.body.removeChild(this.$el)
       this.$destroy()
     }

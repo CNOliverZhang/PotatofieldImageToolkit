@@ -2,23 +2,21 @@
   <el-tabs type="card" tab-position="left" id="watermark">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-images"></i> 导入图片</span>
-      <div class="tab-content">
+      <div id="single" class="tab-content">
         <div class="upload-area interactable">
           <el-upload class="upload-dragger" drag action="" multiple :auto-upload="false" :on-change="handleFile"
             :show-file-list="false" :class="fileList.length != 0 ? 'half' : ''">
-            <i class="fas fa-images icon"></i>
+            <i class="fas fa-images"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
           </el-upload>
           <div v-if="fileList.length != 0" class="file-list">
             <div class="list">
-              <el-scrollbar>
-                <div v-for="(file, index) in fileList" :key="file.name" class="file">
-                  <div class="filename">{{ file.name + '.' + file.ext }}</div>
-                  <div @click="handleDelete(index)">
-                    <i class="fas fa-trash-alt delete"></i>
-                  </div>
+              <div v-for="(file, index) in fileList" :key="file.name" class="file">
+                <div class="filename">{{ file.name + '.' + file.ext }}</div>
+                <div @click="handleDelete(index)">
+                  <i class="fas fa-trash-alt delete"></i>
                 </div>
-              </el-scrollbar>
+              </div>
             </div>
             <el-button type="primary" size="mini" @click="edit" class="interactable">进入水印编辑器</el-button>
           </div>
@@ -61,7 +59,76 @@
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div class="tab-content">内容</div>
+      <div id="multiple" class="tab-content">
+        <div v-if="fileList.length == 0" class="subtitle">请选择读取的文件夹</div>
+        <div v-else class="subtitle">已读取的文件列表</div>
+        <div v-if="fileList.length == 0" class="control-row">
+          <el-switch v-model="childFolderIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
+            inactive-text="不包含子目录" class="interactable"></el-switch>
+          <div class="space"></div>
+          <el-input disabled size="mini" v-model="sourceLocation" class="location interactable">
+            <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
+          </el-input>
+        </div>
+        <el-button v-if="fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">读取文件夹</el-button>
+        <div class="file-list interactable">
+          <div v-if="fileList.length == 0" class="empty">
+            <i class="far fa-folder-open"></i>
+            <div>未读取文件</div>
+          </div>
+          <div v-else v-for="(file, index) in fileList" :key="file.name" class="file">
+            <div class="filename">{{ file.name + '.' + file.ext }}</div>
+            <div class="path">{{ file.path }}</div>
+            <div class="controller" @click="handleDelete(index)">
+              <i class="fas fa-trash-alt delete"></i>
+            </div>
+          </div>
+        </div>
+        <div v-if="fileList.length != 0">
+          <div class="control-row">
+            <div class="subtitle">请选择存储位置</div>
+            <div class="space"></div>
+            <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹，原目录结构将被舍弃</div>
+            <div v-else class="subtext">处理后的图片将存储在原来的位置，并保持目录结构不变</div>
+          </div>
+          <div class="control-row">
+            <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
+              inactive-text="保存在原路径" class="interactable"></el-switch>
+            <div class="space"></div>
+            <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
+              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+            </el-input>
+          </div>
+          <div class="control-row">
+            <div class="subtitle">请选择保存的格式</div>
+            <div class="space"></div>
+            <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
+            <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
+          </div>
+          <div class="control-row">
+            <el-radio-group v-model="mimeType" class="interactable">
+              <el-radio label="JPG"></el-radio>
+              <el-radio label="PNG"></el-radio>
+            </el-radio-group>
+          </div>
+          <div class="control-row">
+            <div class="subtitle">请输入文件后缀</div>
+            <div class="space"></div>
+            <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
+          </div>
+          <div class="control-row">
+            <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
+          </div>
+          <div class="control-row">
+            <div class="subtitle">下一步操作</div>
+            <div class="space"></div>
+          </div>
+          <div class="control-row">
+            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
+          </div>
+        </div>
+      </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-feather"></i> 水印模板库</span>
@@ -94,6 +161,7 @@ export default {
       fileList: [],
       errorList: [],
       customLocation: false,
+      childFolderIncluded: false,
       saveLocation: '',
       sourceLocation: '',
       mimeType: 'JPG',
@@ -107,26 +175,153 @@ export default {
     close() {
       ipcRenderer.send('close')
     },
+    clear() {
+      this.fileList = []
+      this.errorList = []
+      this.customLocation = false
+      this.childFolderIncluded = false
+      this.saveLocation = ''
+      this.sourceLocation = ''
+      this.mimeType = 'JPG'
+      this.postPend = '_watermarked'
+    },
+    clearConfirm() {
+      let that = this
+      that.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '将清除您已读取的图片，确定执行操作吗？',
+        showCancel: true,
+        confirmFunction: function () {
+          that.clear()
+        }
+      })
+    },
     handleFile(file) {
       let that =  this
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let name = file.name.substring(0, file.name.lastIndexOf("."))
       let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
       if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-        this.fileList.push({
-          file: file,
+        that.fileList.push({
           path: path,
           name: name,
           ext: ext
         })
       } else {
-        this.errorList.push(name + '.' + ext)
-        this.$dialog({
+        that.errorList.push(name + '.' + ext)
+        that.$dialog({
           type: 'error',
           title: '下列文件格式不受支持',
-          list: this.errorList,
+          list: that.errorList,
           confirmFunction: function() {
             that.errorList = []
+          }
+        })
+      }
+    },
+    handleFolder() {
+      let that = this
+      if (that.sourceLocation == '') {
+        that.$dialog({
+          type: 'warning',
+          text: '您还没有选择需要读取的文件夹！'
+        })
+      }
+      if (that.childFolderIncluded) {
+        let dialog = that.$dialog({
+          title: '正在扫描文件夹',
+          text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
+          showConfirm: false
+        })
+        let dirList = [];
+        (function traverse(directory, dirList) {
+          fs.readdir(directory, function(e, files) {
+            if (e) {
+              dialog.close()
+              that.$dialog({
+                type: 'error',
+                title: '错误',
+                text: '无法读取您选择的文件夹，请检查文件夹权限。',
+              })
+            } else {
+              for (let i = 0; i < files.length; i++) {
+                let filename = files[i]
+                try {
+                  let filepath = path.join(directory, filename)
+                  let stats = fs.statSync(filepath)
+                  if (stats.isFile()) {
+                    let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+                    let name = filename.substring(0, filename.lastIndexOf("."))
+                    let path = directory
+                    if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                      that.fileList.push({
+                        path: path,
+                        name: name,
+                        ext: ext
+                      })
+                    }
+                  } else {
+                    dirList.push(filepath)
+                  }
+                } catch(e) {
+                }
+              }
+              if (dirList.length != 0) {
+                traverse(dirList.pop(), dirList)
+              } else {
+                dialog.close()
+                that.$dialog({
+                  type: 'success',
+                  title: '完成',
+                  text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+                })
+              }
+            }
+          })
+        })(that.sourceLocation, dirList);
+      } else {
+        let dialog = that.$dialog({
+          title: '正在扫描文件夹',
+          text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
+          showConfirm: false
+        })
+        fs.readdir(that.sourceLocation, function(e, files) {
+          if (e) {
+            dialog.close()
+            that.$dialog({
+              type: 'error',
+              title: '错误',
+              text: '无法读取您选择的文件夹，请检查文件夹权限。',
+            })
+          } else {
+            for (let i = 0; i < files.length; i++) {
+              let filename = files[i]
+              let filepath = path.join(that.sourceLocation, filename)
+              fs.stat(filepath, function(err, stats) {
+                if (stats.isFile) {
+                  fs.readFile(filepath, function(error, file) {
+                    let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+                    let name = filename.substring(0, filename.lastIndexOf("."))
+                    let path = that.sourceLocation
+                    if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                      that.fileList.push({
+                        fileBuffer: fileBuffer,
+                        path: path,
+                        name: name,
+                        ext: ext
+                      })
+                    }
+                  })
+                }
+              })
+            }
+            dialog.close()
+            that.$dialog({
+              type: 'success',
+              title: '完成',
+              text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+            })
           }
         })
       }
@@ -146,12 +341,27 @@ export default {
           text: '您选择了将处理后的图片储存在原图片路径且未设置输出文件的后缀，这可能导致原图被覆盖！您确定要继续吗？',
           showCancel: true,
           confirmFunction: function () {
-            //
+            ipcRenderer.send('open', {
+              title: '水印编辑器',
+              path: '/watermark/editor',
+              modal: true
+            })
           }
+        })
+      } else {
+        ipcRenderer.send('open', {
+          title: '水印编辑器',
+          path: '/watermark/editor',
+          modal: true
         })
       }
     },
-    selectSaveFolder() {}
+    selectSaveFolder() {
+      this.saveLocation = ipcRenderer.sendSync('select-folder')
+    },
+    selectSourceFolder() {
+      this.sourceLocation = ipcRenderer.sendSync('select-folder')
+    }
   }
 }
 </script>
@@ -163,64 +373,6 @@ export default {
   
   button {
     font-family: "SourceHanSansSC";
-  }
-  
-  .el-dialog__header {
-    padding: 20px;
-    
-    .el-dialog__title {
-      font-size: 14px;
-    }
-  }
-  
-  .el-dialog__body {
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 0;
-    padding-bottom: 0;
-    
-    .error-list {
-      width: 100%;
-      max-height: 150px;
-      overflow-x: hidden;
-      overflow-y: auto;
-      
-      .filename {
-        line-height: 24px;
-        font-size: 12px;
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
-        
-        &:hover {
-          background-color: #F5F7FA;
-        }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: #DCDFE6;
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: #C0C4CC;
-        }
-      }
-    }
-  }
-  
-  .el-dialog__footer {
-    padding: 20px;
   }
   
   .el-tabs__header {
@@ -300,6 +452,9 @@ export default {
   
   .tab-content {
     padding: 20px;
+  }
+    
+  #single {
     
     .upload-area {
       width: 100%;
@@ -330,9 +485,9 @@ export default {
             justify-content: center;
             align-items: center;
             
-            .icon {
-              font-size: 50px;
-              margin: 20px;
+            svg {
+              font-size: 40px;
+              margin: 15px;
             }
           }
         }
@@ -422,28 +577,142 @@ export default {
         }
       }
     }
+  }
+  
+  #multiple {
     
-    .el-upload__tip {
-      margin-bottom: 10px;
-    }
-    
-    .control-row {
-      height: 28px;
-      font-size: 14px;
+    .file-list {
+      width: 100%;
+      height: 120px;
+      background-color: #F5F7FA;
       margin-top: 10px;
       margin-bottom: 10px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border-color: #DCDFE6;
+      border-style: solid;
+      border-width: 1px;
+      overflow-y: auto;
+      overflow-x: hidden;
       
-      .space {
-        flex-grow: 1;
+      .empty {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        
+        svg {
+          font-size: 40px;
+          margin: 15px;
+        }
       }
       
-      .location {
-        width: 60%;
+      .file {
+        height: 28px;
+        width: 100%;
+        line-height: 24px;
+        font-size: 12px;
+        padding-left: 5px;
+        padding-right: 5px;
+        box-sizing: border-box;
+        background-color: #FFFFFF;
+        border-bottom-color: #DCDFE6;
+        border-bottom-style: solid;
+        border-bottom-width: 1px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: #F5F7FA;
+        }
+        
+        .filename {
+          width: 40%;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          padding-right: 10px;
+          box-sizing: border-box;
+        }
+        
+        .path {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          flex-grow: 1;
+          padding-right: 10px;
+          box-sizing: border-box;
+        }
+        
+        .controller {
+          width: 5%;
+          
+          .delete {
+            color: #DCDFE6;
+            cursor: pointer;
+            transition: 0.2s;
+            
+            &:hover {
+              color: #F56C6C;
+            }
+          }
+        }
       }
+      
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0);
+        
+        &:hover {
+          background-color: #F5F7FA;
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #DCDFE6;
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: #C0C4CC;
+        }
+      }
+    }
+    
+    .full-width-button {
+      width: 100%;
+    }
+    
+    .half-width-button {
+      width: 48%;
+    }
+  }
+  
+  .control-row {
+    height: 28px;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    .space {
+      flex-grow: 1;
+    }
+    
+    .location {
+      width: 60%;
     }
   }
 }
