@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="watermark">
+  <el-tabs type="card" tab-position="left" id="watermark" @tab-click="clear">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-images"></i> 导入图片</span>
       <div id="single" class="tab-content">
@@ -76,7 +76,7 @@
             <i class="far fa-folder-open"></i>
             <div>未读取文件</div>
           </div>
-          <div v-else v-for="(file, index) in fileList" :key="file.name" class="file">
+          <div v-else v-for="(file, index) in fileList" :key="file.fullpath" class="file">
             <div class="filename">{{ file.name + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
             <div class="controller" @click="handleDelete(index)">
@@ -256,6 +256,7 @@ export default {
                     let path = directory
                     if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
                       that.fileList.push({
+                        fullpath: filepath,
                         path: path,
                         name: name,
                         ext: ext
@@ -298,29 +299,26 @@ export default {
             for (let i = 0; i < files.length; i++) {
               let filename = files[i]
               let filepath = path.join(that.sourceLocation, filename)
-              fs.stat(filepath, function(err, stats) {
-                if (stats.isFile) {
-                  fs.readFile(filepath, function(error, file) {
-                    let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-                    let name = filename.substring(0, filename.lastIndexOf("."))
-                    let path = that.sourceLocation
-                    if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                      that.fileList.push({
-                        fileBuffer: fileBuffer,
-                        path: path,
-                        name: name,
-                        ext: ext
-                      })
-                    }
+              let stats = fs.statSync(filepath)
+              if (stats.isFile()) {
+                let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+                let name = filename.substring(0, filename.lastIndexOf("."))
+                let path = that.sourceLocation
+                if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                  that.fileList.push({
+                    fullpath: filepath,
+                    path: path,
+                    name: name,
+                    ext: ext
                   })
                 }
-              })
+              }
             }
             dialog.close()
             that.$dialog({
               type: 'success',
               title: '完成',
-              text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+              text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
             })
           }
         })
