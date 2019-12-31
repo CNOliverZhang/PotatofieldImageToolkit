@@ -23,15 +23,39 @@
             <el-button type="primary" size="mini" @click="edit" class="interactable">进入水印编辑器</el-button>
           </div>
         </div>
-        <div class="el-upload__tip">支持JPEG，PNG和GIF格式图像。</div>
-        <div class="subtitle">请选择存储位置</div>
+        <div class="control-row">
+          <div class="subtitle">请选择存储位置</div>
+          <div class="space"></div>
+          <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹，原目录结构将被舍弃</div>
+          <div v-else class="subtext">处理后的图片将存储在原来的位置，并保持目录结构不变</div>
+        </div>
         <div class="control-row">
           <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
             inactive-text="保存在原路径" class="interactable"></el-switch>
           <div class="space"></div>
-          <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="position interactable">
+          <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
+        </div>
+        <div class="control-row">
+          <div class="subtitle">请选择保存的格式</div>
+          <div class="space"></div>
+          <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
+          <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
+        </div>
+        <div class="control-row">
+          <el-radio-group v-model="mimeType" class="interactable">
+            <el-radio label="JPG"></el-radio>
+            <el-radio label="PNG"></el-radio>
+          </el-radio-group>
+        </div>
+        <div class="control-row">
+          <div class="subtitle">请输入文件后缀</div>
+          <div class="space"></div>
+          <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
+        </div>
+        <div class="control-row">
+          <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
         </div>
       </div>
     </el-tab-pane>
@@ -68,8 +92,12 @@ export default {
   data () {
     return {
       fileList: [],
+      errorList: [],
       customLocation: false,
-      saveLocation: ''
+      saveLocation: '',
+      sourceLocation: '',
+      mimeType: 'JPG',
+      postPend: '_watermarked'
     }
   },
   methods: {
@@ -80,6 +108,7 @@ export default {
       ipcRenderer.send('close')
     },
     handleFile(file) {
+      let that =  this
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let name = file.name.substring(0, file.name.lastIndexOf("."))
       let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
@@ -91,15 +120,37 @@ export default {
           ext: ext
         })
       } else {
-        this.$message.error({
-          message: "文件“" + file.name + "”的格式不受支持"
+        this.errorList.push(name + '.' + ext)
+        this.$dialog({
+          type: 'error',
+          title: '下列文件格式不受支持',
+          list: this.errorList,
+          confirmFunction: function() {
+            that.errorList = []
+          }
         })
       }
     },
     handleDelete(index) {
       this.fileList.splice(index, 1)
     },
-    edit() {},
+    clearErrorList() {
+      this.errorList = []
+      this.errorListTitle = ""
+    },
+    edit() {
+      if (this.postPend == '' && this.customLocation == false) {
+        this.$dialog({
+          type: 'warning',
+          title: '警告',
+          text: '您选择了将处理后的图片储存在原图片路径且未设置输出文件的后缀，这可能导致原图被覆盖！您确定要继续吗？',
+          showCancel: true,
+          confirmFunction: function () {
+            //
+          }
+        })
+      }
+    },
     selectSaveFolder() {}
   }
 }
@@ -112,6 +163,64 @@ export default {
   
   button {
     font-family: "SourceHanSansSC";
+  }
+  
+  .el-dialog__header {
+    padding: 20px;
+    
+    .el-dialog__title {
+      font-size: 14px;
+    }
+  }
+  
+  .el-dialog__body {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+    
+    .error-list {
+      width: 100%;
+      max-height: 150px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      
+      .filename {
+        line-height: 24px;
+        font-size: 12px;
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0);
+        
+        &:hover {
+          background-color: #F5F7FA;
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #DCDFE6;
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: #C0C4CC;
+        }
+      }
+    }
+  }
+  
+  .el-dialog__footer {
+    padding: 20px;
   }
   
   .el-tabs__header {
@@ -332,7 +441,7 @@ export default {
         flex-grow: 1;
       }
       
-      .position {
+      .location {
         width: 60%;
       }
     }

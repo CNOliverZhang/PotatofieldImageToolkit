@@ -8,22 +8,22 @@ export default new Router({
     {
       path: '/',
       name: 'index',
-      component: require('@/components/index').default
+      component: require('@/pages/index').default
     },
     {
       path: '/about',
       name: 'about',
-      component: require('@/components/about').default
+      component: require('@/pages/about').default
     },
     {
       path: '/watermark',
       name: 'watermark',
-      component: require('@/components/watermark').default,
+      component: require('@/pages/watermark').default,
       children: [
         {
           path: '/watermark/editor',
           name: 'watermarkEditor',
-          component: require('@/components/watermark/editor').default
+          component: require('@/pages/watermark/editor').default
         }
       ]
     },

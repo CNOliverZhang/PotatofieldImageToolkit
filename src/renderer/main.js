@@ -9,12 +9,15 @@ import fontawesome from '@fortawesome/fontawesome'
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
 import solid from '@fortawesome/fontawesome-free-solid'
 import regular from '@fortawesome/fontawesome-free-regular'
+import dialog from './components/dialog/dialog'
 
 fontawesome.library.add(solid)
 fontawesome.library.add(regular)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+
 Vue.use(ElementUI)
+Vue.use(dialog)
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
