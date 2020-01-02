@@ -81,13 +81,15 @@ export default {
         path: path
       })
       ipcRenderer.once('same-window-exists', function () {
-        that.$message.closeAll()
-        that.$message("不支持同时打开两个相同窗口")
+        that.$dialog({
+          text: '不支持同时打开两个相同的窗口！'
+        })
       })
     },
     showDeveloping () {
-      this.$message.closeAll()
-      this.$message("功能正在开发中")
+      this.$dialog({
+        text: '功能正在开发中。'
+      })
     }
   },
   mounted() {

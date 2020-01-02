@@ -24,8 +24,8 @@
         <div class="control-row">
           <div class="subtitle">请选择存储位置</div>
           <div class="space"></div>
-          <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹，原目录结构将被舍弃</div>
-          <div v-else class="subtext">处理后的图片将存储在原来的位置，并保持目录结构不变</div>
+          <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
+          <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
         </div>
         <div class="control-row">
           <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
@@ -61,7 +61,21 @@
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
       <div id="multiple" class="tab-content">
         <div v-if="fileList.length == 0" class="subtitle">请选择读取的文件夹</div>
-        <div v-else class="subtitle">已读取的文件列表</div>
+        <div v-else class="control-row">
+          <div class="subtitle">已读取的文件列表</div>
+          <div class="space"></div>
+          <el-pagination
+            class="interactable"
+            small
+            background
+            layout="prev, pager, next"
+            :page-size="100"
+            :total="fileList.length"
+            :current-page="fileListPage"
+            :hide-on-single-page="true"
+            @current-change="pageChange">
+          </el-pagination>
+        </div>
         <div v-if="fileList.length == 0" class="control-row">
           <el-switch v-model="childFolderIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
             inactive-text="不包含子目录" class="interactable"></el-switch>
@@ -76,7 +90,7 @@
             <i class="far fa-folder-open"></i>
             <div>未读取文件</div>
           </div>
-          <div v-else v-for="(file, index) in fileList" :key="file.fullpath" class="file">
+          <div v-else v-for="(file, index) in fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file">
             <div class="filename">{{ file.name + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
             <div class="controller" @click="handleDelete(index)">
@@ -160,12 +174,14 @@ export default {
     return {
       fileList: [],
       errorList: [],
+      fileListPage: 0,
       customLocation: false,
       childFolderIncluded: false,
       saveLocation: '',
       sourceLocation: '',
       mimeType: 'JPG',
-      postPend: '_watermarked'
+      postPend: '_watermarked',
+      errorLog: null
     }
   },
   methods: {
@@ -178,12 +194,14 @@ export default {
     clear() {
       this.fileList = []
       this.errorList = []
+      this.fileListPage = 1
       this.customLocation = false
       this.childFolderIncluded = false
       this.saveLocation = ''
       this.sourceLocation = ''
       this.mimeType = 'JPG'
       this.postPend = '_watermarked'
+      this.errorLog = null
     },
     clearConfirm() {
       let that = this
@@ -211,14 +229,46 @@ export default {
         })
       } else {
         that.errorList.push(name + '.' + ext)
-        that.$dialog({
-          type: 'error',
-          title: '下列文件格式不受支持',
-          list: that.errorList,
-          confirmFunction: function() {
-            that.errorList = []
-          }
-        })
+        if (that.errorLog) {
+          that.errorLog.change({
+            content: that.$createElement('div', null, that.errorList.map((file) => {
+              return that.$createElement('p', {
+                style: {
+                   lineHeight: '24px',
+                   fontSize: '12px',
+                   width: '100%',
+                   overflow: 'hidden',
+                   textOverflow: 'ellipsis',
+                   whiteSpace: 'nowrap',
+                   textIndent: '0'
+                }
+              }, file)
+            }))
+          })
+        } else {
+          that.errorLog = that.$dialog({
+            type: 'error',
+            title: '错误',
+            text: '下列文件格式的不受支持，请您检查文件格式。但已导入的图片文件不受影响，您仍可以处理列表中显示的已导入文件。',
+            content: that.$createElement('div', null, that.errorList.map((file) => {
+              return that.$createElement('p', {
+                style: {
+                  lineHeight: '24px',
+                  fontSize: '12px',
+                  width: '100%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  textIndent: '0'
+               }
+              }, file)
+            })),
+            confirmFunction: function() {
+              that.errorList = []
+              that.errorDialog = null
+            }
+          })
+        }
       }
     },
     handleFolder() {
@@ -228,6 +278,7 @@ export default {
           type: 'warning',
           text: '您还没有选择需要读取的文件夹！'
         })
+        return
       }
       if (that.childFolderIncluded) {
         let dialog = that.$dialog({
@@ -239,11 +290,10 @@ export default {
         (function traverse(directory, dirList) {
           fs.readdir(directory, function(e, files) {
             if (e) {
-              dialog.close()
               that.$dialog({
                 type: 'error',
                 title: '错误',
-                text: '无法读取您选择的文件夹，请检查文件夹权限。',
+                text: '无法读取文件夹“' + directory + '”，请检查文件夹权限。',
               })
             } else {
               for (let i = 0; i < files.length; i++) {
@@ -262,6 +312,9 @@ export default {
                         name: name,
                         ext: ext
                       })
+                      dialog.change({
+                        text: '正在扫描文件夹“' + path + '”，已读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+                      })
                     }
                   } else {
                     dirList.push(filepath)
@@ -272,11 +325,11 @@ export default {
               if (dirList.length != 0) {
                 traverse(dirList.pop(), dirList)
               } else {
-                dialog.close()
-                that.$dialog({
+                dialog.change({
                   type: 'success',
                   title: '完成',
-                  text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+                  text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
+                  showConfirm: true
                 })
               }
             }
@@ -290,11 +343,10 @@ export default {
         })
         fs.readdir(that.sourceLocation, function(e, files) {
           if (e) {
-            dialog.close()
             that.$dialog({
               type: 'error',
               title: '错误',
-              text: '无法读取您选择的文件夹，请检查文件夹权限。',
+              text: '无法读取文件夹“' + that.sourceLocation + '”，请检查文件夹权限。',
             })
           } else {
             for (let i = 0; i < files.length; i++) {
@@ -312,21 +364,27 @@ export default {
                     name: name,
                     ext: ext
                   })
+                  dialog.change({
+                    text: '正在扫描文件夹，已读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+                  })
                 }
               }
             }
-            dialog.close()
-            that.$dialog({
+            dialog.change({
               type: 'success',
               title: '完成',
-              text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。'
+              text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
+              showConfirm: true
             })
           }
         })
       }
     },
     handleDelete(index) {
-      this.fileList.splice(index, 1)
+      this.fileList.splice(index + (this.fileListPage - 1) * 100, 1)
+    },
+    pageChange(page) {
+      this.fileListPage = page
     },
     clearErrorList() {
       this.errorList = []
@@ -712,6 +770,14 @@ export default {
     
     .location {
       width: 60%;
+    }
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
     }
   }
 }

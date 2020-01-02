@@ -18,8 +18,8 @@
       <span>{{ title }}</span>
     </span>
     <div class="content">
-      <div v-if="text != ''" class="text">{{ text }}</div>
-      <div v-if="list.length != 0" v-for="item in list" :key="item" class="list-item">{{ item }}</div>
+      <p v-if="text != ''">{{ text }}</p>
+      <slot></slot>
     </div>
     <span v-if="showCancel || showConfirm" slot="footer">
       <el-button v-if="showCancel" size="mini" @click="cancel">{{ cancelText }}</el-button>
@@ -36,7 +36,6 @@ export default {
       type: '',
       title: '提示',
       text: '',
-      list: [],
       showCancel: false,
       showConfirm: true,
       confirmText: '确定',
@@ -48,17 +47,34 @@ export default {
   methods: {
     cancel() {
       this.cancelFunction()
-      document.body.removeChild(this.$el)
-      this.$destroy()
+      this.close()
     },
     confirm() {
       this.confirmFunction()
-      document.body.removeChild(this.$el)
-      this.$destroy()
+      this.close()
     },
     close() {
       document.body.removeChild(this.$el)
       this.$destroy()
+    },
+    change(args) {
+      this.type = args.type ? args.type : this.type
+      this.title = args.title ? args.title : this.title
+      this.text = args.text ? args.text : this.text
+      this.confirmText = args.confirmText ? args.confirmText : this.confirmText
+      this.cancelText = args.cancelText ? args.cancelText : this.cancelText
+      this.confirmFunction = args.confirmFunction ? args.confirmFunction : this.confirmFunction
+      this.cancelFunction = args.cancelFunction ? args.cancelFunction : this.cancelFunction
+      if (args.showConfirm === true || false) {
+        this.showConfirm = args.showConfirm
+      }
+      if (args.showCancel === true || false) {
+        this.showCancel = args.showCancel
+      }
+      if (args.content) {
+        this.$slots.default = [args.content]
+        this.$mount()
+      }
     }
   }
 }
@@ -104,21 +120,30 @@ export default {
         overflow-x: hidden;
         overflow-y: auto;
         
-        .text {
-          margin-bottom: 10px;
+        p {
+          margin: 0;
           line-height: 18px;
           font-size: 12px;
           text-align: justify;
           text-indent: 2em;
         }
         
-        .list-item {
-          line-height: 24px;
-          font-size: 12px;
+        div {
+          margin-top: 10px;
+          margin-bottom: 10px;
+          
+          &:first-child {
+            margin-top: 0;
+          }
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+        
+        img {
           width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
+          height: auto;
         }
         
         &::-webkit-scrollbar {
