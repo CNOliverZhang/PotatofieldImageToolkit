@@ -105,8 +105,8 @@
           <div class="control-row">
             <div class="subtitle">请选择存储位置</div>
             <div class="space"></div>
-            <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹，原目录结构将被舍弃</div>
-            <div v-else class="subtext">处理后的图片将存储在原来的位置，并保持目录结构不变</div>
+            <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
+            <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
           </div>
           <div class="control-row">
             <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
