@@ -250,9 +250,9 @@ export default {
           })
         } else {
           that.errorLog = that.$dialog({
-            type: 'error',
-            title: '错误',
-            text: '下列文件格式的不受支持，请您检查文件格式。但已导入的图片文件不受影响，您仍可以处理列表中显示的已导入文件。',
+            type: 'warning',
+            title: '部分文件读取失败',
+            text: '下列文件读取失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
             content: that.$createElement('div', null, that.errorList.map((file) => {
               return that.$createElement('p', {
                 style: {
@@ -296,8 +296,8 @@ export default {
             let files = fs.readdirSync(directory)
             for (let i = 0; i < files.length; i++) {
               let filename = files[i]
+              let filepath = path.join(directory, filename)
               try {
-                let filepath = path.join(directory, filename)
                 let stats = fs.statSync(filepath)
                 if (stats.isFile()) {
                   let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
@@ -315,40 +315,65 @@ export default {
                   dirList.push(filepath)
                 }
               } catch(e) {
+                that.errorList.push(filepath)
               }
             }
           }
-          dialog.change({
-            type: 'success',
-            title: '完成',
-            text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
-            showConfirm: true
-          })
         } else {
           let files = fs.readdirSync(that.sourceLocation)
           for (let i = 0; i < files.length; i++) {
             let filename = files[i]
             let filepath = path.join(that.sourceLocation, filename)
-            let stats = fs.statSync(filepath)
-            if (stats.isFile()) {
-              let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-              let name = filename.substring(0, filename.lastIndexOf("."))
-              let path = that.sourceLocation
-              if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                that.fileList.push({
-                  fullpath: filepath,
-                  path: path,
-                  name: name,
-                  ext: ext
-                })
+            try {
+              let stats = fs.statSync(filepath)
+              if (stats.isFile()) {
+                let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+                let name = filename.substring(0, filename.lastIndexOf("."))
+                let path = that.sourceLocation
+                if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                  that.fileList.push({
+                    fullpath: filepath,
+                    path: path,
+                    name: name,
+                    ext: ext
+                  })
+                }
               }
+            } catch(e) {
+              that.errorList.push(filepath)
             }
           }
+        }
+        dialog.change({
+          type: 'success',
+          title: '完成',
+          text: '已成功读取您选择的文件夹，共发现 ' + that.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
+          showConfirm: true
+        })
+        if (that.errorList) {
           dialog.change({
-            type: 'success',
-            title: '完成',
-            text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
-            showConfirm: true
+            content: that.$createElement('div', null, [
+              that.$createElement('div', null, [
+                that.$createElement('p', null, '读取下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
+              ]),
+              that.$createElement('div', null, that.errorList.map((file) => {
+                return that.$createElement('p', {
+                  style: {
+                    lineHeight: '24px',
+                    fontSize: '12px',
+                    width: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    textIndent: '0'
+                 }
+                }, file)
+              }))
+            ]),
+            confirmFunction: function() {
+              that.errorList = []
+              that.errorDialog = null
+            }
           })
         }
       }, 1000)
