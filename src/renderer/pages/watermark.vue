@@ -268,7 +268,7 @@ export default {
             })),
             confirmFunction: function() {
               that.errorList = []
-              that.errorDialog = null
+              that.errorLog = null
             }
           })
         }
@@ -372,7 +372,6 @@ export default {
             ]),
             confirmFunction: function() {
               that.errorList = []
-              that.errorDialog = null
             }
           })
         }
