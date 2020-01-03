@@ -18,7 +18,10 @@
                 </div>
               </div>
             </div>
-            <el-button type="primary" size="mini" @click="edit" class="interactable">进入水印编辑器</el-button>
+            <div class="control-row">
+              <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
+              <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
+            </div>
           </div>
         </div>
         <div class="control-row">
@@ -174,7 +177,7 @@ export default {
     return {
       fileList: [],
       errorList: [],
-      fileListPage: 0,
+      fileListPage: 1,
       customLocation: false,
       childFolderIncluded: false,
       saveLocation: '',
@@ -280,105 +283,75 @@ export default {
         })
         return
       }
-      if (that.childFolderIncluded) {
-        let dialog = that.$dialog({
-          title: '正在扫描文件夹',
-          text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
-          showConfirm: false
-        })
-        let dirList = [];
-        (function traverse(directory, dirList) {
-          fs.readdir(directory, function(e, files) {
-            if (e) {
-              that.$dialog({
-                type: 'error',
-                title: '错误',
-                text: '无法读取文件夹“' + directory + '”，请检查文件夹权限。',
-              })
-            } else {
-              for (let i = 0; i < files.length; i++) {
-                let filename = files[i]
-                try {
-                  let filepath = path.join(directory, filename)
-                  let stats = fs.statSync(filepath)
-                  if (stats.isFile()) {
-                    let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-                    let name = filename.substring(0, filename.lastIndexOf("."))
-                    let path = directory
-                    if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                      that.fileList.push({
-                        fullpath: filepath,
-                        path: path,
-                        name: name,
-                        ext: ext
-                      })
-                      dialog.change({
-                        text: '正在扫描文件夹“' + path + '”，已读取 ' + that.fileList.length + ' 个可处理的图片文件。'
-                      })
-                    }
-                  } else {
-                    dirList.push(filepath)
+      let dialog = that.$dialog({
+        title: '正在扫描文件夹',
+        text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
+        showConfirm: false
+      })
+      setTimeout(() => {
+        if (that.childFolderIncluded) {
+          let dirList = [that.sourceLocation];
+          while (dirList.length > 0) {
+            let directory = dirList.pop()
+            let files = fs.readdirSync(directory)
+            for (let i = 0; i < files.length; i++) {
+              let filename = files[i]
+              try {
+                let filepath = path.join(directory, filename)
+                let stats = fs.statSync(filepath)
+                if (stats.isFile()) {
+                  let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+                  let name = filename.substring(0, filename.lastIndexOf("."))
+                  let path = directory
+                  if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                    that.fileList.push({
+                      fullpath: filepath,
+                      path: path,
+                      name: name,
+                      ext: ext
+                    })
                   }
-                } catch(e) {
+                } else {
+                  dirList.push(filepath)
                 }
+              } catch(e) {
               }
-              if (dirList.length != 0) {
-                traverse(dirList.pop(), dirList)
-              } else {
-                dialog.change({
-                  type: 'success',
-                  title: '完成',
-                  text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
-                  showConfirm: true
+            }
+          }
+          dialog.change({
+            type: 'success',
+            title: '完成',
+            text: '已成功读取您选择的文件夹及其子文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
+            showConfirm: true
+          })
+        } else {
+          let files = fs.readdirSync(that.sourceLocation)
+          for (let i = 0; i < files.length; i++) {
+            let filename = files[i]
+            let filepath = path.join(that.sourceLocation, filename)
+            let stats = fs.statSync(filepath)
+            if (stats.isFile()) {
+              let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
+              let name = filename.substring(0, filename.lastIndexOf("."))
+              let path = that.sourceLocation
+              if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
+                that.fileList.push({
+                  fullpath: filepath,
+                  path: path,
+                  name: name,
+                  ext: ext
                 })
               }
             }
-          })
-        })(that.sourceLocation, dirList);
-      } else {
-        let dialog = that.$dialog({
-          title: '正在扫描文件夹',
-          text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
-          showConfirm: false
-        })
-        fs.readdir(that.sourceLocation, function(e, files) {
-          if (e) {
-            that.$dialog({
-              type: 'error',
-              title: '错误',
-              text: '无法读取文件夹“' + that.sourceLocation + '”，请检查文件夹权限。',
-            })
-          } else {
-            for (let i = 0; i < files.length; i++) {
-              let filename = files[i]
-              let filepath = path.join(that.sourceLocation, filename)
-              let stats = fs.statSync(filepath)
-              if (stats.isFile()) {
-                let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-                let name = filename.substring(0, filename.lastIndexOf("."))
-                let path = that.sourceLocation
-                if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                  that.fileList.push({
-                    fullpath: filepath,
-                    path: path,
-                    name: name,
-                    ext: ext
-                  })
-                  dialog.change({
-                    text: '正在扫描文件夹，已读取 ' + that.fileList.length + ' 个可处理的图片文件。'
-                  })
-                }
-              }
-            }
-            dialog.change({
-              type: 'success',
-              title: '完成',
-              text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
-              showConfirm: true
-            })
           }
-        })
-      }
+          dialog.change({
+            type: 'success',
+            title: '完成',
+            text: '已成功读取您选择的文件夹，共读取 ' + that.fileList.length + ' 个可处理的图片文件。',
+            showConfirm: true
+          })
+        }
+      }, 1000)
     },
     handleDelete(index) {
       this.fileList.splice(index + (this.fileListPage - 1) * 100, 1)
@@ -561,7 +534,6 @@ export default {
           width: 100%;
           height: 200px;
           background-color: #F5F7FA;
-          margin-bottom: 10px;
           box-sizing: border-box;
           border-radius: 6px;
           border-color: #DCDFE6;
@@ -744,14 +716,6 @@ export default {
         }
       }
     }
-    
-    .full-width-button {
-      width: 100%;
-    }
-    
-    .half-width-button {
-      width: 48%;
-    }
   }
   
   .control-row {
@@ -779,6 +743,14 @@ export default {
     &:last-child {
       margin-bottom: 0;
     }
+  }
+    
+  .full-width-button {
+    width: 100%;
+  }
+  
+  .half-width-button {
+    width: 48%;
   }
 }
 </style>
