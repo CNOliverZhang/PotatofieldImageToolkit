@@ -96,9 +96,7 @@
           <div v-else v-for="(file, index) in fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file">
             <div class="filename">{{ file.name + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
-            <div class="controller" @click="handleDelete(index)">
-              <i class="fas fa-trash-alt delete"></i>
-            </div>
+            <i class="fas fa-trash-alt delete" @click="handleDelete(index)"></i>
           </div>
         </div>
         <div v-if="fileList.length != 0">
@@ -592,6 +590,7 @@ export default {
               white-space: nowrap;
               text-overflow: ellipsis;
               flex-grow: 1;
+              padding-right: 10px;
             }
             
             .delete {
@@ -685,34 +684,32 @@ export default {
         }
         
         .filename {
-          width: 40%;
+          width: 50%;
+          flex-shrink: 1;
+          padding-right: 10px;
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          padding-right: 10px;
           box-sizing: border-box;
         }
         
         .path {
+          width: 50%;
+          flex-shrink: 1;
+          padding-right: 10px;
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
-          flex-grow: 1;
-          padding-right: 10px;
           box-sizing: border-box;
         }
         
-        .controller {
-          width: 5%;
+        .delete {
+          color: #DCDFE6;
+          cursor: pointer;
+          transition: 0.2s;
           
-          .delete {
-            color: #DCDFE6;
-            cursor: pointer;
-            transition: 0.2s;
-            
-            &:hover {
-              color: #F56C6C;
-            }
+          &:hover {
+            color: #F56C6C;
           }
         }
       }
