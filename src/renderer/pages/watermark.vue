@@ -348,7 +348,7 @@ export default {
           text: '已成功读取您选择的文件夹，共发现 ' + that.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
           showConfirm: true
         })
-        if (that.errorList) {
+        if (that.errorList.length != 0) {
           dialog.change({
             content: that.$createElement('div', null, [
               that.$createElement('div', null, [
