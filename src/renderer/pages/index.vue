@@ -1,7 +1,7 @@
 <template>
   <div id="index">
     <div id="title-bar">
-      <img class="logo" :src="require('../assets/logo.png')"/>
+      <img class="logo" src="static/logo.png"/>
       <div class="title">洋芋田图像工具箱</div>
       <div class="flex-space"></div>
       <div class="control-button interactable" @click="open('/about', '关于')">
@@ -72,7 +72,14 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      ipcRenderer.send('close')
+      this.$dialog({
+        title: '操作确认',
+        text: '关闭主界面的同时将退出程序，您打开的其他工具也将关闭。您确认要退出吗？',
+        showCancel: true,
+        confirmFunction: () => {
+          ipcRenderer.send('exit')
+        }
+      })
     },
     open (path, title) {
       if (!ipcRenderer.sendSync('open', {
@@ -80,7 +87,7 @@ export default {
         path: '#' + path
       })) {
         this.$dialog({
-          text: '不支持同时打开两个相同的窗口！'
+          text: '不支持同时打开两个相同的窗口。'
         })
       }
     },
@@ -91,9 +98,12 @@ export default {
     }
   },
   mounted() {
-    document.getElementById('scroll').addEventListener('mousewheel', function(event) {
+    document.getElementById('scroll').addEventListener('mousewheel', (event) => {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
+    })
+    ipcRenderer.on('close', () => {
+      this.close()
     })
     ipcRenderer.send('check-for-update')
     ipcRenderer.once('update-available', (event, info) => {
@@ -158,7 +168,7 @@ export default {
           ipcRenderer.once('error', () => {
             dialog.change({
               title: '出现错误',
-              text: '检查或下载更新的过程中出现错误，将在下次启动程序时重试。您也可以手动检查更新。',
+              text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以进入“关于”页面手动更新。',
               content: null,
               showConfirm: true,
               confirmFunction: () => {

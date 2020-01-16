@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 const windows = new Set
 const windowTitles = new Set
-let mainWindow
+let updateTargetWindow
 const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
@@ -57,7 +57,7 @@ function createWindow(args) {
 
   newWindow.loadURL(baseURL + args.path)
 
-  newWindow.once('ready-to-show', function () {
+  newWindow.once('ready-to-show', () => {
     newWindow.show()
   })
 
@@ -73,13 +73,17 @@ function createWindow(args) {
 }
 
 process.on('uncaughtException', () => {
-  mainWindow.webContents.send('error')
+  updateTargetWindow.webContents.send('error')
 })
 
-app.on('ready', function () {
-  mainWindow = createWindow({
+app.on('ready', () => {
+  const mainWindow = createWindow({
     title: '洋芋田图像工具箱',
     path: '#/'
+  })
+  mainWindow.on('close', (event) => {
+    event.preventDefault()
+    mainWindow.webContents.send('close')
   })
 })
 
@@ -98,7 +102,8 @@ app.on('activate', (event, hasVisibleWindows) => {
   }
 })
 
-ipcMain.on('check-for-update', () => {
+ipcMain.on('check-for-update', (event) => {
+  updateTargetWindow = event.sender
   autoUpdater.checkForUpdates()
 })
 
@@ -110,17 +115,21 @@ ipcMain.on('update-now', () => {
   autoUpdater.quitAndInstall(true, true)
 })
 
-ipcMain.on('minimize', function () {
+ipcMain.on('minimize', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
   currentWindow.minimize()
 })
 
-ipcMain.on('close', function () {
+ipcMain.on('close', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
   currentWindow.close()
 })
 
-ipcMain.on('open', function (event, args) {
+ipcMain.on('exit', () => {
+  app.exit()
+})
+
+ipcMain.on('open', (event, args) => {
   if (windowTitles.has(args.title)) {
     event.returnValue = false
     return
@@ -141,11 +150,15 @@ ipcMain.on('open', function (event, args) {
   event.returnValue = true
 })
 
-ipcMain.on('select-folder', function (event) {
+ipcMain.on('version', (event) => {
+  event.returnValue = app.getVersion()
+})
+
+ipcMain.on('select-folder', (event) => {
   dialog.showOpenDialog({
     title: "选择文件夹",
     properties: ['openDirectory']
-  }, function (folder) {
+  }, (folder) => {
     if (folder) {
       event.returnValue = folder[0]
     }
@@ -153,17 +166,21 @@ ipcMain.on('select-folder', function (event) {
 })
 
 autoUpdater.on('update-available', (info) => {
-  mainWindow.webContents.send('update-available', info)
+  updateTargetWindow.webContents.send('update-available', info)
+})
+
+autoUpdater.on('update-not-available', () => {
+  updateTargetWindow.webContents.send('update-not-available')
 })
 
 autoUpdater.on('download-progress', (progress) => {
-  mainWindow.webContents.send('update-download-progress', progress.percent)
+  updateTargetWindow.webContents.send('update-download-progress', progress.percent)
 })
 
 autoUpdater.on('update-downloaded', () => {
-  mainWindow.webContents.send('update-downloaded')
+  updateTargetWindow.webContents.send('update-downloaded')
 })
 
 autoUpdater.on('error', () => {
-  mainWindow.webContents.send('error')
+  updateTargetWindow.webContents.send('error')
 })

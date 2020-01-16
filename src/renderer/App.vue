@@ -10,7 +10,7 @@
   }
 </script>
 
-<style>
+<style lang="scss">
 @font-face {
   font-family: SourceHanSansSC;
   src: url('./assets/SourceHanSansSC-ExtraLight.otf');
@@ -38,12 +38,42 @@ body {
   flex-grow: 1;
 }
 
+.row {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  
+  &:first-child {
+    margin-top: 0;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.control-row {
+  font-size: 14px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  
+  .location {
+    width: 60%;
+  }
+}
+
 .title {
   font-size: 32px;
 }
 
 .subtitle {
   font-size: 18px;
+}
+
+.text {
+  font-size: 14px;
+  text-align: justify;
 }
 
 .subtext {

@@ -40,8 +40,8 @@ export default {
       showConfirm: true,
       confirmText: '确定',
       cancelText: '取消',
-      confirmFunction: function () {},
-      cancelFunction: function () {}
+      confirmFunction: () => {},
+      cancelFunction: () => {}
     }
   },
   methods: {

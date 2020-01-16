@@ -18,44 +18,44 @@
                 </div>
               </div>
             </div>
-            <div class="control-row">
+            <div class="row control-row">
               <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
               <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
             </div>
           </div>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <div class="subtitle">请选择存储位置</div>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
           <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
             inactive-text="保存在原路径" class="interactable"></el-switch>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <div class="subtitle">请选择保存的格式</div>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
           <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <el-radio-group v-model="mimeType" class="interactable">
             <el-radio label="JPG"></el-radio>
             <el-radio label="PNG"></el-radio>
           </el-radio-group>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <div class="subtitle">请输入文件后缀</div>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
         </div>
-        <div class="control-row">
+        <div class="row control-row">
           <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
         </div>
       </div>
@@ -63,10 +63,12 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
       <div id="multiple" class="tab-content">
-        <div v-if="fileList.length == 0" class="subtitle">请选择读取的文件夹</div>
-        <div v-else class="control-row">
+        <div v-if="fileList.length == 0" class="row">
+          <div class="subtitle">请选择读取的文件夹</div>
+        </div>
+        <div v-else class="row control-row">
           <div class="subtitle">已读取的文件列表</div>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <el-pagination
             class="interactable"
             small
@@ -79,10 +81,10 @@
             @current-change="pageChange">
           </el-pagination>
         </div>
-        <div v-if="fileList.length == 0" class="control-row">
+        <div v-if="fileList.length == 0" class="row control-row">
           <el-switch v-model="childFolderIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
             inactive-text="不包含子目录" class="interactable"></el-switch>
-          <div class="space"></div>
+          <div class="flex-space"></div>
           <el-input disabled size="mini" v-model="sourceLocation" class="location interactable">
             <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
           </el-input>
@@ -102,45 +104,45 @@
           </div>
         </div>
         <div v-if="fileList.length != 0">
-          <div class="control-row">
+          <div class="row control-row">
             <div class="subtitle">请选择存储位置</div>
-            <div class="space"></div>
+            <div class="flex-space"></div>
             <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
             <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
               inactive-text="保存在原路径" class="interactable"></el-switch>
-            <div class="space"></div>
+            <div class="flex-space"></div>
             <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
               <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <div class="subtitle">请选择保存的格式</div>
-            <div class="space"></div>
+            <div class="flex-space"></div>
             <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
             <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <el-radio-group v-model="mimeType" class="interactable">
               <el-radio label="JPG"></el-radio>
               <el-radio label="PNG"></el-radio>
             </el-radio-group>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <div class="subtitle">请输入文件后缀</div>
-            <div class="space"></div>
+            <div class="flex-space"></div>
             <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <div class="subtitle">下一步操作</div>
-            <div class="space"></div>
+            <div class="flex-space"></div>
           </div>
-          <div class="control-row">
+          <div class="row control-row">
             <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
             <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
           </div>
@@ -392,7 +394,7 @@ export default {
           title: '警告',
           text: '您选择了将处理后的图片储存在原图片路径且未设置输出文件的后缀，这可能导致原图被覆盖！您确定要继续吗？',
           showCancel: true,
-          confirmFunction: function () {
+          confirmFunction: () => {
             ipcRenderer.send('open', {
               title: '水印编辑器',
               path: '#/watermark/editor',
@@ -736,33 +738,6 @@ export default {
           background-color: #C0C4CC;
         }
       }
-    }
-  }
-  
-  .control-row {
-    height: 28px;
-    font-size: 14px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .space {
-      flex-grow: 1;
-    }
-    
-    .location {
-      width: 60%;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
     }
   }
     

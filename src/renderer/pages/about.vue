@@ -1,16 +1,113 @@
 <template>
   <el-tabs type="card" tab-position="left" id="about">
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-info-circle"></i> 使用说明</span>
-      <div class="tab-content">内容</div>
-    </el-tab-pane>
-    <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-code"></i> 版权信息</span>
-      <div class="tab-content">内容</div>
+      <div class="tab-content">
+        <div class="row control-row">
+          <div id="intro">
+            <img class="logo" src="static/logo.png" />
+            <div class="intro-text">
+              <div class="title">洋芋田图像工具箱</div>
+              <div class="subtext">一个专为摄影师设计的图像工具箱</div>
+            </div>
+          </div>
+          <div class="subtext link interactable" @click="open('https://imagetoolkit.potatofield.cn')">访问网站</div>
+        </div>
+        <div class="row">
+          <div class="subtitle">开发者信息</div>
+        </div>
+        <div class="row control-row">
+          <div class="text">Copyright © 2020 张志毅</div>
+          <div class="subtext link interactable" @click="open('mailto:cnoliverzhang@gmail.com')">联系开发者</div>
+        </div>
+        <div class="row">
+          <div class="subtitle">开源协议</div>
+        </div>
+        <div class="row">
+          <div class="text">本程序遵循MIT开源许可协议发行，相关资源及源码已托管在Github，您可以<span
+            class="link interactable"
+            @click="open('https://github.com/CNOliverZhang/PotatofieldImageToolkit/')">点此访问</span>。
+        </div>
+        </div>
+        <div class="row">
+          <div class="subtitle">相关项目</div>
+        </div>
+        <div class="row">
+          <div class="text">本程序的开发过程中使用了下列开源程序和组件：</div>
+        </div>
+        <el-button
+          class="interactable"
+          size="mini"
+          type="primary"
+          @click="open('https://github.com/electron/electron')">Electron
+        </el-button>
+        <el-button
+          class="interactable"
+          size="mini"
+          type="primary"
+          @click="open('https://github.com/vuejs/vue')">Vue.js
+        </el-button>
+        <el-button
+          class="interactable"
+          size="mini"
+          type="primary"
+          @click="open('https://github.com/SimulatedGREG/electron-vue')">electron-vue
+        </el-button>
+        <el-button
+          class="interactable"
+          size="mini"
+          type="primary"
+          @click="open('https://github.com/electron-userland/electron-builder')">electron-builder
+        </el-button>
+      </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-sync-alt"></i> 版本更新</span>
-      <div class="tab-content">内容</div>
+      <div class="tab-content">
+        <div class="row">
+          <div class="subtitle">当前版本</div>
+        </div>
+        <div class="row">
+          <div class="text">版本号：{{ version }}</div>
+        </div>
+        <div class="row">
+          <div class="subtitle">当前版本</div>
+        </div>
+        <div v-if="updateChecked">
+          <div v-if="update">
+            <div class="row">
+              <div class="text">版本号：{{ update.version }}</div>
+            </div>
+            <div class="row">
+              <div class="text">更新日志：</div>
+            </div>
+            <div class="row">
+              <div class="subtext" v-for="(releaseNote) in update.releaseNotes" :key="releaseNote">
+                {{ releaseNote }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">发布日期：{{ update.releaseDate }}</div>
+            </div>
+            <div class="row">
+              <el-button type="primary" size="mini" @click="confirmUpdate" class="interactable">现在更新</el-button>
+            </div>
+          </div>
+          <div v-else>
+            <div class="row">
+              <div class="text">您的版本已经是最新版本，无需更新。</div>
+            </div>
+          </div>
+        </div>
+        <div v-else>
+          <div class="row">
+            <div class="text">尚未获取更新信息，请点击下方按钮检查最新版本。</div>
+          </div>
+          <div class="row">
+            <el-button type="primary" size="mini" @click="checkForUpdate" class="interactable">检查更新</el-button>
+          </div>
+        </div>
+      </div>
     </el-tab-pane>
     <el-tab-pane disabled>
       <span slot="label" id="control-button-holder">
@@ -29,16 +126,99 @@
 
 <script>
 const ipcRenderer = require('electron').ipcRenderer
+const shell = require('electron').shell
 
 export default {
   name: 'about',
+  data () {
+    return {
+      version: null,
+      updateChecked: false,
+      update: null
+    }
+  },
   methods: {
     hide() {
       ipcRenderer.send('minimize')
     },
     close() {
       ipcRenderer.send('close')
+    },
+    open(url) {
+      shell.openExternal(url)
+    },
+    checkForUpdate() {
+      ipcRenderer.send('check-for-update')
+      ipcRenderer.once('update-not-available', () => {
+        this.updateChecked = true
+      })
+      ipcRenderer.once('update-available', (event, info) => {
+        this.updateChecked = true
+        this.update = {
+          version: info.version,
+          releaseNotes: info.releaseNotes.split('\n'),
+          releaseDate: info.releaseDate.slice(0, 4) + "年"
+          + info.releaseDate.slice(5, 7) + "月"
+          + info.releaseDate.slice(8, 10) + "日"
+        }
+      })
+      ipcRenderer.once('error', () => {
+        this.$dialog({
+          type: 'error',
+          title: '出现错误',
+          text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍后重试。'
+        })
+      })
+    },
+    confirmUpdate() {
+      ipcRenderer.send('download-update')
+      let dialog = this.$dialog({
+        title: '正在下载更新',
+        content: this.$createElement('el-progress', {
+          'style': {
+            'height': '20px'
+          },
+          'props': {
+            'text-inside': true,
+            'stroke-width': 20,
+            'percentage': 0
+          }
+        }),
+        showConfirm: false
+      })
+      ipcRenderer.on('update-download-progress', (event, progress) => {
+        dialog.change({
+          content: this.$createElement('el-progress', {
+            'props': {
+              'text-inside': true,
+              'stroke-width': 20,
+              'percentage': Math.round(progress)
+            }
+          })
+        })
+      })
+      ipcRenderer.once('update-downloaded', () => {
+        dialog.change({
+          type: 'success',
+          title: '更新下载完成',
+          text: '新版本的安装文件已经下载完成，即将开始更新。',
+          content: null,
+          showConfirm: true,
+          confirmFunction: () => {
+            ipcRenderer.removeAllListeners(['update-download-progress', 'update-downloaded'])
+            ipcRenderer.send('update-now')
+            this.$dialog({
+              title: '正在安装更新',
+              text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
+              showConfirm: false
+            })
+          }
+        })
+      })
     }
+  },
+  beforeMount() {
+    this.version = ipcRenderer.sendSync('version')
   }
 }
 </script>
@@ -47,6 +227,10 @@ export default {
 #about {
   width: 100%;
   height: 100%;
+  
+  button {
+    font-family: "SourceHanSansSC";
+  }
   
   .el-tabs__header {
     margin-right: 0;
@@ -91,6 +275,42 @@ export default {
           }
         }
       }
+    }
+  }
+  
+  #intro {
+    display: flex;
+    flex-direction: row;
+    
+    .logo {
+      width: 60px;
+      height: 60px;
+      object-fit: contain;
+    }
+    
+    .intro-text {
+      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      
+      .title {
+        line-height: 1em;
+      }
+      
+      .subtext {
+        line-height: 1em;
+      }
+    }
+  }
+  
+  .link {
+    cursor: pointer;
+    transition: 0.2s;
+    
+    &:hover {
+      color: #2196F3;
     }
   }
   
