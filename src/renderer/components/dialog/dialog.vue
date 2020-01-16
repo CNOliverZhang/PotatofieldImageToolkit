@@ -71,7 +71,7 @@ export default {
       if (args.showCancel === true || false) {
         this.showCancel = args.showCancel
       }
-      if (args.content) {
+      if (args.content !== undefined) {
         this.$slots.default = [args.content]
         this.$mount()
       }

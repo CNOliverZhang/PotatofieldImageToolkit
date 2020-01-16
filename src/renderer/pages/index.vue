@@ -75,16 +75,14 @@ export default {
       ipcRenderer.send('close')
     },
     open (path, title) {
-      let that = this
-      ipcRenderer.send('open', {
+      if (!ipcRenderer.sendSync('open', {
         title: title,
-        path: path
-      })
-      ipcRenderer.once('same-window-exists', function () {
-        that.$dialog({
+        path: '#' + path
+      })) {
+        this.$dialog({
           text: '不支持同时打开两个相同的窗口！'
         })
-      })
+      }
     },
     showDeveloping () {
       this.$dialog({
@@ -96,6 +94,81 @@ export default {
     document.getElementById('scroll').addEventListener('mousewheel', function(event) {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
+    })
+    ipcRenderer.send('check-for-update')
+    ipcRenderer.once('update-available', (event, info) => {
+      this.$dialog({
+        title: '发现新版本',
+        text: '当前最新版本为 ' + info.version + '，新版本特性如下：',
+        content: this.$createElement('div', null, info.releaseNotes.split('\n').map((releaseNote) => {
+          return this.$createElement('p', {
+            'style': {
+              'text-indent': 0
+            }
+          }, releaseNote)
+        })),
+        showCancel: true,
+        cancelText: '忽略',
+        confirmText: '更新',
+        confirmFunction: () => {
+          ipcRenderer.send('download-update')
+          let dialog = this.$dialog({
+            title: '正在下载更新',
+            content: this.$createElement('el-progress', {
+              'style': {
+                'height': '20px'
+              },
+              'props': {
+                'text-inside': true,
+                'stroke-width': 20,
+                'percentage': 0
+              }
+            }),
+            showConfirm: false
+          })
+          ipcRenderer.on('update-download-progress', (event, progress) => {
+            dialog.change({
+              content: this.$createElement('el-progress', {
+                'props': {
+                  'text-inside': true,
+                  'stroke-width': 20,
+                  'percentage': Math.round(progress)
+                }
+              })
+            })
+          })
+          ipcRenderer.once('update-downloaded', () => {
+            dialog.change({
+              type: 'success',
+              title: '更新下载完成',
+              text: '新版本的安装文件已经下载完成，即将开始更新。',
+              content: null,
+              showConfirm: true,
+              confirmFunction: () => {
+                ipcRenderer.removeAllListeners(['update-download-progress', 'update-downloaded', 'error'])
+                ipcRenderer.send('update-now')
+                this.$dialog({
+                  title: '正在安装更新',
+                  text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
+                  showConfirm: false
+                })
+              }
+            })
+          })
+          ipcRenderer.once('error', () => {
+            dialog.change({
+              title: '出现错误',
+              text: '检查或下载更新的过程中出现错误，将在下次启动程序时重试。您也可以手动检查更新。',
+              content: null,
+              showConfirm: true,
+              confirmFunction: () => {
+                ipcRenderer.removeAllListeners(['update-download-progress', 'update-downloaded', 'error'])
+                dialog.close()
+              }
+            })
+          })
+        }
+      })
     })
   }
 }

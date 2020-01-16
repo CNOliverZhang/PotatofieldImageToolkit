@@ -1,18 +1,30 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { autoUpdater } from 'electron-updater'
+const path = require('path')
 
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
  */
 if (process.env.NODE_ENV !== 'development') {
-  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+  global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
 const windows = new Set
 const windowTitles = new Set
+let mainWindow
 const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+
+autoUpdater.autoDownload = false
+autoUpdater.setFeedURL("https://imagetoolkit.potatofield.cn/download/")
+
+if (process.env.NODE_ENV === 'development') {
+  autoUpdater.updateConfigPath = path.join(__dirname, '../../dev-app-update.yml')
+} else {
+  autoUpdater.updateConfigPath = path.join(__dirname, '../../../app-update.yml')
+}
 
 function createWindow(args) {
   let x, y = 0
@@ -23,9 +35,9 @@ function createWindow(args) {
     modal = true
     parent = args.parent
   }
-  const currentWindow = BrowserWindow.getFocusedWindow()
+  let currentWindow = BrowserWindow.getFocusedWindow()
   if (currentWindow) {
-    const [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
+    let [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
     x = currentWindowX + 30
     y = currentWindowY + 30
   }
@@ -43,7 +55,7 @@ function createWindow(args) {
     modal: modal
   })
 
-  newWindow.loadURL(baseURL + '/#' + args.path)
+  newWindow.loadURL(baseURL + args.path)
 
   newWindow.once('ready-to-show', function () {
     newWindow.show()
@@ -60,6 +72,44 @@ function createWindow(args) {
   return newWindow
 }
 
+process.on('uncaughtException', () => {
+  mainWindow.webContents.send('error')
+})
+
+app.on('ready', function () {
+  mainWindow = createWindow({
+    title: '洋芋田图像工具箱',
+    path: '#/'
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})
+
+app.on('activate', (event, hasVisibleWindows) => {
+  if (!hasVisibleWindows) {
+    createWindow({
+      title: '洋芋田图像工具箱',
+      path: '#/'
+    })
+  }
+})
+
+ipcMain.on('check-for-update', () => {
+  autoUpdater.checkForUpdates()
+})
+
+ipcMain.on('download-update', () => {
+  autoUpdater.downloadUpdate()
+})
+
+ipcMain.on('update-now', () => {
+  autoUpdater.quitAndInstall(true, true)
+})
+
 ipcMain.on('minimize', function () {
   let currentWindow = BrowserWindow.getFocusedWindow()
   currentWindow.minimize()
@@ -72,7 +122,7 @@ ipcMain.on('close', function () {
 
 ipcMain.on('open', function (event, args) {
   if (windowTitles.has(args.title)) {
-    event.sender.send('same-window-exists')
+    event.returnValue = false
     return
   }
   if (args.modal) {
@@ -88,6 +138,7 @@ ipcMain.on('open', function (event, args) {
       path: args.path
     })
   }
+  event.returnValue = true
 })
 
 ipcMain.on('select-folder', function (event) {
@@ -101,44 +152,18 @@ ipcMain.on('select-folder', function (event) {
   })
 })
 
-app.on('ready', function () {
-  createWindow({
-    title: '洋芋田图像工具箱',
-    path: '/'
-  })
+autoUpdater.on('update-available', (info) => {
+  mainWindow.webContents.send('update-available', info)
 })
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
+autoUpdater.on('download-progress', (progress) => {
+  mainWindow.webContents.send('update-download-progress', progress.percent)
 })
-
-app.on('activate', (event, hasVisibleWindows) => {
-  if (!hasVisibleWindows) {
-    createWindow({
-      title: '洋芋田图像工具箱',
-      path: '/'
-    })
-  }
-})
-
-/**
- * Auto Updater
- *
- * Uncomment the following code below and install `electron-updater` to
- * support auto updating. Code Signing with a valid certificate is required.
- * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
- */
-
-/*
-import { autoUpdater } from 'electron-updater'
 
 autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
+  mainWindow.webContents.send('update-downloaded')
 })
 
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+autoUpdater.on('error', () => {
+  mainWindow.webContents.send('error')
 })
- */

@@ -96,7 +96,9 @@
           <div v-else v-for="(file, index) in fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file">
             <div class="filename">{{ file.name + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
-            <i class="fas fa-trash-alt delete" @click="handleDelete(index)"></i>
+            <div @click="handleDelete(index)">
+              <i class="fas fa-trash-alt delete"></i>
+            </div>
           </div>
         </div>
         <div v-if="fileList.length != 0">
@@ -205,90 +207,87 @@ export default {
       this.errorLog = null
     },
     clearConfirm() {
-      let that = this
-      that.$dialog({
+      this.$dialog({
         type: 'warning',
         title: '操作确认',
         text: '将清除您已读取的图片，确定执行操作吗？',
         showCancel: true,
-        confirmFunction: function () {
-          that.clear()
+        confirmFunction: () => {
+          this.clear()
         }
       })
     },
     handleFile(file) {
-      let that =  this
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let name = file.name.substring(0, file.name.lastIndexOf("."))
       let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
       if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-        that.fileList.push({
+        this.fileList.push({
           fullpath: file.raw.path,
           path: path,
           name: name,
           ext: ext
         })
       } else {
-        that.errorList.push(name + '.' + ext)
-        if (that.errorLog) {
-          that.errorLog.change({
-            content: that.$createElement('div', null, that.errorList.map((file) => {
-              return that.$createElement('p', {
+        this.errorList.push(name + '.' + ext)
+        if (this.errorLog) {
+          this.errorLog.change({
+            content: this.$createElement('div', null, this.errorList.map((file) => {
+              return this.$createElement('p', {
                 style: {
-                   lineHeight: '24px',
-                   fontSize: '12px',
-                   width: '100%',
-                   overflow: 'hidden',
-                   textOverflow: 'ellipsis',
-                   whiteSpace: 'nowrap',
-                   textIndent: '0'
+                  'line-height': '24px',
+                  'font-size': '12px',
+                  'width': '100%',
+                  'overflow': 'hidden',
+                  'text-overflow': 'ellipsis',
+                  'white-space': 'nowrap',
+                  'text-indent': '0'
                 }
               }, file)
             }))
           })
         } else {
-          that.errorLog = that.$dialog({
+          this.errorLog = this.$dialog({
             type: 'warning',
             title: '部分文件读取失败',
             text: '下列文件读取失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
-            content: that.$createElement('div', null, that.errorList.map((file) => {
-              return that.$createElement('p', {
+            content: this.$createElement('div', null, this.errorList.map((file) => {
+              return this.$createElement('p', {
                 style: {
-                  lineHeight: '24px',
-                  fontSize: '12px',
-                  width: '100%',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  textIndent: '0'
-               }
+                  'line-height': '24px',
+                  'font-size': '12px',
+                  'width': '100%',
+                  'overflow': 'hidden',
+                  'text-overflow': 'ellipsis',
+                  'white-space': 'nowrap',
+                  'text-indent': '0'
+                }
               }, file)
             })),
-            confirmFunction: function() {
-              that.errorList = []
-              that.errorLog = null
+            confirmFunction: () => {
+              this.errorList = []
+              this.errorLog = null
             }
           })
         }
       }
     },
     handleFolder() {
-      let that = this
-      if (that.sourceLocation == '') {
-        that.$dialog({
+      if (this.sourceLocation == '') {
+        this.$dialog({
           type: 'warning',
           text: '您还没有选择需要读取的文件夹！'
         })
         return
       }
-      let dialog = that.$dialog({
+      let dialog = this.$dialog({
         title: '正在扫描文件夹',
         text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
         showConfirm: false
       })
       setTimeout(() => {
-        if (that.childFolderIncluded) {
-          let dirList = [that.sourceLocation];
+        if (this.childFolderIncluded) {
+          let dirList = [this.sourceLocation];
           while (dirList.length > 0) {
             let directory = dirList.pop()
             let files = fs.readdirSync(directory)
@@ -302,7 +301,7 @@ export default {
                   let name = filename.substring(0, filename.lastIndexOf("."))
                   let path = directory
                   if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                    that.fileList.push({
+                    this.fileList.push({
                       fullpath: filepath,
                       path: path,
                       name: name,
@@ -313,23 +312,23 @@ export default {
                   dirList.push(filepath)
                 }
               } catch(e) {
-                that.errorList.push(filepath)
+                this.errorList.push(filepath)
               }
             }
           }
         } else {
-          let files = fs.readdirSync(that.sourceLocation)
+          let files = fs.readdirSync(this.sourceLocation)
           for (let i = 0; i < files.length; i++) {
             let filename = files[i]
-            let filepath = path.join(that.sourceLocation, filename)
+            let filepath = path.join(this.sourceLocation, filename)
             try {
               let stats = fs.statSync(filepath)
               if (stats.isFile()) {
                 let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
                 let name = filename.substring(0, filename.lastIndexOf("."))
-                let path = that.sourceLocation
+                let path = this.sourceLocation
                 if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                  that.fileList.push({
+                  this.fileList.push({
                     fullpath: filepath,
                     path: path,
                     name: name,
@@ -338,24 +337,24 @@ export default {
                 }
               }
             } catch(e) {
-              that.errorList.push(filepath)
+              this.errorList.push(filepath)
             }
           }
         }
         dialog.change({
           type: 'success',
           title: '完成',
-          text: '已成功读取您选择的文件夹，共发现 ' + that.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
+          text: '已成功读取您选择的文件夹，共发现 ' + this.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
           showConfirm: true
         })
-        if (that.errorList.length != 0) {
+        if (this.errorList.length != 0) {
           dialog.change({
-            content: that.$createElement('div', null, [
-              that.$createElement('div', null, [
-                that.$createElement('p', null, '读取下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
+            content: this.$createElement('div', null, [
+              this.$createElement('div', null, [
+                this.$createElement('p', null, '读取下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
               ]),
-              that.$createElement('div', null, that.errorList.map((file) => {
-                return that.$createElement('p', {
+              this.$createElement('div', null, this.errorList.map((file) => {
+                return this.$createElement('p', {
                   style: {
                     lineHeight: '24px',
                     fontSize: '12px',
@@ -368,14 +367,15 @@ export default {
                 }, file)
               }))
             ]),
-            confirmFunction: function() {
-              that.errorList = []
+            confirmFunction: () => {
+              this.errorList = []
             }
           })
         }
       }, 1000)
     },
     handleDelete(index) {
+      console.log(index)
       this.fileList.splice(index + (this.fileListPage - 1) * 100, 1)
     },
     pageChange(page) {
@@ -395,7 +395,7 @@ export default {
           confirmFunction: function () {
             ipcRenderer.send('open', {
               title: '水印编辑器',
-              path: '/watermark/editor',
+              path: '#/watermark/editor',
               modal: true
             })
           }
@@ -403,7 +403,7 @@ export default {
       } else {
         ipcRenderer.send('open', {
           title: '水印编辑器',
-          path: '/watermark/editor',
+          path: '#/watermark/editor',
           modal: true
         })
       }
