@@ -5,15 +5,19 @@
       <div id="single" class="tab-content">
         <div class="upload-area interactable">
           <el-upload class="upload-dragger" drag action="" multiple :auto-upload="false" :on-change="handleFile"
-            :show-file-list="false" :class="fileList.length != 0 ? 'half' : ''">
+            :show-file-list="false" :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
             <i class="fas fa-images"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
           </el-upload>
-          <div v-if="fileList.length != 0" class="file-list">
+          <div v-if="this.$store.state.watermark.fileList.length != 0" class="file-list">
             <div class="list">
-              <div v-for="(file, index) in fileList" :key="file.fullpath" class="file">
+              <div
+                v-for="(file, index) in this.$store.state.watermark.fileList"
+                :key="file.fullpath"
+                class="file"
+                @click="preview(index)">
                 <div class="filename">{{ file.name + '.' + file.ext }}</div>
-                <div @click="handleDelete(index)">
+                <div @click.stop="handleDelete(index)">
                   <i class="fas fa-trash-alt delete"></i>
                 </div>
               </div>
@@ -34,26 +38,26 @@
           <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
             inactive-text="保存在原路径" class="interactable"></el-switch>
           <div class="flex-space"></div>
-          <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
+          <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location-input interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="row control-row">
           <div class="subtitle">请选择保存的格式</div>
           <div class="flex-space"></div>
-          <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
+          <div v-if="mimeType == 'JPEG'" class="subtext">JPEG格式能够在最小的体积下保证较高的画质</div>
           <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
         </div>
         <div class="row control-row">
           <el-radio-group v-model="mimeType" class="interactable">
-            <el-radio label="JPG"></el-radio>
+            <el-radio label="JPEG"></el-radio>
             <el-radio label="PNG"></el-radio>
           </el-radio-group>
         </div>
         <div class="row control-row">
           <div class="subtitle">请输入文件后缀</div>
           <div class="flex-space"></div>
-          <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
+          <div class="subtext">名为“example.ext”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
         </div>
         <div class="row control-row">
           <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
@@ -63,7 +67,7 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
       <div id="multiple" class="tab-content">
-        <div v-if="fileList.length == 0" class="row">
+        <div v-if="this.$store.state.watermark.fileList.length == 0" class="row">
           <div class="subtitle">请选择读取的文件夹</div>
         </div>
         <div v-else class="row control-row">
@@ -73,37 +77,37 @@
             class="interactable"
             small
             background
-            layout="prev, pager, next"
+            layout="prev, pager, next, jumper"
             :page-size="100"
-            :total="fileList.length"
+            :total="this.$store.state.watermark.fileList.length"
             :current-page="fileListPage"
             :hide-on-single-page="true"
             @current-change="pageChange">
           </el-pagination>
         </div>
-        <div v-if="fileList.length == 0" class="row control-row">
+        <div v-if="this.$store.state.watermark.fileList.length == 0" class="row control-row">
           <el-switch v-model="childFolderIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
             inactive-text="不包含子目录" class="interactable"></el-switch>
           <div class="flex-space"></div>
-          <el-input disabled size="mini" v-model="sourceLocation" class="location interactable">
+          <el-input disabled size="mini" v-model="sourceLocation" class="location-input interactable">
             <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
-        <el-button v-if="fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">读取文件夹</el-button>
+        <el-button v-if="this.$store.state.watermark.fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">读取文件夹</el-button>
         <div class="file-list interactable">
-          <div v-if="fileList.length == 0" class="empty">
+          <div v-if="this.$store.state.watermark.fileList.length == 0" class="empty">
             <i class="far fa-folder-open"></i>
             <div>未读取文件</div>
           </div>
-          <div v-else v-for="(file, index) in fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file">
+          <div v-else v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file" @click="preview(index)">
             <div class="filename">{{ file.name + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
-            <div @click="handleDelete(index)">
+            <div @click.stop="handleDelete(index)">
               <i class="fas fa-trash-alt delete"></i>
             </div>
           </div>
         </div>
-        <div v-if="fileList.length != 0">
+        <div v-if="this.$store.state.watermark.fileList.length != 0">
           <div class="row control-row">
             <div class="subtitle">请选择存储位置</div>
             <div class="flex-space"></div>
@@ -114,26 +118,26 @@
             <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
               inactive-text="保存在原路径" class="interactable"></el-switch>
             <div class="flex-space"></div>
-            <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location interactable">
+            <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location-input interactable">
               <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
           <div class="row control-row">
             <div class="subtitle">请选择保存的格式</div>
             <div class="flex-space"></div>
-            <div v-if="mimeType == 'JPG'" class="subtext">JPG格式能够在最小的体积下保证较高的画质</div>
+            <div v-if="mimeType == 'JPEG'" class="subtext">JPEG格式能够在最小的体积下保证较高的画质</div>
             <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
           </div>
           <div class="row control-row">
             <el-radio-group v-model="mimeType" class="interactable">
-              <el-radio label="JPG"></el-radio>
+              <el-radio label="JPEG"></el-radio>
               <el-radio label="PNG"></el-radio>
             </el-radio-group>
           </div>
           <div class="row control-row">
             <div class="subtitle">请输入文件后缀</div>
             <div class="flex-space"></div>
-            <div class="subtext">名为“example.jpg”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
+            <div class="subtext">名为“example.ext”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
           </div>
           <div class="row control-row">
             <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
@@ -170,21 +174,19 @@
 
 <script>
 const ipcRenderer = require('electron').ipcRenderer
-const path = require('path')
-const fs = require('fs')
+const ReadDirectory = require('../utils/readdirectory').ReadDirectory
 
 export default {
   name: 'watermark',
   data () {
     return {
-      fileList: [],
       errorList: [],
       fileListPage: 1,
       customLocation: false,
       childFolderIncluded: false,
       saveLocation: '',
       sourceLocation: '',
-      mimeType: 'JPG',
+      mimeType: 'JPEG',
       postPend: '_watermarked',
       errorLog: null
     }
@@ -195,16 +197,18 @@ export default {
     },
     close() {
       ipcRenderer.send('close')
+      this.$store.commit('watermark/empty')
+      this.$destroy()
     },
     clear() {
-      this.fileList = []
+      this.$store.commit('watermark/empty')
       this.errorList = []
       this.fileListPage = 1
       this.customLocation = false
       this.childFolderIncluded = false
       this.saveLocation = ''
       this.sourceLocation = ''
-      this.mimeType = 'JPG'
+      this.mimeType = 'JPEG'
       this.postPend = '_watermarked'
       this.errorLog = null
     },
@@ -224,7 +228,7 @@ export default {
       let name = file.name.substring(0, file.name.lastIndexOf("."))
       let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
       if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-        this.fileList.push({
+        this.$store.commit('watermark/push', {
           fullpath: file.raw.path,
           path: path,
           name: name,
@@ -287,66 +291,14 @@ export default {
         text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
         showConfirm: false
       })
+      let result = ReadDirectory(this.sourceLocation, this.childFolderIncluded)
       setTimeout(() => {
-        if (this.childFolderIncluded) {
-          let dirList = [this.sourceLocation];
-          while (dirList.length > 0) {
-            let directory = dirList.pop()
-            let files = fs.readdirSync(directory)
-            for (let i = 0; i < files.length; i++) {
-              let filename = files[i]
-              let filepath = path.join(directory, filename)
-              try {
-                let stats = fs.statSync(filepath)
-                if (stats.isFile()) {
-                  let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-                  let name = filename.substring(0, filename.lastIndexOf("."))
-                  let path = directory
-                  if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                    this.fileList.push({
-                      fullpath: filepath,
-                      path: path,
-                      name: name,
-                      ext: ext
-                    })
-                  }
-                } else {
-                  dirList.push(filepath)
-                }
-              } catch(e) {
-                this.errorList.push(filepath)
-              }
-            }
-          }
-        } else {
-          let files = fs.readdirSync(this.sourceLocation)
-          for (let i = 0; i < files.length; i++) {
-            let filename = files[i]
-            let filepath = path.join(this.sourceLocation, filename)
-            try {
-              let stats = fs.statSync(filepath)
-              if (stats.isFile()) {
-                let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
-                let name = filename.substring(0, filename.lastIndexOf("."))
-                let path = this.sourceLocation
-                if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-                  this.fileList.push({
-                    fullpath: filepath,
-                    path: path,
-                    name: name,
-                    ext: ext
-                  })
-                }
-              }
-            } catch(e) {
-              this.errorList.push(filepath)
-            }
-          }
-        }
+        this.$store.commit('watermark/assign', result.fileList)
+        this.errorList = result.errorList
         dialog.change({
           type: 'success',
           title: '完成',
-          text: '已成功读取您选择的文件夹，共发现 ' + this.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
+          text: '已成功读取您选择的文件夹，共发现 ' + this.$store.state.watermark.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
           showConfirm: true
         })
         if (this.errorList.length != 0) {
@@ -358,14 +310,14 @@ export default {
               this.$createElement('div', null, this.errorList.map((file) => {
                 return this.$createElement('p', {
                   style: {
-                    lineHeight: '24px',
-                    fontSize: '12px',
-                    width: '100%',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    textIndent: '0'
-                 }
+                    'line-height': '24px',
+                    'font-size': '12px',
+                    'width': '100%',
+                    'overflow': 'hidden',
+                    'text-overflow': 'ellipsis',
+                    'white-space': 'nowrap',
+                    'text-indent': '0'
+                  }
                 }, file)
               }))
             ]),
@@ -374,11 +326,21 @@ export default {
             }
           })
         }
-      }, 1000)
+      }, 500)
     },
     handleDelete(index) {
-      console.log(index)
-      this.fileList.splice(index + (this.fileListPage - 1) * 100, 1)
+      this.$store.commit('watermark/del', index + (this.fileListPage - 1) * 100)
+    },
+    preview(index) {
+      console.log(this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath)
+      this.$dialog({
+        title: '图像预览',
+        content: this.$createElement('img', {
+          'attrs': {
+            'src': this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
+          }
+        })
+      })
     },
     pageChange(page) {
       this.fileListPage = page
@@ -395,20 +357,37 @@ export default {
           text: '您选择了将处理后的图片储存在原图片路径且未设置输出文件的后缀，这可能导致原图被覆盖！您确定要继续吗？',
           showCancel: true,
           confirmFunction: () => {
-            ipcRenderer.send('open', {
-              title: '水印编辑器',
-              path: '#/watermark/editor',
-              modal: true
-            })
+            this.openEditor()
           }
         })
       } else {
-        ipcRenderer.send('open', {
-          title: '水印编辑器',
-          path: '#/watermark/editor',
-          modal: true
-        })
+        this.openEditor()
       }
+    },
+    openEditor() {
+      let files = this.$store.state.watermark.fileList.slice()
+      for (let i = 0; i < files.length; i++) {
+        let file = files[i]
+        let distPath = file.path
+        if (this.customLocation) {
+          if (this.sourceLocation != '') {
+            distPath = this.saveLocation + distPath.slice(this.sourceLocation.length - 1)
+          } else {
+            distPath = this.saveLocation
+          }
+        }
+        file.distPath = distPath
+        file.distFullpath = distPath + '\\' + file.name + this.postPend + '.' + this.mimeType.toLowerCase()
+        file.distExt = this.mimeType.toLowerCase()
+      }
+      this.$store.commit('watermark/assign', files)
+      ipcRenderer.send('open', {
+        title: '水印编辑器',
+        path: '#/watermark/editor',
+        modal: true,
+        height: 700,
+        width: 1000
+      })
     },
     selectSaveFolder() {
       this.saveLocation = ipcRenderer.sendSync('select-folder')
@@ -416,6 +395,9 @@ export default {
     selectSourceFolder() {
       this.sourceLocation = ipcRenderer.sendSync('select-folder')
     }
+  },
+  beforeMount() {
+    //this.$store.commit('watermark/empty')
   }
 }
 </script>
@@ -426,7 +408,7 @@ export default {
   height: 100%;
   
   button {
-    font-family: "SourceHanSansSC";
+    font-family: "NotoSansSC";
   }
   
   .el-tabs__header {

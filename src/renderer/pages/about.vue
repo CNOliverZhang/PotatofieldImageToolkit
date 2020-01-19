@@ -59,6 +59,12 @@
           type="primary"
           @click="open('https://github.com/electron-userland/electron-builder')">electron-builder
         </el-button>
+        <el-button
+          class="interactable"
+          size="mini"
+          type="primary"
+          @click="open('https://github.com/niklasvh/html2canvas/')">html2canvas
+        </el-button>
       </div>
     </el-tab-pane>
     <el-tab-pane>
@@ -71,7 +77,7 @@
           <div class="text">版本号：{{ version }}</div>
         </div>
         <div class="row">
-          <div class="subtitle">当前版本</div>
+          <div class="subtitle">最新版本</div>
         </div>
         <div v-if="updateChecked">
           <div v-if="update">
@@ -149,10 +155,15 @@ export default {
     },
     checkForUpdate() {
       ipcRenderer.send('check-for-update')
+      let dialog = this.$dialog({
+        text: '正在检查更新'
+      })
       ipcRenderer.once('update-not-available', () => {
+        dialog.close()
         this.updateChecked = true
       })
       ipcRenderer.once('update-available', (event, info) => {
+        dialog.close()
         this.updateChecked = true
         this.update = {
           version: info.version,
@@ -229,7 +240,7 @@ export default {
   height: 100%;
   
   button {
-    font-family: "SourceHanSansSC";
+    font-family: "NotoSansSC";
   }
   
   .el-tabs__header {
@@ -281,6 +292,8 @@ export default {
   #intro {
     display: flex;
     flex-direction: row;
+    margin-top: 10px;
+    margin-bottom: 10px;
     
     .logo {
       width: 60px;

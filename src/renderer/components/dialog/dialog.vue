@@ -116,7 +116,7 @@ export default {
       
       .content {
         width: 100%;
-        max-height: 150px;
+        max-height: 250px;
         overflow-x: hidden;
         overflow-y: auto;
         
@@ -178,7 +178,7 @@ export default {
       padding: 0;
       
       button {
-        font-family: "SourceHanSansSC";
+        font-family: "NotoSansSC";
       }
     }
   }

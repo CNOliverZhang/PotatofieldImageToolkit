@@ -28,13 +28,6 @@ if (process.env.NODE_ENV === 'development') {
 
 function createWindow(args) {
   let x, y = 0
-  let title = args.title
-  let modal = false
-  let parent = null
-  if (args.modal) {
-    modal = true
-    parent = args.parent
-  }
   let currentWindow = BrowserWindow.getFocusedWindow()
   if (currentWindow) {
     let [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
@@ -42,17 +35,20 @@ function createWindow(args) {
     y = currentWindowY + 30
   }
   let newWindow = new BrowserWindow({
-    title: title,
+    title: args.title,
     x: x,
     y: y,
-    height: 500,
-    width: 800,
+    height: args.height ? args.height : 500,
+    width: args.width ? args.width : 800,
     frame: false,
     fullscreenable: false,
     resizable: true,
     show: false,
-    parent: parent,
-    modal: modal
+    parent: args.modal ? args.parent : null,
+    modal: args.modal,
+    webPreferences: {
+      webSecurity: false
+    }
   })
 
   newWindow.loadURL(baseURL + args.path)
@@ -134,19 +130,19 @@ ipcMain.on('open', (event, args) => {
     event.returnValue = false
     return
   }
-  if (args.modal) {
-    createWindow({
-      title: args.title,
-      path: args.path,
-      parent: BrowserWindow.getFocusedWindow(),
-      modal: true
-    })
-  } else {
-    createWindow({
-      title: args.title,
-      path: args.path
-    })
+  let targetArgs = {
+    title: args.title,
+    path: args.path,
   }
+  if (args.modal) {
+    targetArgs.parent = BrowserWindow.getFocusedWindow()
+    targetArgs.modal = true
+  }
+  if (args.width) {
+    targetArgs.width = args.width
+    targetArgs.height = args.height
+  }
+  createWindow(targetArgs)
   event.returnValue = true
 })
 

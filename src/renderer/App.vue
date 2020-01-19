@@ -12,13 +12,13 @@
 
 <style lang="scss">
 @font-face {
-  font-family: SourceHanSansSC;
-  src: url('./assets/SourceHanSansSC-ExtraLight.otf');
+  font-family: NotoSansSC;
+  src: url('./assets/NotoSansSC-Thin.otf');
 }
 
 body {
   margin: 0;
-  font-family: "SourceHanSansSC";
+  font-family: "NotoSansSC";
   cursor: default;
   -webkit-app-region: drag;
   user-select: none;
@@ -39,6 +39,7 @@ body {
 }
 
 .row {
+  width: 100%;
   margin-top: 10px;
   margin-bottom: 10px;
   
@@ -52,13 +53,14 @@ body {
 }
 
 .control-row {
+  min-height: 28px;
   font-size: 14px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   
-  .location {
+  .location-input {
     width: 60%;
   }
 }
