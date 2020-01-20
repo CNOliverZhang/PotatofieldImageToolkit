@@ -4,75 +4,65 @@
       <span slot="label" class="interactable"><i class="fas fa-images"></i> 导入图片</span>
       <div id="single" class="tab-content">
         <div class="upload-area interactable">
-          <el-upload class="upload-dragger" drag action="" multiple :auto-upload="false" :on-change="handleFile"
+          <el-upload id="upload-dragger" drag action="" multiple :auto-upload="false" :on-change="handleFile"
             :show-file-list="false" :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
             <i class="fas fa-images"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
           </el-upload>
-          <div v-if="this.$store.state.watermark.fileList.length != 0" class="file-list">
-            <div class="list">
+          <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list">
+            <div id="list">
               <div
                 v-for="(file, index) in this.$store.state.watermark.fileList"
                 :key="file.fullpath"
                 class="file"
                 @click="preview(index)">
-                <div class="filename">{{ file.name + '.' + file.ext }}</div>
+                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
                 <div @click.stop="handleDelete(index)">
                   <i class="fas fa-trash-alt delete"></i>
                 </div>
               </div>
             </div>
-            <div class="row control-row">
+            <div class="control-row">
               <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
               <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
             </div>
           </div>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="subtitle">请选择存储位置</div>
-          <div class="flex-space"></div>
-          <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
-          <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
         </div>
-        <div class="row control-row">
-          <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
+        <div class="control-row">
+          <el-switch v-model="customDistDirectory" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
             inactive-text="保存在原路径" class="interactable"></el-switch>
-          <div class="flex-space"></div>
-          <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location-input interactable">
+          <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="controller interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
-        <div class="row control-row">
-          <div class="subtitle">请选择保存的格式</div>
-          <div class="flex-space"></div>
-          <div v-if="mimeType == 'JPEG'" class="subtext">JPEG格式能够在最小的体积下保证较高的画质</div>
-          <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
+        <div class="control-row">
+          <div class="subtitle">自定义保存设置</div>
         </div>
-        <div class="row control-row">
-          <el-radio-group v-model="mimeType" class="interactable">
+        <div class="control-row">
+          <div class="text">保存的图片格式</div>
+          <el-radio-group v-model="mimeType" class="interactable controller">
             <el-radio label="JPEG"></el-radio>
             <el-radio label="PNG"></el-radio>
+            <el-radio label="保持原格式"></el-radio>
           </el-radio-group>
         </div>
-        <div class="row control-row">
-          <div class="subtitle">请输入文件后缀</div>
-          <div class="flex-space"></div>
-          <div class="subtext">名为“example.ext”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
-        </div>
-        <div class="row control-row">
-          <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
+        <div class="control-row">
+          <div class="text">文件名后缀</div>
+          <el-input size="mini" v-model="postPend" maxlength="12" class="interactable controller"></el-input>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
       <div id="multiple" class="tab-content">
-        <div v-if="this.$store.state.watermark.fileList.length == 0" class="row">
-          <div class="subtitle">请选择读取的文件夹</div>
+        <div v-if="this.$store.state.watermark.fileList.length == 0" class="control-row">
+          <div class="subtitle">请选择需要扫描的文件夹</div>
         </div>
-        <div v-else class="row control-row">
-          <div class="subtitle">已读取的文件列表</div>
-          <div class="flex-space"></div>
+        <div v-else class="control-row">
+          <div class="subtitle">已导入的文件列表</div>
           <el-pagination
             class="interactable"
             small
@@ -85,22 +75,21 @@
             @current-change="pageChange">
           </el-pagination>
         </div>
-        <div v-if="this.$store.state.watermark.fileList.length == 0" class="row control-row">
-          <el-switch v-model="childFolderIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
+        <div v-if="this.$store.state.watermark.fileList.length == 0" class="control-row">
+          <el-switch v-model="childDirectoryIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
             inactive-text="不包含子目录" class="interactable"></el-switch>
-          <div class="flex-space"></div>
-          <el-input disabled size="mini" v-model="sourceLocation" class="location-input interactable">
+          <el-input disabled size="mini" v-model="srcDirectory" class="controller interactable">
             <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
-        <el-button v-if="this.$store.state.watermark.fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">读取文件夹</el-button>
-        <div class="file-list interactable">
+        <el-button v-if="this.$store.state.watermark.fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">扫描文件夹</el-button>
+        <div id="file-list" class="interactable">
           <div v-if="this.$store.state.watermark.fileList.length == 0" class="empty">
             <i class="far fa-folder-open"></i>
-            <div>未读取文件</div>
+            <div>未导入图片文件</div>
           </div>
           <div v-else v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file" @click="preview(index)">
-            <div class="filename">{{ file.name + '.' + file.ext }}</div>
+            <div class="filename">{{ file.filename + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
             <div @click.stop="handleDelete(index)">
               <i class="fas fa-trash-alt delete"></i>
@@ -108,45 +97,39 @@
           </div>
         </div>
         <div v-if="this.$store.state.watermark.fileList.length != 0">
-          <div class="row control-row">
+          <div class="control-row">
             <div class="subtitle">请选择存储位置</div>
-            <div class="flex-space"></div>
-            <div v-if="customLocation" class="subtext">处理后的图片将被保存在您选择的文件夹并保持目录结构不变</div>
-            <div v-else class="subtext">处理后的图片将存储在原来的位置</div>
           </div>
-          <div class="row control-row">
-            <el-switch v-model="customLocation" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
+          <div class="control-row">
+            <el-switch v-model="customDistDirectory" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
               inactive-text="保存在原路径" class="interactable"></el-switch>
-            <div class="flex-space"></div>
-            <el-input disabled size="mini" v-model="saveLocation" v-if="customLocation" class="location-input interactable">
+            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="controller interactable">
               <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
-          <div class="row control-row">
-            <div class="subtitle">请选择保存的格式</div>
-            <div class="flex-space"></div>
-            <div v-if="mimeType == 'JPEG'" class="subtext">JPEG格式能够在最小的体积下保证较高的画质</div>
-            <div v-if="mimeType == 'PNG'" class="subtext">PNG格式使用无损压缩达到较小的体积和最好的画质</div>
+          <div class="control-row">
+            <div class="subtitle">自定义保存设置</div>
           </div>
-          <div class="row control-row">
-            <el-radio-group v-model="mimeType" class="interactable">
+          <div class="control-row">
+            <div class="text">保存的文件格式</div>
+            <el-radio-group v-model="mimeType" class="interactable  controller">
               <el-radio label="JPEG"></el-radio>
               <el-radio label="PNG"></el-radio>
+              <el-radio label="保持原格式"></el-radio>
             </el-radio-group>
           </div>
-          <div class="row control-row">
-            <div class="subtitle">请输入文件后缀</div>
-            <div class="flex-space"></div>
-            <div class="subtext">名为“example.ext”的文件将被重命名为“example{{ postPend }}.{{ mimeType.toLowerCase() }}”</div>
+          <div class="control-row">
+            <div class="text">文件名后缀</div>
+            <el-input size="mini" v-model="postPend" maxlength="12" class="interactable controller"></el-input>
           </div>
-          <div class="row control-row">
-            <el-input size="mini" v-model="postPend" maxlength="12" class="interactable"></el-input>
+          <div class="control-row" v-if="customDistDirectory">
+            <div class="text">是否保持源文件夹目录结构</div>
+            <el-switch v-model="keepDirectoryStructure" active-text="保持原目录结构" inactive-text="直接保存到目标文件夹" class="interactable controller"></el-switch>
           </div>
-          <div class="row control-row">
+          <div class="control-row">
             <div class="subtitle">下一步操作</div>
-            <div class="flex-space"></div>
           </div>
-          <div class="row control-row">
+          <div class="control-row">
             <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
             <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
           </div>
@@ -175,6 +158,7 @@
 <script>
 const ipcRenderer = require('electron').ipcRenderer
 const ReadDirectory = require('../utils/readdirectory').ReadDirectory
+const path = require('path')
 
 export default {
   name: 'watermark',
@@ -182,10 +166,11 @@ export default {
     return {
       errorList: [],
       fileListPage: 1,
-      customLocation: false,
-      childFolderIncluded: false,
-      saveLocation: '',
-      sourceLocation: '',
+      customDistDirectory: false,
+      childDirectoryIncluded: false,
+      distDirectory: '',
+      srcDirectory: '',
+      keepDirectoryStructure: false,
       mimeType: 'JPEG',
       postPend: '_watermarked',
       errorLog: null
@@ -197,17 +182,18 @@ export default {
     },
     close() {
       ipcRenderer.send('close')
-      this.$store.commit('watermark/empty')
+      this.$store.dispatch('watermark/fileListEmpty')
       this.$destroy()
     },
     clear() {
-      this.$store.commit('watermark/empty')
+      this.$store.dispatch('watermark/fileListEmpty')
       this.errorList = []
       this.fileListPage = 1
-      this.customLocation = false
-      this.childFolderIncluded = false
-      this.saveLocation = ''
-      this.sourceLocation = ''
+      this.customDistDirectory = false
+      this.childDirectoryIncluded = false
+      this.distDirectory = ''
+      this.srcDirectory = ''
+      this.keepDirectoryStructure = false
       this.mimeType = 'JPEG'
       this.postPend = '_watermarked'
       this.errorLog = null
@@ -216,7 +202,7 @@ export default {
       this.$dialog({
         type: 'warning',
         title: '操作确认',
-        text: '将清除您已读取的图片，确定执行操作吗？',
+        text: '将清除您已导入的图片文件，确定执行操作吗？',
         showCancel: true,
         confirmFunction: () => {
           this.clear()
@@ -225,20 +211,20 @@ export default {
     },
     handleFile(file) {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
-      let name = file.name.substring(0, file.name.lastIndexOf("."))
-      let path = file.raw.path.substring(0, file.raw.path.lastIndexOf("\\"))
-      if (['jpg', 'jpeg', 'png', 'gif'].indexOf(ext) != -1) {
-        this.$store.commit('watermark/push', {
+      let filename = file.name.substring(0, file.name.lastIndexOf("."))
+      let filepath = path.dirname(file.raw.path)
+      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
+        this.$store.dispatch('watermark/fileListPush', {
           fullpath: file.raw.path,
-          path: path,
-          name: name,
+          filepath: filepath,
+          filename: filename,
           ext: ext
         })
       } else {
-        this.errorList.push(name + '.' + ext)
+        this.errorList.push(filename + '.' + ext)
         if (this.errorLog) {
           this.errorLog.change({
-            content: this.$createElement('div', null, this.errorList.map((file) => {
+            content: this.$createElement('div', null, this.errorList.map((filename) => {
               return this.$createElement('p', {
                 style: {
                   'line-height': '24px',
@@ -249,15 +235,15 @@ export default {
                   'white-space': 'nowrap',
                   'text-indent': '0'
                 }
-              }, file)
+              }, filename)
             }))
           })
         } else {
           this.errorLog = this.$dialog({
             type: 'warning',
-            title: '部分文件读取失败',
-            text: '下列文件读取失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
-            content: this.$createElement('div', null, this.errorList.map((file) => {
+            title: '部分文件导入失败',
+            text: '下列文件导入失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
+            content: this.$createElement('div', null, this.errorList.map((filename) => {
               return this.$createElement('p', {
                 style: {
                   'line-height': '24px',
@@ -268,7 +254,7 @@ export default {
                   'white-space': 'nowrap',
                   'text-indent': '0'
                 }
-              }, file)
+              }, filename)
             })),
             confirmFunction: () => {
               this.errorList = []
@@ -279,10 +265,10 @@ export default {
       }
     },
     handleFolder() {
-      if (this.sourceLocation == '') {
+      if (this.srcDirectory == '') {
         this.$dialog({
           type: 'warning',
-          text: '您还没有选择需要读取的文件夹！'
+          text: '您还没有选择需要扫描的文件夹！'
         })
         return
       }
@@ -291,21 +277,21 @@ export default {
         text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
         showConfirm: false
       })
-      let result = ReadDirectory(this.sourceLocation, this.childFolderIncluded)
+      let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
       setTimeout(() => {
-        this.$store.commit('watermark/assign', result.fileList)
+        this.$store.dispatch('watermark/fileListAssign', result.fileList)
         this.errorList = result.errorList
         dialog.change({
           type: 'success',
           title: '完成',
-          text: '已成功读取您选择的文件夹，共发现 ' + this.$store.state.watermark.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
+          text: '已扫描完您选择的文件夹，共发现 ' + this.$store.state.watermark.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
           showConfirm: true
         })
         if (this.errorList.length != 0) {
           dialog.change({
             content: this.$createElement('div', null, [
               this.$createElement('div', null, [
-                this.$createElement('p', null, '读取下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
+                this.$createElement('p', null, '扫描下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
               ]),
               this.$createElement('div', null, this.errorList.map((file) => {
                 return this.$createElement('p', {
@@ -329,10 +315,9 @@ export default {
       }, 500)
     },
     handleDelete(index) {
-      this.$store.commit('watermark/del', index + (this.fileListPage - 1) * 100)
+      this.$store.dispatch('watermark/fileListDelete', index + (this.fileListPage - 1) * 100)
     },
     preview(index) {
-      console.log(this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath)
       this.$dialog({
         title: '图像预览',
         content: this.$createElement('img', {
@@ -350,7 +335,14 @@ export default {
       this.errorListTitle = ""
     },
     edit() {
-      if (this.postPend == '' && this.customLocation == false) {
+      if (this.customDistDirectory && this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '您还没有选择保存的路径！'
+        })
+        return
+      }
+      if (this.postPend == '' && this.customDistDirectory == false) {
         this.$dialog({
           type: 'warning',
           title: '警告',
@@ -365,22 +357,14 @@ export default {
       }
     },
     openEditor() {
-      let files = this.$store.state.watermark.fileList.slice()
-      for (let i = 0; i < files.length; i++) {
-        let file = files[i]
-        let distPath = file.path
-        if (this.customLocation) {
-          if (this.sourceLocation != '') {
-            distPath = this.saveLocation + distPath.slice(this.sourceLocation.length - 1)
-          } else {
-            distPath = this.saveLocation
-          }
-        }
-        file.distPath = distPath
-        file.distFullpath = distPath + '\\' + file.name + this.postPend + '.' + this.mimeType.toLowerCase()
-        file.distExt = this.mimeType.toLowerCase()
-      }
-      this.$store.commit('watermark/assign', files)
+      this.$store.dispatch('watermark/configAssign', {
+        customDistDirectory: this.customDistDirectory,
+        distDirectory: this.distDirectory,
+        srcDirectory: this.srcDirectory,
+        keepDirectoryStructure: this.keepDirectoryStructure,
+        mimeType: this.mimeType,
+        postPend: this.postPend,
+      })
       ipcRenderer.send('open', {
         title: '水印编辑器',
         path: '#/watermark/editor',
@@ -390,14 +374,11 @@ export default {
       })
     },
     selectSaveFolder() {
-      this.saveLocation = ipcRenderer.sendSync('select-folder')
+      this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     selectSourceFolder() {
-      this.sourceLocation = ipcRenderer.sendSync('select-folder')
+      this.srcDirectory = ipcRenderer.sendSync('select-folder')
     }
-  },
-  beforeMount() {
-    //this.$store.commit('watermark/empty')
   }
 }
 </script>
@@ -489,6 +470,30 @@ export default {
   .tab-content {
     padding: 20px;
   }
+  
+  .control-row {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 28px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    .controller {
+      width: 60%;
+    }
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
     
   #single {
     
@@ -500,7 +505,7 @@ export default {
       justify-content: space-between;
       align-items: center;
       
-      .upload-dragger {
+      #upload-dragger {
         width: 100%;
         height: 100%;
         transition: 0.5s;
@@ -529,14 +534,14 @@ export default {
         }
       }
       
-      .file-list {
+      #file-list {
         width: 49%;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         
-        .list {
+        #list {
           width: 100%;
           height: 200px;
           background-color: #F5F7FA;
@@ -617,7 +622,7 @@ export default {
   
   #multiple {
     
-    .file-list {
+    #file-list {
       width: 100%;
       height: 120px;
       background-color: #F5F7FA;

@@ -1,9 +1,9 @@
 <template>
   <div id="index">
     <div id="title-bar">
-      <img class="logo" src="static/logo.png"/>
+      <img id="logo" src="static/logo.png"/>
       <div class="title">洋芋田图像工具箱</div>
-      <div class="flex-space"></div>
+      <div id="title-bar-space"></div>
       <div class="control-button interactable" @click="open('/about', '关于')">
         <span class="fa fa-question-circle"></span>
         <div>关于</div>
@@ -72,14 +72,7 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      this.$dialog({
-        title: '操作确认',
-        text: '关闭主界面的同时将退出程序，您打开的其他工具也将关闭。您确认要退出吗？',
-        showCancel: true,
-        confirmFunction: () => {
-          ipcRenderer.send('exit')
-        }
-      })
+      ipcRenderer.send('close')
     },
     open (path, title) {
       if (!ipcRenderer.sendSync('open', {
@@ -196,7 +189,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .logo {
+    #logo {
       width: 60px;
       height: 60px;
       object-fit: contain;
@@ -204,6 +197,10 @@ export default {
     
     .title {
       margin-left: 20px;
+    }
+    
+    #title-bar-space {
+      flex-grow: 1;
     }
     
     .control-button {

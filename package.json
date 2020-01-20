@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "完成单张图片添加水印功能。"
+      "releaseNotes": "完善单张图片添加水印功能。\n优化流程，增强用户体验。"
     },
     "publish": [
       {

@@ -1,10 +1,10 @@
 <template>
   <div id="editor">
     <div id="file-list" class="interactable">
-      <div v-if="this.$store.state.watermark.fileList.length > 100" class="indicator">
+      <div v-if="this.$store.state.watermark.fileList.length > 100" id="indicator">
         当前在第 {{ fileListPage }} 页，共 {{ totalPages }} 页
       </div>
-      <div v-if="this.$store.state.watermark.fileList.length > 100" class="row control-row">
+      <div v-if="this.$store.state.watermark.fileList.length > 100" class="control-row">
         <el-pagination
           class="interactable"
           small
@@ -17,13 +17,13 @@
           @current-change="pageChange">
         </el-pagination>
       </div>
-      <div class="list">
+      <div id="list">
         <div
           v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
           :key="file.fullpath"
           class="file"
           @click="preview(index)">
-          <div class="filename">{{ file.name + '.' + file.ext }}</div>
+          <div class="filename">{{ file.filename + '.' + file.ext }}</div>
           <div @click.stop="handleDelete(index)">
             <i class="fas fa-trash-alt delete"></i>
           </div>
@@ -33,7 +33,7 @@
     <div id="control">
       <div>
         <div id="sample-container">
-          <img :src="sample" id="sample" />
+          <img :src="this.$store.state.watermark.fileList[this.imageIndex].fullpath" id="sample" />
           <div
             id="watermark-container"
             :style="{
@@ -54,11 +54,11 @@
               }">{{ text }}</div>
           </div>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印内容</div>
           <el-input v-model="text" size="mini" placeholder="请输入水印文字" class="interactable slider"></el-input>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印位置基准</div>
           <el-select v-model="position" placeholder="请选择" size="mini" class="interactable">
             <el-option label="中央" value="center" class="interactable"/>
@@ -74,7 +74,7 @@
         </div>
         <div
           v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-          class="row control-row">
+          class="control-row">
           <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">水印与左边缘的距离</div>
           <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
           <el-slider
@@ -88,7 +88,7 @@
         </div>
         <div
           v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-          class="row control-row">
+          class="control-row">
           <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">水印与上边缘的距离</div>
           <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
           <el-slider
@@ -100,7 +100,7 @@
             :show-input="true"
             input-size="mini"></el-slider>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印旋转角度</div>
           <el-slider
             v-model="rotation"
@@ -111,7 +111,7 @@
             :show-input="true"
             input-size="mini"></el-slider>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印字体</div>
           <el-select v-model="font" placeholder="请选择" size="mini" class="interactable">
             <el-option-group label="中英文字体">
@@ -131,10 +131,10 @@
             </el-option-group>
           </el-select>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印字体大小</div>
           <el-slider
-            v-model="size"
+            v-model="relativeFontSize"
             class="slider interactable"
             :min="1"
             :max="100"
@@ -142,12 +142,12 @@
             :show-input="true"
             input-size="mini"></el-slider>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">水印颜色</div>
-          <el-color-picker v-model="color" size="mini" class="interactable"></el-color-picker>
+          <el-color-picker v-model="color" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
         </div>
       </div>
-      <div class="row control-buttons">
+      <div class="control-buttons">
         <el-button type="primary" size="mini" @click="exit" class="control-button interactable">退出编辑器</el-button>
         <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">将水印保存为模板</el-button>
         <el-button type="primary" size="mini" @click="start" class="control-button interactable">处理这张图片</el-button>
@@ -159,19 +159,26 @@
 </template>
 
 <script>
-import { Loading } from 'element-ui'
 import ResizeObserver from 'resize-observer-polyfill'
 import '../../utils/html2canvas.min.js'
 
+const path = require('path')
 const fs = require('fs')
+const ipcRenderer = require('electron').ipcRenderer
+const CreateDirectory = require('../../utils/createdirectory').CreateDirectory
 
 export default {
   name: 'watermarkEditor',
   data () {
     return  {
+      customDistDirectory: this.$store.state.watermark.config.customDistDirectory,
+      distDirectory: this.$store.state.watermark.config.distDirectory,
+      srcDirectory: this.$store.state.watermark.config.srcDirectory,
+      keepDirectoryStructure: this.$store.state.watermark.config.keepDirectoryStructure,
+      mimeType: this.$store.state.watermark.config.mimeType,
+      postPend: this.$store.state.watermark.config.postPend,
       fileListPage: 1,
-      sample: '',
-      sampleIndex: 0,
+      imageIndex: 0,
       text: '',
       position: 'center',
       offsetX: 0,
@@ -179,7 +186,7 @@ export default {
       rotation: 0,
       color: '#FFFFFF',
       font: "NotoSansSCThin",
-      size: 5,
+      relativeFontSize: 5,
       sizeBaseX: 0,
       sizeBaseY: 0,
       sampleWidth: 0,
@@ -193,7 +200,7 @@ export default {
       return Math.ceil(this.$store.state.watermark.fileList.length / 100)
     },
     fontSize() {
-      return this.size * this.sizeBaseX
+      return this.relativeFontSize * this.sizeBaseX
     },
     x() {
       let watermark = document.getElementById('watermark')
@@ -215,54 +222,52 @@ export default {
     }
   },
   methods: {
+    close() {
+      ipcRenderer.send('close')
+      this.$store.dispatch('watermark/fileListEmpty')
+      this.$store.dispatch('watermark/configReset')
+    },
     pageChange(page) {
       this.fileListPage = page
     },
     handleDelete(index) {
       let targetIndex = index + (this.fileListPage - 1) * 100
-      this.$store.commit('watermark/del', targetIndex)
-      if (this.sampleIndex > targetIndex) {
-        this.sampleIndex -= 1
-      } else if (this.sampleIndex == targetIndex) {
-        this.sampleIndex = 0
-        let loading = Loading.service()
-        this.sample = this.$store.state.watermark.fileList[0].fullpath
-        setTimeout(() => {
-          this.resizeWatermarkBase()
-          loading.close()
-        }, 500)
+      if (this.$store.state.watermark.fileList.length > 1) {
+        this.$store.dispatch('watermark/fileListDelete', targetIndex)
+        if (this.imageIndex > targetIndex) {
+          this.imageIndex -= 1
+        } else if (this.imageIndex == targetIndex) {
+          this.imageIndex = 0
+        }
+      } else {
+        this.close()
       }
     },
-    resizeWatermarkBase() {
-      let sample = document.getElementById('sample')
-      let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
-      let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
-      this.sampleWidth = width
-      this.sampleHeight = height
-      this.sizeBaseX = width / 100
-      this.sizeBaseY = height / 100
-    },
     preview(index) {
-      this.sample = this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
-      this.sampleIndex = index + (this.fileListPage - 1) * 100
-      let loading = Loading.service()
-      setTimeout(() => {
-        this.resizeWatermarkBase()
-        loading.close()
-      }, 500)
+      this.imageIndex = index + (this.fileListPage - 1) * 100
     },
     exit() {
-      this.$dialog({
-        type: 'warning',
-        title: '操作确认',
-        text: '您确定要退出编辑器吗？这将清空待处理文件列表。',
-        showCancel: true,
-        confirmFunction: () => {
-          this.$store.commit('watermark/empty')
-        }
-      })
+      if (this.$store.state.watermark.fileList.length != 0) {
+        this.$dialog({
+          title: '操作确认',
+          text: '您即将退出编辑器，但您的文件列表中仍有待处理文件。您是否要保留这些文件，以便您修改图片保存设置后继续编辑？',
+          showCancel: true,
+          confirmText: '保留',
+          cancelText: '不保留',
+          confirmFunction: () => {
+            ipcRenderer.send('close')
+          },
+          cancelFunction: () => {
+            this.close()
+          }
+        })
+      } else {
+        this.close()
+      }
     },
-    saveAsTemplate() {},
+    saveAsTemplate() {
+      
+    },
     start() {
       if (this.text.length == 0) {
         this.$dialog({
@@ -271,41 +276,83 @@ export default {
         })
         return
       }
-      let imageInfo = this.$store.state.watermark.fileList[this.sampleIndex]
-      let img = new Image()
-      img.src = this.sample
-      let scale = img.width / this.sampleWidth
+      let dialog = this.$dialog({
+        title: '正在处理',
+        text: '即将完成，请稍候。',
+        showConfirm: false
+      })
+      let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
+      let distExt
+      if (this.mimeType == '保持原格式') {
+        distExt = imageInfo.ext
+      } else if (this.mimeType == 'JPEG') {
+        distExt = 'jpg'
+      } else {
+        distExt = 'png'
+      }
+      let mimeType
+      if (distExt == 'png') {
+        mimeType = 'png'
+      } else {
+        mimeType = 'jpeg'
+      }
+      let distFilename = imageInfo.filename + this.postPend + '.' + distExt
+      let distPath
+      if (this.customDistDirectory) {
+        if (this.keepDirectoryStructure) {
+          distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+        } else {
+          distPath = this.distDirectory
+        }
+      } else {
+        distPath = imageInfo.filepath
+      }
+      let distFullpath = path.join(distPath, distFilename)
+      let image = new Image()
+      image.src = imageInfo.fullpath
+      let scale = image.width / this.sampleWidth
       let baseCanvas = document.createElement('canvas')
       let context = baseCanvas.getContext("2d")
-      baseCanvas.width = img.width
-      baseCanvas.height = img.height
-      context.drawImage(img, 0, 0)
+      baseCanvas.width = image.width
+      baseCanvas.height = image.height
+      context.drawImage(image, 0, 0)
       html2canvas(document.getElementById('watermark-container'), {
         scale: scale,
         backgroundColor: null
       }).then(canvas => {
         context.drawImage(canvas, 0, 0)
-        let url = baseCanvas.toDataURL('image/' + imageInfo.distExt, 1).replace(/^data:image\/\w+;base64,/, "")
+        let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
         let buffer = new Buffer(url, 'base64')
-        fs.writeFile(imageInfo.distFullpath, buffer, (error) => {
+        CreateDirectory(distPath)
+        fs.writeFile(distFullpath, buffer, (error) => {
           if (error) {
-            this.$dialog({
+            dialog.change({
               type: 'error',
               title: '出现错误',
-              text: '写入文件失败，请检查目标文件夹权限。'
+              text: '写入文件失败，请检查目标文件夹权限。',
+              showConfirm: true
             })
           } else {
-            this.$store.commit('watermark/del', this.sampleIndex)
-            this.sampleIndex = 0
-            this.sample = this.$store.state.watermark.fileList[0].fullpath
-            this.$dialog({
-              type: 'success',
-              title: '成功',
-              text: '处理完成，添加水印后的图片已保存到目标文件夹。',
-              confirmFunction: () => {
-                this.resizeWatermarkBase()
-              }
-            })
+            if (this.$store.state.watermark.fileList.length > 1) {
+              this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
+              this.imageIndex = 0
+              dialog.change({
+                type: 'success',
+                title: '成功',
+                text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                showConfirm: true
+              })
+            } else {
+              dialog.change({
+                type: 'success',
+                title: '成功',
+                text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
+                showConfirm: true,
+                confirmFunction: () => {
+                  this.close()
+                }
+              })
+            }
           }
         })
       })
@@ -315,19 +362,24 @@ export default {
     }
   },
   mounted() {
-    let loading = Loading.service()
-    this.sample = this.$store.state.watermark.fileList[0].fullpath
-    setTimeout(() => {
-      this.resizeWatermarkBase()
-      loading.close()
-    }, 500)
-    const observer = new ResizeObserver(entries => {
+    const WatermarkSizeObserver = new ResizeObserver(entries => {
       entries.forEach(entry => {
         this.watermarkWidth = entry.contentRect.width
         this.watermarkHeight = entry.contentRect.height
       })
     })
-    observer.observe(document.getElementById('watermark'))
+    WatermarkSizeObserver.observe(document.getElementById('watermark'))
+    const SampleSizeObserver = new ResizeObserver(entries => {
+      entries.forEach(entry => {
+        let width = entry.contentRect.width
+        let height = entry.contentRect.height
+        this.sampleWidth = width
+        this.sampleHeight = height
+        this.sizeBaseX = width / 100
+        this.sizeBaseY = height / 100
+      })
+    })
+    SampleSizeObserver.observe(document.getElementById('sample'))
   }
 }
 </script>
@@ -424,6 +476,40 @@ export default {
     font-family: "NotoSansSC";
   }
   
+  .control-row {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    height: 28px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    .slider {
+      width: 70%;
+    }
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .control-buttons {
+    display: flex;
+    justify-content: space-between;
+    justify-content: flex-end;
+    
+    .control-button {
+      width: 24%;
+    }
+  }
+  
   #file-list {
     width: 20%;
     height: 100%;
@@ -432,7 +518,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .indicator {
+    #indicator {
       height: 28px;
       width: 100%;
       line-height: 28px;
@@ -443,7 +529,7 @@ export default {
       border-radius: 14px;
     }
     
-    .list {
+    #list {
       width: 100%;
       flex-grow: 1;
       background-color: #F5F7FA;
@@ -577,24 +663,6 @@ export default {
         height: fit-content;
         line-height: 1em;
       }
-    }
-    
-    .control-row {
-      height: 28px;
-      
-      .slider {
-        width: 70%;
-      }
-    }
-    
-    .control-buttons {
-      display: flex;
-      justify-content: space-between;
-      justify-content: flex-end;
-    }
-    
-    .control-button {
-      width: 24%;
     }
   }
   

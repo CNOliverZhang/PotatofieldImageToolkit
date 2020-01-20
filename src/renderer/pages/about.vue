@@ -2,37 +2,37 @@
   <el-tabs type="card" tab-position="left" id="about">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-code"></i> 版权信息</span>
-      <div class="tab-content">
-        <div class="row control-row">
+      <div id="info" class="tab-content">
+        <div class="control-row">
           <div id="intro">
-            <img class="logo" src="static/logo.png" />
-            <div class="intro-text">
+            <img id="logo" src="static/logo.png" />
+            <div id="intro-text">
               <div class="title">洋芋田图像工具箱</div>
               <div class="subtext">一个专为摄影师设计的图像工具箱</div>
             </div>
           </div>
           <div class="subtext link interactable" @click="open('https://imagetoolkit.potatofield.cn')">访问网站</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="subtitle">开发者信息</div>
         </div>
-        <div class="row control-row">
+        <div class="control-row">
           <div class="text">Copyright © 2020 张志毅</div>
           <div class="subtext link interactable" @click="open('mailto:cnoliverzhang@gmail.com')">联系开发者</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="subtitle">开源协议</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">本程序遵循MIT开源许可协议发行，相关资源及源码已托管在Github，您可以<span
             class="link interactable"
             @click="open('https://github.com/CNOliverZhang/PotatofieldImageToolkit/')">点此访问</span>。
         </div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="subtitle">相关项目</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">本程序的开发过程中使用了下列开源程序和组件：</div>
         </div>
         <el-button
@@ -69,47 +69,47 @@
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-sync-alt"></i> 版本更新</span>
-      <div class="tab-content">
-        <div class="row">
+      <div id="update" class="tab-content">
+        <div class="control-row">
           <div class="subtitle">当前版本</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">版本号：{{ version }}</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="subtitle">最新版本</div>
         </div>
         <div v-if="updateChecked">
           <div v-if="update">
-            <div class="row">
+            <div class="control-row">
               <div class="text">版本号：{{ update.version }}</div>
             </div>
-            <div class="row">
+            <div class="control-row">
               <div class="text">更新日志：</div>
             </div>
-            <div class="row">
+            <div class="control-row">
               <div class="subtext" v-for="(releaseNote) in update.releaseNotes" :key="releaseNote">
                 {{ releaseNote }}
               </div>
             </div>
-            <div class="row">
+            <div class="control-row">
               <div class="text">发布日期：{{ update.releaseDate }}</div>
             </div>
-            <div class="row">
+            <div class="control-row">
               <el-button type="primary" size="mini" @click="confirmUpdate" class="interactable">现在更新</el-button>
             </div>
           </div>
           <div v-else>
-            <div class="row">
+            <div class="control-row">
               <div class="text">您的版本已经是最新版本，无需更新。</div>
             </div>
           </div>
         </div>
         <div v-else>
-          <div class="row">
+          <div class="control-row">
             <div class="text">尚未获取更新信息，请点击下方按钮检查最新版本。</div>
           </div>
-          <div class="row">
+          <div class="control-row">
             <el-button type="primary" size="mini" @click="checkForUpdate" class="interactable">检查更新</el-button>
           </div>
         </div>
@@ -289,41 +289,67 @@ export default {
     }
   }
   
-  #intro {
-    display: flex;
-    flex-direction: row;
+  .tab-content {
+    padding: 20px;
+  }
+  
+  .control-row {
+    width: 100%;
     margin-top: 10px;
     margin-bottom: 10px;
+    min-height: 28px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     
-    .logo {
-      width: 60px;
-      height: 60px;
-      object-fit: contain;
+    &:first-child {
+      margin-top: 0;
     }
     
-    .intro-text {
-      margin-left: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      
-      .title {
-        line-height: 1em;
-      }
-      
-      .subtext {
-        line-height: 1em;
-      }
+    &:last-child {
+      margin-bottom: 0;
     }
   }
   
-  .link {
-    cursor: pointer;
-    transition: 0.2s;
+  #info {
+    #intro {
+      display: flex;
+      flex-direction: row;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      
+      #logo {
+        width: 60px;
+        height: 60px;
+        object-fit: contain;
+      }
+      
+      #intro-text {
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        
+        .title {
+          line-height: 1em;
+        }
+        
+        .subtext {
+          line-height: 1em;
+        }
+      }
+    }
     
-    &:hover {
-      color: #2196F3;
+    .link {
+      cursor: pointer;
+      transition: 0.2s;
+      
+      &:hover {
+        color: #2196F3;
+      }
     }
   }
   
@@ -354,10 +380,6 @@ export default {
         filter: brightness(0.9);
       }
     }
-  }
-  
-  .tab-content {
-    padding: 20px;
   }
 }
 </style>

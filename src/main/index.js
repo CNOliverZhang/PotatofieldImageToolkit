@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
+import '../renderer/store'
+
 const path = require('path')
 
 /**
@@ -73,13 +75,9 @@ process.on('uncaughtException', () => {
 })
 
 app.on('ready', () => {
-  const mainWindow = createWindow({
+  createWindow({
     title: '洋芋田图像工具箱',
     path: '#/'
-  })
-  mainWindow.on('close', (event) => {
-    event.preventDefault()
-    mainWindow.webContents.send('close')
   })
 })
 
@@ -121,10 +119,6 @@ ipcMain.on('close', () => {
   currentWindow.close()
 })
 
-ipcMain.on('exit', () => {
-  app.exit()
-})
-
 ipcMain.on('open', (event, args) => {
   if (windowTitles.has(args.title)) {
     event.returnValue = false
@@ -157,6 +151,8 @@ ipcMain.on('select-folder', (event) => {
   }, (folder) => {
     if (folder) {
       event.returnValue = folder[0]
+    } else {
+      event.returnValue = ''
     }
   })
 })

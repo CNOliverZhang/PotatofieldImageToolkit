@@ -34,37 +34,6 @@ body {
   -webkit-app-region: no-drag;
 }
 
-.flex-space {
-  flex-grow: 1;
-}
-
-.row {
-  width: 100%;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  
-  &:first-child {
-    margin-top: 0;
-  }
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.control-row {
-  min-height: 28px;
-  font-size: 14px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  
-  .location-input {
-    width: 60%;
-  }
-}
-
 .title {
   font-size: 32px;
 }
