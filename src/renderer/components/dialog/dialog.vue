@@ -88,6 +88,7 @@ export default {
   align-items: center;
   
   .el-dialog {
+    width: 400px;
     margin: 0!important;
   
     .el-dialog__header {

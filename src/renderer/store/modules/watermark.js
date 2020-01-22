@@ -2,14 +2,6 @@ export default {
   namespaced: true,
   state: {
     fileList: [],
-    config: {
-      customDistDirectory: false,
-      distDirectory: '',
-      srcDirectory: '',
-      keepDirectoryStructure: false,
-      mimeType: 'JPEG',
-      postPend: '_watermarked',
-    },
     templates: []
   },
   mutations: {
@@ -28,18 +20,17 @@ export default {
     FILELIST_EMPTY (state) {
       state.fileList = []
     },
-    CONFIG_ASSIGN (state, config) {
-      state.config = config
+    TEMPLATE_PUSH (state, template) {
+      state.templates.push(template)
     },
-    CONFIG_RESET (state) {
-      state.config = {
-        customDistDirectory: false,
-        distDirectory: '',
-        srcDirectory: '',
-        keepDirectoryStructure: false,
-        mimeType: 'JPEG',
-        postPend: '_watermarked'
-      }
+    TEMPLATE_REPLACE (state, payload) {
+      state.templates.splice(payload.index, 1, payload.template)
+    },
+    TEMPLATE_DELETE (state, index) {
+      state.templates.splice(index, 1)
+    },
+    TEMPLATE_EMPTY (state) {
+      state.templates = []
     }
   },
   actions: {
@@ -58,11 +49,17 @@ export default {
     fileListEmpty (context) {
       context.commit('FILELIST_EMPTY')
     },
-    configAssign (context, config) {
-      context.commit('CONFIG_ASSIGN', config)
+    templatePush (context, template) {
+      context.commit('TEMPLATE_PUSH', template)
     },
-    configReset (context) {
-      context.commit('CONFIG_RESET')
+    templateReplace (context, payload) {
+      context.commit('TEMPLATE_REPLACE', payload)
+    },
+    templateDelete (context, index) {
+      context.commit('TEMPLATE_DELETE', index)
+    },
+    templateEmpty (context) {
+      context.commit('TEMPLATE_EMPTY')
     }
   }
 }

@@ -3,65 +3,75 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-images"></i> 导入图片</span>
       <div id="single" class="tab-content">
-        <div class="upload-area interactable">
-          <el-upload id="upload-dragger" drag action="" multiple :auto-upload="false" :on-change="handleFile"
-            :show-file-list="false" :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
-            <i class="fas fa-images"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
-          </el-upload>
-          <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list">
-            <div id="list">
-              <div
-                v-for="(file, index) in this.$store.state.watermark.fileList"
-                :key="file.fullpath"
-                class="file"
-                @click="preview(index)">
-                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-                <div @click.stop="handleDelete(index)">
-                  <i class="fas fa-trash-alt delete"></i>
-                </div>
+        <el-upload
+          id="upload-dragger"
+          action=""
+          class="interactable"
+          drag
+          multiple
+          :auto-upload="false"
+          :on-change="handleFile"
+          :show-file-list="false"
+          :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
+          <i class="fas fa-images"></i>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
+        </el-upload>
+        <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list" class="interactable">
+          <div id="list">
+            <div
+              v-for="(file, index) in this.$store.state.watermark.fileList"
+              :key="file.fullpath"
+              class="file"
+              @click="preview(index)">
+              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+              <div @click.stop="handleDelete(index)">
+                <i class="fas fa-trash-alt delete"></i>
               </div>
             </div>
-            <div class="control-row">
-              <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-              <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
-            </div>
           </div>
-        </div>
-        <div class="control-row">
-          <div class="subtitle">请选择存储位置</div>
-        </div>
-        <div class="control-row">
-          <el-switch v-model="customDistDirectory" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
-            inactive-text="保存在原路径" class="interactable"></el-switch>
-          <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="controller interactable">
-            <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-          </el-input>
-        </div>
-        <div class="control-row">
-          <div class="subtitle">自定义保存设置</div>
-        </div>
-        <div class="control-row">
-          <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" class="interactable controller">
-            <el-radio label="JPEG"></el-radio>
-            <el-radio label="PNG"></el-radio>
-            <el-radio label="保持原格式"></el-radio>
-          </el-radio-group>
-        </div>
-        <div class="control-row">
-          <div class="text">文件名后缀</div>
-          <el-input size="mini" v-model="postPend" maxlength="12" class="interactable controller"></el-input>
+          <div class="row">
+            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
+          </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content">
-        <div v-if="this.$store.state.watermark.fileList.length == 0" class="control-row">
-          <div class="subtitle">请选择需要扫描的文件夹</div>
+      <div id="multiple" class="tab-content" v-if="this.$store.state.watermark.fileList.length == 0">
+        <div id="controller">
+          <div class="row">
+            <div class="subtitle">请选择需要扫描的文件夹</div>
+          </div>
+          <div class="row">
+            <el-switch
+              v-model="childDirectoryIncluded"
+              active-color="#2196F3"
+              inactive-color="#2196F3"
+              active-text="包含子目录"
+              inactive-text="不包含子目录"
+              class="interactable"></el-switch>
+            <el-input disabled size="mini" v-model="srcDirectory" class="controller interactable">
+              <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
+            </el-input>
+          </div>
+          <div class="row">
+            <el-button
+              @click="handleFolder"
+              type="primary"
+              size="mini"
+              class="interactable full-width-button">扫描文件夹</el-button>
+          </div>
         </div>
-        <div v-else class="control-row">
+        <div id="file-list" class="row interactable">
+          <div id="empty">
+            <i class="far fa-folder-open"></i>
+            <div>未导入图片文件</div>
+          </div>
+        </div>
+      </div>
+      <div id="multiple" class="tab-content" v-else>
+        <div class="row">
           <div class="subtitle">已导入的文件列表</div>
           <el-pagination
             class="interactable"
@@ -72,23 +82,11 @@
             :total="this.$store.state.watermark.fileList.length"
             :current-page="fileListPage"
             :hide-on-single-page="true"
-            @current-change="pageChange">
+            @current-change="fileListPageChange">
           </el-pagination>
         </div>
-        <div v-if="this.$store.state.watermark.fileList.length == 0" class="control-row">
-          <el-switch v-model="childDirectoryIncluded" active-color="#2196F3" inactive-color="#2196F3" active-text="包含子目录"
-            inactive-text="不包含子目录" class="interactable"></el-switch>
-          <el-input disabled size="mini" v-model="srcDirectory" class="controller interactable">
-            <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
-          </el-input>
-        </div>
-        <el-button v-if="this.$store.state.watermark.fileList.length == 0" type="primary" size="mini" @click="handleFolder" class="interactable full-width-button">扫描文件夹</el-button>
         <div id="file-list" class="interactable">
-          <div v-if="this.$store.state.watermark.fileList.length == 0" class="empty">
-            <i class="far fa-folder-open"></i>
-            <div>未导入图片文件</div>
-          </div>
-          <div v-else v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file" @click="preview(index)">
+          <div v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file" @click="preview(index)">
             <div class="filename">{{ file.filename + '.' + file.ext }}</div>
             <div class="path">{{ file.path }}</div>
             <div @click.stop="handleDelete(index)">
@@ -96,49 +94,17 @@
             </div>
           </div>
         </div>
-        <div v-if="this.$store.state.watermark.fileList.length != 0">
-          <div class="control-row">
-            <div class="subtitle">请选择存储位置</div>
-          </div>
-          <div class="control-row">
-            <el-switch v-model="customDistDirectory" active-color="#2196F3" inactive-color="#2196F3" active-text="自定义路径"
-              inactive-text="保存在原路径" class="interactable"></el-switch>
-            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="controller interactable">
-              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-            </el-input>
-          </div>
-          <div class="control-row">
-            <div class="subtitle">自定义保存设置</div>
-          </div>
-          <div class="control-row">
-            <div class="text">保存的文件格式</div>
-            <el-radio-group v-model="mimeType" class="interactable  controller">
-              <el-radio label="JPEG"></el-radio>
-              <el-radio label="PNG"></el-radio>
-              <el-radio label="保持原格式"></el-radio>
-            </el-radio-group>
-          </div>
-          <div class="control-row">
-            <div class="text">文件名后缀</div>
-            <el-input size="mini" v-model="postPend" maxlength="12" class="interactable controller"></el-input>
-          </div>
-          <div class="control-row" v-if="customDistDirectory">
-            <div class="text">是否保持源文件夹目录结构</div>
-            <el-switch v-model="keepDirectoryStructure" active-text="保持原目录结构" inactive-text="直接保存到目标文件夹" class="interactable controller"></el-switch>
-          </div>
-          <div class="control-row">
-            <div class="subtitle">下一步操作</div>
-          </div>
-          <div class="control-row">
-            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
-          </div>
+        <div class="row">
+          <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
+          <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-feather"></i> 水印模板库</span>
-      <div class="tab-content">内容</div>
+      <div id="templates" class="tab-content">
+        
+      </div>
     </el-tab-pane>
     <el-tab-pane disabled>
       <span slot="label" id="control-button-holder">
@@ -166,13 +132,8 @@ export default {
     return {
       errorList: [],
       fileListPage: 1,
-      customDistDirectory: false,
       childDirectoryIncluded: false,
-      distDirectory: '',
       srcDirectory: '',
-      keepDirectoryStructure: false,
-      mimeType: 'JPEG',
-      postPend: '_watermarked',
       errorLog: null
     }
   },
@@ -189,13 +150,8 @@ export default {
       this.$store.dispatch('watermark/fileListEmpty')
       this.errorList = []
       this.fileListPage = 1
-      this.customDistDirectory = false
       this.childDirectoryIncluded = false
-      this.distDirectory = ''
       this.srcDirectory = ''
-      this.keepDirectoryStructure = false
-      this.mimeType = 'JPEG'
-      this.postPend = '_watermarked'
       this.errorLog = null
     },
     clearConfirm() {
@@ -327,54 +283,20 @@ export default {
         })
       })
     },
-    pageChange(page) {
+    fileListPageChange(page) {
       this.fileListPage = page
     },
     clearErrorList() {
       this.errorList = []
-      this.errorListTitle = ""
     },
     edit() {
-      if (this.customDistDirectory && this.distDirectory == '') {
-        this.$dialog({
-          type: 'warning',
-          text: '您还没有选择保存的路径！'
-        })
-        return
-      }
-      if (this.postPend == '' && this.customDistDirectory == false) {
-        this.$dialog({
-          type: 'warning',
-          title: '警告',
-          text: '您选择了将处理后的图片储存在原图片路径且未设置输出文件的后缀，这可能导致原图被覆盖！您确定要继续吗？',
-          showCancel: true,
-          confirmFunction: () => {
-            this.openEditor()
-          }
-        })
-      } else {
-        this.openEditor()
-      }
-    },
-    openEditor() {
-      this.$store.dispatch('watermark/configAssign', {
-        customDistDirectory: this.customDistDirectory,
-        distDirectory: this.distDirectory,
-        srcDirectory: this.srcDirectory,
-        keepDirectoryStructure: this.keepDirectoryStructure,
-        mimeType: this.mimeType,
-        postPend: this.postPend,
-      })
       ipcRenderer.send('open', {
         title: '水印编辑器',
-        path: '#/watermark/editor',
+        path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
         modal: true,
-        height: 700,
+        height: 720,
         width: 1000
       })
-    },
-    selectSaveFolder() {
-      this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
@@ -467,16 +389,30 @@ export default {
     }
   }
   
-  .tab-content {
-    padding: 20px;
+  .el-tabs__content {
+    height: 100%;
   }
   
-  .control-row {
+  .el-tab-pane {
     width: 100%;
+    height: 100%;
+  }
+  
+  .tab-content {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .row {
+    width: 100%;
+    flex-shrink: 0;
     margin-top: 10px;
     margin-bottom: 10px;
-    height: 28px;
-    font-size: 14px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -494,126 +430,126 @@ export default {
       margin-bottom: 0;
     }
   }
+  
+  .full-width-button {
+    width: 100%;
+  }
+  
+  .half-width-button {
+    width: calc(50% - 5px);
+  }
     
   #single {
+    flex-direction: row;
     
-    .upload-area {
+    #upload-dragger {
       width: 100%;
-      height: 220px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
+      height: 100%;
+      transition: 0.5s;
       
-      #upload-dragger {
+      &.half {
+        width: calc(50% - 5px);
+      }
+      
+      .el-upload {
         width: 100%;
         height: 100%;
-        transition: 0.5s;
         
-        &.half {
-          width: 49%;
-        }
-        
-        .el-upload {
+        .el-upload-dragger {
           width: 100%;
           height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
           
-          .el-upload-dragger {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            
-            svg {
-              font-size: 40px;
-              margin: 15px;
-            }
+          svg {
+            font-size: 40px;
+            margin: 14px;
           }
         }
       }
+    }
+    
+    #file-list {
+      width: calc(50% - 5px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       
-      #file-list {
-        width: 49%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+      #list {
+        width: 100%;
+        flex-grow: 1;
+        background-color: #F5F7FA;
+        box-sizing: border-box;
+        border-radius: 6px;
+        border-color: #DCDFE6;
+        border-style: solid;
+        border-width: 1px;
+        overflow-y: auto;
+        overflow-x: hidden;
         
-        #list {
+        .file {
+          height: 28px;
           width: 100%;
-          height: 200px;
-          background-color: #F5F7FA;
+          line-height: 24px;
+          font-size: 12px;
+          padding-left: 5px;
+          padding-right: 5px;
           box-sizing: border-box;
-          border-radius: 6px;
-          border-color: #DCDFE6;
-          border-style: solid;
-          border-width: 1px;
-          overflow-y: auto;
-          overflow-x: hidden;
+          background-color: #FFFFFF;
+          border-bottom-color: #DCDFE6;
+          border-bottom-style: solid;
+          border-bottom-width: 1px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: 0.2s;
           
-          .file {
-            height: 28px;
-            width: 100%;
-            line-height: 24px;
-            font-size: 12px;
-            padding-left: 5px;
-            padding-right: 5px;
-            box-sizing: border-box;
-            background-color: #FFFFFF;
-            border-bottom-color: #DCDFE6;
-            border-bottom-style: solid;
-            border-bottom-width: 1px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+          &:hover {
+            background-color: #F5F7FA;
+          }
+          
+          .filename {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            flex-grow: 1;
+            padding-right: 10px;
+          }
+          
+          .delete {
+            color: #DCDFE6;
+            cursor: pointer;
             transition: 0.2s;
             
             &:hover {
-              background-color: #F5F7FA;
-            }
-            
-            .filename {
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              flex-grow: 1;
-              padding-right: 10px;
-            }
-            
-            .delete {
-              color: #DCDFE6;
-              cursor: pointer;
-              transition: 0.2s;
-              
-              &:hover {
-                color: #F56C6C;
-              }
+              color: #F56C6C;
             }
           }
+        }
+        
+        &::-webkit-scrollbar {
+          width: 10px;
+        }
+            
+        &::-webkit-scrollbar-track {
+          border-radius: 5px;
+          background-color: rgba(255, 255, 255, 0);
           
-          &::-webkit-scrollbar {
-            width: 10px;
+          &:hover {
+            background-color: #F5F7FA;
           }
-              
-          &::-webkit-scrollbar-track {
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0);
-            
-            &:hover {
-              background-color: #F5F7FA;
-            }
-          }
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          border-radius: 5px;
+          background-color: #DCDFE6;
+          transition: 0.2s;
           
-          &::-webkit-scrollbar-thumb {
-            border-radius: 5px;
-            background-color: #DCDFE6;
-            transition: 0.2s;
-            
-            &:hover {
-              background-color: #C0C4CC;
-            }
+          &:hover {
+            background-color: #C0C4CC;
           }
         }
       }
@@ -621,13 +557,19 @@ export default {
   }
   
   #multiple {
+    flex-direction: column;
+    
+    #controller {
+      width: 100%;
+      flex-shrink: 0;
+    }
     
     #file-list {
       width: 100%;
-      height: 120px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
       background-color: #F5F7FA;
-      margin-top: 10px;
-      margin-bottom: 10px;
       box-sizing: border-box;
       border-radius: 6px;
       border-color: #DCDFE6;
@@ -636,9 +578,9 @@ export default {
       overflow-y: auto;
       overflow-x: hidden;
       
-      .empty {
+      #empty {
         width: 100%;
-        height: 100%;
+        flex-grow: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -647,13 +589,14 @@ export default {
         
         svg {
           font-size: 40px;
-          margin: 15px;
+          margin: 14px;
         }
       }
       
       .file {
         height: 28px;
         width: 100%;
+        flex-shrink: 0;
         line-height: 24px;
         font-size: 12px;
         padding-left: 5px;
@@ -728,12 +671,28 @@ export default {
     }
   }
     
-  .full-width-button {
-    width: 100%;
-  }
-  
-  .half-width-button {
-    width: 48%;
+  #templates {
+    flex-direction: column;
+    
+    .el-pagination {
+      width: 100%;
+      padding: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .el-pagination__jump {
+        margin: 0;
+      }
+      
+      .btn-prev {
+        margin: 0;
+      }
+      
+      .btn-next {
+        margin: 0;
+      }
+    }
   }
 }
 </style>

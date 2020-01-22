@@ -95,9 +95,6 @@ export default {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
     })
-    ipcRenderer.on('close', () => {
-      this.close()
-    })
     ipcRenderer.send('check-for-update')
     ipcRenderer.once('update-available', (event, info) => {
       this.$dialog({
@@ -148,7 +145,6 @@ export default {
               content: null,
               showConfirm: true,
               confirmFunction: () => {
-                ipcRenderer.removeAllListeners(['update-download-progress', 'update-downloaded', 'error'])
                 ipcRenderer.send('update-now')
                 this.$dialog({
                   title: '正在安装更新',
@@ -160,12 +156,12 @@ export default {
           })
           ipcRenderer.once('error', () => {
             dialog.change({
+              type: 'error',
               title: '出现错误',
               text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以进入“关于”页面手动更新。',
               content: null,
               showConfirm: true,
               confirmFunction: () => {
-                ipcRenderer.removeAllListeners(['update-download-progress', 'update-downloaded', 'error'])
                 dialog.close()
               }
             })
@@ -288,7 +284,7 @@ export default {
       }
       
       .space {
-        width: 16px;
+        width: 15px;
         height: 100%;
       }
       
