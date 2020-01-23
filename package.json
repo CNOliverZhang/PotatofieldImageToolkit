@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "增加水印的样式设置。\n优化操作流程及用户界面。\n修复已知bug。"
+      "releaseNotes": "完成水印模板导入导出功能。\n修复已知bug。"
     },
     "publish": [
       {
@@ -83,6 +83,7 @@
     "element-ui": "^2.13.0",
     "resize-observer-polyfill": "^1.5.1",
     "vue": "^2.5.16",
+    "vue-clamp": "^0.2.2",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",

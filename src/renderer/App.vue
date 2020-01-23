@@ -5,9 +5,9 @@
 </template>
 
 <script>
-  export default {
-    name: 'potatofield-image-toolkit'
-  }
+export default {
+  name: 'potatofield-image-toolkit'
+}
 </script>
 
 <style lang="scss">

@@ -73,28 +73,33 @@
       <div id="multiple" class="tab-content" v-else>
         <div class="row">
           <div class="subtitle">已导入的文件列表</div>
-          <el-pagination
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next, jumper"
-            :page-size="100"
-            :total="this.$store.state.watermark.fileList.length"
-            :current-page="fileListPage"
-            :hide-on-single-page="true"
-            @current-change="fileListPageChange">
-          </el-pagination>
         </div>
         <div id="file-list" class="interactable">
-          <div v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)" :key="file.fullpath" class="file" @click="preview(index)">
+          <div
+            v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+            :key="file.fullpath"
+            class="file"
+            @click="preview(index)">
             <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-            <div class="path">{{ file.path }}</div>
+            <div class="path">{{ file.filepath }}</div>
             <div @click.stop="handleDelete(index)">
               <i class="fas fa-trash-alt delete"></i>
             </div>
           </div>
         </div>
         <div class="row">
+          <el-pagination
+            class="interactable"
+            small
+            background
+            layout="prev, pager, next"
+            :pager-count="5"
+            :page-size="100"
+            :total="this.$store.state.watermark.fileList.length"
+            :current-page="fileListPage"
+            :hide-on-single-page="true"
+            @current-change="fileListPageChange">
+          </el-pagination>
           <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
           <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
         </div>
@@ -103,7 +108,50 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-feather"></i> 水印模板库</span>
       <div id="templates" class="tab-content">
-        
+        <div id="container">
+          <div
+            v-for="(template, index) in this.$store.state.watermark.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
+            :key="template.title"
+            class="template-container">
+            <el-card class="card interactable">
+              <div class="row">
+                <div class="subtitle">{{ template.title }}</div>
+              </div>
+              <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
+              <div class="row control-buttons">
+                <div class="control-button interactable" @click="editTemplate(index)">
+                  <span class="fa fa-edit"></span>
+                  <div>编辑</div>
+                </div>
+                <div class="control-button interactable" @click="shareTemplate(index)">
+                  <span class="fa fa-share-alt"></span>
+                  <div>分享</div>
+                </div>
+                <div class="control-button interactable" @click="deleteTemplate(index)">
+                  <span class="fa fa-trash-alt"></span>
+                  <div>删除</div>
+                </div>
+              </div>
+            </el-card>
+          </div>
+        </div>
+        <div class="row">
+          <el-pagination
+            v-if="this.$store.state.watermark.templates.length > 6"
+            class="interactable"
+            small
+            background
+            layout="prev, pager, next"
+            :pager-count="5"
+            :page-size="6"
+            :total="this.$store.state.watermark.templates.length"
+            :current-page="templateListPage"
+            :hide-on-single-page="true"
+            @current-change="templateListPageChange">
+          </el-pagination>
+          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入水印模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建水印模板</el-button>
+        </div>
       </div>
     </el-tab-pane>
     <el-tab-pane disabled>
@@ -122,7 +170,7 @@
 </template>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer
+const { ipcRenderer, clipboard } = require('electron')
 const ReadDirectory = require('../utils/readdirectory').ReadDirectory
 const path = require('path')
 
@@ -132,9 +180,11 @@ export default {
     return {
       errorList: [],
       fileListPage: 1,
+      templateListPage: 1,
       childDirectoryIncluded: false,
       srcDirectory: '',
-      errorLog: null
+      errorLog: null,
+      templateTitle: ''
     }
   },
   methods: {
@@ -286,6 +336,9 @@ export default {
     fileListPageChange(page) {
       this.fileListPage = page
     },
+    templateListPageChange(page) {
+      this.templateListPage = page
+    },
     clearErrorList() {
       this.errorList = []
     },
@@ -300,7 +353,134 @@ export default {
     },
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
-    }
+    },
+    editTemplate(index) {},
+    shareTemplate(index) {
+      clipboard.writeText(btoa(encodeURI(JSON.stringify({
+        type: 'watermarkTemplate',
+        content: this.$store.state.watermark.templates[index]
+      }))))
+      this.$dialog({
+        type: 'success',
+        title: '成功',
+        text: '已成功将水印模板复制到剪贴板。'
+      })
+    },
+    deleteTemplate(index) {
+      this.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '确定要删除这个模板吗？',
+        showCancel: true,
+        confirmFunction: (index) => {
+          this.$store.dispatch('watermark/templateDelete', index)
+        }
+      })
+    },
+    importTemplate() {
+      try {
+        let template = JSON.parse(decodeURI(atob(clipboard.readText())))
+        if (template.type != 'watermarkTemplate') {
+          throw false
+        } else {
+          template = template.content
+          let checkName = (title) => {
+            if (title == '') {
+              this.$dialog({
+                type: 'error',
+                title: '错误',
+                text: '请输入模板标题，否则无法保存该模板。',
+                showCancel: true,
+                confirmFunction: () => {
+                  this.$dialog({
+                    title: '请输入水印模板标题',
+                    content: this.$createElement('div', {
+                      'class': 'el-input el-input--mini'
+                    }, [
+                      this.$createElement('input', {
+                        'dom-props': {
+                          value: this.templateTitle,
+                        },
+                        'on': {
+                          input: (event) => {
+                            this.templateTitle = event.target.value
+                          }
+                        },
+                        'class': 'el-input__inner',
+                        'style': {
+                          'font-family': 'NotoSansSCThin'
+                        }
+                      })
+                    ]),
+                    showCancel: true,
+                    confirmFunction: () => {
+                      checkName(this.templateTitle)
+                      this.templateTitle = ''
+                    },
+                    cancelFunction: () => {
+                      this.templateTitle = ''
+                    }
+                  })
+                }
+              })
+            } else {
+              for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
+                if (title == this.$store.state.watermark.templates[i].title) {
+                  this.$dialog({
+                    type: 'warning',
+                    title: '存在同名模板',
+                    text: '您需要将新导入的模板重命名，才能将其保存。',
+                    showCancel: true,
+                    confirmFunction: () => {
+                      this.$dialog({
+                        title: '请输入水印模板标题',
+                        content: this.$createElement('div', {
+                          'class': 'el-input el-input--mini'
+                        }, [
+                          this.$createElement('input', {
+                            'dom-props': {
+                              value: this.templateTitle,
+                            },
+                            'on': {
+                              input: (event) => {
+                                this.templateTitle = event.target.value
+                              }
+                            },
+                            'class': 'el-input__inner',
+                            'style': {
+                              'font-family': 'NotoSansSCThin'
+                            }
+                          })
+                        ]),
+                        showCancel: true,
+                        confirmFunction: () => {
+                          checkName(this.templateTitle)
+                          this.templateTitle = ''
+                        },
+                        cancelFunction: () => {
+                          this.templateTitle = ''
+                        }
+                      })
+                    }
+                  })
+                  return
+                }
+              }
+              template.title = title
+              this.$store.dispatch('watermark/templatePush', template)
+            }
+          }
+          checkName(template.title)
+        }
+      } catch (e) {
+        this.$dialog({
+          type: 'error',
+          title: '导入失败',
+          text: '未能从您的剪贴板中读取到水印模板信息！'
+        })
+      }
+    },
+    createTemplate() {}
   }
 }
 </script>
@@ -564,6 +744,31 @@ export default {
       flex-shrink: 0;
     }
     
+    .el-pagination {
+      padding: 0;
+      margin-right: 10px;
+      
+      li {
+        min-width: 24px;
+        height: 28px;
+        line-height: 28px;
+      }
+      
+      .btn-prev {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-left: 0;
+      }
+      
+      .btn-next {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-right: 0;
+      }
+    }
+    
     #file-list {
       width: 100%;
       flex-grow: 1;
@@ -674,23 +879,97 @@ export default {
   #templates {
     flex-direction: column;
     
-    .el-pagination {
+    #container {
       width: 100%;
-      padding: 0;
+      flex-grow: 1;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-wrap: wrap;
       
-      .el-pagination__jump {
-        margin: 0;
+      .template-container {
+        width: calc(100%/3);
+        height: 210px;
+        box-sizing: border-box;
+        padding: 10px;
+        
+        .card {
+          width: 100%;
+          height: 100%;
+          color: #606266;
+          
+          .el-card__body {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            
+            .subtitle {
+              width: 100%;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+            
+            .control-buttons {
+              width: 100%;
+              flex-grow: 1;
+              align-items: flex-end;
+              
+              .control-button {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                font-size: 12px;
+                width: 32px;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: #2196F3;
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
+              }
+            }
+          }
+          
+          &:hover {
+            transform: scale(1.05);
+          }
+        }
+      }
+    }
+    
+    .el-pagination {
+      padding: 0;
+      margin-right: 10px;
+      
+      li {
+        min-width: 24px;
+        height: 28px;
+        line-height: 28px;
       }
       
       .btn-prev {
-        margin: 0;
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-left: 0;
       }
       
       .btn-next {
-        margin: 0;
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-right: 0;
       }
     }
   }

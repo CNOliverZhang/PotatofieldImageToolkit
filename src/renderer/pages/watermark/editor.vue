@@ -54,7 +54,7 @@
               </div>
             </div>
           </div>
-          <div v-if="this.$store.state.watermark.fileList.length > 100" class="control-row interactable">
+          <div v-if="this.$store.state.watermark.fileList.length > 100" class="row interactable">
             <el-pagination
               class="interactable"
               small
@@ -89,7 +89,7 @@
                 </div>
               </div>
               <div class="text">{{ template.title }}</div>
-              <div class="subtext">内容：{{ template.text }}</div>
+              <v-clamp :max-lines="2" class="subtext">内容：{{ template.text }}</v-clamp>
             </div>
           </div>
           <div v-else id="empty-container">
@@ -258,10 +258,9 @@
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
-        <div class="control-row">
+        <div v-if="srcDirectory != '' && customDistDirectory" class="control-row">
           <div class="text">目录结构</div>
           <el-switch
-            v-if="srcDirectory != '' && customDistDirectory"
             v-model="keepDirectoryStructure"
             active-color="#2196F3"
             inactive-color="#2196F3"
@@ -868,22 +867,22 @@ export default {
         }
         
         .el-pagination {
-          width: 100%;
+          flex-grow: 1;
+          text-align: center;
           padding: 0;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
           
-          .el-pagination__jump {
-            margin: 0;
-          }
-          
-          .btn-prev {
-            margin: 0;
-          }
-          
-          .btn-next {
-            margin: 0;
+          li {
+            min-width: 24px;
+            height: 28px;
+            line-height: 28px;
+            
+            &:first-child {
+              margin-left: 0;
+            }
+            
+            &:last-child {
+              margin-right: 0;
+            }
           }
         }
       }
@@ -922,13 +921,6 @@ export default {
             border-bottom-width: 1px;
             
             .text {
-              width: 100%;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-            
-            .subtext {
               width: 100%;
               overflow: hidden;
               white-space: nowrap;

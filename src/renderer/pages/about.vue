@@ -35,42 +35,16 @@
         <div class="row">
           <div class="text">本程序的开发过程中使用了下列开源程序和组件：</div>
         </div>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/electron/electron')">Electron
-        </el-button>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/vuejs/vue')">Vue.js
-        </el-button>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/SimulatedGREG/electron-vue')">electron-vue
-        </el-button>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/ElemeFE/element')">Element UI
-        </el-button>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/electron-userland/electron-builder')">electron-builder
-        </el-button>
-        <el-button
-          class="interactable"
-          size="mini"
-          type="primary"
-          @click="open('https://github.com/niklasvh/html2canvas/')">html2canvas
-        </el-button>
+        <div id="resources">
+          <el-button
+            v-for="(resource) in resources"
+            :key="resource.title"
+            class="interactable"
+            size="mini"
+            type="primary"
+            @click="open(resource.url)">{{ resource.title }}
+          </el-button>
+        </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
@@ -142,6 +116,32 @@ export default {
   name: 'about',
   data () {
     return {
+      resources: [
+        {
+          title: 'Electron',
+          url: 'https://github.com/electron/electron'
+        },
+        {
+          title: 'Vue.js',
+          url: 'https://github.com/vuejs/vue'
+        },
+        {
+          title: 'electron-vue',
+          url: 'https://github.com/SimulatedGREG/electron-vue'
+        },
+        {
+          title: 'Element UI',
+          url: 'https://github.com/ElemeFE/element'
+        },
+        {
+          title: 'electron-buider',
+          url: 'https://github.com/electron-userland/electron-builder'
+        },
+        {
+          title: 'html2canvas',
+          url: 'https://github.com/niklasvh/html2canvas'
+        }
+      ],
       version: null,
       updateChecked: false,
       update: null
@@ -356,6 +356,11 @@ export default {
           line-height: 1em;
         }
       }
+    }
+    
+    #resources {
+      display: flex;
+      flex-wrap: wrap;
     }
     
     .link {

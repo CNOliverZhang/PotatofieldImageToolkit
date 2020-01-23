@@ -21,37 +21,37 @@
       <div id="scroll">
         <div class="space">&nbsp;</div>
         <div class="container" @click="open('/watermark', '水印工具')">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <i class="fas fa-feather icon"></i>
             <div class="title">添加水印</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <i class="fas fa-images icon"></i>
             <div class="title">长图拼接</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <span class="fas fa-crop icon"></span>
             <div class="title">裁剪工具</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <span class="fas fa-magic icon"></span>
             <div class="title">滤镜美化</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <span class="fas fa-compress icon"></span>
             <div class="title">尺寸压缩</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
-          <el-card shadow="always" class="card">
+          <el-card class="card">
             <span class="fas fa-database icon"></span>
             <div class="title">图像瘦身</div>
           </el-card>
