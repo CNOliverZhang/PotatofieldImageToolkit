@@ -109,7 +109,7 @@
           type="textarea"
           resize="none"
           placeholder="请输入水印内容"
-          class="interactable control"></el-input>
+          class="interactable"></el-input>
         <div class="row">
           <div class="subtitle">水印样式设置</div>
         </div>
@@ -281,7 +281,7 @@
           <el-input size="mini" v-model="postPend" maxlength="12" class="interactable control"></el-input>
         </div>
       </div>
-      <div class="control-buttons">
+      <div id="control-buttons">
         <el-button type="primary" size="mini" @click="exit" class="control-button interactable">退出编辑器</el-button>
         <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">保存为模板</el-button>
         <el-button type="primary" size="mini" @click="start" class="control-button interactable">处理这张图片</el-button>
@@ -334,9 +334,6 @@ export default {
     }
   },
   computed: {
-    totalPages() {
-      return Math.ceil(this.$store.state.watermark.fileList.length / 100)
-    },
     fontSize() {
       return this.relativeFontSize * this.sizeBaseX
     },
@@ -363,7 +360,7 @@ export default {
     close() {
       ipcRenderer.send('close')
       this.$store.dispatch('watermark/fileListEmpty')
-      this.$store.dispatch('watermark/configReset')
+      this.$destroy()
     },
     pageChange(page) {
       this.fileListPage = page
@@ -441,94 +438,143 @@ export default {
           type: 'warning',
           text: '请您输入水印文字！'
         })
-        return
-      }
-      this.$dialog({
-        title: '请输入水印模板标题',
-        content: this.$createElement('div', {
-          'class': 'el-input el-input--mini'
-        }, [
-          this.$createElement('input', {
-            'dom-props': {
-              value: this.templateTitle,
-            },
-            'on': {
-              input: (event) => {
-                this.templateTitle = event.target.value
-              }
-            },
-            'class': 'el-input__inner',
-            'style': {
-              'font-family': 'NotoSansSCThin'
-            }
-          })
-        ]),
-        showCancel: true,
-        confirmFunction: () => {
-          if (this.templateTitle == '') {
+      } else {
+        let template =  {
+          title: this.templateTitle,
+          text: this.text,
+          writingMode: this.writingMode,
+          textAlign: this.textAlign,
+          lineHeight: this.lineHeight,
+          letterSpacing: this.letterSpacing,
+          position: this.position,
+          offsetX: this.offsetX,
+          offsetY: this.offsetY,
+          rotation: this.rotation,
+          color: this.color,
+          font: this.font,
+          relativeFontSize: this.relativeFontSize,
+        }
+        let checkName = (title) => {
+          if (title == '') {
             this.$dialog({
               type: 'error',
-              title: '保存失败',
-              text: '请输入水印模板标题！'
+              title: '错误',
+              text: '请输入模板标题，否则无法保存该模板。',
+              showCancel: true,
+              confirmFunction: () => {
+                this.$dialog({
+                  title: '请输入水印模板标题',
+                  content: this.$createElement('div', {
+                    'class': 'el-input el-input--mini'
+                  }, [
+                    this.$createElement('input', {
+                      'dom-props': {
+                        value: this.templateTitle,
+                      },
+                      'on': {
+                        input: (event) => {
+                          this.templateTitle = event.target.value
+                        }
+                      },
+                      'class': 'el-input__inner',
+                      'style': {
+                        'font-family': 'NotoSansSCThin'
+                      }
+                    })
+                  ]),
+                  showCancel: true,
+                  confirmFunction: () => {
+                    checkName(this.templateTitle)
+                    this.templateTitle = ''
+                  },
+                  cancelFunction: () => {
+                    this.templateTitle = ''
+                  }
+                })
+              }
             })
-            return
-          }
-          for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-            if (this.templateTitle == this.$store.state.watermark.templates[i].title) {
-              this.$dialog({
-                type: 'warning',
-                title: '操作确认',
-                text: '已存在同名的水印模板，是否覆盖？',
-                showCancel: true,
-                confirmFunction: () => {
-                  this.$store.dispatch('watermark/templateReplace', {
-                    index: i,
-                    template: {
-                      title: this.templateTitle,
-                      text: this.text,
-                      writingMode: this.writingMode,
-                      textAlign: this.textAlign,
-                      lineHeight: this.lineHeight,
-                      letterSpacing: this.letterSpacing,
-                      position: this.position,
-                      offsetX: this.offsetX,
-                      offsetY: this.offsetY,
-                      rotation: this.rotation,
-                      color: this.color,
-                      font: this.font,
-                      relativeFontSize: this.relativeFontSize,
-                    }
-                  })
-                  this.templateTitle = ''
-                },
-                cancelFunction: () => {
-                  this.templateTitle = ''
-                }
-              })
-              return
+          } else {
+            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
+              if (title == this.$store.state.watermark.templates[i].title) {
+                this.$dialog({
+                  type: 'warning',
+                  title: '需要重命名',
+                  text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                  showCancel: true,
+                  confirmFunction: () => {
+                    this.$dialog({
+                      title: '请输入水印模板标题',
+                      content: this.$createElement('div', {
+                        'class': 'el-input el-input--mini'
+                      }, [
+                        this.$createElement('input', {
+                          'dom-props': {
+                            value: this.templateTitle,
+                          },
+                          'on': {
+                            input: (event) => {
+                              this.templateTitle = event.target.value
+                            }
+                          },
+                          'class': 'el-input__inner',
+                          'style': {
+                            'font-family': 'NotoSansSCThin'
+                          }
+                        })
+                      ]),
+                      showCancel: true,
+                      confirmFunction: () => {
+                        checkName(this.templateTitle)
+                        this.templateTitle = ''
+                      },
+                      cancelFunction: () => {
+                        this.templateTitle = ''
+                      }
+                    })
+                  }
+                })
+                return
+              }
             }
+            template.title = title
+            this.$store.dispatch('watermark/templatePush', template)
+            this.$dialog({
+              type: 'success',
+              title: '成功',
+              text: '水印模板保存成功。'
+            })
           }
-          this.$store.dispatch('watermark/templatePush', {
-            title: this.templateTitle,
-            text: this.text,
-            writingMode: this.writingMode,
-            textAlign: this.textAlign,
-            lineHeight: this.lineHeight,
-            letterSpacing: this.letterSpacing,
-            position: this.position,
-            offsetX: this.offsetX,
-            offsetY: this.offsetY,
-            rotation: this.rotation,
-            color: this.color,
-            font: this.font,
-            relativeFontSize: this.relativeFontSize,
-          })
-          this.templateTitle = ''
-        },
-        cancelFunction: () => {
-          this.templateTitle = ''
         }
-      })
+        this.$dialog({
+          title: '请输入水印模板标题',
+          content: this.$createElement('div', {
+            'class': 'el-input el-input--mini'
+          }, [
+            this.$createElement('input', {
+              'dom-props': {
+                value: this.templateTitle,
+              },
+              'on': {
+                input: (event) => {
+                  this.templateTitle = event.target.value
+                }
+              },
+              'class': 'el-input__inner',
+              'style': {
+                'font-family': 'NotoSansSCThin'
+              }
+            })
+          ]),
+          showCancel: true,
+          confirmFunction: () => {
+            checkName(this.templateTitle)
+            this.templateTitle = ''
+          },
+          cancelFunction: () => {
+            this.templateTitle = ''
+          }
+        })
+      }
     },
     start() {
       if (this.text.length == 0) {
@@ -536,93 +582,182 @@ export default {
           type: 'warning',
           text: '请您输入水印文字！'
         })
-        return
-      }
-      let dialog = this.$dialog({
-        title: '正在处理',
-        text: '即将完成，请稍候。',
-        showConfirm: false
-      })
-      let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
-      let distExt
-      if (this.mimeType == '保持原格式') {
-        distExt = imageInfo.ext
-      } else if (this.mimeType == 'JPEG') {
-        distExt = 'jpg'
+      } else if (this.customDistDirectory && this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您选择保存的目录！'
+        })
       } else {
-        distExt = 'png'
-      }
-      let mimeType
-      if (distExt == 'png') {
-        mimeType = 'png'
-      } else {
-        mimeType = 'jpeg'
-      }
-      let distFilename = imageInfo.filename + this.postPend + '.' + distExt
-      let distPath
-      if (this.customDistDirectory) {
-        if (this.keepDirectoryStructure) {
-          distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
+        let distExt
+        if (this.mimeType == '保持原格式') {
+          distExt = imageInfo.ext
+        } else if (this.mimeType == 'JPEG') {
+          distExt = 'jpg'
         } else {
-          distPath = this.distDirectory
+          distExt = 'png'
         }
-      } else {
-        distPath = imageInfo.filepath
-      }
-      let distFullpath = path.join(distPath, distFilename)
-      let image = new Image()
-      image.src = imageInfo.fullpath
-      let scale = image.width / this.sampleWidth
-      let baseCanvas = document.createElement('canvas')
-      let context = baseCanvas.getContext("2d")
-      baseCanvas.width = image.width
-      baseCanvas.height = image.height
-      context.drawImage(image, 0, 0)
-      html2canvas(document.getElementById('watermark-container'), {
-        scale: scale,
-        backgroundColor: null
-      }).then(canvas => {
-        context.drawImage(canvas, 0, 0)
-        let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-        let buffer = new Buffer(url, 'base64')
-        CreateDirectory(distPath)
-        fs.writeFile(distFullpath, buffer, (error) => {
-          if (error) {
-            dialog.change({
-              type: 'error',
-              title: '出现错误',
-              text: '写入文件失败，请检查目标文件夹权限。',
-              showConfirm: true
-            })
+        let mimeType
+        if (distExt == 'png') {
+          mimeType = 'png'
+        } else {
+          mimeType = 'jpeg'
+        }
+        let distFilename = imageInfo.filename + this.postPend + '.' + distExt
+        let distPath
+        if (this.customDistDirectory) {
+          if (this.keepDirectoryStructure) {
+            distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
           } else {
-            if (this.$store.state.watermark.fileList.length > 1) {
-              this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
-              this.imageIndex = 0
+            distPath = this.distDirectory
+          }
+        } else {
+          distPath = imageInfo.filepath
+        }
+        let distFullpath = path.join(distPath, distFilename)
+        let image = new Image()
+        image.src = imageInfo.fullpath
+        let scale = image.width / this.sampleWidth
+        let baseCanvas = document.createElement('canvas')
+        let context = baseCanvas.getContext("2d")
+        baseCanvas.width = image.width
+        baseCanvas.height = image.height
+        context.drawImage(image, 0, 0)
+        html2canvas(document.getElementById('watermark-container'), {
+          scale: scale,
+          backgroundColor: null
+        }).then(canvas => {
+          context.drawImage(canvas, 0, 0)
+          let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+          let buffer = new Buffer(url, 'base64')
+          CreateDirectory(distPath)
+          fs.writeFile(distFullpath, buffer, (error) => {
+            if (error) {
               dialog.change({
-                type: 'success',
-                title: '成功',
-                text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                type: 'error',
+                title: '出现错误',
+                text: '写入文件失败，请检查目标文件夹权限。',
                 showConfirm: true
               })
             } else {
-              dialog.change({
-                type: 'success',
-                title: '成功',
-                text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
-                showConfirm: true,
-                confirmFunction: () => {
-                  this.close()
+              if (this.$store.state.watermark.fileList.length > 1) {
+                this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
+                this.imageIndex = 0
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                  showConfirm: true
+                })
+              } else {
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.close()
+                  }
+                })
+              }
+            }
+          })
+        })
+      }
+    },
+    startAll() {
+      if (this.text.length == 0) {
+        this.$dialog({
+          type: 'warning',
+          text: '请您输入水印文字！'
+        })
+      } else if (this.customDistDirectory && this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您选择保存的目录！'
+        })
+      } else {
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        let handle = (index) => {
+          this.$nextTick(() => {
+            let imageInfo = this.$store.state.watermark.fileList[index]
+            let distExt
+            if (this.mimeType == '保持原格式') {
+              distExt = imageInfo.ext
+            } else if (this.mimeType == 'JPEG') {
+              distExt = 'jpg'
+            } else {
+              distExt = 'png'
+            }
+            let mimeType
+            if (distExt == 'png') {
+              mimeType = 'png'
+            } else {
+              mimeType = 'jpeg'
+            }
+            let distFilename = imageInfo.filename + this.postPend + '.' + distExt
+            let distPath
+            if (this.customDistDirectory) {
+              if (this.keepDirectoryStructure) {
+                distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+              } else {
+                distPath = this.distDirectory
+              }
+            } else {
+              distPath = imageInfo.filepath
+            }
+            let distFullpath = path.join(distPath, distFilename)
+            let image = new Image()
+            image.src = imageInfo.fullpath
+            image.onload = () => {
+              let scale = image.width / this.sampleWidth
+              let baseCanvas = document.createElement('canvas')
+              let context = baseCanvas.getContext("2d")
+              baseCanvas.width = image.width
+              baseCanvas.height = image.height
+              context.drawImage(image, 0, 0)
+              html2canvas(document.getElementById('watermark-container'), {
+                scale: scale,
+                backgroundColor: null,
+              }).then((canvas) => {
+                context.drawImage(canvas, 0, 0)
+                let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+                let buffer = new Buffer(url, 'base64')
+                CreateDirectory(distPath)
+                fs.writeFileSync(distFullpath, buffer)
+                if (index < this.$store.state.watermark.fileList.length - 1) {
+                  dialog.change({
+                    text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。',
+                  })
+                  return handle(index + 1)
+                } else {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '全部图片处理完成。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                  return
                 }
               })
             }
-          }
-        })
-      })
-    },
-    startAll() {
-      this.$dialog({
-        text: '功能正在开发中。'
-      })
+          })
+          this.imageIndex = index
+        }
+        handle(0)
+      }
     }
   },
   mounted() {
@@ -719,16 +854,6 @@ export default {
     }
   }
   
-  .control-buttons {
-    display: flex;
-    justify-content: space-between;
-    justify-content: flex-end;
-    
-    .control-button {
-      width: calc((100% - 30px) / 4);
-    }
-  }
-  
   #preview {
     width: calc(50% - 10px);
     height: 100%;
@@ -756,13 +881,13 @@ export default {
         position: absolute;
         overflow: hidden;
         white-space: nowrap;
-      }
-      
-      #watermark {
-        position: absolute;
-        width: fit-content;
-        height: fit-content;
-        line-height: 1em;
+        
+        #watermark {
+          position: absolute;
+          width: fit-content;
+          height: fit-content;
+          line-height: 1em;
+        }
       }
     }
     
@@ -1061,6 +1186,16 @@ export default {
         &:hover {
           background-color: #C0C4CC;
         }
+      }
+    }
+    
+    #control-buttons {
+      display: flex;
+      justify-content: space-between;
+      justify-content: flex-end;
+      
+      .control-button {
+        width: calc((100% - 30px) / 4);
       }
     }
   }

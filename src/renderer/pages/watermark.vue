@@ -354,7 +354,15 @@ export default {
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
     },
-    editTemplate(index) {},
+    editTemplate(index) {
+      ipcRenderer.send('open', {
+        title: '水印编辑器',
+        path: '#/watermark/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        modal: true,
+        height: 600,
+        width: 1000
+      })
+    },
     shareTemplate(index) {
       clipboard.writeText(btoa(encodeURI(JSON.stringify({
         type: 'watermarkTemplate',
@@ -367,12 +375,13 @@ export default {
       })
     },
     deleteTemplate(index) {
+      index = index + (this.templateListPage - 1) * 6
       this.$dialog({
         type: 'warning',
         title: '操作确认',
         text: '确定要删除这个模板吗？',
         showCancel: true,
-        confirmFunction: (index) => {
+        confirmFunction: () => {
           this.$store.dispatch('watermark/templateDelete', index)
         }
       })
@@ -468,6 +477,11 @@ export default {
               }
               template.title = title
               this.$store.dispatch('watermark/templatePush', template)
+              this.$dialog({
+                type: 'success',
+                title: '成功',
+                text: '水印模板导入成功。'
+              })
             }
           }
           checkName(template.title)
@@ -480,7 +494,15 @@ export default {
         })
       }
     },
-    createTemplate() {}
+    createTemplate() {
+      ipcRenderer.send('open', {
+        title: '水印编辑器',
+        path: '#/watermark/template?index=-1',
+        modal: true,
+        height: 600,
+        width: 1000
+      })
+    }
   }
 }
 </script>

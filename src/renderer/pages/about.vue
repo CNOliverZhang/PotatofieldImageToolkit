@@ -361,6 +361,11 @@ export default {
     #resources {
       display: flex;
       flex-wrap: wrap;
+      margin: -5px;
+      
+      button {
+        margin: 5px;
+      }
     }
     
     .link {

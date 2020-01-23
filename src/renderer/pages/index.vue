@@ -28,6 +28,12 @@
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
+            <span class="fas fa-file-alt icon"></span>
+            <div class="title">文本制图</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card class="card">
             <i class="fas fa-images icon"></i>
             <div class="title">长图拼接</div>
           </el-card>
@@ -48,12 +54,6 @@
           <el-card class="card">
             <span class="fas fa-compress icon"></span>
             <div class="title">尺寸压缩</div>
-          </el-card>
-        </div>
-        <div class="container" @click="showDeveloping">
-          <el-card class="card">
-            <span class="fas fa-database icon"></span>
-            <div class="title">图像瘦身</div>
           </el-card>
         </div>
         <div class="space">&nbsp;</div>

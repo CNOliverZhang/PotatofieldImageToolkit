@@ -27,6 +27,11 @@ export default new Router({
       component: require('@/pages/watermark/editor').default
     },
     {
+      path: '/watermark/template',
+      name: 'watermarkTemplate',
+      component: require('@/pages/watermark/template').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
