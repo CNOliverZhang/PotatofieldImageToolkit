@@ -719,39 +719,41 @@ export default {
             let image = new Image()
             image.src = imageInfo.fullpath
             image.onload = () => {
-              let scale = image.width / this.sampleWidth
-              let baseCanvas = document.createElement('canvas')
-              let context = baseCanvas.getContext("2d")
-              baseCanvas.width = image.width
-              baseCanvas.height = image.height
-              context.drawImage(image, 0, 0)
-              html2canvas(document.getElementById('watermark-container'), {
-                scale: scale,
-                backgroundColor: null,
-              }).then((canvas) => {
-                context.drawImage(canvas, 0, 0)
-                let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-                let buffer = new Buffer(url, 'base64')
-                CreateDirectory(distPath)
-                fs.writeFileSync(distFullpath, buffer)
-                if (index < this.$store.state.watermark.fileList.length - 1) {
-                  dialog.change({
-                    text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。',
-                  })
-                  return handle(index + 1)
-                } else {
-                  dialog.change({
-                    type: 'success',
-                    title: '成功',
-                    text: '全部图片处理完成。',
-                    showConfirm: true,
-                    confirmFunction: () => {
-                      this.close()
-                    }
-                  })
-                  return
-                }
-              })
+              setTimeout(() => {
+                let scale = image.width / this.sampleWidth
+                let baseCanvas = document.createElement('canvas')
+                let context = baseCanvas.getContext("2d")
+                baseCanvas.width = image.width
+                baseCanvas.height = image.height
+                context.drawImage(image, 0, 0)
+                html2canvas(document.getElementById('watermark-container'), {
+                  scale: scale,
+                  backgroundColor: null,
+                }).then((canvas) => {
+                  context.drawImage(canvas, 0, 0)
+                  let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+                  let buffer = new Buffer(url, 'base64')
+                  CreateDirectory(distPath)
+                  fs.writeFileSync(distFullpath, buffer)
+                  if (index < this.$store.state.watermark.fileList.length - 1) {
+                    dialog.change({
+                      text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。',
+                    })
+                    return handle(index + 1)
+                  } else {
+                    dialog.change({
+                      type: 'success',
+                      title: '成功',
+                      text: '全部图片处理完成。',
+                      showConfirm: true,
+                      confirmFunction: () => {
+                        this.close()
+                      }
+                    })
+                    return
+                  }
+                })
+              }, 300)
             }
           })
           this.imageIndex = index
