@@ -32,6 +32,21 @@ export default new Router({
       component: require('@/pages/watermark/template').default
     },
     {
+      path: '/splicer',
+      name: 'splicer',
+      component: require('@/pages/splicer').default,
+    },
+    {
+      path: '/splicer/editor',
+      name: 'splicerEditor',
+      component: require('@/pages/splicer/editor').default
+    },
+    {
+      path: '/splicer/template',
+      name: 'splicerTemplate',
+      component: require('@/pages/splicer/template').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="watermark" @tab-click="clear">
+  <el-tabs type="card" tab-position="left" id="splicer" @tab-click="clear">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
       <div id="single" class="tab-content">
@@ -12,15 +12,15 @@
           :auto-upload="false"
           :on-change="handleFile"
           :show-file-list="false"
-          :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
+          :class="this.$store.state.splicer.fileList.length != 0 ? 'half' : ''">
           <i class="fas fa-images"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
         </el-upload>
-        <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list" class="interactable">
+        <div v-if="this.$store.state.splicer.fileList.length != 0" id="file-list" class="interactable">
           <div id="list">
             <div
-              v-for="(file, index) in this.$store.state.watermark.fileList"
-              :key="file.fullpath"
+              v-for="(file, index) in this.$store.state.splicer.fileList"
+              :key="index"
               class="file"
               @click="preview(index)">
               <div class="filename">{{ file.filename + '.' + file.ext }}</div>
@@ -31,92 +31,25 @@
           </div>
           <div class="row">
             <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入拼图编辑器</el-button>
           </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content" v-if="this.$store.state.watermark.fileList.length == 0">
-        <div id="controller">
-          <div class="row">
-            <div class="subtitle">请选择需要扫描的文件夹</div>
-          </div>
-          <div class="row">
-            <el-switch
-              v-model="childDirectoryIncluded"
-              active-color="#2196F3"
-              inactive-color="#2196F3"
-              active-text="包含子目录"
-              inactive-text="不包含子目录"
-              class="interactable"></el-switch>
-            <el-input disabled size="mini" v-model="srcDirectory" class="controller interactable">
-              <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
-            </el-input>
-          </div>
-          <div class="row">
-            <el-button
-              @click="handleFolder"
-              type="primary"
-              size="mini"
-              class="interactable full-width-button">扫描文件夹</el-button>
-          </div>
-        </div>
-        <div id="file-list" class="row interactable">
-          <div id="empty">
-            <i class="far fa-folder-open"></i>
-            <div>未导入图片文件</div>
-          </div>
-        </div>
-      </div>
-      <div id="multiple" class="tab-content" v-else>
-        <div class="row">
-          <div class="subtitle">已导入的文件列表</div>
-        </div>
-        <div id="file-list" class="interactable">
-          <div
-            v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
-            :key="file.fullpath"
-            class="file"
-            @click="preview(index)">
-            <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-            <div class="path">{{ file.filepath }}</div>
-            <div @click.stop="handleDelete(index)">
-              <i class="fas fa-trash-alt delete"></i>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <el-pagination
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="100"
-            :total="this.$store.state.watermark.fileList.length"
-            :current-page="fileListPage"
-            :hide-on-single-page="true"
-            @current-change="fileListPageChange">
-          </el-pagination>
-          <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-          <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
-        </div>
-      </div>
-    </el-tab-pane>
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-feather"></i> 水印模板库</span>
+      <span slot="label" class="interactable"><i class="fas fa-images"></i> 拼图模板库</span>
       <div id="templates" class="tab-content">
-        <div id="container" v-if="this.$store.state.watermark.templates.length != 0">
+        <div id="container" v-if="this.$store.state.splicer.templates.length != 0">
           <div
-            v-for="(template, index) in this.$store.state.watermark.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
-            :key="template.title"
+            v-for="(template, index) in this.$store.state.splicer.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
+            :key="index"
             class="template-container">
             <el-card class="card interactable">
               <div class="row">
                 <div class="subtitle">{{ template.title }}</div>
               </div>
+              <div class="text">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
+              <div class="text">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
               <div class="row control-buttons">
                 <div class="control-button interactable" @click="editTemplate(index)">
@@ -143,20 +76,20 @@
         </div>
         <div class="row">
           <el-pagination
-            v-if="this.$store.state.watermark.templates.length > 6"
+            v-if="this.$store.state.splicer.templates.length > 6"
             class="interactable"
             small
             background
             layout="prev, pager, next"
             :pager-count="5"
             :page-size="6"
-            :total="this.$store.state.watermark.templates.length"
+            :total="this.$store.state.splicer.templates.length"
             :current-page="templateListPage"
             :hide-on-single-page="true"
             @current-change="templateListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入水印模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建水印模板</el-button>
+          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入拼图模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建拼图模板</el-button>
         </div>
       </div>
     </el-tab-pane>
@@ -181,14 +114,11 @@ const ReadDirectory = require('../utils/readdirectory').ReadDirectory
 const path = require('path')
 
 export default {
-  name: 'watermark',
+  name: 'splicer',
   data () {
     return {
       errorList: [],
-      fileListPage: 1,
       templateListPage: 1,
-      childDirectoryIncluded: false,
-      srcDirectory: '',
       errorLog: null,
       templateTitle: ''
     }
@@ -199,15 +129,12 @@ export default {
     },
     close() {
       ipcRenderer.send('close')
-      this.$store.dispatch('watermark/fileListEmpty')
+      this.$store.dispatch('splicer/fileListEmpty')
       this.$destroy()
     },
     clear() {
-      this.$store.dispatch('watermark/fileListEmpty')
+      this.$store.dispatch('splicer/fileListEmpty')
       this.errorList = []
-      this.fileListPage = 1
-      this.childDirectoryIncluded = false
-      this.srcDirectory = ''
       this.errorLog = null
     },
     clearConfirm() {
@@ -226,9 +153,8 @@ export default {
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
       if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
-        this.$store.dispatch('watermark/fileListPush', {
+        this.$store.dispatch('splicer/fileListPush', {
           fullpath: file.raw.path,
-          filepath: filepath,
           filename: filename,
           ext: ext
         })
@@ -276,91 +202,35 @@ export default {
         }
       }
     },
-    handleFolder() {
-      if (this.srcDirectory == '') {
-        this.$dialog({
-          type: 'warning',
-          text: '您还没有选择需要扫描的文件夹！'
-        })
-        return
-      }
-      let dialog = this.$dialog({
-        title: '正在扫描文件夹',
-        text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
-        showConfirm: false
-      })
-      let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-      setTimeout(() => {
-        this.$store.dispatch('watermark/fileListAssign', result.fileList)
-        this.errorList = result.errorList
-        dialog.change({
-          type: 'success',
-          title: '完成',
-          text: '已扫描完您选择的文件夹，共发现 ' + result.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
-          showConfirm: true
-        })
-        if (this.errorList.length != 0) {
-          dialog.change({
-            content: this.$createElement('div', null, [
-              this.$createElement('div', null, [
-                this.$createElement('p', null, '扫描下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
-              ]),
-              this.$createElement('div', null, this.errorList.map((file) => {
-                return this.$createElement('p', {
-                  style: {
-                    'line-height': '24px',
-                    'font-size': '12px',
-                    'width': '100%',
-                    'overflow': 'hidden',
-                    'text-overflow': 'ellipsis',
-                    'white-space': 'nowrap',
-                    'text-indent': '0'
-                  }
-                }, file)
-              }))
-            ]),
-            confirmFunction: () => {
-              this.errorList = []
-            }
-          })
-        }
-      }, 500)
-    },
     handleDelete(index) {
-      this.$store.dispatch('watermark/fileListDelete', index + (this.fileListPage - 1) * 100)
+      this.$store.dispatch('splicer/fileListDelete', index)
     },
     preview(index) {
       this.$dialog({
         title: '图像预览',
         content: this.$createElement('img', {
           'attrs': {
-            'src': this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
+            'src': this.$store.state.splicer.fileList[index].fullpath
           }
         })
       })
-    },
-    fileListPageChange(page) {
-      this.fileListPage = page
     },
     templateListPageChange(page) {
       this.templateListPage = page
     },
     edit() {
       ipcRenderer.send('open', {
-        title: '水印编辑器',
-        path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
+        title: '拼图编辑器',
+        path: '#/splicer/editor',
         modal: true,
         height: 720,
         width: 1000
       })
     },
-    selectSourceFolder() {
-      this.srcDirectory = ipcRenderer.sendSync('select-folder')
-    },
     editTemplate(index) {
       ipcRenderer.send('open', {
-        title: '水印模板编辑器',
-        path: '#/watermark/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        title: '拼图模板编辑器',
+        path: '#/splicer/template?index=' + String(index + (this.templateListPage - 1) * 6),
         modal: true,
         height: 600,
         width: 1000
@@ -368,13 +238,13 @@ export default {
     },
     shareTemplate(index) {
       clipboard.writeText(btoa(encodeURI(JSON.stringify({
-        type: 'watermarkTemplate',
-        content: this.$store.state.watermark.templates[index]
+        type: 'splicerTemplate',
+        content: this.$store.state.splicer.templates[index]
       }))))
       this.$dialog({
         type: 'success',
         title: '成功',
-        text: '已成功将水印模板复制到剪贴板。'
+        text: '已成功将拼图模板复制到剪贴板。'
       })
     },
     deleteTemplate(index) {
@@ -385,14 +255,14 @@ export default {
         text: '确定要删除这个模板吗？',
         showCancel: true,
         confirmFunction: () => {
-          this.$store.dispatch('watermark/templateDelete', index)
+          this.$store.dispatch('splicer/templateDelete', index)
         }
       })
     },
     importTemplate() {
       try {
         let template = JSON.parse(decodeURI(atob(clipboard.readText())))
-        if (template.type != 'watermarkTemplate') {
+        if (template.type != 'splicerTemplate') {
           throw false
         } else {
           template = template.content
@@ -405,7 +275,7 @@ export default {
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入水印模板标题',
+                    title: '请输入拼图模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -436,8 +306,8 @@ export default {
                 }
               })
             } else {
-              for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-                if (title == this.$store.state.watermark.templates[i].title) {
+              for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
+                if (title == this.$store.state.splicer.templates[i].title) {
                   this.$dialog({
                     type: 'warning',
                     title: '存在同名模板',
@@ -445,7 +315,7 @@ export default {
                     showCancel: true,
                     confirmFunction: () => {
                       this.$dialog({
-                        title: '请输入水印模板标题',
+                        title: '请输入拼图模板标题',
                         content: this.$createElement('div', {
                           'class': 'el-input el-input--mini'
                         }, [
@@ -479,11 +349,11 @@ export default {
                 }
               }
               template.title = title
-              this.$store.dispatch('watermark/templatePush', template)
+              this.$store.dispatch('splicer/templatePush', template)
               this.$dialog({
                 type: 'success',
                 title: '成功',
-                text: '水印模板导入成功。'
+                text: '拼图模板导入成功。'
               })
             }
           }
@@ -493,14 +363,14 @@ export default {
         this.$dialog({
           type: 'error',
           title: '导入失败',
-          text: '未能从您的剪贴板中读取到水印模板信息！'
+          text: '未能从您的剪贴板中读取到拼图模板信息！'
         })
       }
     },
     createTemplate() {
       ipcRenderer.send('open', {
-        title: '水印编辑器',
-        path: '#/watermark/template?index=-1',
+        title: '拼图模板编辑器',
+        path: '#/splicer/template?index=-1',
         modal: true,
         height: 600,
         width: 1000
@@ -511,7 +381,7 @@ export default {
 </script>
 
 <style lang="scss">
-#watermark {
+#splicer {
   width: 100%;
   height: 100%;
   

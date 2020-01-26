@@ -9,11 +9,6 @@ export default {
       state.fileList = fileList
     },
     FILELIST_PUSH (state, file) {
-      for (let i = 0; i < state.fileList.length; i++) {
-        if (state.fileList[i].fullpath == file.fullpath) {
-          return
-        }
-      }
       state.fileList.push(file)
     },
     FILELIST_POP (state) {

@@ -1,0 +1,949 @@
+<template>
+  <div id="splicer-editor">
+    <div id="sample-container" class="interactable">
+      <div
+        id="sample"
+        :style="{
+          'padding': padding + 'px',
+          'background-color': backgroundColor
+        }">
+        <div
+          v-for="(image, index) in this.$store.state.splicer.fileList"
+          class="image-container"
+          :key="index">
+          <img
+            class="image"
+            :src="image.fullpath"
+            :style="{
+              'margin-bottom': index != ($store.state.splicer.fileList.length - 1) ? (spacing + 'px') : 0,
+              'border-radius': borderRadius + 'px'
+            }"/>
+          <div
+            class="image-controller"
+            :style="{
+              'border-radius': borderRadius + 'px'
+            }">
+            <div v-if="index != 0" class="control-button move interactable" @click="moveUp(index)">
+              <span class="fa fa-arrow-up"></span>
+              <div>上移</div>
+            </div>
+            <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="control-button move interactable" @click="moveDown(index)">
+              <span class="fa fa-arrow-down"></span>
+              <div>下移</div>
+            </div>
+            <div class="control-button interactable delete" @click="handleDelete(index)">
+              <span class="fa fa-trash-alt"></span>
+              <div>删除</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="control">
+      <div>
+        <div class="row">
+          <div class="subtitle">拼图样式设置</div>
+        </div>
+        <div class="control-row">
+          <div class="text">外框宽度</div>
+          <el-slider
+            v-model="padding"
+            class="control interactable"
+            :min="0"
+            :max="100"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row">
+          <div class="text">图片间距</div>
+          <el-slider
+            v-model="spacing"
+            class="control interactable"
+            :min="0"
+            :max="100"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row">
+          <div class="text">图片圆角</div>
+          <el-slider
+            v-model="borderRadius"
+            class="control interactable"
+            :min="0"
+            :max="100"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row">
+          <div class="text">边框颜色</div>
+          <el-color-picker v-model="backgroundColor" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
+        </div>
+        <div class="row">
+          <div class="subtitle">保存设置</div>
+        </div>
+        <div class="control-row">
+          <div class="text">存储位置</div>
+          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
+            <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+          </el-input>
+        </div>
+        <div class="control-row">
+          <div class="text">文件名</div>
+          <el-input size="mini" v-model="filename" class="interactable control" placeholder="请输入文件名">
+            <template slot="append">.jpg</template>
+          </el-input>
+        </div>
+      </div>
+      <div id="lists">
+        <div id="file-list">
+          <div class="row">
+            <div class="subtitle">待处理的文件</div>
+          </div>
+          <div id="list" class="interactable">
+            <div
+              v-for="(file, index) in this.$store.state.splicer.fileList"
+              :key="index"
+              class="file">
+              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+              <div v-if="index != 0" @click.stop="moveUp(index)">
+                <i class="fas fa-arrow-up move"></i>
+              </div>
+              <div v-if="index != $store.state.splicer.fileList.length - 1" @click.stop="moveDown(index)">
+                <i class="fas fa-arrow-down move"></i>
+              </div>
+              <div @click.stop="handleDelete(index)">
+                <i class="fas fa-trash-alt delete"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="template-list" class="interactable">
+          <div class="row">
+            <div class="subtitle">已保存的模板</div>
+          </div>
+          <div v-if="this.$store.state.splicer.templates.length != 0" id="list">
+            <div
+              v-for="(template, index) in this.$store.state.splicer.templates"
+              :key="template.title"
+              class="template">
+              <div class="cover">
+                <div class="action interactable" @click="applyTemplate(index)">
+                  <span class="fa fa-check-circle"></span>
+                  <div>应用</div>
+                </div>
+                <div class="action interactable" @click="deleteTemplate(index)">
+                  <span class="fa fa-trash-alt"></span>
+                  <div>删除</div>
+                </div>
+              </div>
+              <div class="text">{{ template.title }}</div>
+              <div class="subtext">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
+              <div class="subtext">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
+            </div>
+          </div>
+          <div v-else id="empty-container">
+            <div id="empty">
+              <i class="far fa-folder-open"></i>
+              <div>尚无已保存的模板</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <el-button type="primary" size="mini" @click="close" class="control-button interactable">退出编辑器</el-button>
+        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">保存为模板</el-button>
+        <el-button type="primary" size="mini" @click="start" class="control-button interactable">开始拼接</el-button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import '../../utils/html2canvas.min.js'
+
+const path = require('path')
+const fs = require('fs')
+const ipcRenderer = require('electron').ipcRenderer
+
+export default {
+  name: 'splicerEditor',
+  data () {
+    return  {
+      padding: 0,
+      spacing: 0,
+      borderRadius: 0,
+      backgroundColor: '#FFFFFF',
+      distDirectory: '',
+      filename: '',
+      templateTitle: ''
+    }
+  },
+  methods: {
+    close() {
+      ipcRenderer.send('close')
+      this.$store.dispatch('splicer/fileListEmpty')
+      this.$destroy()
+    },
+    moveUp(index) {
+      let fileList = this.$store.state.splicer.fileList
+      let image = fileList[index - 1]
+      fileList[index - 1] = fileList[index]
+      fileList[index] = image
+      this.$store.dispatch('splicer/fileListAssign', fileList)
+    },
+    moveDown(index) {
+      let fileList = this.$store.state.splicer.fileList
+      let image = fileList[index + 1]
+      fileList[index + 1] = fileList[index]
+      fileList[index] = image
+      this.$store.dispatch('splicer/fileListAssign', fileList)
+    },
+    handleDelete(index) {
+      if (this.$store.state.splicer.fileList.length > 1) {
+        this.$store.dispatch('splicer/fileListDelete', index)
+      } else {
+        this.close()
+      }
+    },
+    selectSaveFolder() {
+      this.distDirectory = ipcRenderer.sendSync('select-folder')
+    },
+    applyTemplate(index) {
+      this.padding = this.$store.state.splicer.templates[index].padding
+      this.spacing = this.$store.state.splicer.templates[index].spacing
+      this.borderRadius = this.$store.state.splicer.templates[index].borderRadius
+      this.backgroundColor = this.$store.state.splicer.templates[index].backgroundColor
+    },
+    deleteTemplate(index) {
+      this.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '确定要删除这个模板吗？',
+        showCancel: true,
+        confirmFunction: (index) => {
+          this.$store.dispatch('splicer/templateDelete', index)
+        }
+      })
+    },
+    saveAsTemplate() {
+      let template =  {
+        title: this.templateTitle,
+        padding: this.padding,
+        spacing: this.spacing,
+        borderRadius: this.borderRadius,
+        backgroundColor: this.backgroundColor
+      }
+      let checkName = (title) => {
+        if (title == '') {
+          this.$dialog({
+            type: 'error',
+            title: '错误',
+            text: '请输入模板标题，否则无法保存该模板。',
+            showCancel: true,
+            confirmFunction: () => {
+              this.$dialog({
+                title: '请输入水印模板标题',
+                content: this.$createElement('div', {
+                  'class': 'el-input el-input--mini'
+                }, [
+                  this.$createElement('input', {
+                    'dom-props': {
+                      value: this.templateTitle,
+                    },
+                    'on': {
+                      input: (event) => {
+                        this.templateTitle = event.target.value
+                      }
+                    },
+                    'class': 'el-input__inner',
+                    'style': {
+                      'font-family': 'NotoSansSCThin'
+                    }
+                  })
+                ]),
+                showCancel: true,
+                confirmFunction: () => {
+                  checkName(this.templateTitle)
+                  this.templateTitle = ''
+                },
+                cancelFunction: () => {
+                  this.templateTitle = ''
+                }
+              })
+            }
+          })
+        } else {
+          for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
+            if (title == this.$store.state.splicer.templates[i].title) {
+              this.$dialog({
+                type: 'warning',
+                title: '需要重命名',
+                text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                showCancel: true,
+                confirmFunction: () => {
+                  this.$dialog({
+                    title: '请输入水印模板标题',
+                    content: this.$createElement('div', {
+                      'class': 'el-input el-input--mini'
+                    }, [
+                      this.$createElement('input', {
+                        'dom-props': {
+                          value: this.templateTitle,
+                        },
+                        'on': {
+                          input: (event) => {
+                            this.templateTitle = event.target.value
+                          }
+                        },
+                        'class': 'el-input__inner',
+                        'style': {
+                          'font-family': 'NotoSansSCThin'
+                        }
+                      })
+                    ]),
+                    showCancel: true,
+                    confirmFunction: () => {
+                      checkName(this.templateTitle)
+                      this.templateTitle = ''
+                    },
+                    cancelFunction: () => {
+                      this.templateTitle = ''
+                    }
+                  })
+                }
+              })
+              return
+            }
+          }
+          template.title = title
+          this.$store.dispatch('splicer/templatePush', template)
+          this.$dialog({
+            type: 'success',
+            title: '成功',
+            text: '水印模板保存成功。'
+          })
+        }
+      }
+      this.$dialog({
+        title: '请输入水印模板标题',
+        content: this.$createElement('div', {
+          'class': 'el-input el-input--mini'
+        }, [
+          this.$createElement('input', {
+            'dom-props': {
+              value: this.templateTitle,
+            },
+            'on': {
+              input: (event) => {
+                this.templateTitle = event.target.value
+              }
+            },
+            'class': 'el-input__inner',
+            'style': {
+              'font-family': 'NotoSansSCThin'
+            }
+          })
+        ]),
+        showCancel: true,
+        confirmFunction: () => {
+          checkName(this.templateTitle)
+          this.templateTitle = ''
+        },
+        cancelFunction: () => {
+          this.templateTitle = ''
+        }
+      })
+    },
+    start() {
+      if (this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请选择保存的目录！'
+        })
+      } else if (this.filename == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请输入文件名！'
+        })
+      } else {
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        let fullname = this.filename + '.jpg'
+        let distFullpath = path.join(this.distDirectory, fullname)
+        let image = new Image()
+        image.src = this.$store.state.splicer.fileList[0].fullpath
+        let maxWidth = image.width
+        for (let i = 1; i < this.$store.state.splicer.fileList.length; i++) {
+          image.src = this.$store.state.splicer.fileList[i].fullpath
+          maxWidth = Math.max(maxWidth, image.width)
+        }
+        document.getElementById('sample-container').style['overflow-y'] = 'hidden'
+        let sample = document.getElementById('sample')
+        let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
+        let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
+        maxWidth = maxWidth * (width / (width - this.padding * 2))
+        let scale = Math.min((maxWidth / width), (32000 / height), Math.sqrt(256000000 / (width * height)))
+        let canvas = document.createElement('canvas')
+        canvas.width = width * scale
+        canvas.height = height * scale
+        html2canvas(sample, {
+          canvas: canvas,
+          scale: scale,
+          backgroundColor: null,
+          allowTaint: true,
+          imageTimeout: 0
+        }).then(canvas => {
+          let url = canvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
+          let buffer = new Buffer(url, 'base64')
+          fs.writeFile(distFullpath, buffer, (error) => {
+            if (error) {
+              dialog.change({
+                type: 'error',
+                title: '出现错误',
+                text: '写入文件失败，请检查目标文件夹权限。',
+                showConfirm: true
+              })
+            } else {
+              if (scale < (maxWidth / width)) {
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '处理完成，拼接后的长图已保存到目标文件夹。因为图片数量过多或原图尺寸过大，拼接后图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。',
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.close()
+                  }
+                })
+              } else {
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '处理完成，拼接后的长图已保存到目标文件夹。',
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.close()
+                  }
+                })
+              }
+            }
+          })
+        })
+      }
+    }
+  }
+}
+</script>
+
+<style lang="scss">  
+.el-color-picker__panel {
+  -webkit-app-region: no-drag;
+  
+  button {
+    font-family: "NotoSansSC";
+  }
+}
+
+#splicer-editor {
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  
+  button {
+    font-family: "NotoSansSC";
+  }
+  
+  input {
+    font-family: "NotoSansSC";
+  }
+  
+  .control-row {
+    width: 100%;
+    height: 21px;
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    .control {
+      width: 60%;
+    }
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .row {
+    width: 100%;
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+    
+  #sample-container {
+    width: calc(50% - 10px);
+    height: 100%;
+    flex-shrink: 0;
+    background-color: #606266;
+    border-color: #DCDFE6;
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    overflow-x: hidden;
+    overflow-y: auto;
+      
+    #sample {
+      width: 100%;
+      box-sizing: border-box;
+      
+      .image-container {
+        width: 100%;
+        position: relative;
+        
+        .image {
+          width: 100%;
+          display: block;
+        }
+        
+        .image-controller {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: rgba(0, 0, 0, 0.3);
+          transition: 0.2s;
+          opacity: 0;
+            
+          .control-button {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 12px;
+            width: 32px;
+            margin-left: 10px;
+            margin-right: 10px;
+            color: #FFFFFF;
+            transition: 0.2s;
+            
+            svg {
+              font-size: 20px;
+              margin: 5px;
+            }
+            
+            &:active {
+              filter: brightness(0.9);
+            }
+          }
+          
+          &:hover {
+            opacity: 1;
+          }
+          
+          .move:hover {
+            color: #2196F3;
+          }
+          
+          .delete:hover {
+            color: #F56C6C;
+          }
+        }
+      }
+    }
+    
+    &::-webkit-scrollbar {
+      width: 10px;
+    }
+        
+    &::-webkit-scrollbar-track {
+      border-radius: 5px;
+      background-color: rgba(255, 255, 255, 0);
+      
+      &:hover {
+        background-color: #F5F7FA;
+      }
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: #DCDFE6;
+      transition: 0.2s;
+      
+      &:hover {
+        background-color: #C0C4CC;
+      }
+    }
+  }
+  
+  #control {
+    width: calc(50% - 10px);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    
+    .el-textarea__inner {
+      font-family: "NotoSansSC"
+    }
+      
+    textarea {
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0);
+        
+        &:hover {
+          background-color: #F5F7FA;
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #DCDFE6;
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: #C0C4CC;
+        }
+      }
+    }
+    
+    .control-button {
+      width: calc((100% - 20px) / 3);
+    }
+    
+    .el-select .el-input {
+      width: 80px;
+    }
+    
+    #lists {
+      width: 100%;
+      flex-grow: 1;
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      
+      #file-list {
+        width: calc(50% - 5px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        
+        #indicator {
+          height: 28px;
+          width: 100%;
+          line-height: 28px;
+          font-size: 14px;
+          text-align: center;
+          color: #FFFFFF;
+          background-color: #2196F3;
+          border-radius: 14px;
+        }
+        
+        #list {
+          width: 100%;
+          flex-grow: 1;
+          background-color: #F5F7FA;
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: #DCDFE6;
+          border-style: solid;
+          border-width: 1px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          
+          .file {
+            height: 28px;
+            width: 100%;
+            line-height: 24px;
+            font-size: 12px;
+            padding-left: 5px;
+            padding-right: 5px;
+            box-sizing: border-box;
+            background-color: #FFFFFF;
+            border-bottom-color: #DCDFE6;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: #F5F7FA;
+            }
+            
+            .filename {
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              flex-grow: 1;
+              padding-right: 10px;
+            }
+            
+            .delete {
+              color: #DCDFE6;
+              cursor: pointer;
+              transition: 0.2s;
+              margin-right: 5px;
+              margin-left: 5px;
+              
+              &:hover {
+                color: #F56C6C;
+              }
+              
+              &:first-index {
+                margin-left: 0;
+              }
+              
+              &:last-index {
+                margin-right: 0;
+              }
+            }
+            
+            .move {
+              color: #DCDFE6;
+              cursor: pointer;
+              transition: 0.2s;
+              margin-right: 5px;
+              margin-left: 5px;
+              
+              &:hover {
+                color: #2196F3;
+              }
+              
+              &:first-index {
+                margin-left: 0;
+              }
+              
+              &:last-index {
+                margin-right: 0;
+              }
+            }
+          }
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0);
+            
+            &:hover {
+              background-color: #F5F7FA;
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: #DCDFE6;
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: #C0C4CC;
+            }
+          }
+        }
+        
+        .el-pagination {
+          flex-grow: 1;
+          text-align: center;
+          padding: 0;
+          
+          li {
+            min-width: 24px;
+            height: 28px;
+            line-height: 28px;
+            
+            &:first-child {
+              margin-left: 0;
+            }
+            
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
+      }
+      
+      #template-list {
+        width: calc(50% - 5px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        
+        #list {
+          width: 100%;
+          flex-grow: 1;
+          background-color: #F5F7FA;
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: #DCDFE6;
+          border-style: solid;
+          border-width: 1px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          
+          .template {
+            position: relative;
+            height: 80px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: #FFFFFF;
+            border-bottom-color: #DCDFE6;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            
+            .text {
+              width: 100%;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+            
+            .cover {
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              top: 0;
+              left: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background-color: #FFFFFF;
+              opacity: 0;
+              transition: 0.2s;
+              
+              .action {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                font-size: 12px;
+                width: 32px;
+                margin-left: 10px;
+                margin-right: 10px;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: #2196F3;
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
+              }
+              
+              &:hover {
+                opacity: 1;
+              }
+            }
+          }
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0);
+            
+            &:hover {
+              background-color: #F5F7FA;
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: #DCDFE6;
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: #C0C4CC;
+            }
+          }
+        }
+        
+        #empty-container {
+          width: 100%;
+          flex-grow: 1;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: #F5F7FA;
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: #DCDFE6;
+          border-style: solid;
+          border-width: 1px;
+          
+          #empty {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            
+            svg {
+              font-size: 40px;
+              margin: 14px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</style>

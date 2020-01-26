@@ -1,5 +1,5 @@
 <template>
-  <div id="editor">
+  <div id="watermark-editor">
     <div id="preview">
       <div id="sample-container">
         <img :src="this.$store.state.watermark.fileList[this.imageIndex].fullpath" id="sample" />
@@ -278,7 +278,7 @@
         </div>
         <div class="control-row">
           <div class="text">文件名后缀</div>
-          <el-input size="mini" v-model="postPend" maxlength="12" class="interactable control"></el-input>
+          <el-input size="mini" v-model="append" maxlength="12" class="interactable control"></el-input>
         </div>
       </div>
       <div id="control-buttons">
@@ -309,7 +309,7 @@ export default {
       srcDirectory: this.$route.query.srcDirectory,
       keepDirectoryStructure: false,
       mimeType: 'JPEG',
-      postPend: '_watermarked',
+      append: '_watermarked',
       fileListPage: 1,
       imageIndex: 0,
       text: '',
@@ -608,7 +608,7 @@ export default {
         } else {
           mimeType = 'jpeg'
         }
-        let distFilename = imageInfo.filename + this.postPend + '.' + distExt
+        let distFilename = imageInfo.filename + this.append + '.' + distExt
         let distPath
         if (this.customDistDirectory) {
           if (this.keepDirectoryStructure) {
@@ -704,7 +704,7 @@ export default {
             } else {
               mimeType = 'jpeg'
             }
-            let distFilename = imageInfo.filename + this.postPend + '.' + distExt
+            let distFilename = imageInfo.filename + this.append + '.' + distExt
             let distPath
             if (this.customDistDirectory) {
               if (this.keepDirectoryStructure) {
@@ -794,7 +794,7 @@ export default {
   }
 }
 
-#editor {
+#watermark-editor {
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -1135,8 +1135,6 @@ export default {
           border-color: #DCDFE6;
           border-style: solid;
           border-width: 1px;
-          overflow-y: auto;
-          overflow-x: hidden;
           
           #empty {
             display: flex;
@@ -1194,7 +1192,7 @@ export default {
     #control-buttons {
       display: flex;
       justify-content: space-between;
-      justify-content: flex-end;
+      align-items: flex-end;
       
       .control-button {
         width: calc((100% - 30px) / 4);

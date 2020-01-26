@@ -26,16 +26,16 @@
             <div class="title">添加水印</div>
           </el-card>
         </div>
-        <div class="container" @click="showDeveloping">
+        <div class="container" @click="open('/splicer', '长图拼接工具')">
           <el-card class="card">
-            <span class="fas fa-file-alt icon"></span>
-            <div class="title">文本制图</div>
+            <i class="fas fa-images icon"></i>
+            <div class="title">长图拼接</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
-            <i class="fas fa-images icon"></i>
-            <div class="title">长图拼接</div>
+            <span class="fas fa-file-alt icon"></span>
+            <div class="title">文本制图</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">

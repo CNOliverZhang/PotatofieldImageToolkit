@@ -1,5 +1,5 @@
 <template>
-  <div id="watermark-template">
+  <div id="splicer-template">
     <div id="preview">
       <div
         id="sample"
@@ -7,13 +7,13 @@
           'background-color': background
         }">
         <div
-          id="watermark-container"
+          id="splicer-container"
           :style="{
             'width': sampleWidth + 'px',
             'height': sampleHeight + 'px'
           }">
           <div
-            id="watermark"
+            id="splicer"
             :style="{
               'left': (position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'center' || position == 'top' || position == 'bottom') ? x + 'px' : null,
               'right': (position == 'right-top' || position == 'right-bottom' || position == 'right') ? x + 'px' : null,
@@ -207,7 +207,7 @@ const ipcRenderer = require('electron').ipcRenderer
 const CreateDirectory = require('../../utils/createdirectory').CreateDirectory
 
 export default {
-  name: 'watermarkEditor',
+  name: 'splicerEditor',
   data () {
     return  {
       index: this.$route.query.index,
@@ -227,8 +227,8 @@ export default {
       sizeBaseY: 0,
       sampleWidth: 0,
       sampleHeight: 0,
-      watermarkWidth: 0,
-      watermarkHeight: 0,
+      splicerWidth: 0,
+      splicerHeight: 0,
       background: '#606266',
       templateTitle: ''
     }
@@ -238,20 +238,20 @@ export default {
       return this.relativeFontSize * this.sizeBaseX
     },
     x() {
-      let watermark = document.getElementById('watermark')
+      let splicer = document.getElementById('splicer')
       if (this.position == 'top' || this.position == 'bottom' || this.position == 'center') {
-        return ((this.sampleWidth - this.watermarkWidth) / 2)
+        return ((this.sampleWidth - this.splicerWidth) / 2)
       } else {
-        let ratio = 1 - this.watermarkWidth / this.sampleWidth
+        let ratio = 1 - this.splicerWidth / this.sampleWidth
         return this.offsetX * this.sizeBaseX * (ratio)
       }
     },
     y() {
-      let watermark = document.getElementById('watermark')
+      let splicer = document.getElementById('splicer')
       if (this.position == 'left' || this.position == 'right' || this.position == 'center') {
-        return ((this.sampleHeight - this.watermarkHeight) / 2)
+        return ((this.sampleHeight - this.splicerHeight) / 2)
       } else {
-        let ratio = 1 - this.watermarkHeight / this.sampleHeight
+        let ratio = 1 - this.splicerHeight / this.sampleHeight
         return this.offsetY * this.sizeBaseY * (ratio)
       }
     }
@@ -338,8 +338,8 @@ export default {
               }
             })
           } else {
-            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-              if (title == this.$store.state.watermark.templates[i].title && this.index != i) {
+            for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
+              if (title == this.$store.state.splicer.templates[i].title && this.index != i) {
                 this.$dialog({
                   type: 'warning',
                   title: '存在同名模板',
@@ -381,7 +381,7 @@ export default {
               }
             }
             template.title = title
-            this.$store.dispatch('watermark/templateReplace', {
+            this.$store.dispatch('splicer/templateReplace', {
               index: this.index,
               template: template
             })
@@ -457,8 +457,8 @@ export default {
               }
             })
           } else {
-            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-              if (title == this.$store.state.watermark.templates[i].title) {
+            for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
+              if (title == this.$store.state.splicer.templates[i].title) {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
@@ -496,7 +496,7 @@ export default {
               }
             }
             template.title = title
-            this.$store.dispatch('watermark/templatePush', template)
+            this.$store.dispatch('splicer/templatePush', template)
             this.$dialog({
               type: 'success',
               title: '成功',
@@ -506,7 +506,7 @@ export default {
                 this.close()
               },
               cancelFunction: () => {
-                this.index = this.$store.state.watermark.templates.length - 1
+                this.index = this.$store.state.splicer.templates.length - 1
               }
             })
           }
@@ -521,20 +521,20 @@ export default {
         text: '确定要删除这个模板吗？',
         showCancel: true,
         confirmFunction: () => {
-          this.$store.dispatch('watermark/templateDelete', this.index)
+          this.$store.dispatch('splicer/templateDelete', this.index)
           this.close()
         }
       })
     }
   },
   mounted() {
-    const WatermarkSizeObserver = new ResizeObserver(entries => {
+    const splicerSizeObserver = new ResizeObserver(entries => {
       entries.forEach(entry => {
-        this.watermarkWidth = entry.contentRect.width
-        this.watermarkHeight = entry.contentRect.height
+        this.splicerWidth = entry.contentRect.width
+        this.splicerHeight = entry.contentRect.height
       })
     })
-    WatermarkSizeObserver.observe(document.getElementById('watermark'))
+    splicerSizeObserver.observe(document.getElementById('splicer'))
     const SampleSizeObserver = new ResizeObserver(entries => {
       entries.forEach(entry => {
         let width = entry.contentRect.width
@@ -548,19 +548,19 @@ export default {
     SampleSizeObserver.observe(document.getElementById('sample'))
     if (this.$route.query.index != -1) {
       let index = this.$route.query.index
-      this.templateTitle = this.$store.state.watermark.templates[index].title
-      this.text = this.$store.state.watermark.templates[index].text
-      this.writingMode = this.$store.state.watermark.templates[index].writingMode
-      this.textAlign = this.$store.state.watermark.templates[index].textAlign
-      this.lineHeight = this.$store.state.watermark.templates[index].lineHeight
-      this.letterSpacing = this.$store.state.watermark.templates[index].letterSpacing
-      this.position = this.$store.state.watermark.templates[index].position
-      this.offsetX = this.$store.state.watermark.templates[index].offsetX
-      this.offsetY = this.$store.state.watermark.templates[index].offsetY
-      this.rotation = this.$store.state.watermark.templates[index].rotation
-      this.color = this.$store.state.watermark.templates[index].color
-      this.font = this.$store.state.watermark.templates[index].font
-      this.relativeFontSize = this.$store.state.watermark.templates[index].relativeFontSize
+      this.templateTitle = this.$store.state.splicer.templates[index].title
+      this.text = this.$store.state.splicer.templates[index].text
+      this.writingMode = this.$store.state.splicer.templates[index].writingMode
+      this.textAlign = this.$store.state.splicer.templates[index].textAlign
+      this.lineHeight = this.$store.state.splicer.templates[index].lineHeight
+      this.letterSpacing = this.$store.state.splicer.templates[index].letterSpacing
+      this.position = this.$store.state.splicer.templates[index].position
+      this.offsetX = this.$store.state.splicer.templates[index].offsetX
+      this.offsetY = this.$store.state.splicer.templates[index].offsetY
+      this.rotation = this.$store.state.splicer.templates[index].rotation
+      this.color = this.$store.state.splicer.templates[index].color
+      this.font = this.$store.state.splicer.templates[index].font
+      this.relativeFontSize = this.$store.state.splicer.templates[index].relativeFontSize
     }
   }
 }
@@ -575,7 +575,7 @@ export default {
   }
 }
 
-#watermark-template {
+#splicer-template {
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -655,13 +655,13 @@ export default {
       overflow: hidden;
       position: relative;
       
-      #watermark-container {
+      #splicer-container {
         position: absolute;
         overflow: hidden;
         white-space: nowrap;
       }
       
-      #watermark {
+      #splicer {
         position: absolute;
         width: fit-content;
         height: fit-content;
