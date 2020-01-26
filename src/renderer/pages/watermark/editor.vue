@@ -293,7 +293,7 @@
 
 <script>
 import ResizeObserver from 'resize-observer-polyfill'
-import '../../utils/html2canvas.min.js'
+import html2canvas from 'html2canvas'
 
 const path = require('path')
 const fs = require('fs')
@@ -906,17 +906,6 @@ export default {
         flex-direction: column;
         justify-content: space-between;
         
-        #indicator {
-          height: 28px;
-          width: 100%;
-          line-height: 28px;
-          font-size: 14px;
-          text-align: center;
-          color: #FFFFFF;
-          background-color: #2196F3;
-          border-radius: 14px;
-        }
-        
         #list {
           width: 100%;
           flex-grow: 1;
@@ -1195,7 +1184,17 @@ export default {
       align-items: flex-end;
       
       .control-button {
-        width: calc((100% - 30px) / 4);
+        width: 100%;
+        margin-left: 5px;
+        margin-right: 5px;
+        
+        &:first-child {
+          margin-left: 0;
+        }
+        
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
   }

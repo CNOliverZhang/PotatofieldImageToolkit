@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -81,6 +81,7 @@
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "axios": "^0.18.0",
     "element-ui": "^2.13.0",
+    "html2canvas": "^1.0.0-rc.5",
     "resize-observer-polyfill": "^1.5.1",
     "vue": "^2.5.16",
     "vue-clamp": "^0.2.2",

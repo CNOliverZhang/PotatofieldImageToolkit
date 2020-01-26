@@ -23,15 +23,15 @@
             :style="{
               'border-radius': borderRadius + 'px'
             }">
-            <div v-if="index != 0" class="control-button move interactable" @click="moveUp(index)">
+            <div v-if="index != 0" class="action move interactable" @click="moveUp(index)">
               <span class="fa fa-arrow-up"></span>
               <div>上移</div>
             </div>
-            <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="control-button move interactable" @click="moveDown(index)">
+            <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="action move interactable" @click="moveDown(index)">
               <span class="fa fa-arrow-down"></span>
               <div>下移</div>
             </div>
-            <div class="control-button interactable delete" @click="handleDelete(index)">
+            <div class="action interactable delete" @click="handleDelete(index)">
               <span class="fa fa-trash-alt"></span>
               <div>删除</div>
             </div>
@@ -162,7 +162,7 @@
 </template>
 
 <script>
-import '../../utils/html2canvas.min.js'
+import html2canvas from 'html2canvas'
 
 const path = require('path')
 const fs = require('fs')
@@ -550,7 +550,7 @@ export default {
           transition: 0.2s;
           opacity: 0;
             
-          .control-button {
+          .action {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -619,37 +619,18 @@ export default {
     flex-direction: column;
     justify-content: space-between;
     
-    .el-textarea__inner {
-      font-family: "NotoSansSC"
-    }
-      
-    textarea {
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
-        
-        &:hover {
-          background-color: #F5F7FA;
-        }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: #DCDFE6;
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: #C0C4CC;
-        }
-      }
-    }
-    
     .control-button {
-      width: calc((100% - 20px) / 3);
+      width: 100%;
+      margin-left: 5px;
+      margin-right: 5px;
+      
+      &:first-child {
+        margin-left: 0;
+      }
+      
+      &:last-child {
+        margin-right: 0;
+      }
     }
     
     .el-select .el-input {
@@ -668,17 +649,6 @@ export default {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        
-        #indicator {
-          height: 28px;
-          width: 100%;
-          line-height: 28px;
-          font-size: 14px;
-          text-align: center;
-          color: #FFFFFF;
-          background-color: #2196F3;
-          border-radius: 14px;
-        }
         
         #list {
           width: 100%;
@@ -782,26 +752,6 @@ export default {
             
             &:hover {
               background-color: #C0C4CC;
-            }
-          }
-        }
-        
-        .el-pagination {
-          flex-grow: 1;
-          text-align: center;
-          padding: 0;
-          
-          li {
-            min-width: 24px;
-            height: 28px;
-            line-height: 28px;
-            
-            &:first-child {
-              margin-left: 0;
-            }
-            
-            &:last-child {
-              margin-right: 0;
             }
           }
         }

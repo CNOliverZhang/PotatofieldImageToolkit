@@ -506,10 +506,6 @@ export default {
     }
   }
   
-  .full-width-button {
-    width: 100%;
-  }
-  
   .half-width-button {
     width: calc(50% - 5px);
   }
