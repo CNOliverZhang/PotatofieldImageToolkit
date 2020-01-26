@@ -49,7 +49,8 @@ function createWindow(args) {
     parent: args.modal ? args.parent : null,
     modal: args.modal,
     webPreferences: {
-      webSecurity: false
+      webSecurity: false,
+      nodeIntegration: true
     }
   })
 

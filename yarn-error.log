@@ -1,5 +1,5 @@
 Arguments: 
-  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js upgrade electron@5.0
+  C:\Program Files\nodejs\node.exe C:\Program Files (x86)\Yarn\bin\yarn.js
 
 PATH: 
   C:\Program Files (x86)\NetSarang\Xshell 6\;C:\Program Files (x86)\Common Files\Intel\Shared Libraries\redist\intel64\compiler;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\nodejs\;C:\Program Files (x86)\Yarn\bin\;C:\Program Files\Git\cmd;C:\Users\Oliver\AppData\Local\Programs\Python\Python38\Scripts\;C:\Users\Oliver\AppData\Local\Programs\Python\Python38\;C:\Users\Oliver\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Bandizip\;C:\Users\Oliver\AppData\Roaming\npm;C:\Users\Oliver\AppData\Local\Yarn\bin
@@ -19,7 +19,7 @@ Trace:
 npm manifest: 
   {
     "name": "potatofield-image-toolkit",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "author": "张志毅",
     "description": "一个为摄影师设计的图片工具箱。",
     "copyright": "Copyright © 2020 张志毅",
