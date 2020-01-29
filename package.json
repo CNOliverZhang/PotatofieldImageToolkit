@@ -74,13 +74,15 @@
     }
   },
   "dependencies": {
-    "@fortawesome/fontawesome": "^1.1.8",
-    "@fortawesome/fontawesome-free-regular": "^5.0.13",
-    "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@ckeditor/ckeditor5-build-classic": "^16.0.0",
+    "@ckeditor/ckeditor5-vue": "^1.0.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.26",
+    "@fortawesome/free-regular-svg-icons": "^5.12.0",
+    "@fortawesome/free-solid-svg-icons": "^5.12.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "axios": "^0.18.0",
     "element-ui": "^2.13.0",
+    "exif-js": "^2.3.0",
     "html2canvas": "^1.0.0-rc.5",
     "resize-observer-polyfill": "^1.5.1",
     "vue": "^2.6.11",

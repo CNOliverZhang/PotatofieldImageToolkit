@@ -47,6 +47,11 @@ export default new Router({
       component: require('@/pages/splicer/template').default
     },
     {
+      path: '/textToImage',
+      name: 'textToImage',
+      component: require('@/pages/textToImage').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

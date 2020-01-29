@@ -41,7 +41,8 @@ export default {
       confirmText: '确定',
       cancelText: '取消',
       confirmFunction: () => {},
-      cancelFunction: () => {}
+      cancelFunction: () => {},
+      onShowFunction: () => {}
     }
   },
   methods: {
@@ -58,24 +59,26 @@ export default {
       this.$destroy()
     },
     change(args) {
-      this.type = args.type ? args.type : this.type
-      this.title = args.title ? args.title : this.title
-      this.text = args.text ? args.text : this.text
-      this.confirmText = args.confirmText ? args.confirmText : this.confirmText
-      this.cancelText = args.cancelText ? args.cancelText : this.cancelText
-      this.confirmFunction = args.confirmFunction ? args.confirmFunction : this.confirmFunction
-      this.cancelFunction = args.cancelFunction ? args.cancelFunction : this.cancelFunction
-      if (args.showConfirm === true || false) {
-        this.showConfirm = args.showConfirm
-      }
-      if (args.showCancel === true || false) {
-        this.showCancel = args.showCancel
-      }
-      if (args.content !== undefined) {
+      this.type = args.type !== undefined ? args.type : this.type
+      this.title = args.title !== undefined ? args.title : this.title
+      this.text = args.text !== undefined ? args.text : this.text
+      this.showConfirm = args.showConfirm !== undefined ? args.showConfirm : this.showConfirm
+      this.showCancel = args.showCancel !== undefined ? args.showCancel : this.showCancel
+      this.confirmText = args.confirmText !== undefined ? args.confirmText : this.confirmText
+      this.cancelText = args.cancelText !== undefined ? args.cancelText : this.cancelText
+      this.confirmFunction = args.confirmFunction !== undefined ? args.confirmFunction : this.confirmFunction
+      this.cancelFunction = args.cancelFunction !== undefined ? args.cancelFunction : this.cancelFunction
+      this.onShowFunction = args.onShowFunction !== undefined ? args.onShowFunction : this.onShowFunction
+      if (args.content ) {
         this.$slots.default = [args.content]
         this.$mount()
       }
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.onShowFunction()
+    })
   }
 }
 </script>
@@ -143,6 +146,7 @@ export default {
         }
         
         img {
+          display: block;
           width: 100%;
           height: auto;
         }

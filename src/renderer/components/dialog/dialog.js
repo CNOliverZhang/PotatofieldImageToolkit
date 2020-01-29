@@ -8,15 +8,16 @@ function showDialog(args) {
     el: document.createElement('div'),
     data() {
       return {
-        type: args.type ? args.type : '',
-        title: args.title ? args.title : '提示',
-        text: args.text ? args.text : '',
-        showCancel: args.showCancel ? args.showCancel : false,
-        showConfirm: args.showConfirm === false ? false : true,
-        confirmText: args.confirmText ? args.confirmText : '确定',
-        cancelText: args.cancelText ? args.cancelText : '取消',
-        confirmFunction: args.confirmFunction ? args.confirmFunction : function () {},
-        cancelFunction: args.cancelFunction ? args.cancelFunction : function () {}
+        type: args.type !== undefined ? args.type : '',
+        title: args.title !== undefined ? args.title : '提示',
+        text: args.text !== undefined ? args.text : '',
+        showCancel: args.showCancel !== undefined ? args.showCancel : false,
+        showConfirm: args.showConfirm !== undefined ? args.showConfirm : true,
+        confirmText: args.confirmText !== undefined ? args.confirmText : '确定',
+        cancelText: args.cancelText !== undefined ? args.cancelText : '取消',
+        confirmFunction: args.confirmFunction !== undefined ? args.confirmFunction : function () {},
+        cancelFunction: args.cancelFunction !== undefined ? args.cancelFunction : function () {},
+        onShowFunction: args.onShowFunction !== undefined ? args.onShowFunction : function () {}
       }
     },
   })

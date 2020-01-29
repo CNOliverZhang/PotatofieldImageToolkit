@@ -1,47 +1,24 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="splicer" @tab-click="clear">
+  <el-tabs type="card" tab-position="left" id="textToImage" @tab-click="clear">
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
-      <div id="file-input" class="tab-content">
-        <el-upload
-          id="upload-dragger"
-          action=""
-          class="interactable"
-          drag
-          multiple
-          :auto-upload="false"
-          :on-change="handleFile"
-          :show-file-list="false"
-          :class="this.$store.state.splicer.fileList.length != 0 ? 'half' : ''">
-          <i class="fas fa-images"></i>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
-        </el-upload>
-        <div v-if="this.$store.state.splicer.fileList.length != 0" id="file-list" class="interactable">
-          <div id="list">
-            <div
-              v-for="(file, index) in this.$store.state.splicer.fileList"
-              :key="index"
-              class="file"
-              @click="preview(index)">
-              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-              <div @click.stop="handleDelete(index)">
-                <i class="fas fa-trash-alt delete"></i>
-              </div>
-            </div>
-          </div>
+      <span slot="label" class="interactable"><i class="fas fa-file-alt"></i> 输入内容</span>
+      <div id="editor" class="tab-content">
+        <div v-html="content"></div>
+        <div id="controller" class="interactable">
+          <ckeditor :editor="editor.editor" :config="editor.config" v-model="content"></ckeditor>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入拼图编辑器</el-button>
+            <el-button type="primary" size="mini" @click="clear" class="half-width-button interactable">清空内容</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入样式编辑器</el-button>
           </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-images"></i> 拼图模板库</span>
+      <span slot="label" class="interactable"><i class="fas fa-palette"></i> 样式模板库</span>
       <div id="templates" class="tab-content">
-        <div id="container" v-if="this.$store.state.splicer.templates.length != 0">
+        <div id="container" v-if="this.$store.state.textToImage.templates.length != 0">
           <div
-            v-for="(template, index) in this.$store.state.splicer.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
+            v-for="(template, index) in this.$store.state.textToImage.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
             :key="index"
             class="template-container">
             <el-card class="card interactable">
@@ -76,20 +53,20 @@
         </div>
         <div class="row">
           <el-pagination
-            v-if="this.$store.state.splicer.templates.length > 6"
+            v-if="this.$store.state.textToImage.templates.length > 6"
             class="interactable"
             small
             background
             layout="prev, pager, next"
             :pager-count="5"
             :page-size="6"
-            :total="this.$store.state.splicer.templates.length"
+            :total="this.$store.state.textToImage.templates.length"
             :current-page="templateListPage"
             :hide-on-single-page="true"
             @current-change="templateListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入拼图模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建拼图模板</el-button>
+          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入样式模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建样式模板</el-button>
         </div>
       </div>
     </el-tab-pane>
@@ -110,18 +87,25 @@
 
 <script>
 const { ipcRenderer, clipboard } = require('electron')
-const ReadDirectory = require('../utils/readdirectory').ReadDirectory
 const path = require('path')
 
-import EXIF from 'exif-js'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import '@ckeditor/ckeditor5-build-classic/build/translations/zh-cn'
 
 export default {
-  name: 'splicer',
+  name: 'textToImage',
   data () {
     return {
-      errorList: [],
+      editor: {
+        editor: ClassicEditor,
+        uiColor: '#FFFFFF',
+        config: {
+          language: 'zh-cn',
+          toolbar: ['heading', 'imageUpload', 'bold', 'italic', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo']
+        }
+      },
+      content: '',
       templateListPage: 1,
-      errorLog: null,
       templateTitle: ''
     }
   },
@@ -131,152 +115,10 @@ export default {
     },
     close() {
       ipcRenderer.send('close')
-      this.$store.dispatch('splicer/fileListEmpty')
       this.$destroy()
     },
     clear() {
-      this.$store.dispatch('splicer/fileListEmpty')
-      this.errorList = []
-      this.errorLog = null
-    },
-    clearConfirm() {
-      this.$dialog({
-        type: 'warning',
-        title: '操作确认',
-        text: '将清除您已导入的图片文件，确定执行操作吗？',
-        showCancel: true,
-        confirmFunction: () => {
-          this.clear()
-        }
-      })
-    },
-    handleFile(file) {
-      let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
-      let filename = file.name.substring(0, file.name.lastIndexOf("."))
-      let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
-        this.$store.dispatch('splicer/fileListPush', {
-          fullpath: file.raw.path,
-          filename: filename,
-          ext: ext
-        })
-      } else {
-        this.errorList.push(filename + '.' + ext)
-        if (this.errorLog) {
-          this.errorLog.change({
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            }))
-          })
-        } else {
-          this.errorLog = this.$dialog({
-            type: 'warning',
-            title: '部分文件导入失败',
-            text: '下列文件导入失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            })),
-            confirmFunction: () => {
-              this.errorList = []
-              this.errorLog = null
-            }
-          })
-        }
-      }
-    },
-    handleDelete(index) {
-      this.$store.dispatch('splicer/fileListDelete', index)
-    },
-    preview(index) {
-      let dialog = this.$dialog({
-        title: '图像预览',
-        text: '正在生成预览',
-        showConfirm: false
-      })
-      let url = this.$store.state.splicer.fileList[index].fullpath
-      let image = document.createElement('img')
-      image.src = url
-      image.onload = () => {
-        EXIF.getData(image, () => {
-          EXIF.getAllTags(image)
-          let orientation = EXIF.getTag(image, 'Orientation')
-          if (orientation == 3 || orientation == 6 || orientation == 8) {
-            let canvas = document.createElement('canvas')
-            let width, height, x, y, rotation
-            if (orientation == 3) {
-              width = image.width
-              height = image.height
-              x = -width
-              y = -height
-              rotation = 180
-            } else if (orientation == 6) {
-              width = image.height
-              height = image.width
-              x = 0
-              y = -width
-              rotation = 90
-            } else {
-              width = image.height
-              height = image.width
-              x = -height
-              y = 0
-              rotation = 270
-            }
-            canvas.height = height
-            canvas.width = width
-            let context = canvas.getContext("2d")
-            context.rotate(rotation * Math.PI / 180)
-            context.drawImage(image, x, y)
-            dialog.change({
-              title: '图像预览',
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'id': 'preview-image'
-                }
-              }),
-              onShowFunction: () => {
-                canvas.style.width = '100%'
-                canvas.style.display = 'block'
-                let previewImage = document.getElementById('preview-image')
-                previewImage.parentNode.replaceChild(canvas, previewImage)
-              }
-            })
-          } else {
-            dialog.change({
-              title: '图像预览',
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'src': url
-                }
-              })
-            })
-          }
-        })
-      }
+      this.content = ''
     },
     templateListPageChange(page) {
       this.templateListPage = page
@@ -284,7 +126,7 @@ export default {
     edit() {
       ipcRenderer.send('open', {
         title: '拼图编辑器',
-        path: '#/splicer/editor',
+        path: '#/textToImage/editor',
         modal: true,
         height: 720,
         width: 1000
@@ -292,8 +134,8 @@ export default {
     },
     editTemplate(index) {
       ipcRenderer.send('open', {
-        title: '拼图模板编辑器',
-        path: '#/splicer/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        title: '样式模板编辑器',
+        path: '#/textToImage/template?index=' + String(index + (this.templateListPage - 1) * 6),
         modal: true,
         height: 600,
         width: 1000
@@ -301,13 +143,13 @@ export default {
     },
     shareTemplate(index) {
       clipboard.writeText(btoa(encodeURI(JSON.stringify({
-        type: 'splicerTemplate',
-        content: this.$store.state.splicer.templates[index]
+        type: 'textToImageTemplate',
+        content: this.$store.state.text.templates[index]
       }))))
       this.$dialog({
         type: 'success',
         title: '成功',
-        text: '已成功将拼图模板复制到剪贴板。'
+        text: '已成功将样式模板复制到剪贴板。'
       })
     },
     deleteTemplate(index) {
@@ -318,14 +160,14 @@ export default {
         text: '确定要删除这个模板吗？',
         showCancel: true,
         confirmFunction: () => {
-          this.$store.dispatch('splicer/templateDelete', index)
+          this.$store.dispatch('textToImage/templateDelete', index)
         }
       })
     },
     importTemplate() {
       try {
         let template = JSON.parse(decodeURI(atob(clipboard.readText())))
-        if (template.type != 'splicerTemplate') {
+        if (template.type != 'textToImageTemplate') {
           throw false
         } else {
           template = template.content
@@ -369,8 +211,8 @@ export default {
                 }
               })
             } else {
-              for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
-                if (title == this.$store.state.splicer.templates[i].title) {
+              for (let i = 0; i < this.$store.state.text.templates.length; i++) {
+                if (title == this.$store.state.text.templates[i].title) {
                   this.$dialog({
                     type: 'warning',
                     title: '存在同名模板',
@@ -412,7 +254,7 @@ export default {
                 }
               }
               template.title = title
-              this.$store.dispatch('splicer/templatePush', template)
+              this.$store.dispatch('text/templatePush', template)
               this.$dialog({
                 type: 'success',
                 title: '成功',
@@ -433,7 +275,7 @@ export default {
     createTemplate() {
       ipcRenderer.send('open', {
         title: '拼图模板编辑器',
-        path: '#/splicer/template?index=-1',
+        path: '#/textToImage/template?index=-1',
         modal: true,
         height: 600,
         width: 1000
@@ -444,7 +286,7 @@ export default {
 </script>
 
 <style lang="scss">
-#splicer {
+#textToImage {
   width: 100%;
   height: 100%;
   
@@ -573,117 +415,60 @@ export default {
     width: calc(50% - 5px);
   }
     
-  #file-input {
+  #editor {
     flex-direction: row;
     
-    #upload-dragger {
-      width: 100%;
-      height: 100%;
-      transition: 0.5s;
-      
-      &.half {
-        width: calc(50% - 5px);
-      }
-      
-      .el-upload {
-        width: 100%;
-        height: 100%;
-        
-        .el-upload-dragger {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          
-          svg {
-            font-size: 40px;
-            margin: 14px;
-          }
-        }
-      }
-    }
-    
-    #file-list {
+    #controller {
       width: calc(50% - 5px);
       height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       
-      #list {
-        width: 100%;
+      .ck-editor {
         flex-grow: 1;
-        background-color: #F5F7FA;
-        box-sizing: border-box;
-        border-radius: 6px;
-        border-color: #DCDFE6;
-        border-style: solid;
-        border-width: 1px;
-        overflow-y: auto;
-        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
         
-        .file {
-          height: 28px;
-          width: 100%;
-          line-height: 24px;
-          font-size: 12px;
-          padding-left: 5px;
-          padding-right: 5px;
-          box-sizing: border-box;
-          background-color: #FFFFFF;
-          border-bottom-color: #DCDFE6;
-          border-bottom-style: solid;
-          border-bottom-width: 1px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: 0.2s;
+        .ck-editor__main {
+          flex-grow: 1;
+          overflow: hidden;
           
-          &:hover {
-            background-color: #F5F7FA;
-          }
-          
-          .filename {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            flex-grow: 1;
-            padding-right: 10px;
-          }
-          
-          .delete {
-            color: #DCDFE6;
-            cursor: pointer;
+          .ck-editor__editable {
+            height: 100%;
+            box-sizing: border-box;
             transition: 0.2s;
             
             &:hover {
-              color: #F56C6C;
+              border-color: #2196F3;
             }
-          }
-        }
-        
-        &::-webkit-scrollbar {
-          width: 10px;
-        }
             
-        &::-webkit-scrollbar-track {
-          border-radius: 5px;
-          background-color: rgba(255, 255, 255, 0);
-          
-          &:hover {
-            background-color: #F5F7FA;
-          }
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          border-radius: 5px;
-          background-color: #DCDFE6;
-          transition: 0.2s;
-          
-          &:hover {
-            background-color: #C0C4CC;
+            &:focus {
+              border-color: #2196F3;
+            }
+            
+            &::-webkit-scrollbar {
+              width: 10px;
+            }
+                
+            &::-webkit-scrollbar-track {
+              border-radius: 5px;
+              background-color: rgba(255, 255, 255, 0);
+              
+              &:hover {
+                background-color: #F5F7FA;
+              }
+            }
+            
+            &::-webkit-scrollbar-thumb {
+              border-radius: 5px;
+              background-color: #DCDFE6;
+              transition: 0.2s;
+              
+              &:hover {
+                background-color: #C0C4CC;
+              }
+            }
           }
         }
       }

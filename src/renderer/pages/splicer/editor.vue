@@ -646,6 +646,7 @@ export default {
       
       #file-list {
         width: calc(50% - 5px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -759,10 +760,10 @@ export default {
       
       #template-list {
         width: calc(50% - 5px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        align-items: center;
         
         #list {
           width: 100%;

@@ -106,7 +106,7 @@
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-feather"></i> 水印模板库</span>
+      <span slot="label" class="interactable"><i class="fas fa-feather-alt"></i> 水印模板库</span>
       <div id="templates" class="tab-content">
         <div id="container" v-if="this.$store.state.watermark.templates.length != 0">
           <div
@@ -179,6 +179,8 @@
 const { ipcRenderer, clipboard } = require('electron')
 const ReadDirectory = require('../utils/readdirectory').ReadDirectory
 const path = require('path')
+
+import EXIF from 'exif-js'
 
 export default {
   name: 'watermark',
@@ -330,14 +332,74 @@ export default {
       this.$store.dispatch('watermark/fileListDelete', index + (this.fileListPage - 1) * 100)
     },
     preview(index) {
-      this.$dialog({
+      let dialog = this.$dialog({
         title: '图像预览',
-        content: this.$createElement('img', {
-          'attrs': {
-            'src': this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
+        text: '正在生成预览',
+        showConfirm: false
+      })
+      let url = this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
+      let image = document.createElement('img')
+      image.src = url
+      image.onload = () => {
+        EXIF.getData(image, () => {
+          let orientation = EXIF.getTag(image, 'Orientation')
+          if (orientation == 3 || orientation == 6 || orientation == 8) {
+            let canvas = document.createElement('canvas')
+            let width, height, x, y, rotation
+            if (orientation == 3) {
+              width = image.width
+              height = image.height
+              x = -width
+              y = -height
+              rotation = 180
+            } else if (orientation == 6) {
+              width = image.height
+              height = image.width
+              x = 0
+              y = -width
+              rotation = 90
+            } else {
+              width = image.height
+              height = image.width
+              x = -height
+              y = 0
+              rotation = 270
+            }
+            canvas.height = height
+            canvas.width = width
+            let context = canvas.getContext("2d")
+            context.rotate(rotation * Math.PI / 180)
+            context.drawImage(image, x, y)
+            dialog.change({
+              title: '图像预览',
+              text: '',
+              showConfirm: true,
+              content: this.$createElement('img', {
+                'attrs': {
+                  'id': 'preview-image'
+                }
+              }),
+              onShowFunction: () => {
+                canvas.style.width = '100%'
+                canvas.style.display = 'block'
+                let previewImage = document.getElementById('preview-image')
+                previewImage.parentNode.replaceChild(canvas, previewImage)
+              }
+            })
+          } else {
+            dialog.change({
+              title: '图像预览',
+              text: '',
+              showConfirm: true,
+              content: this.$createElement('img', {
+                'attrs': {
+                  'src': url
+                }
+              })
+            })
           }
         })
-      })
+      }
     },
     fileListPageChange(page) {
       this.fileListPage = page

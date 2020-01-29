@@ -2,7 +2,7 @@
   <div id="watermark-editor">
     <div id="preview">
       <div id="sample-container">
-        <img :src="this.$store.state.watermark.fileList[this.imageIndex].fullpath" id="sample" />
+        <div id="sample"></div>
         <div
           id="watermark-container"
           :style="{
@@ -294,6 +294,7 @@
 <script>
 import ResizeObserver from 'resize-observer-polyfill'
 import html2canvas from 'html2canvas'
+import EXIF from 'exif-js'
 
 const path = require('path')
 const fs = require('fs')
@@ -379,7 +380,66 @@ export default {
       }
     },
     preview(index) {
+      let dialog = this.$dialog({
+        title: '请稍后',
+        text: '正在载入图像',
+        showConfirm: false
+      })
       this.imageIndex = index + (this.fileListPage - 1) * 100
+      let image = document.createElement('img')
+      image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
+      image.onload = () => {
+        EXIF.getData(image, () => {
+          let orientation = EXIF.getTag(image, 'Orientation')
+          let canvas = document.createElement('canvas')
+          let width, height, x, y, rotation
+          if (orientation == 3) {
+            width = image.width
+            height = image.height
+            x = -width
+            y = -height
+            rotation = 180
+          } else if (orientation == 6) {
+            width = image.height
+            height = image.width
+            x = 0
+            y = -width
+            rotation = 90
+          } else if (orientation == 8) {
+            width = image.height
+            height = image.width
+            x = -height
+            y = 0
+            rotation = 270
+          } else {
+            width = image.width
+            height = image.height
+            x = 0
+            y = 0
+            rotation = 0
+          }
+          canvas.height = height
+          canvas.width = width
+          let context = canvas.getContext("2d")
+          context.rotate(rotation * Math.PI / 180)
+          context.drawImage(image, x, y)
+          context.rotate(-rotation * Math.PI / 180)
+          canvas.style['max-width'] = '100%'
+          canvas.style['max-height'] = '100%'
+          canvas.style.display = 'block'
+          let sample = document.getElementById('sample')
+          sample.parentNode.replaceChild(canvas, sample)
+          canvas.id = 'sample'
+          let style = window.getComputedStyle(canvas)
+          let viewWidth = style.getPropertyValue('width').slice(0, -2)
+          let viewHeight = style.getPropertyValue('height').slice(0, -2)
+          this.sampleWidth = viewWidth
+          this.sampleHeight = viewHeight
+          this.sizeBaseX = viewWidth / 100
+          this.sizeBaseY = viewHeight / 100
+          dialog.close()
+        })
+      }
     },
     changePosition() {
       this.offsetX = 0
@@ -620,21 +680,16 @@ export default {
           distPath = imageInfo.filepath
         }
         let distFullpath = path.join(distPath, distFilename)
-        let image = new Image()
-        image.src = imageInfo.fullpath
-        let scale = image.width / this.sampleWidth
-        let baseCanvas = document.createElement('canvas')
-        let context = baseCanvas.getContext("2d")
-        baseCanvas.width = image.width
-        baseCanvas.height = image.height
-        context.drawImage(image, 0, 0)
+        let baseCanvas = document.getElementById('sample')
+        let scale = baseCanvas.width / this.sampleWidth
         html2canvas(document.getElementById('watermark-container'), {
           scale: scale,
           backgroundColor: null
         }).then(canvas => {
+          let context = baseCanvas.getContext('2d')
           context.drawImage(canvas, 0, 0)
           let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-          let buffer = new Buffer(url, 'base64')
+          let buffer = new Buffer.from(url, 'base64')
           CreateDirectory(distPath)
           fs.writeFile(distFullpath, buffer, (error) => {
             if (error) {
@@ -688,51 +743,93 @@ export default {
           showConfirm: false
         })
         let handle = (index) => {
-          this.$nextTick(() => {
-            let imageInfo = this.$store.state.watermark.fileList[index]
-            let distExt
-            if (this.mimeType == '保持原格式') {
-              distExt = imageInfo.ext
-            } else if (this.mimeType == 'JPEG') {
-              distExt = 'jpg'
+          let imageInfo = this.$store.state.watermark.fileList[index]
+          let distExt
+          if (this.mimeType == '保持原格式') {
+            distExt = imageInfo.ext
+          } else if (this.mimeType == 'JPEG') {
+            distExt = 'jpg'
+          } else {
+            distExt = 'png'
+          }
+          let mimeType
+          if (distExt == 'png') {
+            mimeType = 'png'
+          } else {
+            mimeType = 'jpeg'
+          }
+          let distFilename = imageInfo.filename + this.append + '.' + distExt
+          let distPath
+          if (this.customDistDirectory) {
+            if (this.keepDirectoryStructure) {
+              distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
             } else {
-              distExt = 'png'
+              distPath = this.distDirectory
             }
-            let mimeType
-            if (distExt == 'png') {
-              mimeType = 'png'
-            } else {
-              mimeType = 'jpeg'
-            }
-            let distFilename = imageInfo.filename + this.append + '.' + distExt
-            let distPath
-            if (this.customDistDirectory) {
-              if (this.keepDirectoryStructure) {
-                distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+          } else {
+            distPath = imageInfo.filepath
+          }
+          let distFullpath = path.join(distPath, distFilename)
+          let image = document.createElement('img')
+          image.src = this.$store.state.watermark.fileList[index].fullpath
+          image.onload = () => {
+            EXIF.getData(image, () => {
+              let orientation = EXIF.getTag(image, 'Orientation')
+              let canvas = document.createElement('canvas')
+              let width, height, x, y, rotation
+              if (orientation == 3) {
+                width = image.width
+                height = image.height
+                x = -width
+                y = -height
+                rotation = 180
+              } else if (orientation == 6) {
+                width = image.height
+                height = image.width
+                x = 0
+                y = -width
+                rotation = 90
+              } else if (orientation == 8) {
+                width = image.height
+                height = image.width
+                x = -height
+                y = 0
+                rotation = 270
               } else {
-                distPath = this.distDirectory
+                width = image.width
+                height = image.height
+                x = 0
+                y = 0
+                rotation = 0
               }
-            } else {
-              distPath = imageInfo.filepath
-            }
-            let distFullpath = path.join(distPath, distFilename)
-            let image = new Image()
-            image.src = imageInfo.fullpath
-            image.onload = () => {
+              canvas.height = height
+              canvas.width = width
+              let context = canvas.getContext("2d")
+              context.rotate(rotation * Math.PI / 180)
+              context.drawImage(image, x, y)
+              context.rotate(-rotation * Math.PI / 180)
+              canvas.style['max-width'] = '100%'
+              canvas.style['max-height'] = '100%'
+              canvas.style.display = 'block'
+              let sample = document.getElementById('sample')
+              sample.parentNode.replaceChild(canvas, sample)
+              canvas.id = 'sample'
+              let style = window.getComputedStyle(canvas)
+              let viewWidth = style.getPropertyValue('width').slice(0, -2)
+              let viewHeight = style.getPropertyValue('height').slice(0, -2)
+              this.sampleWidth = viewWidth
+              this.sampleHeight = viewHeight
+              this.sizeBaseX = viewWidth / 100
+              this.sizeBaseY = viewHeight / 100
+              let scale = width / viewWidth
               setTimeout(() => {
-                let scale = image.width / this.sampleWidth
-                let baseCanvas = document.createElement('canvas')
-                let context = baseCanvas.getContext("2d")
-                baseCanvas.width = image.width
-                baseCanvas.height = image.height
-                context.drawImage(image, 0, 0)
                 html2canvas(document.getElementById('watermark-container'), {
                   scale: scale,
                   backgroundColor: null,
-                }).then((canvas) => {
-                  context.drawImage(canvas, 0, 0)
-                  let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-                  let buffer = new Buffer(url, 'base64')
+                }).then((coverCanvas) => {
+                  context.drawImage(coverCanvas, 0, 0)
+                  let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+                  let buffer = new Buffer.from(url, 'base64')
                   CreateDirectory(distPath)
                   fs.writeFileSync(distFullpath, buffer)
                   if (index < this.$store.state.watermark.fileList.length - 1) {
@@ -750,19 +847,18 @@ export default {
                         this.close()
                       }
                     })
-                    return
                   }
                 })
-              }, 300)
-            }
-          })
-          this.imageIndex = index
+              }, 100)
+            })
+          }
         }
         handle(0)
       }
     }
   },
   mounted() {
+    this.preview(0)
     const WatermarkSizeObserver = new ResizeObserver(entries => {
       entries.forEach(entry => {
         this.watermarkWidth = entry.contentRect.width
@@ -770,17 +866,6 @@ export default {
       })
     })
     WatermarkSizeObserver.observe(document.getElementById('watermark'))
-    const SampleSizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        let width = entry.contentRect.width
-        let height = entry.contentRect.height
-        this.sampleWidth = width
-        this.sampleHeight = height
-        this.sizeBaseX = width / 100
-        this.sizeBaseY = height / 100
-      })
-    })
-    SampleSizeObserver.observe(document.getElementById('sample'))
   }
 }
 </script>
@@ -902,6 +987,7 @@ export default {
       
       #file-list {
         width: calc(50% - 5px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -1005,10 +1091,10 @@ export default {
       
       #template-list {
         width: calc(50% - 5px);
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        align-items: center;
         
         #list {
           width: 100%;

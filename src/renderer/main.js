@@ -3,21 +3,23 @@ import axios from 'axios'
 import App from './App'
 import router from './router'
 import store from './store'
-import fontawesome from '@fortawesome/fontawesome'
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
-import solid from '@fortawesome/fontawesome-free-solid'
-import regular from '@fortawesome/fontawesome-free-regular'
 import dialog from './components/dialog/dialog'
 import VClamp from 'vue-clamp'
-import ElementUI from 'element-ui';
+import ElementUI from 'element-ui'
+import CKEditor from '@ckeditor/ckeditor5-vue'
+import { library, dom } from '@fortawesome/fontawesome-svg-core'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
 import './theme/index.css'
 
-fontawesome.library.add(solid)
-fontawesome.library.add(regular)
+library.add(fas)
+library.add(far)
+dom.watch()
 
-Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.component('v-clamp', VClamp)
 
+Vue.use( CKEditor )
 Vue.use(ElementUI)
 Vue.use(dialog)
 
