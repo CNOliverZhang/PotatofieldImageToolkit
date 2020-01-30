@@ -134,7 +134,7 @@ export default {
     },
     edit() {
       ipcRenderer.send('open', {
-        title: '拼图编辑器',
+        title: '样式编辑器',
         path: '#/textToImage/editor',
         modal: true,
         height: 720,
@@ -189,7 +189,7 @@ export default {
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入拼图模板标题',
+                    title: '请输入样式模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -229,7 +229,7 @@ export default {
                     showCancel: true,
                     confirmFunction: () => {
                       this.$dialog({
-                        title: '请输入拼图模板标题',
+                        title: '请输入样式模板标题',
                         content: this.$createElement('div', {
                           'class': 'el-input el-input--mini'
                         }, [
@@ -267,7 +267,7 @@ export default {
               this.$dialog({
                 type: 'success',
                 title: '成功',
-                text: '拼图模板导入成功。'
+                text: '样式模板导入成功。'
               })
             }
           }
@@ -277,13 +277,13 @@ export default {
         this.$dialog({
           type: 'error',
           title: '导入失败',
-          text: '未能从您的剪贴板中读取到拼图模板信息！'
+          text: '未能从您的剪贴板中读取到样式模板信息！'
         })
       }
     },
     createTemplate() {
       ipcRenderer.send('open', {
-        title: '拼图模板编辑器',
+        title: '样式模板编辑器',
         path: '#/textToImage/template?index=-1',
         modal: true,
         height: 600,

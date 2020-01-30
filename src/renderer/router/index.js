@@ -52,6 +52,16 @@ export default new Router({
       component: require('@/pages/textToImage').default
     },
     {
+      path: '/textToImage/editor',
+      name: 'textToImageEditor',
+      component: require('@/pages/textToImage/editor').default
+    },
+    {
+      path: '/textToImage/template',
+      name: 'textToImageTemplate',
+      component: require('@/pages/textToImage/template').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

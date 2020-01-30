@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新 Electron 到最新版本，提高安全性和整体性能。图片支持根据 EXIF 信息自动旋转至正确的方向。\n修复已知问题。"
+      "releaseNotes": "更新 Electron 到最新版本，提高安全性和整体性能。\n图片支持根据 EXIF 信息自动旋转至正确的方向。\n修复已知问题。"
     },
     "publish": [
       {
