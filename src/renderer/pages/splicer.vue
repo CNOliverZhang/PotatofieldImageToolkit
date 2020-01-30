@@ -52,15 +52,15 @@
               <div class="text">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
               <div class="row control-buttons">
-                <div class="control-button interactable" @click="editTemplate(index)">
+                <div class="control-button interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
                   <div>编辑</div>
                 </div>
-                <div class="control-button interactable" @click="shareTemplate(index)">
+                <div class="control-button interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-share-alt"></span>
                   <div>分享</div>
                 </div>
-                <div class="control-button interactable" @click="deleteTemplate(index)">
+                <div class="control-button interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -293,7 +293,7 @@ export default {
     editTemplate(index) {
       ipcRenderer.send('open', {
         title: '拼图模板编辑器',
-        path: '#/splicer/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        path: '#/splicer/template?index=' + String(index),
         modal: true,
         height: 600,
         width: 1000
@@ -311,7 +311,6 @@ export default {
       })
     },
     deleteTemplate(index) {
-      index = index + (this.templateListPage - 1) * 6
       this.$dialog({
         type: 'warning',
         title: '操作确认',

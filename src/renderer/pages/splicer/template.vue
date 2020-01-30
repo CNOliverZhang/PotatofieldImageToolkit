@@ -157,7 +157,7 @@ export default {
             showCancel: true,
             confirmFunction: () => {
               this.$dialog({
-                title: '请输入水印模板标题',
+                title: '请输入拼图模板标题',
                 content: this.$createElement('div', {
                   'class': 'el-input el-input--mini'
                 }, [

@@ -3,7 +3,7 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-file-alt"></i> 输入内容</span>
       <div id="editor" class="tab-content">
-        <div v-html="content"></div>
+        <div id="preview" class="interactable" v-html="content"></div>
         <div id="controller" class="interactable">
           <ckeditor :editor="editor.editor" :config="editor.config" v-model="content"></ckeditor>
           <div class="row">
@@ -90,6 +90,7 @@ const { ipcRenderer, clipboard } = require('electron')
 const path = require('path')
 
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import UploadAdapterPlugin from '../utils/EditorUploadAdapter'
 import '@ckeditor/ckeditor5-build-classic/build/translations/zh-cn'
 
 export default {
@@ -101,7 +102,15 @@ export default {
         uiColor: '#FFFFFF',
         config: {
           language: 'zh-cn',
-          toolbar: ['heading', 'imageUpload', 'bold', 'italic', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo']
+          heading: {
+            options: [
+              { model: 'paragraph', title: 'Paragraph', class: 'ck-heading_paragraph' },
+              { model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
+              { model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' }
+            ]
+          },
+          toolbar: ['heading', 'imageUpload', 'bold', 'italic', 'blockQuote', 'bulletedList', 'numberedList', 'undo', 'redo'],
+          extraPlugins: [UploadAdapterPlugin]
         }
       },
       content: '',
@@ -418,6 +427,86 @@ export default {
   #editor {
     flex-direction: row;
     
+    #preview {
+      width: calc(50% - 10px);
+      height: 100%;
+      background-color: #606266;
+      box-sizing: border-box;
+      border-radius: 6px;
+      padding: 10px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: #FFFFFF;
+      margin-bottom: 0.5em;
+      margin-top: 0.5em;
+      
+      blockquote {
+        margin: 0;
+        padding-left: 10px;
+        border-left-color: #DCDFE6;
+        border-left-style: solid;
+        border-left-width: 5px;
+        box-sizing: border-box;
+      }
+      
+      h2 {
+        font-size: 18px;
+      }
+      
+      h3 {
+        font-size: 14px;
+      }
+      
+      p {
+        font-size: 12px;
+        text-align: justify;
+      }
+      
+      ul {
+        padding-left: 1em;
+      }
+      
+      ol {
+        padding-left: 1em;
+      }
+      
+      li {
+        font-size: 12px;
+      }
+      
+      figure {
+        margin: 0;
+        width: 100%;
+        
+        img {
+          width: 100%;
+        }
+      }
+      
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: rgba(255, 255, 255, 0);
+        
+        &:hover {
+          background-color: #F5F7FA;
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: #DCDFE6;
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: #C0C4CC;
+        }
+      }
+    }
+    
     #controller {
       width: calc(50% - 5px);
       height: 100%;
@@ -470,6 +559,10 @@ export default {
               }
             }
           }
+        }
+        
+        .ck-toolbar {
+          background-color: #FFFFFF;
         }
       }
     }

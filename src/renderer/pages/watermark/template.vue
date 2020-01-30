@@ -531,17 +531,14 @@ export default {
       })
     })
     WatermarkSizeObserver.observe(document.getElementById('watermark'))
-    const SampleSizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        let width = entry.contentRect.width
-        let height = entry.contentRect.height
-        this.sampleWidth = width
-        this.sampleHeight = height
-        this.sizeBaseX = width / 100
-        this.sizeBaseY = height / 100
-      })
-    })
-    SampleSizeObserver.observe(document.getElementById('sample'))
+    let sample = document.getElementById('sample')
+    let style = window.getComputedStyle(sample)
+    let width = style.getPropertyValue('width').slice(0, -2)
+    let height = style.getPropertyValue('height').slice(0, -2)
+    this.sampleWidth = width
+    this.sampleHeight = height
+    this.sizeBaseX = width / 100
+    this.sizeBaseY = height / 100
     if (this.$route.query.index != -1) {
       let index = this.$route.query.index
       this.templateTitle = this.$store.state.watermark.templates[index].title

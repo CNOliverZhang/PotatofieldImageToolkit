@@ -47,9 +47,9 @@
               v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
               :key="file.fullpath"
               class="file"
-              @click="preview(index)">
+              @click="preview(index + (fileListPage - 1) * 100)">
               <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-              <div @click.stop="handleDelete(index)">
+              <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
                 <i class="fas fa-trash-alt delete"></i>
               </div>
             </div>
@@ -282,7 +282,7 @@
         </div>
       </div>
       <div id="control-buttons">
-        <el-button type="primary" size="mini" @click="exit" class="control-button interactable">退出编辑器</el-button>
+        <el-button type="primary" size="mini" @click="close" class="control-button interactable">退出编辑器</el-button>
         <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">保存为模板</el-button>
         <el-button type="primary" size="mini" @click="start" class="control-button interactable">处理这张图片</el-button>
         <el-button type="primary" size="mini" @click="startAll" class="control-button interactable">处理全部图片</el-button>
@@ -367,32 +367,37 @@ export default {
       this.fileListPage = page
     },
     handleDelete(index) {
-      let targetIndex = index + (this.fileListPage - 1) * 100
       if (this.$store.state.watermark.fileList.length > 1) {
         if (this.$store.state.watermark.fileList.length % 100 == 1) {
-          this.fileListPage -= 1
+          if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
+            if (this.fileListPage != 1) {
+              this.fileListPage -= 1
+            }
+          }
         }
-        this.$store.dispatch('watermark/fileListDelete', targetIndex)
-        if (this.imageIndex > targetIndex) {
+        if (this.imageIndex > index) {
           this.imageIndex -= 1
-        } else if (this.imageIndex == targetIndex) {
-          this.preview(this.imageIndex - (this.fileListPage - 1) * 100 - 1)
+        } else if (this.imageIndex == index) {
+          setTimeout(() => {
+            this.preview(this.imageIndex - 1)
+          }, 100)
         }
+        this.$store.dispatch('watermark/fileListDelete', index)
       } else {
         this.close()
       }
     },
     preview(index) {
-      if (this.imageIndex != index + (this.fileListPage - 1) * 100) {
+      if (this.imageIndex != index) {
         let dialog = this.$dialog({
           title: '请稍后',
           text: '正在载入图像',
           showConfirm: false
         })
-        if (index + (this.fileListPage - 1) * 100 < 0) {
+        if (index < 0) {
           this.imageIndex = 0
         } else {
-          this.imageIndex = index + (this.fileListPage - 1) * 100
+          this.imageIndex = index
         }
         let image = document.createElement('img')
         image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
@@ -481,25 +486,6 @@ export default {
           this.$store.dispatch('watermark/templateDelete', index)
         }
       })
-    },
-    exit() {
-      if (this.$store.state.watermark.fileList.length != 0) {
-        this.$dialog({
-          title: '操作确认',
-          text: '您即将退出编辑器，但您的文件列表中仍有待处理文件。您是否要保留这些文件，以便您修改图片保存设置后继续编辑？',
-          showCancel: true,
-          confirmText: '保留',
-          cancelText: '不保留',
-          confirmFunction: () => {
-            ipcRenderer.send('close')
-          },
-          cancelFunction: () => {
-            this.close()
-          }
-        })
-      } else {
-        this.close()
-      }
     },
     saveAsTemplate() {
       if (this.text.length == 0) {
@@ -710,17 +696,23 @@ export default {
               })
             } else {
               if (this.$store.state.watermark.fileList.length > 1) {
-                this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
                 dialog.change({
                   type: 'success',
                   title: '成功',
                   text: '处理完成，添加水印后的图片已保存到目标文件夹。',
                   showConfirm: true,
                   confirmFunction: () => {
-                    if (this.$store.state.watermark.fileList.length % 100 == 0) {
-                      this.fileListPage -= 1
+                    if (this.fileListPage != 1) {
+                      if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
+                        if (this.$store.state.watermark.fileList.length % 100 == 1) {
+                          this.fileListPage -= 1
+                        }
+                      }
                     }
-                    this.preview(this.imageIndex - (this.fileListPage - 1) * 100 - 1)
+                    setTimeout(() => {
+                      this.preview(this.imageIndex - 1)
+                    }, 100)
+                    this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
                   }
                 })
               } else {

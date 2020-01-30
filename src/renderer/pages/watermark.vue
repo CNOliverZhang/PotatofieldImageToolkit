@@ -79,10 +79,10 @@
             v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
             :key="file.fullpath"
             class="file"
-            @click="preview(index)">
+            @click="preview(index + (fileListPage - 1) * 100)">
             <div class="filename">{{ file.filename + '.' + file.ext }}</div>
             <div class="path">{{ file.filepath }}</div>
-            <div @click.stop="handleDelete(index)">
+            <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
               <i class="fas fa-trash-alt delete"></i>
             </div>
           </div>
@@ -119,15 +119,15 @@
               </div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
               <div class="row control-buttons">
-                <div class="control-button interactable" @click="editTemplate(index)">
+                <div class="control-button interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
                   <div>编辑</div>
                 </div>
-                <div class="control-button interactable" @click="shareTemplate(index)">
+                <div class="control-button interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-share-alt"></span>
                   <div>分享</div>
                 </div>
-                <div class="control-button interactable" @click="deleteTemplate(index)">
+                <div class="control-button interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -292,47 +292,49 @@ export default {
         showConfirm: false
       })
       let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-      setTimeout(() => {
-        this.$store.dispatch('watermark/fileListAssign', result.fileList)
-        this.errorList = result.errorList
+      dialog.change({
+        type: 'success',
+        title: '完成',
+        text: '已扫描完您选择的文件夹，共发现 ' + result.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
+        showConfirm: true
+      })
+      this.$store.dispatch('watermark/fileListAssign', result.fileList)
+      this.errorList = result.errorList
+      if (this.errorList.length != 0) {
         dialog.change({
-          type: 'success',
-          title: '完成',
-          text: '已扫描完您选择的文件夹，共发现 ' + result.fileList.length + ' 个可处理的图片文件，接下来你可以继续执行下一步操作。',
-          showConfirm: true
-        })
-        if (this.errorList.length != 0) {
-          dialog.change({
-            content: this.$createElement('div', null, [
-              this.$createElement('div', null, [
-                this.$createElement('p', null, '扫描下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
-              ]),
-              this.$createElement('div', null, this.errorList.map((file) => {
-                return this.$createElement('p', {
-                  style: {
-                    'line-height': '24px',
-                    'font-size': '12px',
-                    'width': '100%',
-                    'overflow': 'hidden',
-                    'text-overflow': 'ellipsis',
-                    'white-space': 'nowrap',
-                    'text-indent': '0'
-                  }
-                }, file)
-              }))
+          content: this.$createElement('div', null, [
+            this.$createElement('div', null, [
+              this.$createElement('p', null, '扫描下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
             ]),
-            confirmFunction: () => {
-              this.errorList = []
-            }
-          })
-        }
-      }, 500)
+            this.$createElement('div', null, this.errorList.map((file) => {
+              return this.$createElement('p', {
+                style: {
+                  'line-height': '24px',
+                  'font-size': '12px',
+                  'width': '100%',
+                  'overflow': 'hidden',
+                  'text-overflow': 'ellipsis',
+                  'white-space': 'nowrap',
+                  'text-indent': '0'
+                }
+              }, file)
+            }))
+          ]),
+          confirmFunction: () => {
+            this.errorList = []
+          }
+        })
+      }
     },
     handleDelete(index) {
-      if (this.$store.state.watermark.fileList.length % 100 == 1) {
-        this.fileListPage -= 1
+      if (this.fileListPage != 1) {
+        if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
+          if (this.$store.state.watermark.fileList.length % 100 == 1) {
+            this.fileListPage -= 1
+          }
+        }
       }
-      this.$store.dispatch('watermark/fileListDelete', index + (this.fileListPage - 1) * 100)
+      this.$store.dispatch('watermark/fileListDelete', index)
     },
     preview(index) {
       let dialog = this.$dialog({
@@ -340,7 +342,7 @@ export default {
         text: '正在生成预览',
         showConfirm: false
       })
-      let url = this.$store.state.watermark.fileList[index + (this.fileListPage - 1) * 100].fullpath
+      let url = this.$store.state.watermark.fileList[index].fullpath
       let image = document.createElement('img')
       image.src = url
       image.onload = () => {
@@ -374,7 +376,6 @@ export default {
             context.rotate(rotation * Math.PI / 180)
             context.drawImage(image, x, y)
             dialog.change({
-              title: '图像预览',
               text: '',
               showConfirm: true,
               content: this.$createElement('img', {
@@ -391,7 +392,6 @@ export default {
             })
           } else {
             dialog.change({
-              title: '图像预览',
               text: '',
               showConfirm: true,
               content: this.$createElement('img', {
@@ -425,7 +425,7 @@ export default {
     editTemplate(index) {
       ipcRenderer.send('open', {
         title: '水印模板编辑器',
-        path: '#/watermark/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        path: '#/watermark/template?index=' + String(index),
         modal: true,
         height: 600,
         width: 1000
@@ -443,13 +443,19 @@ export default {
       })
     },
     deleteTemplate(index) {
-      index = index + (this.templateListPage - 1) * 6
       this.$dialog({
         type: 'warning',
         title: '操作确认',
         text: '确定要删除这个模板吗？',
         showCancel: true,
         confirmFunction: () => {
+          if (this.templateListPage != 1) {
+            if (this.templateListPage == Math.ceil(this.$store.state.watermark.templates.length / 6)) {
+              if (this.$store.state.watermark.templates.length % 6 == 1) {
+                this.templateListPage -= 1
+              }
+            }
+          }
           this.$store.dispatch('watermark/templateDelete', index)
         }
       })
