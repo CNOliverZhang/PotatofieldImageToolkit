@@ -399,7 +399,7 @@ export default {
           let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
           let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
           maxWidth = maxWidth * (width / (width - this.padding * 2))
-          let scale = Math.min((maxWidth / width), (16000 / height), Math.sqrt(64000000 / (width * height)))
+          let scale = Math.min((maxWidth / width), (16000 / height), Math.sqrt(256000000 / (width * height)))
           let canvas = document.createElement('canvas')
           canvas.width = width * scale
           canvas.height = height * scale
