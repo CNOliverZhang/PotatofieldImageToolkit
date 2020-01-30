@@ -312,7 +312,7 @@ export default {
       mimeType: 'JPEG',
       append: '_watermarked',
       fileListPage: 1,
-      imageIndex: 0,
+      imageIndex: -1,
       text: '',
       writingMode: 'horizontal-tb',
       textAlign: 'center',
@@ -369,76 +369,85 @@ export default {
     handleDelete(index) {
       let targetIndex = index + (this.fileListPage - 1) * 100
       if (this.$store.state.watermark.fileList.length > 1) {
+        if (this.$store.state.watermark.fileList.length % 100 == 1) {
+          this.fileListPage -= 1
+        }
         this.$store.dispatch('watermark/fileListDelete', targetIndex)
         if (this.imageIndex > targetIndex) {
           this.imageIndex -= 1
         } else if (this.imageIndex == targetIndex) {
-          this.imageIndex = 0
+          this.preview(this.imageIndex - (this.fileListPage - 1) * 100 - 1)
         }
       } else {
         this.close()
       }
     },
     preview(index) {
-      let dialog = this.$dialog({
-        title: '请稍后',
-        text: '正在载入图像',
-        showConfirm: false
-      })
-      this.imageIndex = index + (this.fileListPage - 1) * 100
-      let image = document.createElement('img')
-      image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
-      image.onload = () => {
-        EXIF.getData(image, () => {
-          let orientation = EXIF.getTag(image, 'Orientation')
-          let canvas = document.createElement('canvas')
-          let width, height, x, y, rotation
-          if (orientation == 3) {
-            width = image.width
-            height = image.height
-            x = -width
-            y = -height
-            rotation = 180
-          } else if (orientation == 6) {
-            width = image.height
-            height = image.width
-            x = 0
-            y = -width
-            rotation = 90
-          } else if (orientation == 8) {
-            width = image.height
-            height = image.width
-            x = -height
-            y = 0
-            rotation = 270
-          } else {
-            width = image.width
-            height = image.height
-            x = 0
-            y = 0
-            rotation = 0
-          }
-          canvas.height = height
-          canvas.width = width
-          let context = canvas.getContext("2d")
-          context.rotate(rotation * Math.PI / 180)
-          context.drawImage(image, x, y)
-          context.rotate(-rotation * Math.PI / 180)
-          canvas.style['max-width'] = '100%'
-          canvas.style['max-height'] = '100%'
-          canvas.style.display = 'block'
-          let sample = document.getElementById('sample')
-          sample.parentNode.replaceChild(canvas, sample)
-          canvas.id = 'sample'
-          let style = window.getComputedStyle(canvas)
-          let viewWidth = style.getPropertyValue('width').slice(0, -2)
-          let viewHeight = style.getPropertyValue('height').slice(0, -2)
-          this.sampleWidth = viewWidth
-          this.sampleHeight = viewHeight
-          this.sizeBaseX = viewWidth / 100
-          this.sizeBaseY = viewHeight / 100
-          dialog.close()
+      if (this.imageIndex != index + (this.fileListPage - 1) * 100) {
+        let dialog = this.$dialog({
+          title: '请稍后',
+          text: '正在载入图像',
+          showConfirm: false
         })
+        if (index + (this.fileListPage - 1) * 100 < 0) {
+          this.imageIndex = 0
+        } else {
+          this.imageIndex = index + (this.fileListPage - 1) * 100
+        }
+        let image = document.createElement('img')
+        image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
+        image.onload = () => {
+          EXIF.getData(image, () => {
+            let orientation = EXIF.getTag(image, 'Orientation')
+            let canvas = document.createElement('canvas')
+            let width, height, x, y, rotation
+            if (orientation == 3) {
+              width = image.width
+              height = image.height
+              x = -width
+              y = -height
+              rotation = 180
+            } else if (orientation == 6) {
+              width = image.height
+              height = image.width
+              x = 0
+              y = -width
+              rotation = 90
+            } else if (orientation == 8) {
+              width = image.height
+              height = image.width
+              x = -height
+              y = 0
+              rotation = 270
+            } else {
+              width = image.width
+              height = image.height
+              x = 0
+              y = 0
+              rotation = 0
+            }
+            canvas.height = height
+            canvas.width = width
+            let context = canvas.getContext("2d")
+            context.rotate(rotation * Math.PI / 180)
+            context.drawImage(image, x, y)
+            context.rotate(-rotation * Math.PI / 180)
+            canvas.style['max-width'] = '100%'
+            canvas.style['max-height'] = '100%'
+            canvas.style.display = 'block'
+            let sample = document.getElementById('sample')
+            sample.parentNode.replaceChild(canvas, sample)
+            canvas.id = 'sample'
+            let style = window.getComputedStyle(canvas)
+            let viewWidth = style.getPropertyValue('width').slice(0, -2)
+            let viewHeight = style.getPropertyValue('height').slice(0, -2)
+            this.sampleWidth = viewWidth
+            this.sampleHeight = viewHeight
+            this.sizeBaseX = viewWidth / 100
+            this.sizeBaseY = viewHeight / 100
+            dialog.close()
+          })
+        }
       }
     },
     changePosition() {
@@ -702,12 +711,17 @@ export default {
             } else {
               if (this.$store.state.watermark.fileList.length > 1) {
                 this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
-                this.imageIndex = 0
                 dialog.change({
                   type: 'success',
                   title: '成功',
                   text: '处理完成，添加水印后的图片已保存到目标文件夹。',
-                  showConfirm: true
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    if (this.$store.state.watermark.fileList.length % 100 == 0) {
+                      this.fileListPage -= 1
+                    }
+                    this.preview(this.imageIndex - (this.fileListPage - 1) * 100 - 1)
+                  }
                 })
               } else {
                 dialog.change({
@@ -834,7 +848,7 @@ export default {
                   fs.writeFileSync(distFullpath, buffer)
                   if (index < this.$store.state.watermark.fileList.length - 1) {
                     dialog.change({
-                      text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。',
+                      text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
                     })
                     return handle(index + 1)
                   } else {

@@ -329,6 +329,9 @@ export default {
       }, 500)
     },
     handleDelete(index) {
+      if (this.$store.state.watermark.fileList.length % 100 == 1) {
+        this.fileListPage -= 1
+      }
       this.$store.dispatch('watermark/fileListDelete', index + (this.fileListPage - 1) * 100)
     },
     preview(index) {

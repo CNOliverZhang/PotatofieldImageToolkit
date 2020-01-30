@@ -11,8 +11,8 @@ export default {
     FILELIST_PUSH (state, file) {
       state.fileList.push(file)
     },
-    FILELIST_POP (state) {
-      return state.fileList.pop()
+    FILELIST_REPLACE (state, payload) {
+      state.fileList.splice(payload.index, 1, payload.file)
     },
     FILELIST_DELETE (state, index) {
       state.fileList.splice(index, 1)
@@ -40,8 +40,8 @@ export default {
     fileListPush (context, file) {
       context.commit('FILELIST_PUSH', file)
     },
-    fileListPop (context) {
-      return context.commit('FILELIST_POP')
+    fileListReplace (context, payload) {
+      context.commit('FILELIST_REPLACE', payload)
     },
     fileListDelete (context, index) {
       context.commit('FILELIST_DELETE', index)

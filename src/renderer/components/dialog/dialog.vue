@@ -89,10 +89,12 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  -webkit-app-region: drag;
   
   .el-dialog {
     width: 400px;
     margin: 0!important;
+    -webkit-app-region: no-drag;
   
     .el-dialog__header {
       margin-top: 20px;

@@ -10,14 +10,19 @@
         <div
           v-for="(image, index) in this.$store.state.splicer.fileList"
           class="image-container"
-          :key="index">
-          <img
-            class="image"
-            :src="image.fullpath"
+          :key="index"
+          :style="{
+            'margin-bottom': index != ($store.state.splicer.fileList.length - 1) ? (spacing + 'px') : 0
+          }">
+          <div
+            class="image-wrapper"
             :style="{
-              'margin-bottom': index != ($store.state.splicer.fileList.length - 1) ? (spacing + 'px') : 0,
               'border-radius': borderRadius + 'px'
-            }"/>
+            }">
+            <img
+              class="image"
+              :src="image.fullpath"/>
+          </div>
           <div
             class="image-controller"
             :style="{
@@ -163,6 +168,7 @@
 
 <script>
 import html2canvas from 'html2canvas'
+import EXIF from 'exif-js'
 
 const path = require('path')
 const fs = require('fs')
@@ -178,7 +184,8 @@ export default {
       backgroundColor: '#FFFFFF',
       distDirectory: '',
       filename: '',
-      templateTitle: ''
+      templateTitle: '',
+      imagesChanged: false
     }
   },
   methods: {
@@ -193,6 +200,7 @@ export default {
       fileList[index - 1] = fileList[index]
       fileList[index] = image
       this.$store.dispatch('splicer/fileListAssign', fileList)
+      this.imagesChanged = true
     },
     moveDown(index) {
       let fileList = this.$store.state.splicer.fileList
@@ -200,10 +208,12 @@ export default {
       fileList[index + 1] = fileList[index]
       fileList[index] = image
       this.$store.dispatch('splicer/fileListAssign', fileList)
+      this.imagesChanged = true
     },
     handleDelete(index) {
       if (this.$store.state.splicer.fileList.length > 1) {
         this.$store.dispatch('splicer/fileListDelete', index)
+        this.imagesChanged = true
       } else {
         this.close()
       }
@@ -374,67 +384,140 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         })
-        let fullname = this.filename + '.jpg'
-        let distFullpath = path.join(this.distDirectory, fullname)
-        let image = new Image()
-        image.src = this.$store.state.splicer.fileList[0].fullpath
-        let maxWidth = image.width
-        for (let i = 1; i < this.$store.state.splicer.fileList.length; i++) {
-          image.src = this.$store.state.splicer.fileList[i].fullpath
-          maxWidth = Math.max(maxWidth, image.width)
-        }
-        document.getElementById('sample-container').style['overflow-y'] = 'hidden'
-        let sample = document.getElementById('sample')
-        let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
-        let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
-        maxWidth = maxWidth * (width / (width - this.padding * 2))
-        let scale = Math.min((maxWidth / width), (32000 / height), Math.sqrt(256000000 / (width * height)))
-        let canvas = document.createElement('canvas')
-        canvas.width = width * scale
-        canvas.height = height * scale
-        html2canvas(sample, {
-          canvas: canvas,
-          scale: scale,
-          backgroundColor: null,
-          allowTaint: true,
-          imageTimeout: 0
-        }).then(canvas => {
-          let url = canvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
-          let buffer = new Buffer(url, 'base64')
-          fs.writeFile(distFullpath, buffer, (error) => {
-            if (error) {
-              dialog.change({
-                type: 'error',
-                title: '出现错误',
-                text: '写入文件失败，请检查目标文件夹权限。',
-                showConfirm: true
-              })
-            } else {
-              if (scale < (maxWidth / width)) {
+        setTimeout(() => {
+          let fullname = this.filename + '.jpg'
+          let distFullpath = path.join(this.distDirectory, fullname)
+          let image = new Image()
+          image.src = this.$store.state.splicer.fileList[0].fullpath
+          let images = document.getElementsByClassName('image')
+          let maxWidth = 0
+          for (let i = 0; i < images.length; i++) {
+            maxWidth = Math.max(maxWidth, images[i].width)
+          }
+          let sampleContainer = document.getElementById('sample-container')
+          sampleContainer.style['overflow-y'] = 'hidden'
+          let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
+          let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
+          maxWidth = maxWidth * (width / (width - this.padding * 2))
+          let scale = Math.min((maxWidth / width), (16000 / height), Math.sqrt(64000000 / (width * height)))
+          let canvas = document.createElement('canvas')
+          canvas.width = width * scale
+          canvas.height = height * scale
+          html2canvas(sample, {
+            canvas: canvas,
+            scale: scale,
+            backgroundColor: null,
+            allowTaint: true,
+            imageTimeout: 0
+          }).then(canvas => {
+            let url = canvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
+            let buffer = new Buffer.from(url, 'base64')
+            fs.writeFile(distFullpath, buffer, (error) => {
+              if (error) {
                 dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '处理完成，拼接后的长图已保存到目标文件夹。因为图片数量过多或原图尺寸过大，拼接后图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.close()
-                  }
+                  type: 'error',
+                  title: '出现错误',
+                  text: '写入文件失败，请检查目标文件夹权限。',
+                  showConfirm: true
                 })
               } else {
-                dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '处理完成，拼接后的长图已保存到目标文件夹。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.close()
-                  }
-                })
+                if (scale < (maxWidth / width)) {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '处理完成，拼接后的长图已保存到目标文件夹。因为图片数量过多或原图尺寸过大，拼接后图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                } else {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '处理完成，拼接后的长图已保存到目标文件夹。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                }
               }
+            })
+          })
+        }, 0)
+      }
+    },
+    refresh() {
+      let dialog = this.$dialog({
+        title: '正在更新预览',
+        text: '即将完成，请稍候。',
+        showConfirm: false
+      })
+      let wrappers = document.getElementsByClassName('image-wrapper')
+      let images = document.getElementsByClassName('image')
+      let replace = (index) => {
+        let image = document.createElement('img')
+        image.src = this.$store.state.splicer.fileList[index].fullpath
+        image.onload = () => {
+          EXIF.getData(image, () => {
+            let orientation = EXIF.getTag(image, 'Orientation')
+            let canvas = document.createElement('canvas')
+            let width, height, x, y, rotation
+            if (orientation == 3) {
+              width = image.width
+              height = image.height
+              x = -width
+              y = -height
+              rotation = 180
+            } else if (orientation == 6) {
+              width = image.height
+              height = image.width
+              x = 0
+              y = -width
+              rotation = 90
+            } else if (orientation == 8) {
+              width = image.height
+              height = image.width
+              x = -height
+              y = 0
+              rotation = 270
+            } else {
+              width = image.width
+              height = image.height
+              x = 0
+              y = 0
+              rotation = 0
+            }
+            canvas.height = height
+            canvas.width = width
+            let context = canvas.getContext("2d")
+            context.rotate(rotation * Math.PI / 180)
+            context.drawImage(image, x, y)
+            context.rotate(-rotation * Math.PI / 180)
+            canvas.className = 'image'
+            wrappers[index].replaceChild(canvas, images[index])
+            dialog.change({
+              text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.splicer.fileList.length) + ' 张。'
+            })
+            if (index < this.$store.state.splicer.fileList.length - 1) {
+              return replace(index + 1)
+            } else {
+              dialog.close()
             }
           })
-        })
+        }
       }
+      replace(0)
+    }
+  },
+  mounted() {
+    this.refresh()
+  },
+  updated() {
+    if (this.imagesChanged) {
+      this.refresh()
+      this.imagesChanged = false
     }
   }
 }
@@ -532,9 +615,14 @@ export default {
         width: 100%;
         position: relative;
         
-        .image {
+        .image-wrapper {
           width: 100%;
-          display: block;
+          overflow: hidden;
+          
+          .image {
+            width: 100%;
+            display: block;
+          }
         }
         
         .image-controller {
