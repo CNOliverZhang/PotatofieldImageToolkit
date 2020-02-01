@@ -26,18 +26,24 @@
                 <div class="subtitle">{{ template.title }}</div>
               </div>
               <div class="text">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
-              <div class="text">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
+              <div class="text">背景颜色：
+                <div
+                  class="color-sample"
+                  :style="{
+                    'background-color': template.backgroundColor
+                  }"></div>
+              </div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
               <div class="row control-buttons">
-                <div class="control-button interactable" @click="editTemplate(index)">
+                <div class="control-button interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
                   <div>编辑</div>
                 </div>
-                <div class="control-button interactable" @click="shareTemplate(index)">
+                <div class="control-button interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-share-alt"></span>
                   <div>分享</div>
                 </div>
-                <div class="control-button interactable" @click="deleteTemplate(index)">
+                <div class="control-button interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -89,9 +95,9 @@
 const { ipcRenderer, clipboard } = require('electron')
 const path = require('path')
 
+import '@ckeditor/ckeditor5-build-classic/build/translations/zh-cn'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import UploadAdapterPlugin from '../utils/EditorUploadAdapter'
-import '@ckeditor/ckeditor5-build-classic/build/translations/zh-cn'
 
 export default {
   name: 'textToImage',
@@ -108,6 +114,9 @@ export default {
               { model: 'heading1', view: 'h2', title: 'Heading 1', class: 'ck-heading_heading1' },
               { model: 'heading2', view: 'h3', title: 'Heading 2', class: 'ck-heading_heading2' }
             ]
+          },
+          image: {
+            toolbar: []
           },
           toolbar: ['heading', 'imageUpload', 'bold', 'italic', 'blockQuote', 'bulletedList', 'numberedList', 'undo', 'redo'],
           extraPlugins: [UploadAdapterPlugin]
@@ -133,18 +142,26 @@ export default {
       this.templateListPage = page
     },
     edit() {
-      ipcRenderer.send('open', {
-        title: '样式编辑器',
-        path: '#/textToImage/editor',
-        modal: true,
-        height: 720,
-        width: 1000
-      })
+      if (this.content == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您输入内容！'
+        })
+      } else {
+        this.$store.dispatch('textToImage/contentAssign', this.content)
+        ipcRenderer.send('open', {
+          title: '样式编辑器',
+          path: '#/textToImage/editor',
+          modal: true,
+          height: 720,
+          width: 1000
+        })
+      }
     },
     editTemplate(index) {
       ipcRenderer.send('open', {
         title: '样式模板编辑器',
-        path: '#/textToImage/template?index=' + String(index + (this.templateListPage - 1) * 6),
+        path: '#/textToImage/template?index=' + String(index),
         modal: true,
         height: 600,
         width: 1000
@@ -153,7 +170,7 @@ export default {
     shareTemplate(index) {
       clipboard.writeText(btoa(encodeURI(JSON.stringify({
         type: 'textToImageTemplate',
-        content: this.$store.state.text.templates[index]
+        content: this.$store.state.textToImage.templates[index]
       }))))
       this.$dialog({
         type: 'success',
@@ -162,7 +179,6 @@ export default {
       })
     },
     deleteTemplate(index) {
-      index = index + (this.templateListPage - 1) * 6
       this.$dialog({
         type: 'warning',
         title: '操作确认',
@@ -185,7 +201,7 @@ export default {
               this.$dialog({
                 type: 'error',
                 title: '错误',
-                text: '请输入模板标题，否则无法保存该模板。',
+                text: '请输入模板标题，否则无法导入该模板。',
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
@@ -204,7 +220,7 @@ export default {
                         },
                         'class': 'el-input__inner',
                         'style': {
-                          'font-family': 'NotoSansSCThin'
+                          'font-family': 'var(--main-font)'
                         }
                       })
                     ]),
@@ -220,8 +236,8 @@ export default {
                 }
               })
             } else {
-              for (let i = 0; i < this.$store.state.text.templates.length; i++) {
-                if (title == this.$store.state.text.templates[i].title) {
+              for (let i = 0; i < this.$store.state.textToImage.templates.length; i++) {
+                if (title == this.$store.state.textToImage.templates[i].title) {
                   this.$dialog({
                     type: 'warning',
                     title: '存在同名模板',
@@ -244,7 +260,7 @@ export default {
                             },
                             'class': 'el-input__inner',
                             'style': {
-                              'font-family': 'NotoSansSCThin'
+                              'font-family': 'var(--main-font)'
                             }
                           })
                         ]),
@@ -263,7 +279,7 @@ export default {
                 }
               }
               template.title = title
-              this.$store.dispatch('text/templatePush', template)
+              this.$store.dispatch('textToImage/templatePush', template)
               this.$dialog({
                 type: 'success',
                 title: '成功',
@@ -300,14 +316,14 @@ export default {
   height: 100%;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .el-tabs__header {
     margin-right: 0;
     
     .el-tabs__nav-scroll {
-      background-color: #606266;
+      background-color: var(--dark-gray);
       
       .el-tabs__nav {
         border: 0;
@@ -319,7 +335,7 @@ export default {
           width: 150px;
           height: 50px;
           line-height: 50px;
-          color: #DCDFE6;
+          color: var(--light-gray);
           text-align: center;
           border: 0;
           transition: 0.2s;
@@ -344,7 +360,7 @@ export default {
               }
               
               &:hover {
-                color: #FFFFFF;
+                color: var(--white);
               }
               
               &:active {
@@ -354,8 +370,8 @@ export default {
           }
           
           &.is-active {
-            background-color: #FFFFFF;
-            color: #2196F3;
+            background-color: var(--white);
+            color: var(--main-color);
             cursor: default;
           }
           
@@ -367,7 +383,7 @@ export default {
           }
           
           &:hover:not(.is-disabled):not(.is-active) {
-            color: #FFFFFF;
+            color: var(--white);
           }
           
           &:active:not(.is-disabled):not(.is-active) {
@@ -430,48 +446,85 @@ export default {
     #preview {
       width: calc(50% - 10px);
       height: 100%;
-      background-color: #606266;
+      background-color: var(--black-gray);
       box-sizing: border-box;
       border-radius: 6px;
       padding: 10px;
+      line-height: 1.5em;
       overflow-x: hidden;
       overflow-y: auto;
-      color: #FFFFFF;
-      margin-bottom: 0.5em;
-      margin-top: 0.5em;
+      color: var(--white);
       
       blockquote {
         margin: 0;
         padding-left: 10px;
-        border-left-color: #DCDFE6;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        border-left-color: var(--light-gray);
         border-left-style: solid;
-        border-left-width: 5px;
+        border-left-width: 3px;
         box-sizing: border-box;
       }
       
       h2 {
-        font-size: 18px;
+        font-family: 'NotoSerifSCBlack';
+        font-size: 24px;
+        letter-spacing: 0.3em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        line-height: 1.8em;
+        text-align: justify;
+        color: var(--white)
       }
       
       h3 {
-        font-size: 14px;
+        font-family: 'NotoSerifSCBlack';
+        font-size: 18px;
+        letter-spacing: 0.1em;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        line-height: 1.8em;
+        text-align: justify;
+        color: var(--white)
       }
       
       p {
-        font-size: 12px;
+        font-family: 'NotoSansSCThin';
+        font-size: 14px;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        line-height: 1.8em;
+        text-indent: 2em;
         text-align: justify;
+        color: var(--white)
       }
       
       ul {
-        padding-left: 1em;
+        font-family: 'NotoSansSCThin';
+        font-size: 14px;
+        padding-left: 2em;
+        line-height: 1.8em;
+        text-align: justify;
+        color: var(--white)
+        
+        li {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+        }
       }
       
       ol {
-        padding-left: 1em;
-      }
-      
-      li {
-        font-size: 12px;
+        font-family: 'NotoSansSCThin';
+        font-size: 14px;
+        padding-left: 2em;
+        line-height: 1.8em;
+        text-align: justify;
+        color: var(--white)
+        
+        li {
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+        }
       }
       
       figure {
@@ -479,7 +532,26 @@ export default {
         width: 100%;
         
         img {
+          display: block;
           width: 100%;
+          font-size: 12px;
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        canvas {
+          display: block;
+          width: 100%;
+          font-size: 12px;
+          margin-top: 0.5em;
+          margin-bottom: 0.5em;
+        }
+        
+        figcaption {
+          font-family: 'NotoSansSCThin';
+          font-size: 12px;
+          text-align: center;
+          color: var(--gray);
         }
       }
       
@@ -489,20 +561,20 @@ export default {
           
       &::-webkit-scrollbar-track {
         border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
+        background-color: var(--white-gray);
         
         &:hover {
-          background-color: #F5F7FA;
+          background-color: var(--light-gray);
         }
       }
       
       &::-webkit-scrollbar-thumb {
         border-radius: 5px;
-        background-color: #DCDFE6;
+        background-color: var(--gray);
         transition: 0.2s;
         
         &:hover {
-          background-color: #C0C4CC;
+          background-color: var(--dark-gray);
         }
       }
     }
@@ -528,12 +600,16 @@ export default {
             box-sizing: border-box;
             transition: 0.2s;
             
+            blockquote {
+              font-style: normal;
+            }
+            
             &:hover {
-              border-color: #2196F3;
+              border-color: var(--main-color);
             }
             
             &:focus {
-              border-color: #2196F3;
+              border-color: var(--main-color);
             }
             
             &::-webkit-scrollbar {
@@ -542,27 +618,27 @@ export default {
                 
             &::-webkit-scrollbar-track {
               border-radius: 5px;
-              background-color: rgba(255, 255, 255, 0);
+              background-color: var(--transparent);
               
               &:hover {
-                background-color: #F5F7FA;
+                background-color: var(--white-gray);
               }
             }
             
             &::-webkit-scrollbar-thumb {
               border-radius: 5px;
-              background-color: #DCDFE6;
+              background-color: var(--light-gray);
               transition: 0.2s;
               
               &:hover {
-                background-color: #C0C4CC;
+                background-color: var(--gray);
               }
             }
           }
         }
         
         .ck-toolbar {
-          background-color: #FFFFFF;
+          background-color: var(--white);
         }
       }
     }
@@ -578,7 +654,7 @@ export default {
       flex-wrap: wrap;
       
       .template-container {
-        width: calc(100%/3);
+        width: calc(100% / 3);
         height: 210px;
         box-sizing: border-box;
         padding: 10px;
@@ -586,7 +662,7 @@ export default {
         .card {
           width: 100%;
           height: 100%;
-          color: #606266;
+          color: var(--dark-gray);
           
           .el-card__body {
             width: 100%;
@@ -600,6 +676,21 @@ export default {
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
+            }
+            
+            .text {
+              display: flex;
+              align-items: center;
+              
+              .color-sample {
+                width: 1em;
+                height: 1em;
+                border-color: var(--light-gray);
+                border-style: solid;
+                border-radius: 3px;
+                border-width: 1px;
+                box-sizing: border-box;
+              }
             }
             
             .control-buttons {
@@ -623,7 +714,7 @@ export default {
                 }
                 
                 &:hover {
-                  color: #2196F3;
+                  color: var(--main-color);
                 }
                 
                 &:active {

@@ -5,7 +5,7 @@
       <div id="info" class="tab-content">
         <div class="row">
           <div id="intro">
-            <img id="logo" src="static/logo.png" />
+            <img id="logo" src="static/images/logo.png" />
             <div id="intro-text">
               <div class="title">洋芋田图像工具箱</div>
               <div class="text">一个专为摄影师设计的图像工具箱</div>
@@ -24,7 +24,7 @@
           <div class="subtitle">开源协议</div>
         </div>
         <div class="row">
-          <div class="text">本程序遵循MIT开源许可协议发行，相关资源及源码已托管在Github，您可以<span
+          <div class="text">本程序遵循 MIT 开源许可协议发行，相关资源及源码已托管在 Github ，您可以<span
             class="link interactable"
             @click="open('https://github.com/CNOliverZhang/PotatofieldImageToolkit/')">点此访问</span>。
         </div>
@@ -256,14 +256,14 @@ export default {
   height: 100%;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .el-tabs__header {
     margin-right: 0;
     
     .el-tabs__nav-scroll {
-      background-color: #606266;
+      background-color: var(--dark-gray);
       
       .el-tabs__nav {
         border: 0;
@@ -275,14 +275,14 @@ export default {
           width: 150px;
           height: 50px;
           line-height: 50px;
-          color: #DCDFE6;
+          color: var(--light-gray);
           text-align: center;
           border: 0;
           transition: 0.2s;
           
           &.is-active {
-            background-color: #FFFFFF;
-            color: #2196F3;
+            background-color: var(--white);
+            color: var(--main-color);
             cursor: default;
           }
           
@@ -294,7 +294,7 @@ export default {
           }
           
           &:hover:not(.is-disabled):not(.is-active) {
-            color: #FFFFFF;
+            color: var(--white);
           }
           
           &:active:not(.is-disabled):not(.is-active) {
@@ -373,7 +373,7 @@ export default {
       transition: 0.2s;
       
       &:hover {
-        color: #2196F3;
+        color: var(--main-color);
       }
     }
   }
@@ -398,7 +398,7 @@ export default {
       }
       
       &:hover {
-        color: #FFFFFF;
+        color: var(--white);
       }
       
       &:active {

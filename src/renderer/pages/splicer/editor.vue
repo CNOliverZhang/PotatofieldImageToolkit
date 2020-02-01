@@ -44,7 +44,7 @@
         </div>
       </div>
     </div>
-    <div id="control">
+    <div id="control" class="interactable">
       <div>
         <div class="row">
           <div class="subtitle">拼图样式设置</div>
@@ -53,7 +53,7 @@
           <div class="text">外框宽度</div>
           <el-slider
             v-model="padding"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -64,7 +64,7 @@
           <div class="text">图片间距</div>
           <el-slider
             v-model="spacing"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -75,7 +75,7 @@
           <div class="text">图片圆角</div>
           <el-slider
             v-model="borderRadius"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -84,20 +84,20 @@
         </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
-          <el-color-picker v-model="backgroundColor" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
+          <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
         </div>
         <div class="row">
           <div class="subtitle">保存设置</div>
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
+          <el-input disabled size="mini" v-model="distDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="control-row">
           <div class="text">文件名</div>
-          <el-input size="mini" v-model="filename" class="interactable control" placeholder="请输入文件名">
+          <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
             <template slot="append">.jpg</template>
           </el-input>
         </div>
@@ -107,7 +107,7 @@
           <div class="row">
             <div class="subtitle">待处理的文件</div>
           </div>
-          <div id="list" class="interactable">
+          <div id="list">
             <div
               v-for="(file, index) in this.$store.state.splicer.fileList"
               :key="index"
@@ -125,7 +125,7 @@
             </div>
           </div>
         </div>
-        <div id="template-list" class="interactable">
+        <div id="template-list">
           <div class="row">
             <div class="subtitle">已保存的模板</div>
           </div>
@@ -135,11 +135,11 @@
               :key="template.title"
               class="template">
               <div class="cover">
-                <div class="action interactable" @click="applyTemplate(index)">
+                <div class="action" @click="applyTemplate(index)">
                   <span class="fa fa-check-circle"></span>
                   <div>应用</div>
                 </div>
-                <div class="action interactable" @click="deleteTemplate(index)">
+                <div class="action" @click="deleteTemplate(index)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -158,9 +158,9 @@
         </div>
       </div>
       <div class="row">
-        <el-button type="primary" size="mini" @click="close" class="control-button interactable">退出编辑器</el-button>
-        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">保存为模板</el-button>
-        <el-button type="primary" size="mini" @click="start" class="control-button interactable">开始拼接</el-button>
+        <el-button type="primary" size="mini" @click="close" class="control-button">退出编辑器</el-button>
+        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button">保存为模板</el-button>
+        <el-button type="primary" size="mini" @click="start" class="control-button">开始拼接</el-button>
       </div>
     </div>
   </div>
@@ -255,7 +255,7 @@ export default {
             showCancel: true,
             confirmFunction: () => {
               this.$dialog({
-                title: '请输入水印模板标题',
+                title: '请输入拼图模板标题',
                 content: this.$createElement('div', {
                   'class': 'el-input el-input--mini'
                 }, [
@@ -270,7 +270,7 @@ export default {
                     },
                     'class': 'el-input__inner',
                     'style': {
-                      'font-family': 'NotoSansSCThin'
+                      'font-family': 'var(--main-font)'
                     }
                   })
                 ]),
@@ -291,11 +291,11 @@ export default {
               this.$dialog({
                 type: 'warning',
                 title: '需要重命名',
-                text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入水印模板标题',
+                    title: '请输入拼图模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -310,7 +310,7 @@ export default {
                         },
                         'class': 'el-input__inner',
                         'style': {
-                          'font-family': 'NotoSansSCThin'
+                          'font-family': 'var(--main-font)'
                         }
                       })
                     ]),
@@ -333,12 +333,12 @@ export default {
           this.$dialog({
             type: 'success',
             title: '成功',
-            text: '水印模板保存成功。'
+            text: '拼图模板保存成功。'
           })
         }
       }
       this.$dialog({
-        title: '请输入水印模板标题',
+        title: '请输入拼图模板标题',
         content: this.$createElement('div', {
           'class': 'el-input el-input--mini'
         }, [
@@ -353,7 +353,7 @@ export default {
             },
             'class': 'el-input__inner',
             'style': {
-              'font-family': 'NotoSansSCThin'
+              'font-family': 'var(--main-font)'
             }
           })
         ]),
@@ -445,7 +445,7 @@ export default {
               }
             })
           })
-        }, 0)
+        }, 100)
       }
     },
     refresh() {
@@ -528,7 +528,7 @@ export default {
   -webkit-app-region: no-drag;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
 }
 
@@ -543,11 +543,11 @@ export default {
   align-items: center;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   input {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .control-row {
@@ -598,8 +598,8 @@ export default {
     width: calc(50% - 10px);
     height: 100%;
     flex-shrink: 0;
-    background-color: #606266;
-    border-color: #DCDFE6;
+    background-color: var(--black-gray);
+    border-color: var(--light-gray);
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
@@ -634,7 +634,7 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: rgba(0, 0, 0, 0.3);
+          background-color: var(--transparent-black-cover);
           transition: 0.2s;
           opacity: 0;
             
@@ -648,7 +648,7 @@ export default {
             width: 32px;
             margin-left: 10px;
             margin-right: 10px;
-            color: #FFFFFF;
+            color: var(--white);
             transition: 0.2s;
             
             svg {
@@ -666,11 +666,11 @@ export default {
           }
           
           .move:hover {
-            color: #2196F3;
+            color: var(--main-color);
           }
           
           .delete:hover {
-            color: #F56C6C;
+            color: var(--warning-red);
           }
         }
       }
@@ -682,20 +682,20 @@ export default {
         
     &::-webkit-scrollbar-track {
       border-radius: 5px;
-      background-color: rgba(255, 255, 255, 0);
+      background-color: var(--white-gray);
       
       &:hover {
-        background-color: #F5F7FA;
+        background-color: var(--light-gray);
       }
     }
     
     &::-webkit-scrollbar-thumb {
       border-radius: 5px;
-      background-color: #DCDFE6;
+      background-color: var(--gray);
       transition: 0.2s;
       
       &:hover {
-        background-color: #C0C4CC;
+        background-color: var(--dark-gray);
       }
     }
   }
@@ -742,10 +742,10 @@ export default {
         #list {
           width: 100%;
           flex-grow: 1;
-          background-color: #F5F7FA;
+          background-color: var(--white--gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           overflow-y: auto;
@@ -759,8 +759,8 @@ export default {
             padding-left: 5px;
             padding-right: 5px;
             box-sizing: border-box;
-            background-color: #FFFFFF;
-            border-bottom-color: #DCDFE6;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
             border-bottom-style: solid;
             border-bottom-width: 1px;
             display: flex;
@@ -769,7 +769,7 @@ export default {
             transition: 0.2s;
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
             
             .filename {
@@ -781,14 +781,14 @@ export default {
             }
             
             .delete {
-              color: #DCDFE6;
+              color: var(--light-gray);
               cursor: pointer;
               transition: 0.2s;
               margin-right: 5px;
               margin-left: 5px;
               
               &:hover {
-                color: #F56C6C;
+                color: var(--warning-red);
               }
               
               &:first-index {
@@ -801,14 +801,14 @@ export default {
             }
             
             .move {
-              color: #DCDFE6;
+              color: var(--light-gray);
               cursor: pointer;
               transition: 0.2s;
               margin-right: 5px;
               margin-left: 5px;
               
               &:hover {
-                color: #2196F3;
+                color: var(--main-color);
               }
               
               &:first-index {
@@ -827,20 +827,20 @@ export default {
               
           &::-webkit-scrollbar-track {
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: var(--transparent);
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
           }
           
           &::-webkit-scrollbar-thumb {
             border-radius: 5px;
-            background-color: #DCDFE6;
+            background-color: var(--light-gray);
             transition: 0.2s;
             
             &:hover {
-              background-color: #C0C4CC;
+              background-color: var(--gray);
             }
           }
         }
@@ -856,10 +856,10 @@ export default {
         #list {
           width: 100%;
           flex-grow: 1;
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           overflow-y: auto;
@@ -874,8 +874,8 @@ export default {
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            background-color: #FFFFFF;
-            border-bottom-color: #DCDFE6;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
             border-bottom-style: solid;
             border-bottom-width: 1px;
             
@@ -895,7 +895,7 @@ export default {
               display: flex;
               justify-content: center;
               align-items: center;
-              background-color: #FFFFFF;
+              background-color: var(--white);
               opacity: 0;
               transition: 0.2s;
               
@@ -917,7 +917,7 @@ export default {
                 }
                 
                 &:hover {
-                  color: #2196F3;
+                  color: var(--main-color);
                 }
                 
                 &:active {
@@ -937,20 +937,20 @@ export default {
               
           &::-webkit-scrollbar-track {
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: var(--transparent);
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
           }
           
           &::-webkit-scrollbar-thumb {
             border-radius: 5px;
-            background-color: #DCDFE6;
+            background-color: var(--light-gray);
             transition: 0.2s;
             
             &:hover {
-              background-color: #C0C4CC;
+              background-color: var(--gray);
             }
           }
         }
@@ -961,10 +961,10 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           

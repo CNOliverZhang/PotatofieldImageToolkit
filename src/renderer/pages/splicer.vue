@@ -13,8 +13,8 @@
           :on-change="handleFile"
           :show-file-list="false"
           :class="this.$store.state.splicer.fileList.length != 0 ? 'half' : ''">
-          <i class="fas fa-images"></i>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击选择文件</em></div>
+          <i class="fas fa-image"></i>
+          <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
         </el-upload>
         <div v-if="this.$store.state.splicer.fileList.length != 0" id="file-list" class="interactable">
           <div id="list">
@@ -110,7 +110,7 @@
 
 <script>
 const { ipcRenderer, clipboard } = require('electron')
-const ReadDirectory = require('../utils/readdirectory').ReadDirectory
+const ReadDirectory = require('../utils/ReadDirectory')
 const path = require('path')
 
 import EXIF from 'exif-js'
@@ -143,7 +143,7 @@ export default {
       this.$dialog({
         type: 'warning',
         title: '操作确认',
-        text: '将清除您已导入的图片文件，确定执行操作吗？',
+        text: '将清除您已导入的图片，确定执行操作吗？',
         showCancel: true,
         confirmFunction: () => {
           this.clear()
@@ -181,8 +181,8 @@ export default {
         } else {
           this.errorLog = this.$dialog({
             type: 'warning',
-            title: '部分文件导入失败',
-            text: '下列文件导入失败，请您检查文件格式。但已导入的图片文件不受影响，您仍可以继续处理列表中显示的已导入文件。',
+            title: '部分图片导入失败',
+            text: '下列图片导入失败，请您检查文件格式。但已导入的图片不受影响，您仍可以继续处理列表中显示的已导入图片。',
             content: this.$createElement('div', null, this.errorList.map((filename) => {
               return this.$createElement('p', {
                 style: {
@@ -333,7 +333,7 @@ export default {
               this.$dialog({
                 type: 'error',
                 title: '错误',
-                text: '请输入模板标题，否则无法保存该模板。',
+                text: '请输入模板标题，否则无法导入该模板。',
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
@@ -352,7 +352,7 @@ export default {
                         },
                         'class': 'el-input__inner',
                         'style': {
-                          'font-family': 'NotoSansSCThin'
+                          'font-family': 'var(--main-font)'
                         }
                       })
                     ]),
@@ -392,7 +392,7 @@ export default {
                             },
                             'class': 'el-input__inner',
                             'style': {
-                              'font-family': 'NotoSansSCThin'
+                              'font-family': 'var(--main-font)'
                             }
                           })
                         ]),
@@ -448,14 +448,14 @@ export default {
   height: 100%;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .el-tabs__header {
     margin-right: 0;
     
     .el-tabs__nav-scroll {
-      background-color: #606266;
+      background-color: var(--dark-gray);
       
       .el-tabs__nav {
         border: 0;
@@ -467,7 +467,7 @@ export default {
           width: 150px;
           height: 50px;
           line-height: 50px;
-          color: #DCDFE6;
+          color: var(--light-gray);
           text-align: center;
           border: 0;
           transition: 0.2s;
@@ -492,7 +492,7 @@ export default {
               }
               
               &:hover {
-                color: #FFFFFF;
+                color: var(--white);
               }
               
               &:active {
@@ -502,8 +502,8 @@ export default {
           }
           
           &.is-active {
-            background-color: #FFFFFF;
-            color: #2196F3;
+            background-color: var(--white);
+            color: var(--main-color);
             cursor: default;
           }
           
@@ -515,7 +515,7 @@ export default {
           }
           
           &:hover:not(.is-disabled):not(.is-active) {
-            color: #FFFFFF;
+            color: var(--white);
           }
           
           &:active:not(.is-disabled):not(.is-active) {
@@ -614,10 +614,10 @@ export default {
       #list {
         width: 100%;
         flex-grow: 1;
-        background-color: #F5F7FA;
+        background-color: var(--white-gray);
         box-sizing: border-box;
         border-radius: 6px;
-        border-color: #DCDFE6;
+        border-color: var(--light-gray);
         border-style: solid;
         border-width: 1px;
         overflow-y: auto;
@@ -631,8 +631,8 @@ export default {
           padding-left: 5px;
           padding-right: 5px;
           box-sizing: border-box;
-          background-color: #FFFFFF;
-          border-bottom-color: #DCDFE6;
+          background-color: var(--white);
+          border-bottom-color: var(--light-gray);
           border-bottom-style: solid;
           border-bottom-width: 1px;
           display: flex;
@@ -641,7 +641,7 @@ export default {
           transition: 0.2s;
           
           &:hover {
-            background-color: #F5F7FA;
+            background-color: var(--white-gray);
           }
           
           .filename {
@@ -653,12 +653,12 @@ export default {
           }
           
           .delete {
-            color: #DCDFE6;
+            color: var(--light-gray);
             cursor: pointer;
             transition: 0.2s;
             
             &:hover {
-              color: #F56C6C;
+              color: var(--warning-red);
             }
           }
         }
@@ -669,20 +669,20 @@ export default {
             
         &::-webkit-scrollbar-track {
           border-radius: 5px;
-          background-color: rgba(255, 255, 255, 0);
+          background-color: var(--transparent);
           
           &:hover {
-            background-color: #F5F7FA;
+            background-color: var(--white-gray);
           }
         }
         
         &::-webkit-scrollbar-thumb {
           border-radius: 5px;
-          background-color: #DCDFE6;
+          background-color: var(--light-gray);
           transition: 0.2s;
           
           &:hover {
-            background-color: #C0C4CC;
+            background-color: var(--gray);
           }
         }
       }
@@ -707,7 +707,7 @@ export default {
         .card {
           width: 100%;
           height: 100%;
-          color: #606266;
+          color: var(--dark-gray);
           
           .el-card__body {
             width: 100%;
@@ -744,7 +744,7 @@ export default {
                 }
                 
                 &:hover {
-                  color: #2196F3;
+                  color: var(--main-color);
                 }
                 
                 &:active {

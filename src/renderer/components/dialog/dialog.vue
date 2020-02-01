@@ -69,7 +69,7 @@ export default {
       this.confirmFunction = args.confirmFunction !== undefined ? args.confirmFunction : this.confirmFunction
       this.cancelFunction = args.cancelFunction !== undefined ? args.cancelFunction : this.cancelFunction
       this.onShowFunction = args.onShowFunction !== undefined ? args.onShowFunction : this.onShowFunction
-      if (args.content ) {
+      if (args.content !== undefined) {
         this.$slots.default = [args.content]
         this.$mount()
       }

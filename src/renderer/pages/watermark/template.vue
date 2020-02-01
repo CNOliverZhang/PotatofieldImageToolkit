@@ -50,36 +50,35 @@
         <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="control-button interactable">删除</el-button>
       </div>
     </div>
-    <div id="control">
+    <div id="control" class="interactable">
       <div>
         <el-input
           :rows="5"
           v-model="text"
           type="textarea"
           resize="none"
-          placeholder="请输入水印内容"
-          class="interactable"></el-input>
+          placeholder="请输入水印内容"></el-input>
         <div class="control-row">
           <div class="text">水印文字方向</div>
-          <el-select v-model="writingMode" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="水平" value="horizontal-tb" class="interactable"/>
-            <el-option label="垂直从右至左" value="vertical-rl" class="interactable"/>
-            <el-option label="垂直从左至右" value="vertical-lr" class="interactable"/>
+          <el-select v-model="writingMode" placeholder="请选择" size="mini">
+            <el-option label="水平" value="horizontal-tb"/>
+            <el-option label="垂直从右至左" value="vertical-rl"/>
+            <el-option label="垂直从左至右" value="vertical-lr"/>
           </el-select>
         </div>
         <div class="control-row">
           <div class="text">多行水印对齐方式</div>
-          <el-select v-model="textAlign" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="居中对齐" value="center" class="interactable"/>
-            <el-option label="行首对齐" value="left" class="interactable"/>
-            <el-option label="行尾对其" value="right" class="interactable"/>
+          <el-select v-model="textAlign" placeholder="请选择" size="mini">
+            <el-option label="居中对齐" value="center"/>
+            <el-option label="行首对齐" value="left"/>
+            <el-option label="行尾对其" value="right"/>
           </el-select>
         </div>
         <div class="control-row">
           <div class="text">多行水印行距</div>
           <el-slider
             v-model="lineHeight"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="10"
             :step="0.1"
@@ -90,7 +89,7 @@
           <div class="text">水印文字间距</div>
           <el-slider
             v-model="letterSpacing"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -99,16 +98,16 @@
         </div>
         <div class="control-row">
           <div class="text">水印位置基准</div>
-          <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="中央" value="center" class="interactable"/>
-            <el-option label="左上角" value="left-top" class="interactable"/>
-            <el-option label="右上角" value="right-top" class="interactable"/>
-            <el-option label="左下角" value="left-bottom" class="interactable"/>
-            <el-option label="右下角" value="right-bottom" class="interactable"/>
-            <el-option label="上方" value="top" class="interactable"/>
-            <el-option label="下方" value="bottom" class="interactable"/>
-            <el-option label="左侧" value="left" class="interactable"/>
-            <el-option label="右侧" value="right" class="interactable"/>
+          <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
+            <el-option label="中央" value="center"/>
+            <el-option label="左上角" value="left-top"/>
+            <el-option label="右上角" value="right-top"/>
+            <el-option label="左下角" value="left-bottom"/>
+            <el-option label="右下角" value="right-bottom"/>
+            <el-option label="上方" value="top"/>
+            <el-option label="下方" value="bottom"/>
+            <el-option label="左侧" value="left"/>
+            <el-option label="右侧" value="right"/>
           </el-select>
         </div>
         <div
@@ -118,7 +117,7 @@
           <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
           <el-slider
             v-model="offsetX"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -132,7 +131,7 @@
           <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
           <el-slider
             v-model="offsetY"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -143,7 +142,7 @@
           <div class="text">水印旋转角度</div>
           <el-slider
             v-model="rotation"
-            class="control interactable"
+            class="control"
             :min="-180"
             :max="180"
             :step="1"
@@ -152,21 +151,21 @@
         </div>
         <div class="control-row">
           <div class="text">水印字体</div>
-          <el-select v-model="font" placeholder="请选择" size="mini" class="interactable">
+          <el-select v-model="font" placeholder="请选择" size="mini">
             <el-option-group label="中英文字体">
-              <el-option label="思源黑体(细)" value="NotoSansSCThin" class="interactable" style="font-family: NotoSansSCThin;"/>
-              <el-option label="思源黑体(粗)" value="NotoSansSCBlack" class="interactable" style="font-family: NotoSansSCBlack;"/>
-              <el-option label="思源宋体(细)" value="NotoSerifSCThin" class="interactable" style="font-family: NotoSerifSCThin;"/>
-              <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" class="interactable" style="font-family: NotoSerifSCBlack;"/>
-              <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" class="interactable" style="font-family: ZCoolHuangyou;"/>
-              <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" class="interactable" style="font-family: ZCoolXiaowei;"/>
-              <el-option label="站酷快乐体" value="ZCoolKuaile" class="interactable" style="font-family: ZCoolKuaile;"/>
-              <el-option label="站酷文艺体" value="ZCoolWenyi" class="interactable" style="font-family: ZCoolWenyi;"/>
-              <el-option label="站酷酷黑体" value="ZCoolKuhei" class="interactable" style="font-family: ZCoolKuhei;"/>
-              <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" class="interactable" style="font-family: ZCoolGaoduanhei;"/>
+              <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
+              <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
+              <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
+              <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
+              <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
+              <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
+              <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
+              <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
+              <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
+              <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
             </el-option-group>
             <el-option-group label="纯英文字体">
-              <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" class="interactable" style="font-family: ZCoolAddict;"></el-option>
+              <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
             </el-option-group>
           </el-select>
         </div>
@@ -174,7 +173,7 @@
           <div class="text">水印字体大小</div>
           <el-slider
             v-model="relativeFontSize"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="100"
             :step="1"
@@ -183,14 +182,14 @@
         </div>
         <div class="control-row">
           <div class="text">水印颜色</div>
-          <el-color-picker v-model="color" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
+          <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
         </div>
       </div>
       <div class="row">
         <div class="text">参照背景颜色</div>
-        <el-select v-model="background" placeholder="请选择" size="mini" class="interactable">
-          <el-option label="深色" value="#606266" class="interactable"/>
-          <el-option label="浅色" value="#DCDFE6" class="interactable"/>
+        <el-select v-model="background" placeholder="请选择" size="mini">
+          <el-option label="深色" value="var(--dark-gray)"/>
+          <el-option label="浅色" value="var(--light-gray)"/>
         </el-select>
       </div>
     </div>
@@ -217,7 +216,7 @@ export default {
       offsetY: 0,
       rotation: 0,
       color: '#FFFFFF',
-      font: "NotoSansSCThin",
+      font: 'NotoSansSCThin',
       relativeFontSize: 5,
       sizeBaseX: 0,
       sizeBaseY: 0,
@@ -225,7 +224,7 @@ export default {
       sampleHeight: 0,
       watermarkWidth: 0,
       watermarkHeight: 0,
-      background: '#606266',
+      background: 'var(--dark-gray)',
       templateTitle: ''
     }
   },
@@ -318,7 +317,7 @@ export default {
                       },
                       'class': 'el-input__inner',
                       'style': {
-                        'font-family': 'NotoSansSCThin'
+                        'font-family': 'var(--main-font)'
                       }
                     })
                   ]),
@@ -338,8 +337,8 @@ export default {
               if (title == this.$store.state.watermark.templates[i].title && this.index != i) {
                 this.$dialog({
                   type: 'warning',
-                  title: '存在同名模板',
-                  text: '您需要将新导入的模板重命名，才能将其保存。',
+                  title: '需要重命名',
+                  text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
@@ -358,7 +357,7 @@ export default {
                           },
                           'class': 'el-input__inner',
                           'style': {
-                            'font-family': 'NotoSansSCThin'
+                            'font-family': 'var(--main-font)'
                           }
                         })
                       ]),
@@ -441,7 +440,7 @@ export default {
                       },
                       'class': 'el-input__inner',
                       'style': {
-                        'font-family': 'NotoSansSCThin'
+                        'font-family': 'var(--main-cont)'
                       }
                     })
                   ]),
@@ -458,7 +457,7 @@ export default {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
-                  text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                  text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
@@ -477,7 +476,7 @@ export default {
                           },
                           'class': 'el-input__inner',
                           'style': {
-                            'font-family': 'NotoSansSCThin'
+                            'font-family': 'var(--main-font)'
                           }
                         })
                       ]),
@@ -564,7 +563,7 @@ export default {
   -webkit-app-region: no-drag;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
 }
 
@@ -579,11 +578,11 @@ export default {
   align-items: center;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   input {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .control-row {
@@ -691,7 +690,7 @@ export default {
     justify-content: space-between;
     
     .el-textarea__inner {
-      font-family: "NotoSansSC"
+      font-family: var(--main-font)
     }
       
     textarea {
@@ -701,20 +700,20 @@ export default {
           
       &::-webkit-scrollbar-track {
         border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
+        background-color: var(--transparent);
         
         &:hover {
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
         }
       }
       
       &::-webkit-scrollbar-thumb {
         border-radius: 5px;
-        background-color: #DCDFE6;
+        background-color: var(--light-gray);
         transition: 0.2s;
         
         &:hover {
-          background-color: #C0C4CC;
+          background-color: var(--gray);
         }
       }
     }

@@ -12,11 +12,6 @@ export default {
 
 <style lang="scss">
 @font-face {
-  font-family: NotoSansSC;
-  src: url('./assets/NotoSansSC-Thin.otf');
-}
-
-@font-face {
   font-family: NotoSansSCThin;
   src: url('./assets/NotoSansSC-Thin.otf');
 }
@@ -81,13 +76,27 @@ export default {
   src: url('./assets/ZCOOLAddict-Italic.ttf');
 }
 
+:root {
+  --main-font: "NotoSansSCThin";
+  --main-color: #2196F3;
+  --warning-red: #F56C6C;
+  --black-gray: #303133;
+  --dark-gray: #606266;
+  --gray: #C0C4CC;
+  --light-gray: #DCDFE6;
+  --white-gray: #F5F7FA;
+  --white: #FFFFFF;
+  --transparent: rgba(255, 255, 255, 0);
+  --transparent-black-cover: rgba(0, 0, 0, 0.3);
+}
+
 body {
   margin: 0;
-  font-family: "NotoSansSC";
+  font-family: var(--main-font);
   cursor: default;
   -webkit-app-region: drag;
   user-select: none;
-  color: #606266;
+  color: var(--dark-gray);
 }
 
 #app {

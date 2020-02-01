@@ -21,7 +21,7 @@ function showDialog(args) {
       }
     },
   })
-  if (args.content) {
+  if (args.content !== undefined) {
     dialogDom.$slots.default = [args.content]
   }
   dialogDom.$mount()

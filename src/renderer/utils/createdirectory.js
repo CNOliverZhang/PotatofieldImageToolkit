@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-function CreateDirectory(dirname) {
+export default function CreateDirectory(dirname) {
   if (fs.existsSync(dirname)) {
     return true
   } else {
@@ -10,8 +10,4 @@ function CreateDirectory(dirname) {
       return true
     }
   }
-}
-
-export {
-  CreateDirectory
 }

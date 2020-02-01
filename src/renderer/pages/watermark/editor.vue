@@ -69,11 +69,11 @@
             </el-pagination>
           </div>
         </div>
-        <div id="template-list" class="interactable">
+        <div id="template-list">
           <div class="row">
             <div class="subtitle">已保存的模板</div>
           </div>
-          <div v-if="this.$store.state.watermark.templates.length != 0" id="list">
+          <div v-if="this.$store.state.watermark.templates.length != 0" id="list" class="interactable">
             <div
               v-for="(template, index) in this.$store.state.watermark.templates"
               :key="template.title"
@@ -101,39 +101,38 @@
         </div>
       </div>
     </div>
-    <div id="control">
+    <div id="control" class="interactable">
       <div>
         <el-input
           :rows="2"
           v-model="text"
           type="textarea"
           resize="none"
-          placeholder="请输入水印内容"
-          class="interactable"></el-input>
+          placeholder="请输入水印内容"></el-input>
         <div class="row">
           <div class="subtitle">水印样式设置</div>
         </div>
         <div class="control-row">
           <div class="text">水印文字方向</div>
-          <el-select v-model="writingMode" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="水平" value="horizontal-tb" class="interactable"/>
-            <el-option label="垂直从右至左" value="vertical-rl" class="interactable"/>
-            <el-option label="垂直从左至右" value="vertical-lr" class="interactable"/>
+          <el-select v-model="writingMode" placeholder="请选择" size="mini">
+            <el-option label="水平" value="horizontal-tb"/>
+            <el-option label="垂直从右至左" value="vertical-rl"/>
+            <el-option label="垂直从左至右" value="vertical-lr"/>
           </el-select>
         </div>
         <div class="control-row">
           <div class="text">多行水印对齐方式</div>
-          <el-select v-model="textAlign" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="居中对齐" value="center" class="interactable"/>
-            <el-option label="行首对齐" value="left" class="interactable"/>
-            <el-option label="行尾对其" value="right" class="interactable"/>
+          <el-select v-model="textAlign" placeholder="请选择" size="mini">
+            <el-option label="居中对齐" value="center"/>
+            <el-option label="行首对齐" value="left"/>
+            <el-option label="行尾对其" value="right"/>
           </el-select>
         </div>
         <div class="control-row">
           <div class="text">多行水印行距</div>
           <el-slider
             v-model="lineHeight"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="10"
             :step="0.1"
@@ -144,7 +143,7 @@
           <div class="text">水印文字间距</div>
           <el-slider
             v-model="letterSpacing"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -153,16 +152,16 @@
         </div>
         <div class="control-row">
           <div class="text">水印位置基准</div>
-          <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="interactable">
-            <el-option label="中央" value="center" class="interactable"/>
-            <el-option label="左上角" value="left-top" class="interactable"/>
-            <el-option label="右上角" value="right-top" class="interactable"/>
-            <el-option label="左下角" value="left-bottom" class="interactable"/>
-            <el-option label="右下角" value="right-bottom" class="interactable"/>
-            <el-option label="上方" value="top" class="interactable"/>
-            <el-option label="下方" value="bottom" class="interactable"/>
-            <el-option label="左侧" value="left" class="interactable"/>
-            <el-option label="右侧" value="right" class="interactable"/>
+          <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
+            <el-option label="中央" value="center"/>
+            <el-option label="左上角" value="left-top"/>
+            <el-option label="右上角" value="right-top"/>
+            <el-option label="左下角" value="left-bottom"/>
+            <el-option label="右下角" value="right-bottom"/>
+            <el-option label="上方" value="top"/>
+            <el-option label="下方" value="bottom"/>
+            <el-option label="左侧" value="left"/>
+            <el-option label="右侧" value="right"/>
           </el-select>
         </div>
         <div
@@ -172,7 +171,7 @@
           <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
           <el-slider
             v-model="offsetX"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -186,7 +185,7 @@
           <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
           <el-slider
             v-model="offsetY"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -197,7 +196,7 @@
           <div class="text">水印旋转角度</div>
           <el-slider
             v-model="rotation"
-            class="control interactable"
+            class="control"
             :min="-180"
             :max="180"
             :step="1"
@@ -206,21 +205,21 @@
         </div>
         <div class="control-row">
           <div class="text">水印字体</div>
-          <el-select v-model="font" placeholder="请选择" size="mini" class="interactable">
+          <el-select v-model="font" placeholder="请选择" size="mini">
             <el-option-group label="中英文字体">
-              <el-option label="思源黑体(细)" value="NotoSansSCThin" class="interactable" style="font-family: NotoSansSCThin;"/>
-              <el-option label="思源黑体(粗)" value="NotoSansSCBlack" class="interactable" style="font-family: NotoSansSCBlack;"/>
-              <el-option label="思源宋体(细)" value="NotoSerifSCThin" class="interactable" style="font-family: NotoSerifSCThin;"/>
-              <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" class="interactable" style="font-family: NotoSerifSCBlack;"/>
-              <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" class="interactable" style="font-family: ZCoolHuangyou;"/>
-              <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" class="interactable" style="font-family: ZCoolXiaowei;"/>
-              <el-option label="站酷快乐体" value="ZCoolKuaile" class="interactable" style="font-family: ZCoolKuaile;"/>
-              <el-option label="站酷文艺体" value="ZCoolWenyi" class="interactable" style="font-family: ZCoolWenyi;"/>
-              <el-option label="站酷酷黑体" value="ZCoolKuhei" class="interactable" style="font-family: ZCoolKuhei;"/>
-              <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" class="interactable" style="font-family: ZCoolGaoduanhei;"/>
+              <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
+              <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
+              <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
+              <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
+              <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
+              <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
+              <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
+              <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
+              <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
+              <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
             </el-option-group>
             <el-option-group label="纯英文字体">
-              <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" class="interactable" style="font-family: ZCoolAddict;"></el-option>
+              <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
             </el-option-group>
           </el-select>
         </div>
@@ -228,7 +227,7 @@
           <div class="text">水印字体大小</div>
           <el-slider
             v-model="relativeFontSize"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="100"
             :step="1"
@@ -237,7 +236,7 @@
         </div>
         <div class="control-row">
           <div class="text">水印颜色</div>
-          <el-color-picker v-model="color" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
+          <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
         </div>
         <div class="row">
           <div class="subtitle">保存设置</div>
@@ -246,15 +245,15 @@
           <div class="text">存储位置</div>
           <el-switch
             v-model="customDistDirectory"
-            active-color="#2196F3"
-            inactive-color="#2196F3"
+            active-color="var(--main-color)"
+            inactive-color="var(--main-color)"
             active-text="自定义路径"
             inactive-text="保存在原路径"
-            class="control interactable"></el-switch>
+            class="control"></el-switch>
         </div>
         <div v-if="customDistDirectory" class="control-row">
           <div class="text">自定义存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
+          <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
@@ -262,15 +261,13 @@
           <div class="text">目录结构</div>
           <el-switch
             v-model="keepDirectoryStructure"
-            active-color="#2196F3"
-            inactive-color="#2196F3"
             active-text="保持目录结构"
             inactive-text="不保持目录结构"
-            class="control interactable"></el-switch>
+            class="control"></el-switch>
         </div>
         <div class="control-row">
           <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" class="interactable control">
+          <el-radio-group v-model="mimeType" class="control">
             <el-radio label="JPEG"></el-radio>
             <el-radio label="PNG"></el-radio>
             <el-radio label="保持原格式"></el-radio>
@@ -278,14 +275,14 @@
         </div>
         <div class="control-row">
           <div class="text">文件名后缀</div>
-          <el-input size="mini" v-model="append" maxlength="12" class="interactable control"></el-input>
+          <el-input size="mini" v-model="append" maxlength="12" class="control"></el-input>
         </div>
       </div>
       <div id="control-buttons">
-        <el-button type="primary" size="mini" @click="close" class="control-button interactable">退出编辑器</el-button>
-        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button interactable">保存为模板</el-button>
-        <el-button type="primary" size="mini" @click="start" class="control-button interactable">处理这张图片</el-button>
-        <el-button type="primary" size="mini" @click="startAll" class="control-button interactable">处理全部图片</el-button>
+        <el-button type="primary" size="mini" @click="close" class="control-button">退出编辑器</el-button>
+        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button">保存为模板</el-button>
+        <el-button type="primary" size="mini" @click="start" class="control-button">处理这张图片</el-button>
+        <el-button type="primary" size="mini" @click="startAll" class="control-button">处理全部图片</el-button>
       </div>
     </div>
   </div>
@@ -299,7 +296,7 @@ import EXIF from 'exif-js'
 const path = require('path')
 const fs = require('fs')
 const ipcRenderer = require('electron').ipcRenderer
-const CreateDirectory = require('../../utils/createdirectory').CreateDirectory
+const CreateDirectory = require('../../utils/CreateDirectory')
 
 export default {
   name: 'watermarkEditor',
@@ -390,8 +387,8 @@ export default {
     preview(index) {
       if (this.imageIndex != index) {
         let dialog = this.$dialog({
-          title: '请稍后',
-          text: '正在载入图像',
+          title: '正在载入图像',
+          text: '即将完成，请稍后。',
           showConfirm: false
         })
         if (index < 0) {
@@ -533,7 +530,7 @@ export default {
                       },
                       'class': 'el-input__inner',
                       'style': {
-                        'font-family': 'NotoSansSCThin'
+                        'font-family': 'var(--main-font)'
                       }
                     })
                   ]),
@@ -554,7 +551,7 @@ export default {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
-                  text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                  text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
@@ -573,7 +570,7 @@ export default {
                           },
                           'class': 'el-input__inner',
                           'style': {
-                            'font-family': 'NotoSansSCThin'
+                            'font-family': 'var(--main-font)'
                           }
                         })
                       ]),
@@ -616,7 +613,7 @@ export default {
               },
               'class': 'el-input__inner',
               'style': {
-                'font-family': 'NotoSansSCThin'
+                'font-family': 'var(--main-color)'
               }
             })
           ]),
@@ -881,7 +878,7 @@ export default {
   -webkit-app-region: no-drag;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
 }
 
@@ -896,11 +893,11 @@ export default {
   align-items: center;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   input {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .control-row {
@@ -914,6 +911,16 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    
+    .el-switch {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .el-radio-group {
+      display: flex;
+      justify-content: flex-end;
+    }
     
     .control {
       width: 60%;
@@ -957,7 +964,7 @@ export default {
       width: 100%;
       height: 300px;
       flex-shrink: 0;
-      background-color: #606266;
+      background-color: var(--dark-gray);
       border-radius: 6px;
       display: flex;
       justify-content: center;
@@ -1001,10 +1008,10 @@ export default {
         #list {
           width: 100%;
           flex-grow: 1;
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           overflow-y: auto;
@@ -1018,8 +1025,8 @@ export default {
             padding-left: 5px;
             padding-right: 5px;
             box-sizing: border-box;
-            background-color: #FFFFFF;
-            border-bottom-color: #DCDFE6;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
             border-bottom-style: solid;
             border-bottom-width: 1px;
             display: flex;
@@ -1028,7 +1035,7 @@ export default {
             transition: 0.2s;
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
             
             .filename {
@@ -1040,12 +1047,12 @@ export default {
             }
             
             .delete {
-              color: #DCDFE6;
+              color: var(--white-gray);
               cursor: pointer;
               transition: 0.2s;
               
               &:hover {
-                color: #F56C6C;
+                color: var(--warning-red);
               }
             }
           }
@@ -1056,20 +1063,20 @@ export default {
               
           &::-webkit-scrollbar-track {
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: var(--transparent);
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
           }
           
           &::-webkit-scrollbar-thumb {
             border-radius: 5px;
-            background-color: #DCDFE6;
+            background-color: var(--light-gray);
             transition: 0.2s;
             
             &:hover {
-              background-color: #C0C4CC;
+              background-color: var(--gray);
             }
           }
         }
@@ -1105,10 +1112,10 @@ export default {
         #list {
           width: 100%;
           flex-grow: 1;
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           overflow-y: auto;
@@ -1123,8 +1130,8 @@ export default {
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            background-color: #FFFFFF;
-            border-bottom-color: #DCDFE6;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
             border-bottom-style: solid;
             border-bottom-width: 1px;
             
@@ -1144,7 +1151,7 @@ export default {
               display: flex;
               justify-content: center;
               align-items: center;
-              background-color: #FFFFFF;
+              background-color: var(--white);
               opacity: 0;
               transition: 0.2s;
               
@@ -1166,7 +1173,7 @@ export default {
                 }
                 
                 &:hover {
-                  color: #2196F3;
+                  color: var(--main-color);
                 }
                 
                 &:active {
@@ -1186,20 +1193,20 @@ export default {
               
           &::-webkit-scrollbar-track {
             border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0);
+            background-color: var(--transparent);
             
             &:hover {
-              background-color: #F5F7FA;
+              background-color: var(--white-gray);
             }
           }
           
           &::-webkit-scrollbar-thumb {
             border-radius: 5px;
-            background-color: #DCDFE6;
+            background-color: var(--light-gray);
             transition: 0.2s;
             
             &:hover {
-              background-color: #C0C4CC;
+              background-color: var(--gray);
             }
           }
         }
@@ -1210,10 +1217,10 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
           box-sizing: border-box;
           border-radius: 6px;
-          border-color: #DCDFE6;
+          border-color: var(--light-gray);
           border-style: solid;
           border-width: 1px;
           
@@ -1242,7 +1249,7 @@ export default {
     justify-content: space-between;
     
     .el-textarea__inner {
-      font-family: "NotoSansSC"
+      font-family: var(--main-font)
     }
       
     textarea {
@@ -1252,20 +1259,20 @@ export default {
           
       &::-webkit-scrollbar-track {
         border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
+        background-color: var(--transparent);
         
         &:hover {
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
         }
       }
       
       &::-webkit-scrollbar-thumb {
         border-radius: 5px;
-        background-color: #DCDFE6;
+        background-color: var(--light-gray);
         transition: 0.2s;
         
         &:hover {
-          background-color: #C0C4CC;
+          background-color: var(--gray);
         }
       }
     }

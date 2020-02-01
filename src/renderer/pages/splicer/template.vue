@@ -1,5 +1,5 @@
 <template>
-  <div id="splicer-editor">
+  <div id="splicer-template">
     <div id="samples-container" class="interactable">
       <div
         id="samples"
@@ -13,7 +13,7 @@
             :style="{
               'margin-bottom': spacing + 'px',
               'border-radius': borderRadius + 'px',
-              'background-color': '#303133'
+              'background-color': 'var(--black-gray)'
             }">
             <div class="subtitle">样例图片</div>
           </div>
@@ -22,7 +22,7 @@
             :style="{
               'margin-bottom': spacing + 'px',
               'border-radius': borderRadius + 'px',
-              'background-color': '#606266'
+              'background-color': 'var(--dark-gray)'
             }">
             <div class="subtitle">样例图片</div>
           </div>
@@ -31,31 +31,14 @@
             :style="{
               'margin-bottom': spacing + 'px',
               'border-radius': borderRadius + 'px',
-              'background-color': '#909399'
-            }">
-            <div class="subtitle">样例图片</div>
-          </div>
-          <div
-            class="sample"
-            :style="{
-              'margin-bottom': spacing + 'px',
-              'border-radius': borderRadius + 'px',
-              'background-color': '#C0C4CC'
-            }">
-            <div class="subtitle">样例图片</div>
-          </div>
-          <div
-            class="sample"
-            :style="{
-              'border-radius': borderRadius + 'px',
-              'background-color': '#DCDFE6'
+              'background-color': 'var(--gray)'
             }">
             <div class="subtitle">样例图片</div>
           </div>
         </div>
       </div>
     </div>
-    <div id="control">
+    <div id="control" class="interactable">
       <div id="controller">
         <div class="row">
           <div class="subtitle">拼图样式设置</div>
@@ -64,7 +47,7 @@
           <div class="text">外框宽度</div>
           <el-slider
             v-model="padding"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -75,7 +58,7 @@
           <div class="text">图片间距</div>
           <el-slider
             v-model="spacing"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -86,7 +69,7 @@
           <div class="text">图片圆角</div>
           <el-slider
             v-model="borderRadius"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="100"
             :step="1"
@@ -95,15 +78,15 @@
         </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
-          <el-color-picker v-model="backgroundColor" size="mini" class="interactable" :show-alpha="true"></el-color-picker>
+          <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
         </div>
       </div>
-      <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini" class="interactable"></el-input>
+      <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
       <div class="row">
-        <el-button type="primary" size="mini" @click="exit" class="control-button interactable">退出编辑器</el-button>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="control-button interactable">保存</el-button>
-        <el-button type="primary" size="mini" @click="saveAsNew" class="control-button interactable">{{ index == -1 ? '保存' : '另存'}}</el-button>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="control-button interactable">删除</el-button>
+        <el-button type="primary" size="mini" @click="exit" class="control-button">退出编辑器</el-button>
+        <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="control-button">保存</el-button>
+        <el-button type="primary" size="mini" @click="saveAsNew" class="control-button">{{ index == -1 ? '保存' : '另存'}}</el-button>
+        <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="control-button">删除</el-button>
       </div>
     </div>
   </div>
@@ -172,7 +155,7 @@ export default {
                     },
                     'class': 'el-input__inner',
                     'style': {
-                      'font-family': 'NotoSansSCThin'
+                      'font-family': 'var(--main-font)'
                     }
                   })
                 ]),
@@ -192,12 +175,12 @@ export default {
             if (title == this.$store.state.splicer.templates[i].title && this.index != i) {
               this.$dialog({
                 type: 'warning',
-                title: '存在同名模板',
-                text: '您需要将新导入的模板重命名，才能将其保存。',
+                title: '需要重命名',
+                text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入水印模板标题',
+                    title: '请输入拼图模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -212,7 +195,7 @@ export default {
                         },
                         'class': 'el-input__inner',
                         'style': {
-                          'font-family': 'NotoSansSCThin'
+                          'font-family': 'var(--main-font)'
                         }
                       })
                     ]),
@@ -265,7 +248,7 @@ export default {
             showCancel: true,
             confirmFunction: () => {
               this.$dialog({
-                title: '请输入水印模板标题',
+                title: '请输入拼图模板标题',
                 content: this.$createElement('div', {
                   'class': 'el-input el-input--mini'
                 }, [
@@ -280,7 +263,7 @@ export default {
                     },
                     'class': 'el-input__inner',
                     'style': {
-                      'font-family': 'NotoSansSCThin'
+                      'font-family': 'var(--main-font)'
                     }
                   })
                 ]),
@@ -297,11 +280,11 @@ export default {
               this.$dialog({
                 type: 'warning',
                 title: '需要重命名',
-                text: '已存在同名模板，您需要更改当前目标的标题才能将其保存。',
+                text: '已存在同名模板，您需要更改当前模板的标题才能将其保存。',
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入水印模板标题',
+                    title: '请输入拼图模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -316,7 +299,7 @@ export default {
                         },
                         'class': 'el-input__inner',
                         'style': {
-                          'font-family': 'NotoSansSCThin'
+                          'font-family': 'var(--main-font)'
                         }
                       })
                     ]),
@@ -356,6 +339,7 @@ export default {
         showCancel: true,
         confirmFunction: (index) => {
           this.$store.dispatch('splicer/templateDelete', index)
+          this.close()
         }
       })
     }
@@ -378,11 +362,11 @@ export default {
   -webkit-app-region: no-drag;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
 }
 
-#splicer-editor {
+#splicer-template {
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -393,11 +377,11 @@ export default {
   align-items: center;
   
   button {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   input {
-    font-family: "NotoSansSC";
+    font-family: var(--main-font);
   }
   
   .control-row {
@@ -448,8 +432,8 @@ export default {
     width: calc(50% - 10px);
     height: 100%;
     flex-shrink: 0;
-    background-color: #606266;
-    border-color: #DCDFE6;
+    background-color: var(--dark-gray);
+    border-color: var(--light-gray);
     border-style: solid;
     border-width: 1px;
     box-sizing: border-box;
@@ -471,7 +455,7 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          color: #FFFFFF;
+          color: var(--white);
         }
       }
     }
@@ -482,20 +466,20 @@ export default {
         
     &::-webkit-scrollbar-track {
       border-radius: 5px;
-      background-color: rgba(255, 255, 255, 0);
+      background-color: var(--transparent);
       
       &:hover {
-        background-color: #F5F7FA;
+        background-color: var(--white-gray);
       }
     }
     
     &::-webkit-scrollbar-thumb {
       border-radius: 5px;
-      background-color: #DCDFE6;
+      background-color: var(--light-gray);
       transition: 0.2s;
       
       &:hover {
-        background-color: #C0C4CC;
+        background-color: var(--gray);
       }
     }
   }

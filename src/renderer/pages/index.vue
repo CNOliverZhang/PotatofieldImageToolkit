@@ -1,7 +1,7 @@
 <template>
   <div id="index">
     <div id="title-bar">
-      <img id="logo" src="static/logo.png"/>
+      <img id="logo" src="static/images/logo.png"/>
       <div class="title">洋芋田图像工具箱</div>
       <div id="title-bar-space"></div>
       <div class="control-button interactable" @click="open('/about', '关于')">
@@ -20,40 +20,40 @@
     <div id="cards-holder" class="interactable">
       <div id="scroll">
         <div class="space">&nbsp;</div>
-        <div class="container" @click="open('/watermark', '水印工具')">
+        <div class="container" @click="open('/watermark', '图片加水印工具')">
           <el-card class="card">
             <i class="fas fa-feather-alt icon"></i>
-            <div class="title">添加水印</div>
+            <div class="title">图片加水印工具</div>
           </el-card>
         </div>
         <div class="container" @click="open('/splicer', '长图拼接工具')">
           <el-card class="card">
             <i class="fas fa-images icon"></i>
-            <div class="title">长图拼接</div>
+            <div class="title">长图拼接工具</div>
           </el-card>
         </div>
-        <div class="container" @click="showDeveloping">
+        <div class="container" @click="open('/textToImage', '富文本制图工具')">
           <el-card class="card">
             <span class="fas fa-file-alt icon"></span>
-            <div class="title">文本制图</div>
+            <div class="title">富文本制图工具</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
             <span class="fas fa-crop-alt icon"></span>
-            <div class="title">裁剪工具</div>
+            <div class="title">图片裁剪工具</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
             <span class="fas fa-magic icon"></span>
-            <div class="title">滤镜美化</div>
+            <div class="title">滤镜美化工具</div>
           </el-card>
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
             <span class="fas fa-compress icon"></span>
-            <div class="title">尺寸压缩</div>
+            <div class="title">尺寸压缩工具</div>
           </el-card>
         </div>
         <div class="space">&nbsp;</div>
@@ -99,7 +99,7 @@ export default {
     ipcRenderer.once('update-available', (event, info) => {
       this.$dialog({
         title: '发现新版本',
-        text: '当前最新版本为 ' + info.version + '，新版本特性如下：',
+        text: '当前最新版本为 ' + info.version + ' ，新版本特性如下：',
         content: this.$createElement('div', null, info.releaseNotes.split('\n').map((releaseNote) => {
           return this.$createElement('p', {
             'style': {
@@ -217,7 +217,7 @@ export default {
       }
       
       &:hover {
-        color: #2196F3;
+        color: var(--main-color);
       }
       
       &:active {
@@ -252,7 +252,7 @@ export default {
           position: relative;
           cursor: pointer;
           font-size: 14px;
-          color: #606266;
+          color: var(--dark-gray);
           text-align: center;
           
           .icon {
@@ -266,7 +266,7 @@ export default {
           
           &:hover {
             transform: scale(1.05);
-            color: #2196F3;
+            color: var(--main-color);
           }
           
           &:active {
@@ -295,22 +295,22 @@ export default {
           
       &::-webkit-scrollbar-track {
         border-radius: 5px;
-        background-color: rgba(255, 255, 255, 0);
+        background-color: var(--transparent);
         z-index: 3;
         
         &:hover {
-          background-color: #F5F7FA;
+          background-color: var(--white-gray);
         }
       }
       
       &::-webkit-scrollbar-thumb {
         border-radius: 5px;
-        background-color: #DCDFE6;
+        background-color: var(--light-gray);
         z-index: 3;
         transition: 0.2s;
         
         &:hover {
-          background-color: #C0C4CC;
+          background-color: var(--gray);
         }
       }
     }
@@ -323,7 +323,7 @@ export default {
       top: 0;
       left: 0;
       z-index: 2;
-      background-image: linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+      background-image: linear-gradient(to right, var(--white), var(--transparent));
     }
     
     &:after {
@@ -334,7 +334,7 @@ export default {
       top: 0;
       right: 0;
       z-index: 2;
-      background-image: linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+      background-image: linear-gradient(to left, var(--white), var(--transparent));
     }
   }
 }
