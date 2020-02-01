@@ -1313,7 +1313,7 @@ export default {
       
       --title-font: 'NotoSerifSCBlack';
       --title-font-size: 24px;
-      --title-letter-spacing: 0.3;
+      --title-letter-spacing: 0.3em;
       --title-line-height: 1.8em;
       --title-margin: 0.5em;
       --title-text-align: justify;

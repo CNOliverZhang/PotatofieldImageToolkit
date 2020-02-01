@@ -40,6 +40,12 @@
         </div>
         <div class="container" @click="showDeveloping">
           <el-card class="card">
+            <span class="fas fa-compress icon"></span>
+            <div class="title">尺寸调整工具</div>
+          </el-card>
+        </div>
+        <div class="container" @click="showDeveloping">
+          <el-card class="card">
             <span class="fas fa-crop-alt icon"></span>
             <div class="title">图片裁剪工具</div>
           </el-card>
@@ -48,12 +54,6 @@
           <el-card class="card">
             <span class="fas fa-magic icon"></span>
             <div class="title">滤镜美化工具</div>
-          </el-card>
-        </div>
-        <div class="container" @click="showDeveloping">
-          <el-card class="card">
-            <span class="fas fa-compress icon"></span>
-            <div class="title">尺寸压缩工具</div>
           </el-card>
         </div>
         <div class="space">&nbsp;</div>

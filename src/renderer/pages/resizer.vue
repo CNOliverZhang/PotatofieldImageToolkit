@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="watermark" @tab-click="clear">
+  <el-tabs type="card" tab-position="left" id="resizer" @tab-click="clear">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
       <div id="single" class="tab-content">
@@ -12,14 +12,14 @@
           :auto-upload="false"
           :on-change="handleFile"
           :show-file-list="false"
-          :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
+          :class="this.fileList.length != 0 ? 'half' : ''">
           <i class="fas fa-image"></i>
           <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
         </el-upload>
-        <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list" class="interactable">
+        <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
           <div id="list">
             <div
-              v-for="(file, index) in this.$store.state.watermark.fileList"
+              v-for="(file, index) in this.fileList"
               :key="file.fullpath"
               class="file"
               @click="preview(index)">
@@ -31,14 +31,14 @@
           </div>
           <div class="row">
             <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入尺寸调整编辑器</el-button>
           </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content" v-if="this.$store.state.watermark.fileList.length == 0">
+      <div id="multiple" class="tab-content" v-if="this.fileList.length == 0">
         <div id="controller">
           <div class="row">
             <el-switch
@@ -68,7 +68,7 @@
       <div id="multiple" class="tab-content" v-else>
         <div id="file-list" class="interactable">
           <div
-            v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+            v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
             :key="file.fullpath"
             class="file"
             @click="preview(index + (fileListPage - 1) * 100)">
@@ -87,68 +87,13 @@
             layout="prev, pager, next"
             :pager-count="5"
             :page-size="100"
-            :total="this.$store.state.watermark.fileList.length"
+            :total="this.fileList.length"
             :current-page="fileListPage"
             :hide-on-single-page="true"
             @current-change="fileListPageChange">
           </el-pagination>
           <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-          <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入水印编辑器</el-button>
-        </div>
-      </div>
-    </el-tab-pane>
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-feather-alt"></i> 水印模板库</span>
-      <div id="templates" class="tab-content">
-        <div id="container" v-if="this.$store.state.watermark.templates.length != 0">
-          <div
-            v-for="(template, index) in this.$store.state.watermark.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
-            :key="template.title"
-            class="template-container">
-            <el-card class="card interactable">
-              <div class="row">
-                <div class="subtitle">{{ template.title }}</div>
-              </div>
-              <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
-              <div class="row control-buttons">
-                <div class="control-button interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
-                  <span class="fa fa-edit"></span>
-                  <div>编辑</div>
-                </div>
-                <div class="control-button interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
-                  <span class="fa fa-share-alt"></span>
-                  <div>分享</div>
-                </div>
-                <div class="control-button interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>删除</div>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </div>
-        <div v-else id="empty-container">
-          <div id="empty">
-            <i class="far fa-folder-open"></i>
-            <div>尚无已保存的模板</div>
-          </div>
-        </div>
-        <div class="row">
-          <el-pagination
-            v-if="this.$store.state.watermark.templates.length > 6"
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="6"
-            :total="this.$store.state.watermark.templates.length"
-            :current-page="templateListPage"
-            :hide-on-single-page="true"
-            @current-change="templateListPageChange">
-          </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入水印模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建水印模板</el-button>
+          <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入尺寸调整编辑器</el-button>
         </div>
       </div>
     </el-tab-pane>
@@ -168,23 +113,23 @@
 </template>
 
 <script>
-import EXIF from 'exif-js'
 import ReadDirectory from '../utils/ReadDirectory'
+import EXIF from 'exif-js'
 
 const { ipcRenderer, clipboard } = require('electron')
 const path = require('path')
 
 export default {
-  name: 'watermark',
+  name: 'resizer',
   data () {
     return {
+      fileList: [],
+      fileSet: new Set(),
       errorList: [],
       fileListPage: 1,
-      templateListPage: 1,
       childDirectoryIncluded: false,
       srcDirectory: '',
-      errorLog: null,
-      templateTitle: ''
+      errorLog: null
     }
   },
   methods: {
@@ -193,11 +138,11 @@ export default {
     },
     close() {
       ipcRenderer.send('close')
-      this.$store.dispatch('watermark/fileListEmpty')
       this.$destroy()
     },
     clear() {
-      this.$store.dispatch('watermark/fileListEmpty')
+      this.fileList = []
+      this.fileSet = new Set()
       this.errorList = []
       this.fileListPage = 1
       this.childDirectoryIncluded = false
@@ -219,13 +164,14 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
-        this.$store.dispatch('watermark/fileListPush', {
+      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+        this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,
           filename: filename,
           ext: ext
         })
+        this.fileSet.add(file.raw.path)
       } else {
         this.errorList.push(filename + '.' + ext)
         if (this.errorLog) {
@@ -248,7 +194,7 @@ export default {
           this.errorLog = this.$dialog({
             type: 'warning',
             title: '部分图片导入失败',
-            text: '下列图片导入失败，请您检查文件格式。但已导入的图片不受影响，您仍可以继续处理列表中显示的已导入图片。',
+            text: '下列图片导入失败，这可能是由于文件权限问题或图片已在列表中。但已导入的图片不受影响，您仍可以继续处理列表中显示的已导入图片。',
             content: this.$createElement('div', null, this.errorList.map((filename) => {
               return this.$createElement('p', {
                 style: {
@@ -284,12 +230,12 @@ export default {
         })
         setTimeout(() => {
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-          this.$store.dispatch('watermark/fileListAssign', result.fileList)
+          this.fileList = result.fileList
           this.errorList = result.errorList
           dialog.change({
             type: 'success',
             title: '完成',
-            text: '已扫描完您选择的文件夹，共发现 ' + result.fileList.length + ' 个可处理的图片文件，接下来您可以继续执行下一步操作。',
+            text: '已扫描完您选择的文件夹，共发现 ' + this.fileList.length + ' 个可处理的图片文件，接下来您可以继续执行下一步操作。',
             showConfirm: true
           })
           if (this.errorList.length != 0) {
@@ -322,13 +268,14 @@ export default {
     },
     handleDelete(index) {
       if (this.fileListPage != 1) {
-        if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
-          if (this.$store.state.watermark.fileList.length % 100 == 1) {
+        if (this.fileListPage == Math.ceil(this.fileList.length / 100)) {
+          if (this.fileList.length % 100 == 1) {
             this.fileListPage -= 1
           }
         }
       }
-      this.$store.dispatch('watermark/fileListDelete', index)
+      this.fileSet.delete(this.fileList[index].fullpath)
+      this.fileList.splice(index, 1)
     },
     preview(index) {
       let dialog = this.$dialog({
@@ -336,7 +283,7 @@ export default {
         text: '正在生成预览',
         showConfirm: false
       })
-      let url = this.$store.state.watermark.fileList[index].fullpath
+      let url = this.fileList[index].fullpath
       let image = document.createElement('img')
       image.src = url
       image.onload = () => {
@@ -401,13 +348,10 @@ export default {
     fileListPageChange(page) {
       this.fileListPage = page
     },
-    templateListPageChange(page) {
-      this.templateListPage = page
-    },
     edit() {
       ipcRenderer.send('open', {
-        title: '水印编辑器',
-        path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
+        title: '尺寸调整编辑器',
+        path: '#/resizer/editor?srcDirectory=' + this.srcDirectory,
         modal: true,
         height: 720,
         width: 1000
@@ -415,168 +359,13 @@ export default {
     },
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
-    },
-    editTemplate(index) {
-      ipcRenderer.send('open', {
-        title: '水印模板编辑器',
-        path: '#/watermark/template?index=' + String(index),
-        modal: true,
-        height: 600,
-        width: 1000
-      })
-    },
-    shareTemplate(index) {
-      clipboard.writeText(btoa(encodeURI(JSON.stringify({
-        type: 'watermarkTemplate',
-        content: this.$store.state.watermark.templates[index]
-      }))))
-      this.$dialog({
-        type: 'success',
-        title: '成功',
-        text: '已成功将水印模板复制到剪贴板。'
-      })
-    },
-    deleteTemplate(index) {
-      this.$dialog({
-        type: 'warning',
-        title: '操作确认',
-        text: '确定要删除这个模板吗？',
-        showCancel: true,
-        confirmFunction: () => {
-          if (this.templateListPage != 1) {
-            if (this.templateListPage == Math.ceil(this.$store.state.watermark.templates.length / 6)) {
-              if (this.$store.state.watermark.templates.length % 6 == 1) {
-                this.templateListPage -= 1
-              }
-            }
-          }
-          this.$store.dispatch('watermark/templateDelete', index)
-        }
-      })
-    },
-    importTemplate() {
-      try {
-        let template = JSON.parse(decodeURI(atob(clipboard.readText())))
-        if (template.type != 'watermarkTemplate') {
-          throw false
-        } else {
-          template = template.content
-          let checkName = (title) => {
-            if (title == '') {
-              this.$dialog({
-                type: 'error',
-                title: '错误',
-                text: '请输入模板标题，否则无法导入该模板。',
-                showCancel: true,
-                confirmFunction: () => {
-                  this.$dialog({
-                    title: '请输入水印模板标题',
-                    content: this.$createElement('div', {
-                      'class': 'el-input el-input--mini'
-                    }, [
-                      this.$createElement('input', {
-                        'dom-props': {
-                          value: this.templateTitle,
-                        },
-                        'on': {
-                          input: (event) => {
-                            this.templateTitle = event.target.value
-                          }
-                        },
-                        'class': 'el-input__inner',
-                        'style': {
-                          'font-family': 'var(--main-font)'
-                        }
-                      })
-                    ]),
-                    showCancel: true,
-                    confirmFunction: () => {
-                      checkName(this.templateTitle)
-                      this.templateTitle = ''
-                    },
-                    cancelFunction: () => {
-                      this.templateTitle = ''
-                    }
-                  })
-                }
-              })
-            } else {
-              for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-                if (title == this.$store.state.watermark.templates[i].title) {
-                  this.$dialog({
-                    type: 'warning',
-                    title: '存在同名模板',
-                    text: '您需要将新导入的模板重命名，才能将其保存。',
-                    showCancel: true,
-                    confirmFunction: () => {
-                      this.$dialog({
-                        title: '请输入水印模板标题',
-                        content: this.$createElement('div', {
-                          'class': 'el-input el-input--mini'
-                        }, [
-                          this.$createElement('input', {
-                            'dom-props': {
-                              value: this.templateTitle,
-                            },
-                            'on': {
-                              input: (event) => {
-                                this.templateTitle = event.target.value
-                              }
-                            },
-                            'class': 'el-input__inner',
-                            'style': {
-                              'font-family': 'var(--main-font)'
-                            }
-                          })
-                        ]),
-                        showCancel: true,
-                        confirmFunction: () => {
-                          checkName(this.templateTitle)
-                          this.templateTitle = ''
-                        },
-                        cancelFunction: () => {
-                          this.templateTitle = ''
-                        }
-                      })
-                    }
-                  })
-                  return
-                }
-              }
-              template.title = title
-              this.$store.dispatch('watermark/templatePush', template)
-              this.$dialog({
-                type: 'success',
-                title: '成功',
-                text: '水印模板导入成功。'
-              })
-            }
-          }
-          checkName(template.title)
-        }
-      } catch (e) {
-        this.$dialog({
-          type: 'error',
-          title: '导入失败',
-          text: '未能从您的剪贴板中读取到水印模板信息！'
-        })
-      }
-    },
-    createTemplate() {
-      ipcRenderer.send('open', {
-        title: '水印模板编辑器',
-        path: '#/watermark/template?index=-1',
-        modal: true,
-        height: 600,
-        width: 1000
-      })
     }
   }
 }
 </script>
 
 <style lang="scss">
-#watermark {
+#resizer {
   width: 100%;
   height: 100%;
   
@@ -962,125 +751,6 @@ export default {
         &:hover {
           background-color: var(--gray);
         }
-      }
-    }
-  }
-    
-  #templates {
-    flex-direction: column;
-    
-    #container {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      flex-wrap: wrap;
-      
-      .template-container {
-        width: calc(100%/3);
-        height: 210px;
-        box-sizing: border-box;
-        padding: 10px;
-        
-        .card {
-          width: 100%;
-          height: 100%;
-          color: var(--dark-gray);
-          
-          .el-card__body {
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            
-            .subtitle {
-              width: 100%;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-            
-            .control-buttons {
-              width: 100%;
-              flex-grow: 1;
-              align-items: flex-end;
-              
-              .control-button {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                cursor: pointer;
-                font-size: 12px;
-                width: 32px;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 20px;
-                  margin: 5px;
-                }
-                
-                &:hover {
-                  color: var(--main-color);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
-              }
-            }
-          }
-          
-          &:hover {
-            transform: scale(1.05);
-          }
-        }
-      }
-    }
-    
-    #empty-container {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      
-      #empty {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        
-        svg {
-          font-size: 40px;
-          margin: 14px;
-        }
-      }
-    }
-    
-    .el-pagination {
-      padding: 0;
-      margin-right: 10px;
-      
-      li {
-        min-width: 24px;
-        height: 28px;
-        line-height: 28px;
-      }
-      
-      .btn-prev {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-left: 0;
-      }
-      
-      .btn-next {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-right: 0;
       }
     }
   }

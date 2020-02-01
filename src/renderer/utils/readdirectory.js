@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-function ReadDirectory(srcDirectory, childDirectoryIncluded) {
+export default function ReadDirectory(srcDirectory, childDirectoryIncluded) {
   let fileList = []
   let errorList = []
   if (childDirectoryIncluded) {
@@ -63,8 +63,4 @@ function ReadDirectory(srcDirectory, childDirectoryIncluded) {
     fileList: fileList,
     errorList: errorList
   }
-}
-
-export {
-  ReadDirectory
 }

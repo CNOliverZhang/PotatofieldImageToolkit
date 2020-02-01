@@ -62,6 +62,11 @@ export default new Router({
       component: require('@/pages/textToImage/template').default
     },
     {
+      path: '/resizer',
+      name: 'resizer',
+      component: require('@/pages/resizer').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

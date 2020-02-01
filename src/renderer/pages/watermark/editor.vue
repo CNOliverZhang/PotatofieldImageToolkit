@@ -289,6 +289,7 @@
 </template>
 
 <script>
+import CreateDirectory from '../../utils/CreateDirectory'
 import ResizeObserver from 'resize-observer-polyfill'
 import html2canvas from 'html2canvas'
 import EXIF from 'exif-js'
@@ -296,7 +297,6 @@ import EXIF from 'exif-js'
 const path = require('path')
 const fs = require('fs')
 const ipcRenderer = require('electron').ipcRenderer
-const CreateDirectory = require('../../utils/CreateDirectory')
 
 export default {
   name: 'watermarkEditor',
