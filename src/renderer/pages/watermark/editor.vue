@@ -329,6 +329,7 @@ export default {
       watermarkWidth: 0,
       watermarkHeight: 0,
       templateTitle: '',
+      errorList: []
     }
   },
   computed: {
@@ -376,7 +377,7 @@ export default {
           this.imageIndex -= 1
         } else if (this.imageIndex == index) {
           setTimeout(() => {
-            this.preview(this.imageIndex - 1)
+            this.preview(this.imageIndex)
           }, 100)
         }
         this.$store.dispatch('watermark/fileListDelete', index)
@@ -388,16 +389,40 @@ export default {
       if (this.imageIndex != index) {
         let dialog = this.$dialog({
           title: '正在载入图像',
-          text: '即将完成，请稍后。',
+          text: '即将完成，请稍候。',
           showConfirm: false
         })
-        if (index < 0) {
-          this.imageIndex = 0
+        if (index >= this.$store.state.watermark.fileList.length) {
+          this.imageIndex = this.$store.state.watermark.fileList.length - 1
         } else {
           this.imageIndex = index
         }
         let image = document.createElement('img')
         image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
+        image.onerror = () => {
+          if (this.$store.state.watermark.fileList.length == 1) {
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '图像文件读取错误，生成预览失败。即将退出编辑器。',
+              showConfirm: true,
+              confirmFunction: () => {
+                this.close()
+              }
+            })
+          } else {
+            this.$store.dispatch('watermark/fileListDelete', index)
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '图像文件读取错误，生成预览失败。已从待处理列表中移除该文件。',
+              showConfirm: true,
+              confirmFunction: () => {
+                this.preview(index)
+              }
+            })
+          }
+        }
         image.onload = () => {
           EXIF.getData(image, () => {
             let orientation = EXIF.getTag(image, 'Orientation')
@@ -707,7 +732,7 @@ export default {
                       }
                     }
                     setTimeout(() => {
-                      this.preview(this.imageIndex - 1)
+                      this.preview(this.imageIndex)
                     }, 100)
                     this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
                   }
@@ -775,6 +800,50 @@ export default {
           let distFullpath = path.join(distPath, distFilename)
           let image = document.createElement('img')
           image.src = this.$store.state.watermark.fileList[index].fullpath
+          image.onerror = () => {
+            this.errorList.push(imageInfo.fullpath)
+            if (index < this.$store.state.watermark.fileList.length - 1) {
+              dialog.change({
+                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+              })
+              return handle(index + 1)
+            } else {
+              if (this.errorList.length == 0) {
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '全部图片处理完成。',
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.close()
+                  }
+                })
+              } else {
+                dialog.change({
+                  type: 'warning',
+                  title: '完成',
+                  text: '队列中的图片已处理完成，但下列图片处理失败。',
+                  content: this.$createElement('div', null, this.errorList.map((filename) => {
+                    return this.$createElement('p', {
+                      style: {
+                        'line-height': '24px',
+                        'font-size': '12px',
+                        'width': '100%',
+                        'overflow': 'hidden',
+                        'text-overflow': 'ellipsis',
+                        'white-space': 'nowrap',
+                        'text-indent': '0'
+                      }
+                    }, filename)
+                  })),
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.close()
+                  }
+                })
+              }
+            }
+          }
           image.onload = () => {
             EXIF.getData(image, () => {
               let orientation = EXIF.getTag(image, 'Orientation')
@@ -841,15 +910,40 @@ export default {
                     })
                     return handle(index + 1)
                   } else {
-                    dialog.change({
-                      type: 'success',
-                      title: '成功',
-                      text: '全部图片处理完成。',
-                      showConfirm: true,
-                      confirmFunction: () => {
-                        this.close()
-                      }
-                    })
+                    if (this.errorList.length == 0) {
+                      dialog.change({
+                        type: 'success',
+                        title: '成功',
+                        text: '全部图片处理完成。',
+                        showConfirm: true,
+                        confirmFunction: () => {
+                          this.close()
+                        }
+                      })
+                    } else {
+                      dialog.change({
+                        type: 'warning',
+                        title: '完成',
+                        text: '队列中的图片已处理完成，但下列图片处理失败。',
+                        content: this.$createElement('div', null, this.errorList.map((filename) => {
+                          return this.$createElement('p', {
+                            style: {
+                              'line-height': '24px',
+                              'font-size': '12px',
+                              'width': '100%',
+                              'overflow': 'hidden',
+                              'text-overflow': 'ellipsis',
+                              'white-space': 'nowrap',
+                              'text-indent': '0'
+                            }
+                          }, filename)
+                        })),
+                        showConfirm: true,
+                        confirmFunction: () => {
+                          this.close()
+                        }
+                      })
+                    }
                   }
                 })
               }, 100)
@@ -964,7 +1058,7 @@ export default {
       width: 100%;
       height: 300px;
       flex-shrink: 0;
-      background-color: var(--dark-gray);
+      background-color: var(--black-gray);
       border-radius: 6px;
       display: flex;
       justify-content: center;

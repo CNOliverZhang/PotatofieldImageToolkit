@@ -1142,7 +1142,7 @@ export default {
                 dialog.change({
                   type: 'success',
                   title: '成功',
-                  text: '处理完成，拼接后的长图已保存到目标文件夹。',
+                  text: '处理完成，制作完成的图片已保存到目标文件夹。',
                   showConfirm: true,
                   confirmFunction: () => {
                     this.close()

@@ -30,8 +30,8 @@
             </div>
           </div>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入拼图编辑器</el-button>
+            <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入拼图编辑器</el-button>
           </div>
         </div>
       </div>
@@ -51,16 +51,16 @@
               <div class="text">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
               <div class="text">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
-              <div class="row control-buttons">
-                <div class="control-button interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
+              <div class="row actions">
+                <div class="action interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
                   <div>编辑</div>
                 </div>
-                <div class="control-button interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
+                <div class="action interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-share-alt"></span>
                   <div>分享</div>
                 </div>
-                <div class="control-button interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
+                <div class="action interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -88,20 +88,26 @@
             :hide-on-single-page="true"
             @current-change="templateListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="half-width-button interactable">导入拼图模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="half-width-button interactable">创建拼图模板</el-button>
+          <el-button type="primary" size="mini" @click="importTemplate" class="bar-button interactable">导入拼图模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="bar-button interactable">创建拼图模板</el-button>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane disabled>
-      <span slot="label" id="control-button-holder">
-        <div class="control-button interactable" @click="hide">
-          <i class="fas fa-angle-double-down"></i>
-          <div>最小化</div>
+      <span slot="label" id="sidebar">
+        <div id="tool-info">
+          <i id="tool-logo" class="fas fa-images"></i>
+          <div class="text">长图拼接工具</div>
         </div>
-        <div class="control-button interactable" @click="close">
-          <span class="fas fa-sign-out-alt"></span>
-          <div>退出</div>
+        <div id="control-button-holder">
+          <div class="control-button interactable" @click="hide">
+            <i class="fas fa-angle-double-down"></i>
+            <div>最小化</div>
+          </div>
+          <div class="control-button interactable" @click="close">
+            <span class="fas fa-sign-out-alt"></span>
+            <div>退出</div>
+          </div>
         </div>
       </span>
     </el-tab-pane>
@@ -216,6 +222,14 @@ export default {
       let url = this.$store.state.splicer.fileList[index].fullpath
       let image = document.createElement('img')
       image.src = url
+      image.onerror = () => {
+        dialog.change({
+          type: 'error',
+          title: '出现错误',
+          text: '生成预览失败，请检查图像文件是否正常。',
+          showConfirm: true
+        })
+      }
       image.onload = () => {
         EXIF.getData(image, () => {
           EXIF.getAllTags(image)
@@ -472,31 +486,65 @@ export default {
           border: 0;
           transition: 0.2s;
           
-          #control-button-holder {
+          #sidebar {
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
             
-            .control-button {
-              font-size: 12px;
-              line-height: initial;
-              cursor: pointer;
-              transition: 0.2s;
-              
-              svg {
-                font-size: 20px;
-                margin: 5px;
+            @keyframes shine {
+              0% {
+                color: var(--light-gray)
               }
-              
-              &:hover {
-                color: var(--white);
+              25% {
+                color: var(--light-gray)
               }
+              50% {
+                color: var(--main-color)
+              }
+              75% {
+                color: var(--light-gray)
+              }
+              100% {
+                color: var(--light-gray)
+              }
+            }
+            
+            #tool-info {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              animation: shine 5s infinite;
               
-              &:active {
-                filter: brightness(0.9);
+              #tool-logo {
+                font-size: 60px;
+                margin: 20px;
+              }
+            }
+            
+            #control-button-holder {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 20px;
+              box-sizing: border-box;
+              
+              .control-button {
+                font-size: 12px;
+                line-height: initial;
+                cursor: pointer;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: var(--white);
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
               }
             }
           }
@@ -568,8 +616,18 @@ export default {
     }
   }
   
-  .half-width-button {
-    width: calc(50% - 5px);
+  .bar-button {
+    width: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    
+    &:first-child {
+      margin-left: 0;
+    }
+    
+    &:last-child {
+      margin-right: 0;
+    }
   }
     
   #file-input {
@@ -595,10 +653,21 @@ export default {
           flex-direction: column;
           justify-content: center;
           align-items: center;
+          border-color: var(--light-gray);
+          transition: 0.2s;
           
           svg {
             font-size: 40px;
             margin: 14px;
+          }
+          
+          &:hover {
+            color: var(--main-color);
+            border-color: var(--main-color);
+            
+            .el-upload__text {
+              color: var(--main-color);
+            }
           }
         }
       }
@@ -723,12 +792,12 @@ export default {
               text-overflow: ellipsis;
             }
             
-            .control-buttons {
+            .actions {
               width: 100%;
               flex-grow: 1;
               align-items: flex-end;
               
-              .control-button {
+              .action {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;

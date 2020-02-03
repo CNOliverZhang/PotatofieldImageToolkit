@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "0.4.1",
+  "version": "1.0.0",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新富文本制图工具。\n修复已知问题。"
+      "releaseNotes": "更新尺寸调整工具。\n更新图片裁剪工具。\n更新 EXIF 读取工具。\n修复已知问题。"
     },
     "publish": [
       {
@@ -81,12 +81,14 @@
     "@fortawesome/free-solid-svg-icons": "^5.12.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "axios": "^0.18.0",
+    "cropperjs": "^1.5.6",
     "element-ui": "^2.13.0",
     "exif-js": "^2.3.0",
     "html2canvas": "^1.0.0-rc.5",
     "resize-observer-polyfill": "^1.5.1",
     "vue": "^2.6.11",
     "vue-clamp": "^0.2.2",
+    "vue-cropper": "^0.5.0",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",

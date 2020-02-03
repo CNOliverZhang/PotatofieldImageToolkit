@@ -16,14 +16,14 @@
         <div class="row">
           <div class="subtitle">开发者信息</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">Copyright © 2020 张志毅</div>
           <div class="text link interactable" @click="open('mailto:cnoliverzhang@gmail.com')">联系开发者</div>
         </div>
         <div class="row">
           <div class="subtitle">开源协议</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">本程序遵循 MIT 开源许可协议发行，相关资源及源码已托管在 Github ，您可以<span
             class="link interactable"
             @click="open('https://github.com/CNOliverZhang/PotatofieldImageToolkit/')">点此访问</span>。
@@ -32,7 +32,7 @@
         <div class="row">
           <div class="subtitle">相关项目</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">本程序的开发过程中使用了下列开源程序和组件：</div>
         </div>
         <div id="resources">
@@ -53,7 +53,7 @@
         <div class="row">
           <div class="subtitle">当前版本</div>
         </div>
-        <div class="row">
+        <div class="control-row">
           <div class="text">版本号：{{ version }}</div>
         </div>
         <div class="row">
@@ -61,16 +61,16 @@
         </div>
         <div v-if="updateChecked">
           <div v-if="update">
-            <div class="row">
+            <div class="control-row">
               <div class="text">版本号：{{ update.version }}</div>
             </div>
-            <div class="row">
+            <div class="control-row">
               <div class="text">更新日志：</div>
             </div>
             <div class="subtext" v-for="(releaseNote) in update.releaseNotes" :key="releaseNote">
               {{ releaseNote }}
             </div>
-            <div class="row">
+            <div class="control-row">
               <div class="text">发布日期：{{ update.releaseDate }}</div>
             </div>
             <div class="row">
@@ -78,13 +78,13 @@
             </div>
           </div>
           <div v-else>
-            <div class="row">
+            <div class="control-row">
               <div class="text">您的版本已经是最新版本，无需更新。</div>
             </div>
           </div>
         </div>
         <div v-else>
-          <div class="row">
+          <div class="control-row">
             <div class="text">尚未获取更新信息，请点击下方按钮检查最新版本。</div>
           </div>
           <div class="row">
@@ -94,14 +94,20 @@
       </div>
     </el-tab-pane>
     <el-tab-pane disabled>
-      <span slot="label" id="control-button-holder">
-        <div class="control-button interactable" @click="hide">
-          <i class="fas fa-angle-double-down"></i>
-          <div>最小化</div>
+      <span slot="label" id="sidebar">
+        <div id="tool-info">
+          <i id="tool-logo" class="fas fa-question-circle"></i>
+          <div class="text">关于</div>
         </div>
-        <div class="control-button interactable" @click="close">
-          <span class="fas fa-sign-out-alt"></span>
-          <div>退出</div>
+        <div id="control-button-holder">
+          <div class="control-button interactable" @click="hide">
+            <i class="fas fa-angle-double-down"></i>
+            <div>最小化</div>
+          </div>
+          <div class="control-button interactable" @click="close">
+            <span class="fas fa-sign-out-alt"></span>
+            <div>退出</div>
+          </div>
         </div>
       </span>
     </el-tab-pane>
@@ -122,24 +128,56 @@ export default {
           url: 'https://github.com/electron/electron'
         },
         {
+          title: 'electron-buider',
+          url: 'https://github.com/electron-userland/electron-builder'
+        },
+        {
           title: 'Vue.js',
           url: 'https://github.com/vuejs/vue'
         },
         {
-          title: 'electron-vue',
-          url: 'https://github.com/SimulatedGREG/electron-vue'
+          title: 'Vue Router',
+          url: 'https://github.com/vuejs/vue-router'
+        },
+        {
+          title: 'Vuex',
+          url: 'https://github.com/vuejs/vuex'
+        },
+        {
+          title: 'Vuex Electron',
+          url: 'https://github.com/vue-electron/vuex-electron'
+        },
+        {
+          title: 'vue-clamp',
+          url: 'https://github.com/Justineo/vue-clamp'
         },
         {
           title: 'Element UI',
           url: 'https://github.com/ElemeFE/element'
         },
         {
-          title: 'electron-buider',
-          url: 'https://github.com/electron-userland/electron-builder'
+          title: 'Font Awesome',
+          url: 'https://github.com/FortAwesome/Font-Awesome'
+        },
+        {
+          title: 'Resize Observer',
+          url: 'https://github.com/juggle/resize-observer'
         },
         {
           title: 'html2canvas',
           url: 'https://github.com/niklasvh/html2canvas'
+        },
+        {
+          title: 'CKEditor 5',
+          url: 'https://github.com/ckeditor/ckeditor5'
+        },
+        {
+          title: 'EXIF.js',
+          url: 'https://github.com/exif-js/exif-js'
+        },
+        {
+          title: 'Cropper.js',
+          url: 'https://github.com/fengyuanchen/cropperjs'
         }
       ],
       version: null,
@@ -167,7 +205,7 @@ export default {
         dialog.change({
           type: 'error',
           title: '出现错误',
-          text: '检查更新的过程中出现错误，请您检查网络连接状态或稍后重试。',
+          text: '检查更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
           showConfirm: true
         })
       })
@@ -209,7 +247,7 @@ export default {
         dialog.change({
           type: 'error',
           title: '出现错误',
-          text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍后重试。',
+          text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
           content: null,
           showConfirm: true
         })
@@ -309,6 +347,27 @@ export default {
     padding: 20px;
   }
   
+  .control-row {
+    width: 100%;
+    height: 21px;
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
   .row {
     width: 100%;
     flex-shrink: 0;
@@ -326,6 +385,11 @@ export default {
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  
+  .subtext {
+    margin-top: 5px;
+    margin-bottom: 5px;
   }
   
   #info {      
@@ -378,31 +442,65 @@ export default {
     }
   }
   
-  #control-button-holder {
+  #sidebar {
     width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    box-sizing: border-box;
     
-    .control-button {
-      font-size: 12px;
-      line-height: initial;
-      cursor: pointer;
-      transition: 0.2s;
-      
-      svg {
-        font-size: 20px;
-        margin: 5px;
+    @keyframes shine {
+      0% {
+        color: var(--light-gray)
       }
-      
-      &:hover {
-        color: var(--white);
+      25% {
+        color: var(--light-gray)
       }
+      50% {
+        color: var(--main-color)
+      }
+      75% {
+        color: var(--light-gray)
+      }
+      100% {
+        color: var(--light-gray)
+      }
+    }
+    
+    #tool-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: shine 5s infinite;
       
-      &:active {
-        filter: brightness(0.9);
+      #tool-logo {
+        font-size: 60px;
+        margin: 20px;
+      }
+    }
+    
+    #control-button-holder {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+      
+      .control-button {
+        font-size: 12px;
+        line-height: initial;
+        cursor: pointer;
+        transition: 0.2s;
+        
+        svg {
+          font-size: 20px;
+          margin: 5px;
+        }
+        
+        &:hover {
+          color: var(--white);
+        }
+        
+        &:active {
+          filter: brightness(0.9);
+        }
       }
     }
   }

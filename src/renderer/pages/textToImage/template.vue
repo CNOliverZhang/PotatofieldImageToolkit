@@ -24,14 +24,22 @@
         </ul>
         <p>洋芋田图像工具箱基于 MIT 协议开源。目前提供适用于 Windows 的构建版本，使用其他平台的用户可以自行下载源码并构建。</p>
         <p>洋芋田图像工具箱在开发过程中使用了下列开源组件和库：</p>
-        <ol>
+        <ul>
           <li>Electron</li>
-          <li>Vue.js</li>
-          <li>electron-vue</li>
-          <li>Element UI</li>
           <li>electron-buider</li>
+          <li>Vue.js</li>
+          <li>Vue Router</li>
+          <li>Vuex</li>
+          <li>Vuex Electron</li>
+          <li>vue-clamp</li>
+          <li>Element UI</li>
+          <li>Font Awesome</li>
+          <li>Resize Observer</li>
           <li>html2canvas</li>
-        </ol>
+          <li>CKEditor 5</li>
+          <li>EXIF.js</li>
+          <li>Cropper.js</li>
+        </ul>
         <h3>爱莲说</h3>
         <blockquote>
           <p>水陆草木之花，可爱者甚蕃。晋陶渊明独爱菊。自李唐来，世人盛爱牡丹。予独爱莲之出淤泥而不染，濯清涟而不妖，中通外直，不蔓不枝，香远益清，亭亭净植，可远观而不可亵玩焉。</p>
@@ -607,7 +615,7 @@
 const ipcRenderer = require('electron').ipcRenderer
 
 export default {
-  name: 'textToImageEditor',
+  name: 'textToImageTemplate',
   data () {
     return  {
       templateTitle: '',

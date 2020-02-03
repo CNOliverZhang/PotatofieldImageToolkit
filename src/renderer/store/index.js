@@ -14,7 +14,13 @@ export default new Vuex.Store({
       reducer: (state) => {
         return {
           watermark: {
-            templates: state.watermark.templates,
+            templates: state.watermark.templates
+          },
+          splicer: {
+            templates: state.watermark.templates
+          },
+          textToImage: {
+            templates: state.watermark.templates
           }
         }
       }

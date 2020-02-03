@@ -202,7 +202,7 @@ import ResizeObserver from 'resize-observer-polyfill'
 const ipcRenderer = require('electron').ipcRenderer
 
 export default {
-  name: 'watermarkEditor',
+  name: 'watermarkTemplate',
   data () {
     return  {
       index: this.$route.query.index,

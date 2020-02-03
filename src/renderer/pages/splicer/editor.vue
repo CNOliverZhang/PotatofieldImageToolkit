@@ -185,7 +185,8 @@ export default {
       distDirectory: '',
       filename: '',
       templateTitle: '',
-      imagesChanged: false
+      imagesChanged: false,
+      errorList: []
     }
   },
   methods: {
@@ -459,6 +460,40 @@ export default {
       let replace = (index) => {
         let image = document.createElement('img')
         image.src = this.$store.state.splicer.fileList[index].fullpath
+        image.onerror = () => {
+          this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
+          if (index < this.$store.state.splicer.fileList.length - 1) {
+            return replace(index + 1)
+          } else {
+            if (this.errorList.length == 0) {
+              dialog.close()
+            } else {
+              dialog.change({
+                type: 'error',
+                title: '出现错误',
+                text: '生成预览失败，读取下列文件失败。即将关闭编辑器，请您从列表中移除出现错误的文件后再进入编辑器。',
+                content: this.$createElement('div', null, this.errorList.map((filename) => {
+                  return this.$createElement('p', {
+                    style: {
+                      'line-height': '24px',
+                      'font-size': '12px',
+                      'width': '100%',
+                      'overflow': 'hidden',
+                      'text-overflow': 'ellipsis',
+                      'white-space': 'nowrap',
+                      'text-indent': '0'
+                    }
+                  }, filename)
+                })),
+                showConfirm: true,
+                confirmFunction: () => {
+                  ipcRenderer.send('close')
+                  this.$destroy()
+                }
+              })
+            }
+          }
+        }
         image.onload = () => {
           EXIF.getData(image, () => {
             let orientation = EXIF.getTag(image, 'Orientation')
@@ -719,10 +754,6 @@ export default {
       &:last-child {
         margin-right: 0;
       }
-    }
-    
-    .el-select .el-input {
-      width: 80px;
     }
     
     #lists {

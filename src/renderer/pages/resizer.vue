@@ -3,35 +3,96 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
       <div id="single" class="tab-content">
-        <el-upload
-          id="upload-dragger"
-          action=""
-          class="interactable"
-          drag
-          multiple
-          :auto-upload="false"
-          :on-change="handleFile"
-          :show-file-list="false"
-          :class="this.fileList.length != 0 ? 'half' : ''">
-          <i class="fas fa-image"></i>
-          <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
-        </el-upload>
-        <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
-          <div id="list">
-            <div
-              v-for="(file, index) in this.fileList"
-              :key="file.fullpath"
-              class="file"
-              @click="preview(index)">
-              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-              <div @click.stop="handleDelete(index)">
-                <i class="fas fa-trash-alt delete"></i>
+        <div id="upload">
+          <el-upload
+            id="upload-dragger"
+            action=""
+            class="interactable"
+            drag
+            multiple
+            :auto-upload="false"
+            :on-change="handleFile"
+            :show-file-list="false"
+            :class="this.fileList.length != 0 ? 'half' : ''">
+            <i class="fas fa-image"></i>
+            <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
+          </el-upload>
+          <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
+            <div id="list">
+              <div
+                v-for="(file, index) in this.fileList"
+                :key="file.fullpath"
+                class="file"
+                @click="preview(index)">
+                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+                <div @click.stop="handleDelete(index)">
+                  <i class="fas fa-trash-alt delete"></i>
+                </div>
               </div>
             </div>
+            <div class="row">
+              <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
+            </div>
+          </div>
+        </div>
+        <div v-if="this.fileList.length != 0" class="controller">
+          <div class="control-row">
+            <div class="text">目标尺寸参考基准</div>
+            <el-radio-group v-model="standard" class="control interactable">
+              <el-radio label="percentage">百分比</el-radio>
+              <el-radio label="short">固定短边</el-radio>
+              <el-radio label="long">固定长边</el-radio>
+            </el-radio-group>
+          </div>
+          <div v-if="standard == 'percentage'" class="control-row">
+            <div class="text">目标百分比设置</div>
+            <el-slider
+              v-model="percentage"
+              class="control interactable"
+              :min="1"
+              :max="100"
+              :step="1"
+              :show-input="true"
+              input-size="mini"></el-slider>
+          </div>
+          <div v-else class="control-row">
+            <div class="text">目标尺寸设置</div>
+            <el-input size="mini" v-model="length" class="control interactable">
+              <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
+              <template v-else slot="prepend">固定较长边长度</template>
+              <template slot="append">像素</template>
+            </el-input>
+          </div>
+          <div class="control-row">
+            <div class="text">存储位置</div>
+            <el-switch
+              v-model="customDistDirectory"
+              active-color="var(--main-color)"
+              inactive-color="var(--main-color)"
+              active-text="自定义路径"
+              inactive-text="保存在原路径"
+              class="control interactable"></el-switch>
+          </div>
+          <div v-if="customDistDirectory" class="control-row">
+            <div class="text">自定义存储位置</div>
+            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
+              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+            </el-input>
+          </div>
+          <div class="control-row">
+            <div class="text">保存的图片格式</div>
+            <el-radio-group v-model="mimeType" class="control interactable">
+              <el-radio label="JPEG"></el-radio>
+              <el-radio label="PNG"></el-radio>
+              <el-radio label="保持原格式"></el-radio>
+            </el-radio-group>
+          </div>
+          <div class="control-row">
+            <div class="text">文件名后缀</div>
+            <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
           </div>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入尺寸调整编辑器</el-button>
+            <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
           </div>
         </div>
       </div>
@@ -39,14 +100,14 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
       <div id="multiple" class="tab-content" v-if="this.fileList.length == 0">
-        <div id="controller">
+        <div class="controller">
           <div class="row">
             <el-switch
               v-model="childDirectoryIncluded"
               active-text="包含子目录"
               inactive-text="不包含子目录"
               class="interactable"></el-switch>
-            <el-input disabled size="mini" v-model="srcDirectory" class="controller interactable">
+            <el-input disabled size="mini" v-model="srcDirectory" class="control interactable">
               <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
@@ -55,7 +116,7 @@
               @click="handleFolder"
               type="primary"
               size="mini"
-              class="interactable full-width-button">扫描文件夹</el-button>
+              class="interactable bar-button">扫描文件夹</el-button>
           </div>
         </div>
         <div id="file-list" class="row interactable">
@@ -92,20 +153,93 @@
             :hide-on-single-page="true"
             @current-change="fileListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="clearConfirm" class="half-width-button interactable">清空列表</el-button>
-          <el-button type="primary" size="mini" @click="edit" class="half-width-button interactable">进入尺寸调整编辑器</el-button>
+          <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
+        </div>
+        <div class="controller">
+          <div class="control-row">
+            <div class="text">目标尺寸参考基准</div>
+            <el-radio-group v-model="standard" class="control interactable">
+              <el-radio label="percentage">百分比</el-radio>
+              <el-radio label="short">固定短边</el-radio>
+              <el-radio label="long">固定长边</el-radio>
+            </el-radio-group>
+          </div>
+          <div v-if="standard == 'percentage'" class="control-row">
+            <div class="text">目标百分比设置</div>
+            <el-slider
+              v-model="percentage"
+              class="control interactable"
+              :min="1"
+              :max="100"
+              :step="1"
+              :show-input="true"
+              input-size="mini"></el-slider>
+          </div>
+          <div v-else class="control-row">
+            <div class="text">目标尺寸设置</div>
+            <el-input size="mini" v-model="length" class="control interactable">
+              <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
+              <template v-else slot="prepend">固定较长边长度</template>
+              <template slot="append">像素</template>
+            </el-input>
+          </div>
+          <div class="control-row">
+            <div class="text">存储位置</div>
+            <el-switch
+              v-model="customDistDirectory"
+              active-color="var(--main-color)"
+              inactive-color="var(--main-color)"
+              active-text="自定义路径"
+              inactive-text="保存在原路径"
+              class="control interactable"></el-switch>
+          </div>
+          <div v-if="customDistDirectory" class="control-row">
+            <div class="text">自定义存储位置</div>
+            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
+              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+            </el-input>
+          </div>
+          <div v-if="customDistDirectory && childDirectoryIncluded" class="control-row interactable">
+            <div class="text">目录结构</div>
+            <el-switch
+              v-model="keepDirectoryStructure"
+              active-text="保持目录结构"
+              inactive-text="不保持目录结构"
+              class="control"></el-switch>
+          </div>
+          <div class="control-row">
+            <div class="text">保存的图片格式</div>
+            <el-radio-group v-model="mimeType" class="control interactable">
+              <el-radio label="JPEG"></el-radio>
+              <el-radio label="PNG"></el-radio>
+              <el-radio label="保持原格式"></el-radio>
+            </el-radio-group>
+          </div>
+          <div class="control-row">
+            <div class="text">文件名后缀</div>
+            <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+          </div>
+          <div class="row">
+            <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
+          </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane disabled>
-      <span slot="label" id="control-button-holder">
-        <div class="control-button interactable" @click="hide">
-          <i class="fas fa-angle-double-down"></i>
-          <div>最小化</div>
+      <span slot="label" id="sidebar">
+        <div id="tool-info">
+          <i id="tool-logo" class="fas fa-compress"></i>
+          <div class="text">尺寸调整工具</div>
         </div>
-        <div class="control-button interactable" @click="close">
-          <span class="fas fa-sign-out-alt"></span>
-          <div>退出</div>
+        <div id="control-button-holder">
+          <div class="control-button interactable" @click="hide">
+            <i class="fas fa-angle-double-down"></i>
+            <div>最小化</div>
+          </div>
+          <div class="control-button interactable" @click="close">
+            <span class="fas fa-sign-out-alt"></span>
+            <div>退出</div>
+          </div>
         </div>
       </span>
     </el-tab-pane>
@@ -113,11 +247,13 @@
 </template>
 
 <script>
+import CreateDirectory from '../utils/CreateDirectory'
 import ReadDirectory from '../utils/ReadDirectory'
 import EXIF from 'exif-js'
 
-const { ipcRenderer, clipboard } = require('electron')
+const { ipcRenderer } = require('electron')
 const path = require('path')
+const fs = require('fs')
 
 export default {
   name: 'resizer',
@@ -126,10 +262,18 @@ export default {
       fileList: [],
       fileSet: new Set(),
       errorList: [],
+      errorLog: null,
       fileListPage: 1,
-      childDirectoryIncluded: false,
+      standard: 'percentage',
+      percentage: 100,
+      length: 0,
+      mimeType: 'JPEG',
+      append: '_resized',
       srcDirectory: '',
-      errorLog: null
+      distDirectory: '',
+      childDirectoryIncluded: false,
+      customDistDirectory: false,
+      keepDirectoryStructure: false
     }
   },
   methods: {
@@ -144,10 +288,18 @@ export default {
       this.fileList = []
       this.fileSet = new Set()
       this.errorList = []
-      this.fileListPage = 1
-      this.childDirectoryIncluded = false
-      this.srcDirectory = ''
       this.errorLog = null
+      this.fileListPage = 1
+      this.standard = 'percentage'
+      this.percentage = 100
+      this.length = 0
+      this.mimeType = 'JPEG'
+      this.append = '_resized'
+      this.srcDirectory = ''
+      this.distDirectory = ''
+      this.childDirectoryIncluded = false
+      this.customDistDirectory = false
+      this.keepDirectoryStructure = false
     },
     clearConfirm() {
       this.$dialog({
@@ -263,7 +415,7 @@ export default {
               }
             })
           }
-        }, 0)
+        }, 100)
       }
     },
     handleDelete(index) {
@@ -286,6 +438,14 @@ export default {
       let url = this.fileList[index].fullpath
       let image = document.createElement('img')
       image.src = url
+      image.onerror = () => {
+        dialog.change({
+          type: 'error',
+          title: '出现错误',
+          text: '生成预览失败，请检查图像文件是否正常。',
+          showConfirm: true
+        })
+      }
       image.onload = () => {
         EXIF.getData(image, () => {
           let orientation = EXIF.getTag(image, 'Orientation')
@@ -348,17 +508,203 @@ export default {
     fileListPageChange(page) {
       this.fileListPage = page
     },
-    edit() {
-      ipcRenderer.send('open', {
-        title: '尺寸调整编辑器',
-        path: '#/resizer/editor?srcDirectory=' + this.srcDirectory,
-        modal: true,
-        height: 720,
-        width: 1000
-      })
-    },
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
+    },
+    selectSaveFolder() {
+      this.distDirectory = ipcRenderer.sendSync('select-folder')
+    },
+    start() {
+      if (this.customDistDirectory && this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您选择保存的目录！'
+        })
+      } else if (this.standard != 'percentage' && isNaN(Number(this.length))) {
+        this.$dialog({
+          type: 'warning',
+          text: '尺寸必须为数字！'
+        })
+      } else if (this.standard != 'percentage' && (Number(this.length) <= 0 || Number(this.length) >= 16000)) {
+        this.$dialog({
+          type: 'warning',
+          text: '请正确设置尺寸！'
+        })
+      } else {
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        let handle = (index) => {
+          let imageInfo = this.fileList[index]
+          let distExt
+          if (this.mimeType == '保持原格式') {
+            distExt = imageInfo.ext
+          } else if (this.mimeType == 'JPEG') {
+            distExt = 'jpg'
+          } else {
+            distExt = 'png'
+          }
+          let mimeType
+          if (distExt == 'png') {
+            mimeType = 'png'
+          } else {
+            mimeType = 'jpeg'
+          }
+          let distFilename = imageInfo.filename + this.append + '.' + distExt
+          let distPath
+          if (this.customDistDirectory) {
+            if (this.keepDirectoryStructure) {
+              distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+            } else {
+              distPath = this.distDirectory
+            }
+          } else {
+            distPath = imageInfo.filepath
+          }
+          let distFullpath = path.join(distPath, distFilename)
+          let image = document.createElement('img')
+          image.src = imageInfo.fullpath
+          image.onerror = () => {
+            this.errorList.push(imageInfo.fullpath)
+            if (index < this.fileList.length - 1) {
+              dialog.change({
+                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+              })
+              return handle(index + 1)
+            } else {
+              if (this.errorList.length == 0) {
+                dialog.change({
+                  type: 'success',
+                  title: '成功',
+                  text: '全部图片处理完成。',
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.clear()
+                  }
+                })
+              } else {
+                dialog.change({
+                  type: 'warning',
+                  title: '完成',
+                  text: '队列中的图片已处理完成，但下列图片处理失败。',
+                  content: this.$createElement('div', null, this.errorList.map((filename) => {
+                    return this.$createElement('p', {
+                      style: {
+                        'line-height': '24px',
+                        'font-size': '12px',
+                        'width': '100%',
+                        'overflow': 'hidden',
+                        'text-overflow': 'ellipsis',
+                        'white-space': 'nowrap',
+                        'text-indent': '0'
+                      }
+                    }, filename)
+                  })),
+                  showConfirm: true,
+                  confirmFunction: () => {
+                    this.clear()
+                  }
+                })
+              }
+            }
+          }
+          image.onload = () => {
+            let scale
+            if (this.standard == 'percentage') {
+              scale = this.percentage / 100
+            } else if (this.standard == 'short') {
+              scale = this.length / Math.min(image.width, image.height)
+            } else {
+              scale = this.length / Math.max(image.width, image.height)
+            }
+            EXIF.getData(image, () => {
+              let orientation = EXIF.getTag(image, 'Orientation')
+              let canvas = document.createElement('canvas')
+              let width, height, x, y, rotation
+              if (orientation == 3) {
+                width = image.width
+                height = image.height
+                x = -width
+                y = -height
+                rotation = 180
+              } else if (orientation == 6) {
+                width = image.height
+                height = image.width
+                x = 0
+                y = -width
+                rotation = 90
+              } else if (orientation == 8) {
+                width = image.height
+                height = image.width
+                x = -height
+                y = 0
+                rotation = 270
+              } else {
+                width = image.width
+                height = image.height
+                x = 0
+                y = 0
+                rotation = 0
+              }
+              canvas.height = height * scale
+              canvas.width = width * scale
+              let context = canvas.getContext("2d")
+              context.rotate(rotation * Math.PI / 180)
+              context.drawImage(image, x * scale, y * scale, image.width * scale, image.height * scale)
+              context.rotate(-rotation * Math.PI / 180)
+              let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+              let buffer = new Buffer.from(url, 'base64')
+              CreateDirectory(distPath)
+              fs.writeFileSync(distFullpath, buffer)
+              if (index < this.fileList.length - 1) {
+                dialog.change({
+                  text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+                })
+                return handle(index + 1)
+              } else {
+                if (this.errorList.length == 0) {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '全部图片处理完成。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.clear()
+                    }
+                  })
+                } else {
+                  dialog.change({
+                    type: 'warning',
+                    title: '完成',
+                    text: '队列中的图片已处理完成，但下列图片处理失败。',
+                    content: this.$createElement('div', null, this.errorList.map((filename) => {
+                      return this.$createElement('p', {
+                        style: {
+                          'line-height': '24px',
+                          'font-size': '12px',
+                          'width': '100%',
+                          'overflow': 'hidden',
+                          'text-overflow': 'ellipsis',
+                          'white-space': 'nowrap',
+                          'text-indent': '0'
+                        }
+                      }, filename)
+                    })),
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.errorList = []
+                      this.clear()
+                    }
+                  })
+                }
+              }
+            })
+          }
+        }
+        handle(0)
+      }
     }
   }
 }
@@ -394,31 +740,65 @@ export default {
           border: 0;
           transition: 0.2s;
           
-          #control-button-holder {
+          #sidebar {
             width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
             
-            .control-button {
-              font-size: 12px;
-              line-height: initial;
-              cursor: pointer;
-              transition: 0.2s;
-              
-              svg {
-                font-size: 20px;
-                margin: 5px;
+            @keyframes shine {
+              0% {
+                color: var(--light-gray)
               }
-              
-              &:hover {
-                color: var(--white);
+              25% {
+                color: var(--light-gray)
               }
+              50% {
+                color: var(--main-color)
+              }
+              75% {
+                color: var(--light-gray)
+              }
+              100% {
+                color: var(--light-gray)
+              }
+            }
+            
+            #tool-info {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              animation: shine 5s infinite;
               
-              &:active {
-                filter: brightness(0.9);
+              #tool-logo {
+                font-size: 60px;
+                margin: 20px;
+              }
+            }
+            
+            #control-button-holder {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 20px;
+              box-sizing: border-box;
+              
+              .control-button {
+                font-size: 12px;
+                line-height: initial;
+                cursor: pointer;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: var(--white);
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
               }
             }
           }
@@ -463,21 +843,34 @@ export default {
     padding: 20px;
     box-sizing: border-box;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
   }
   
-  .row {
+  .control-row {
     width: 100%;
+    height: 28px;
     flex-shrink: 0;
     margin-top: 10px;
     margin-bottom: 10px;
+    font-size: 14px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     
-    .controller {
+    .el-switch {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .el-radio-group {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .control {
       width: 60%;
     }
     
@@ -490,125 +883,175 @@ export default {
     }
   }
   
-  .full-width-button {
+  .row {
     width: 100%;
+    flex-shrink: 0;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    
+    .control {
+      width: 60%;
+    }
+    
+    &:first-child {
+      margin-top: 0;
+    }
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
   
-  .half-width-button {
-    width: calc(50% - 5px);
+  .bar-button {
+    width: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    
+    &:first-child {
+      margin-left: 0;
+    }
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  
+  .controller {
+    width: 100%;
   }
     
   #single {
-    flex-direction: row;
-    
-    #upload-dragger {
+    #upload {
       width: 100%;
-      height: 100%;
-      transition: 0.5s;
+      flex-grow: 1;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
       
-      &.half {
-        width: calc(50% - 5px);
-      }
-      
-      .el-upload {
+      #upload-dragger {
         width: 100%;
         height: 100%;
+        transition: 0.5s;
         
-        .el-upload-dragger {
+        &.half {
+          width: calc(50% - 5px);
+        }
+        
+        .el-upload {
           width: 100%;
           height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
           
-          svg {
-            font-size: 40px;
-            margin: 14px;
-          }
-        }
-      }
-    }
-    
-    #file-list {
-      width: calc(50% - 5px);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      
-      #list {
-        width: 100%;
-        flex-grow: 1;
-        background-color: var(--white-gray);
-        box-sizing: border-box;
-        border-radius: 6px;
-        border-color: var(--light-gray);
-        border-style: solid;
-        border-width: 1px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        
-        .file {
-          height: 28px;
-          width: 100%;
-          line-height: 24px;
-          font-size: 12px;
-          padding-left: 5px;
-          padding-right: 5px;
-          box-sizing: border-box;
-          background-color: var(--white);
-          border-bottom-color: var(--light-gray);
-          border-bottom-style: solid;
-          border-bottom-width: 1px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: 0.2s;
-          
-          &:hover {
-            background-color: var(--white-gray);
-          }
-          
-          .filename {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            flex-grow: 1;
-            padding-right: 10px;
-          }
-          
-          .delete {
-            color: var(--light-gray);
-            cursor: pointer;
+          .el-upload-dragger {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-color: var(--light-gray);
             transition: 0.2s;
             
+            svg {
+              font-size: 40px;
+              margin: 14px;
+            }
+            
             &:hover {
-              color: var(--warning-red);
+              color: var(--main-color);
+              border-color: var(--main-color);
+            
+              .el-upload__text {
+                color: var(--main-color);
+              }
             }
           }
         }
+      }
+      
+      #file-list {
+        width: calc(50% - 5px);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
         
-        &::-webkit-scrollbar {
-          width: 10px;
-        }
+        #list {
+          width: 100%;
+          flex-grow: 1;
+          background-color: var(--white-gray);
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: var(--light-gray);
+          border-style: solid;
+          border-width: 1px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          
+          .file {
+            height: 28px;
+            width: 100%;
+            line-height: 24px;
+            font-size: 12px;
+            padding-left: 5px;
+            padding-right: 5px;
+            box-sizing: border-box;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
             
-        &::-webkit-scrollbar-track {
-          border-radius: 5px;
-          background-color: var(--transparent);
-          
-          &:hover {
-            background-color: var(--white-gray);
+            &:hover {
+              background-color: var(--white-gray);
+            }
+            
+            .filename {
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              flex-grow: 1;
+              padding-right: 10px;
+            }
+            
+            .delete {
+              color: var(--light-gray);
+              cursor: pointer;
+              transition: 0.2s;
+              
+              &:hover {
+                color: var(--warning-red);
+              }
+            }
           }
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          border-radius: 5px;
-          background-color: var(--light-gray);
-          transition: 0.2s;
           
-          &:hover {
-            background-color: var(--gray);
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
           }
         }
       }
@@ -616,12 +1059,6 @@ export default {
   }
   
   #multiple {
-    flex-direction: column;
-    
-    #controller {
-      width: 100%;
-      flex-shrink: 0;
-    }
     
     .el-pagination {
       padding: 0;

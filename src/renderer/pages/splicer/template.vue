@@ -96,7 +96,7 @@
 const ipcRenderer = require('electron').ipcRenderer
 
 export default {
-  name: 'splicerEditor',
+  name: 'splicerTemplate',
   data () {
     return  {
       index: this.$route.query.index,

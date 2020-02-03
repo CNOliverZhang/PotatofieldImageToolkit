@@ -67,6 +67,21 @@ export default new Router({
       component: require('@/pages/resizer').default
     },
     {
+      path: '/cropper',
+      name: 'cropper',
+      component: require('@/pages/cropper').default
+    },
+    {
+      path: '/cropper/editor',
+      name: 'cropperEditor',
+      component: require('@/pages/cropper/editor').default
+    },
+    {
+      path: '/exif',
+      name: 'exif',
+      component: require('@/pages/exif').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
