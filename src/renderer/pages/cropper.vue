@@ -58,10 +58,10 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import EXIF from 'exif-js'
 import ReadDirectory from '../utils/ReadDirectory'
 
-const { ipcRenderer, clipboard } = require('electron')
 const path = require('path')
 
 export default {
@@ -79,8 +79,8 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      ipcRenderer.send('close')
       this.$store.dispatch('cropper/fileListEmpty')
+      ipcRenderer.send('close')
       this.$destroy()
     },
     clear() {

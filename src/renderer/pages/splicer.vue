@@ -136,8 +136,8 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      ipcRenderer.send('close')
       this.$store.dispatch('splicer/fileListEmpty')
+      ipcRenderer.send('close')
       this.$destroy()
     },
     clear() {

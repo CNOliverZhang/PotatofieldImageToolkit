@@ -657,49 +657,53 @@ export default {
               let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
               CreateDirectory(distPath)
-              fs.writeFileSync(distFullpath, buffer)
-              if (index < this.fileList.length - 1) {
-                dialog.change({
-                  text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
-                })
-                return handle(index + 1)
-              } else {
-                if (this.errorList.length == 0) {
-                  dialog.change({
-                    type: 'success',
-                    title: '成功',
-                    text: '全部图片处理完成。',
-                    showConfirm: true,
-                    confirmFunction: () => {
-                      this.clear()
-                    }
-                  })
-                } else {
-                  dialog.change({
-                    type: 'warning',
-                    title: '完成',
-                    text: '队列中的图片已处理完成，但下列图片处理失败。',
-                    content: this.$createElement('div', null, this.errorList.map((filename) => {
-                      return this.$createElement('p', {
-                        style: {
-                          'line-height': '24px',
-                          'font-size': '12px',
-                          'width': '100%',
-                          'overflow': 'hidden',
-                          'text-overflow': 'ellipsis',
-                          'white-space': 'nowrap',
-                          'text-indent': '0'
-                        }
-                      }, filename)
-                    })),
-                    showConfirm: true,
-                    confirmFunction: () => {
-                      this.errorList = []
-                      this.clear()
-                    }
-                  })
+              fs.writeFile(distFullpath, buffer, (error) => {
+                if (error) {
+                  this.errorList.push(imageInfo.fullpath)
                 }
-              }
+                if (index < this.fileList.length - 1) {
+                  dialog.change({
+                    text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+                  })
+                  return handle(index + 1)
+                } else {
+                  if (this.errorList.length == 0) {
+                    dialog.change({
+                      type: 'success',
+                      title: '成功',
+                      text: '全部图片处理完成。',
+                      showConfirm: true,
+                      confirmFunction: () => {
+                        this.clear()
+                      }
+                    })
+                  } else {
+                    dialog.change({
+                      type: 'warning',
+                      title: '完成',
+                      text: '队列中的图片已处理完成，但下列图片处理失败。',
+                      content: this.$createElement('div', null, this.errorList.map((filename) => {
+                        return this.$createElement('p', {
+                          style: {
+                            'line-height': '24px',
+                            'font-size': '12px',
+                            'width': '100%',
+                            'overflow': 'hidden',
+                            'text-overflow': 'ellipsis',
+                            'white-space': 'nowrap',
+                            'text-indent': '0'
+                          }
+                        }, filename)
+                      })),
+                      showConfirm: true,
+                      confirmFunction: () => {
+                        this.errorList = []
+                        this.clear()
+                      }
+                    })
+                  }
+                }
+              })
             })
           }
         }
@@ -927,6 +931,7 @@ export default {
   #single {
     #upload {
       width: 100%;
+      height: 0;
       flex-grow: 1;
       display: flex;
       justify-content: space-between;
@@ -1087,6 +1092,7 @@ export default {
     
     #file-list {
       width: 100%;
+      height: 0;
       flex-grow: 1;
       display: flex;
       flex-direction: column;

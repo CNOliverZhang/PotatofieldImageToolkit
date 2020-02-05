@@ -17,7 +17,7 @@ export default new Vuex.Store({
             templates: state.watermark.templates
           },
           splicer: {
-            templates: state.watermark.templates
+            templates: state.splicer.templates
           },
           textToImage: {
             templates: state.watermark.templates

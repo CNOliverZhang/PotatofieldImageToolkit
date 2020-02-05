@@ -12,8 +12,9 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-const windows = new Set
-const windowTitles = new Set
+const windows = new Set()
+const windowTitles = new Set()
+let mainWindow
 let updateTargetWindow
 const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
@@ -45,6 +46,7 @@ function createWindow(args) {
     frame: false,
     fullscreenable: false,
     resizable: false,
+    closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
     modal: args.modal,
@@ -58,6 +60,10 @@ function createWindow(args) {
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
+  })
+  
+  newWindow.on('close', (event) => {
+    event.preventDefault()
   })
 
   newWindow.on('closed', () => {
@@ -75,16 +81,27 @@ process.on('uncaughtException', () => {
   updateTargetWindow.webContents.send('error')
 })
 
+if (!app.requestSingleInstanceLock()) {
+  app.exit()
+}
+
 app.on('ready', () => {
-  createWindow({
+  mainWindow = createWindow({
     title: '洋芋田图像工具箱',
     path: '#/'
   })
 })
 
+app.on('second-instance', (event) => {
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore()
+  }
+  mainWindow.focus()
+})
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.exit()
   }
 })
 
@@ -117,7 +134,16 @@ ipcMain.on('minimize', () => {
 
 ipcMain.on('close', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
-  currentWindow.close()
+  currentWindow.destroy()
+})
+
+ipcMain.on('exit', () => {
+  windows.forEach((window) => {
+    if (window.isModal()) {
+      window.destroy()
+    }
+  })
+  app.exit()
 })
 
 ipcMain.on('open', (event, args) => {
@@ -145,13 +171,17 @@ ipcMain.on('version', (event) => {
   event.returnValue = app.getVersion()
 })
 
+ipcMain.on('app-path', (event) => {
+  event.returnValue = app.getAppPath()
+})
+
 ipcMain.on('select-folder', (event) => {
   dialog.showOpenDialog({
     title: "选择文件夹",
     properties: ['openDirectory']
-  }, (folder) => {
-    if (folder) {
-      event.returnValue = folder[0]
+  }).then((result) => {
+    if (result) {
+      event.returnValue = result.filePaths[0]
     } else {
       event.returnValue = ''
     }

@@ -629,12 +629,9 @@
 </template>
 
 <script>
-import html2canvas from 'html2canvas'
-import EXIF from 'exif-js'
-
+import { ipcRenderer } from 'electron'
 const path = require('path')
 const fs = require('fs')
-const ipcRenderer = require('electron').ipcRenderer
 
 export default {
   name: 'textToImageEditor',
@@ -847,8 +844,8 @@ export default {
   },
   methods: {
     close() {
-      ipcRenderer.send('close')
       this.$store.dispatch('textToImage/contentReset')
+      ipcRenderer.send('close')
       this.$destroy()
     },
     selectSaveFolder() {

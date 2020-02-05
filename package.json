@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新尺寸调整工具。\n更新图片裁剪工具。\n更新 EXIF 读取工具。\n修复已知问题。"
+      "releaseNotes": "更新底层框架 Electron 到 8.0.0 版本。\n支持将保存的模板导出为备份文件以及将备份文件导入。\n调整批处理任务流程，增强程序稳定性。\n更新单实例锁，防止程序运行冲突。\n修复已知问题。"
     },
     "publish": [
       {
@@ -103,14 +103,14 @@
     "babel-preset-env": "^1.7.0",
     "babel-preset-stage-0": "^6.24.1",
     "babel-register": "^6.26.0",
-    "cfonts": "^2.1.2",
+    "cfonts": "^2.5.2",
     "chalk": "^2.4.1",
     "copy-webpack-plugin": "^4.5.1",
     "cross-env": "^5.1.6",
     "css-loader": "^0.28.11",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "5.0.0",
+    "electron": "^8.0.0",
     "electron-builder": "^20.19.2",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",
@@ -130,7 +130,7 @@
     "vue-template-compiler": "^2.5.16",
     "webpack": "^4.15.1",
     "webpack-cli": "^3.0.8",
-    "webpack-dev-server": "^3.1.4",
+    "webpack-dev-server": "^3.10.2",
     "webpack-hot-middleware": "^2.22.2",
     "webpack-merge": "^4.1.3"
   }

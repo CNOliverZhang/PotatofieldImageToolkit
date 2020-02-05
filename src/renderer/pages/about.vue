@@ -93,6 +93,49 @@
         </div>
       </div>
     </el-tab-pane>
+    <el-tab-pane>
+      <span slot="label" class="interactable"><i class="fas fa-cog"></i> 模板管理</span>
+      <div id="templates" class="tab-content">
+        <div class="row">
+          <div class="subtitle">导出模板备份</div>
+        </div>
+        <div class="control-row">
+          <div class="text">您可以将所有工具的模板导出为备份文件，请先选择目标文件夹并输入文件名。</div>
+        </div>
+        <div class="row">
+          <el-input disabled size="mini" v-model="distDirectory" class="export interactable">
+            <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+          </el-input>
+          <el-input size="mini" v-model="filename" class="export interactable" placeholder="请输入文件名">
+            <template slot="append">.pfitbak</template>
+          </el-input>
+          <el-button type="primary" size="mini" @click="exportTemplates" class="export interactable">导出备份</el-button>
+        </div>
+        <div class="row">
+          <div class="subtitle">导入模板</div>
+        </div>
+        <div class="control-row">
+          <div class="text">您可以从之前导出的备份文件导入模板。请注意，这将覆盖您已保存的模板。</div>
+        </div>
+        <el-upload
+          action=""
+          class="interactable"
+          :auto-upload="false"
+          :on-change="importTemplates"
+          :show-file-list="false">
+          <el-button type="primary" size="mini">导入模板</el-button>
+        </el-upload>
+        <div class="row">
+          <div class="subtitle">清空模板</div>
+        </div>
+        <div class="control-row">
+          <div class="text">这将删除您已保存的所有模板且不可恢复，请务必谨慎操作。</div>
+        </div>
+        <div class="row">
+          <el-button type="primary" size="mini" @click="clearTemplates" class="interactable">清空模板</el-button>
+        </div>
+      </div>
+    </el-tab-pane>
     <el-tab-pane disabled>
       <span slot="label" id="sidebar">
         <div id="tool-info">
@@ -115,8 +158,10 @@
 </template>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer
-const shell = require('electron').shell
+import { ipcRenderer, shell } from 'electron'
+
+const path = require('path')
+const fs = require('fs')
 
 export default {
   name: 'about',
@@ -182,7 +227,9 @@ export default {
       ],
       version: null,
       updateChecked: false,
-      update: null
+      update: null,
+      distDirectory: '',
+      filename: ''
     }
   },
   methods: {
@@ -280,9 +327,123 @@ export default {
           }
         })
       })
+    },
+    selectSaveFolder() {
+      this.distDirectory = ipcRenderer.sendSync('select-folder')
+    },
+    exportTemplates() {
+      if (this.distDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请选择保存的目录！'
+        })
+      } else if (this.filename == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请输入文件名！'
+        })
+      } else {
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        setTimeout(() => {
+          let backup = {
+            type: 'PotatofieldImageToolkitTemplatesBackup',
+            version: this.version,
+            templates: {
+              watermarkTemplates: this.$store.state.watermark.templates,
+              splicerTemplates: this.$store.state.splicer.templates,
+              textToImageTemplates: this.$store.state.textToImage.templates
+            }
+          }
+          let buffer = new Buffer.from(btoa(encodeURI(JSON.stringify(backup))))
+          let distFullpath = path.join(this.distDirectory, this.filename + '.pfitbak')
+          fs.writeFile(distFullpath, buffer, (error) => {
+            if (error) {
+              dialog.change({
+                type: 'error',
+                title: '出现错误',
+                text: '导出备份，请检查目标文件夹权限。',
+                showConfirm: true
+              })
+            } else {
+              dialog.change({
+                type: 'success',
+                title: '成功',
+                text: '备份文件已导出到目标文件夹。',
+                showConfirm: true
+              })
+            }
+            this.distDirectory = ''
+            this.filename = ''
+          })
+        }, 100)
+      }
+    },
+    clearTemplates() {
+      this.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '这将删除您已保存的所有模板且不可恢复，确定执行操作吗？',
+        showCancel: true,
+        confirmFunction: () => {
+          this.$store.dispatch('watermark/templatesEmpty')
+          this.$store.dispatch('splicer/templatesEmpty')
+          this.$store.dispatch('textToImage/templatesEmpty')
+        }
+      })
+    },
+    importTemplates(file) {
+      let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
+      if (ext != 'pfitbak') {
+        this.$dialog({
+          type: 'error',
+          title: '错误',
+          text: '文件格式不正确。'
+        })
+      } else {
+        let dialog = this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        })
+        setTimeout(() => {
+          try {
+            let backup = JSON.parse(decodeURI(atob(fs.readFileSync(file.raw.path))))
+            if (backup.type != 'PotatofieldImageToolkitTemplatesBackup') {
+              throw 'error'
+            } else {
+              if (backup.templates.watermarkTemplates) {
+                this.$store.dispatch('watermark/templatesAssign', backup.templates.watermarkTemplates)
+              }
+              if (backup.templates.splicerTemplates) {
+                this.$store.dispatch('splicer/templatesAssign', backup.templates.splicerTemplates)
+              }
+              if (backup.templates.textToImageTemplates) {
+                this.$store.dispatch('textToImage/templatesAssign', backup.templates.textToImageTemplates)
+              }
+            }
+            dialog.change({
+              type: 'success',
+              title: '成功',
+              text: '已将该备份文件中的模板导入到您的模板库中。',
+              showConfirm: true
+            })
+          } catch(e) {
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '文件已损坏，导入模板失败。',
+              showConfirm: true
+            })
+          }
+        }, 100)
+      }
     }
   },
-  beforeMount() {
+  mounted() {
     this.version = ipcRenderer.sendSync('version')
   }
 }
@@ -317,6 +478,69 @@ export default {
           text-align: center;
           border: 0;
           transition: 0.2s;
+          
+          #sidebar {
+            width: 100%;
+            
+            @keyframes shine {
+              0% {
+                color: var(--light-gray)
+              }
+              25% {
+                color: var(--light-gray)
+              }
+              50% {
+                color: var(--main-color)
+              }
+              75% {
+                color: var(--light-gray)
+              }
+              100% {
+                color: var(--light-gray)
+              }
+            }
+            
+            #tool-info {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              animation: shine 5s infinite;
+              
+              #tool-logo {
+                font-size: 60px;
+                margin: 20px;
+              }
+            }
+            
+            #control-button-holder {
+              width: 100%;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 20px;
+              box-sizing: border-box;
+              
+              .control-button {
+                font-size: 12px;
+                line-height: initial;
+                cursor: pointer;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: var(--white);
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
+              }
+            }
+          }
           
           &.is-active {
             background-color: var(--white);
@@ -442,65 +666,17 @@ export default {
     }
   }
   
-  #sidebar {
-    width: 100%;
-    
-    @keyframes shine {
-      0% {
-        color: var(--light-gray)
-      }
-      25% {
-        color: var(--light-gray)
-      }
-      50% {
-        color: var(--main-color)
-      }
-      75% {
-        color: var(--light-gray)
-      }
-      100% {
-        color: var(--light-gray)
-      }
-    }
-    
-    #tool-info {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      animation: shine 5s infinite;
+  #templates {
+    .export {
+      margin-left: 5px;
+      margin-right: 5px;
       
-      #tool-logo {
-        font-size: 60px;
-        margin: 20px;
+      &:first-child {
+        margin-left: 0;
       }
-    }
-    
-    #control-button-holder {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px;
-      box-sizing: border-box;
       
-      .control-button {
-        font-size: 12px;
-        line-height: initial;
-        cursor: pointer;
-        transition: 0.2s;
-        
-        svg {
-          font-size: 20px;
-          margin: 5px;
-        }
-        
-        &:hover {
-          color: var(--white);
-        }
-        
-        &:active {
-          filter: brightness(0.9);
-        }
+      &:last-child {
+        margin-right: 0;
       }
     }
   }

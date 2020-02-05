@@ -108,13 +108,13 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import EXIF from 'exif-js'
 import Cropper from 'cropperjs'
 import 'cropperjs/dist/cropper.min.css'
 
 const path = require('path')
 const fs = require('fs')
-const ipcRenderer = require('electron').ipcRenderer
 
 export default {
   name: 'cropperEditor',
@@ -137,8 +137,8 @@ export default {
   },
   methods: {
     close() {
-      ipcRenderer.send('close')
       this.$store.dispatch('cropper/fileListEmpty')
+      ipcRenderer.send('close')
       this.$destroy()
     },
     handleDelete(index) {
@@ -444,6 +444,7 @@ export default {
       
       #list {
         width: 100%;
+        height: 0;
         flex-grow: 1;
         background-color: var(--white-gray);
         box-sizing: border-box;

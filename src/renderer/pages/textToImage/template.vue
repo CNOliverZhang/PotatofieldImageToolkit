@@ -612,7 +612,7 @@
 </template>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer
+import { ipcRenderer } from 'electron'
 
 export default {
   name: 'textToImageTemplate',
@@ -824,7 +824,6 @@ export default {
   methods: {
     close() {
       ipcRenderer.send('close')
-      this.$store.dispatch('textToImage/contentReset')
       this.$destroy()
     },
     exit() {

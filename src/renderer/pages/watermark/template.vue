@@ -197,9 +197,8 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import ResizeObserver from 'resize-observer-polyfill'
-
-const ipcRenderer = require('electron').ipcRenderer
 
 export default {
   name: 'watermarkTemplate',

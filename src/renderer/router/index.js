@@ -82,6 +82,11 @@ export default new Router({
       component: require('@/pages/exif').default
     },
     {
+      path: '/fonts',
+      name: 'fonts',
+      component: require('@/pages/fonts').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

@@ -93,7 +93,7 @@
 </template>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer
+import { ipcRenderer } from 'electron'
 
 export default {
   name: 'splicerTemplate',

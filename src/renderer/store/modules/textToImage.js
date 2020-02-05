@@ -11,6 +11,9 @@ export default {
     CONTENT_RESET (state) {
       state.content = ''
     },
+    TEMPLATES_ASSIGN (state, templates) {
+      state.templates = templates
+    },
     TEMPLATE_PUSH (state, template) {
       state.templates.push(template)
     },
@@ -20,7 +23,7 @@ export default {
     TEMPLATE_DELETE (state, index) {
       state.templates.splice(index, 1)
     },
-    TEMPLATE_EMPTY (state) {
+    TEMPLATES_EMPTY (state) {
       state.templates = []
     }
   },
@@ -31,6 +34,9 @@ export default {
     contentReset (context) {
       context.commit('CONTENT_RESET')
     },
+    templatesAssign (context, templates) {
+      context.commit('TEMPLATES_ASSIGN', templates)
+    },
     templatePush (context, template) {
       context.commit('TEMPLATE_PUSH', template)
     },
@@ -40,8 +46,8 @@ export default {
     templateDelete (context, index) {
       context.commit('TEMPLATE_DELETE', index)
     },
-    templateEmpty (context) {
-      context.commit('TEMPLATE_EMPTY')
+    templatesEmpty (context) {
+      context.commit('TEMPLATES_EMPTY')
     }
   }
 }

@@ -637,6 +637,7 @@ export default {
       justify-content: space-between;
       
       .ck-editor {
+        height: 0;
         flex-grow: 1;
         display: flex;
         flex-direction: column;

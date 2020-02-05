@@ -289,6 +289,7 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import CreateDirectory from '../../utils/CreateDirectory'
 import ResizeObserver from 'resize-observer-polyfill'
 import html2canvas from 'html2canvas'
@@ -296,7 +297,6 @@ import EXIF from 'exif-js'
 
 const path = require('path')
 const fs = require('fs')
-const ipcRenderer = require('electron').ipcRenderer
 
 export default {
   name: 'watermarkEditor',
@@ -357,8 +357,8 @@ export default {
   },
   methods: {
     close() {
-      ipcRenderer.send('close')
       this.$store.dispatch('watermark/fileListEmpty')
+      ipcRenderer.send('close')
       this.$destroy()
     },
     pageChange(page) {
@@ -903,48 +903,52 @@ export default {
                   let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
                   let buffer = new Buffer.from(url, 'base64')
                   CreateDirectory(distPath)
-                  fs.writeFileSync(distFullpath, buffer)
-                  if (index < this.$store.state.watermark.fileList.length - 1) {
-                    dialog.change({
-                      text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
-                    })
-                    return handle(index + 1)
-                  } else {
-                    if (this.errorList.length == 0) {
-                      dialog.change({
-                        type: 'success',
-                        title: '成功',
-                        text: '全部图片处理完成。',
-                        showConfirm: true,
-                        confirmFunction: () => {
-                          this.close()
-                        }
-                      })
-                    } else {
-                      dialog.change({
-                        type: 'warning',
-                        title: '完成',
-                        text: '队列中的图片已处理完成，但下列图片处理失败。',
-                        content: this.$createElement('div', null, this.errorList.map((filename) => {
-                          return this.$createElement('p', {
-                            style: {
-                              'line-height': '24px',
-                              'font-size': '12px',
-                              'width': '100%',
-                              'overflow': 'hidden',
-                              'text-overflow': 'ellipsis',
-                              'white-space': 'nowrap',
-                              'text-indent': '0'
-                            }
-                          }, filename)
-                        })),
-                        showConfirm: true,
-                        confirmFunction: () => {
-                          this.close()
-                        }
-                      })
+                  fs.writeFile(distFullpath, buffer, (error) => {
+                    if (error) {
+                      this.errorList.push(imageInfo.fullpath)
                     }
-                  }
+                    if (index < this.$store.state.watermark.fileList.length - 1) {
+                      dialog.change({
+                        text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+                      })
+                      return handle(index + 1)
+                    } else {
+                      if (this.errorList.length == 0) {
+                        dialog.change({
+                          type: 'success',
+                          title: '成功',
+                          text: '全部图片处理完成。',
+                          showConfirm: true,
+                          confirmFunction: () => {
+                            this.close()
+                          }
+                        })
+                      } else {
+                        dialog.change({
+                          type: 'warning',
+                          title: '完成',
+                          text: '队列中的图片已处理完成，但下列图片处理失败。',
+                          content: this.$createElement('div', null, this.errorList.map((filename) => {
+                            return this.$createElement('p', {
+                              style: {
+                                'line-height': '24px',
+                                'font-size': '12px',
+                                'width': '100%',
+                                'overflow': 'hidden',
+                                'text-overflow': 'ellipsis',
+                                'white-space': 'nowrap',
+                                'text-indent': '0'
+                              }
+                            }, filename)
+                          })),
+                          showConfirm: true,
+                          confirmFunction: () => {
+                            this.close()
+                          }
+                        })
+                      }
+                    }
+                  })
                 })
               }, 100)
             })
@@ -1087,6 +1091,7 @@ export default {
     
     #lists {
       width: 100%;
+      height: 0;
       flex-grow: 1;
       margin-top: 10px;
       display: flex;

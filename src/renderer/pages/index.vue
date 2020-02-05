@@ -12,7 +12,7 @@
         <span class="fa fa-angle-double-down"></span>
         <div>隐藏</div>
       </div>
-      <div class="control-button interactable" @click="close">
+      <div class="control-button interactable" @click="exit">
         <span class="fa fa-sign-out-alt"></span>
         <div>退出</div>
       </div>
@@ -56,6 +56,14 @@
             <div class="title">EXIF 读取工具</div>
           </el-card>
         </div>
+        <!--
+        <div class="container" @click="open('/fonts', '字体管理工具')">
+          <el-card class="card">
+            <span class="fas fa-font icon"></span>
+            <div class="title">字体管理工具</div>
+          </el-card>
+        </div>
+        -->
         <div class="space">&nbsp;</div>
       </div>
     </div>
@@ -63,7 +71,7 @@
 </template>
 
 <script>
-const ipcRenderer = require('electron').ipcRenderer
+import { ipcRenderer } from 'electron'
 
 export default {
   name: 'index',
@@ -71,10 +79,22 @@ export default {
     hide() {
       ipcRenderer.send('minimize')
     },
-    close() {
-      ipcRenderer.send('close')
+    exit() {
+      this.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '关闭主页面的同时将退出程序，正在运行的所有工具都将关闭。您确定要退出吗？',
+        showCancel: true,
+        confirmFunction: () => {
+          this.$store.dispatch('watermark/fileListEmpty')
+          this.$store.dispatch('splicer/fileListEmpty')
+          this.$store.dispatch('textToImage/contentReset')
+          this.$store.dispatch('cropper/fileListEmpty')
+          ipcRenderer.send('exit')
+        }
+      })
     },
-    open (path, title) {
+    open(path, title) {
       if (!ipcRenderer.sendSync('open', {
         title: title,
         path: '#' + path
@@ -84,7 +104,7 @@ export default {
         })
       }
     },
-    showDeveloping () {
+    showDeveloping() {
       this.$dialog({
         text: '功能正在开发中。'
       })

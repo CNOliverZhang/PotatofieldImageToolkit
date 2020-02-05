@@ -16,7 +16,7 @@
             :on-change="handleFile"
             :show-file-list="false">
             <i class="fas fa-image"></i>
-            <div class="el-upload__text">点击选择图片</em></div>
+            <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
           </el-upload>
         </div>
         <div id="info" class="interactable" v-if="info != null">
@@ -130,9 +130,8 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import EXIF from 'exif-js'
-
-const { ipcRenderer } = require('electron')
 
 export default {
   name: 'exif',
