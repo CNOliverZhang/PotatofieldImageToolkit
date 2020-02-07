@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新底层框架 Electron 到 8.0.0 版本。\n支持将保存的模板导出为备份文件以及将备份文件导入。\n调整批处理任务流程，增强程序稳定性。\n更新单实例锁，防止程序运行冲突。\n修复已知问题。"
+      "releaseNotes": "更新字体管理工具。\n支持自定义界面字体。\n大幅缩减安装包体积，优化升级体验。\n修复已知问题。"
     },
     "publish": [
       {
@@ -77,6 +77,7 @@
     "@ckeditor/ckeditor5-build-classic": "^16.0.0",
     "@ckeditor/ckeditor5-vue": "^1.0.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.26",
+    "@fortawesome/free-brands-svg-icons": "^5.12.1",
     "@fortawesome/free-regular-svg-icons": "^5.12.0",
     "@fortawesome/free-solid-svg-icons": "^5.12.0",
     "@fortawesome/vue-fontawesome": "^0.1.9",

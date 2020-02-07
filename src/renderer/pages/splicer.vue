@@ -763,13 +763,14 @@ export default {
     
     #container {
       width: 100%;
+      height: 0;
       flex-grow: 1;
       display: flex;
       flex-wrap: wrap;
       
       .template-container {
         width: calc(100%/3);
-        height: 210px;
+        height: 50%;
         box-sizing: border-box;
         padding: 10px;
         

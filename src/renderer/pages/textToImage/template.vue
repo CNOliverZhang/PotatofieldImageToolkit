@@ -18,9 +18,13 @@
         <h3>洋芋田图像工具箱</h3>
         <p>洋芋田图像工具箱是一个基于 Electron 和 Vue.js 的具有多种图像相关功能的工具软件。目前它具有以下功能：</p>
         <ul>
-          <li>图片加水印工具：提供单张图片加水印和批量加水印功能，可以自定义水印的内容和样式，还可以将水印保存为模板以便下次使用。</li>
-          <li>长图拼接工具：可以将多张图片拼接为一张长图，便于在社交媒体分享数量较多的图片；还能对单张图片添加简单的边框。</li>
-          <li>富文本转图片工具：将富文本内容输出为图片，能够自定义各种富文本元素的样式。</li>
+          <li>图片加水印工具：具备丰富的样式设置，水印的内容和外观均可随心定制。可单张处理，亦可批量处理，操作便捷高效。性能良好，处理图片迅速；运行稳定，大尺寸图片轻松应对。</li>
+          <li>长图拼接工具：可以将若干图片拼接为一张长图，也能为单张图片添加简单边框。不限制输入图片数量，最大支持输出高度为 16000 像素或面积为 256000000 像素的图片，能尽可能多地保留原图片的细节。</li>
+          <li>富文本制图工具：将富文本内容输出为图片，支持文本、标题、项目列表、图片和引用内容。每一类富文本元素都有丰富的自定义设置，可以随心定制外观样式，还可以将样式保存为模板以供下次使用。</li>
+          <li>尺寸调整工具：对图片进行批量调整大小的操作，支持固定比例、固定长边和固定短边三种模式。同样具有良好的性能和稳定性，短时间内可以处理大量图片，也可以处理大尺寸图片。</li>
+          <li>图片裁剪工具：可以采用自由模式裁剪，可以采用预置的多种常用比例裁剪，也可以自定义比例裁剪。支持批量导入图片，在工作流程中能够维持裁剪设置和保存设置不变，提升效率。</li>
+          <li>EXIF 读取工具：从 JPEG 文件中读取 EXIF 信息，支持相机制造商、型号等设备信息和曝光补偿、镜头焦距、光圈、快门、感光度等曝光参数以及作者、图像尺寸等图像文件信息。</li>
+          <li>字体管理工具：管理本地字体库，还可以从在线字体库中下载字体。在线字体库现有数十款字体，全部为商用免费字体，且仍在持续更新。支持将下载的字体用于其他工具，也能设为界面字体。</li>
         </ul>
         <p>洋芋田图像工具箱基于 MIT 协议开源。目前提供适用于 Windows 的构建版本，使用其他平台的用户可以自行下载源码并构建。</p>
         <p>洋芋田图像工具箱在开发过程中使用了下列开源组件和库：</p>
@@ -75,21 +79,14 @@
             <div class="control-row">
               <div class="text">字体</div>
               <el-select v-model="titleFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
@@ -161,21 +158,14 @@
             <div class="control-row">
               <div class="text">字体</div>
               <el-select v-model="subtitleFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
@@ -247,21 +237,14 @@
             <div class="control-row">
               <div class="text">字体</div>
               <el-select v-model="textFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
@@ -333,21 +316,14 @@
             <div class="control-row">
               <div class="text">字体</div>
               <el-select v-model="orderedListFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
@@ -425,21 +401,14 @@
             <div class="control-row">
               <div class="text">字体</div>
               <el-select v-model="orderedListFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
@@ -538,28 +507,21 @@
             </div>
             <div class="control-row">
               <div class="text">注释字体</div>
-              <el-select v-model="imageLableFont" placeholder="请选择" size="mini">
-                <el-option-group label="中英文字体">
-                  <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-                  <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-                  <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-                  <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-                  <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-                  <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-                  <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-                  <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-                  <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-                  <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-                </el-option-group>
-                <el-option-group label="纯英文字体">
-                  <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-                </el-option-group>
+              <el-select v-model="imageLabelFont" placeholder="请选择" size="mini">
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
               </el-select>
             </div>
             <div class="control-row">
               <div class="text">注释字体大小</div>
               <el-slider
-                v-model="imageLableFontSize"
+                v-model="imageLabelFontSize"
                 class="control"
                 :min="3"
                 :max="40"
@@ -570,7 +532,7 @@
             <div class="control-row">
               <div class="text">注释字间距</div>
               <el-slider
-                v-model="imageLableLetterSpacing"
+                v-model="imageLabelLetterSpacing"
                 class="control"
                 :min="0"
                 :max="3"
@@ -580,7 +542,7 @@
             </div>
             <div class="control-row">
               <div class="text">注释字体颜色</div>
-              <el-color-picker v-model="imageLableColor" size="mini" :show-alpha="true"></el-color-picker>
+              <el-color-picker v-model="imageLabelColor" size="mini" :show-alpha="true"></el-color-picker>
             </div>
             <div class="control-row">
               <div class="text">引用段间距</div>
@@ -622,7 +584,7 @@ export default {
       index: this.$route.query.index,
       padding: 20,
       backgroundColor: '#303133',
-      titleFont: 'NotoSerifSCBlack',
+      titleFont: this.$store.state.fonts.defaultFont,
       titleFontSize: 24,
       titleLetterSpacing: 0.3,
       titleLineHeight: 1.8,
@@ -630,7 +592,7 @@ export default {
       titleTextAlign: 'justify',
       titleIndent: false,
       titleColor: '#FFFFFF',
-      subtitleFont: 'NotoSerifSCBlack',
+      subtitleFont: this.$store.state.fonts.defaultFont,
       subtitleFontSize: 18,
       subtitleLetterSpacing: 0.1,
       subtitleLineHeight: 1.8,
@@ -638,7 +600,7 @@ export default {
       subtitleTextAlign: 'justify',
       subtitleIndent: false,
       subtitleColor: '#FFFFFF',
-      textFont: 'NotoSansSCThin',
+      textFont: this.$store.state.fonts.defaultFont,
       textFontSize: 14,
       textLetterSpacing: 0,
       textLineHeight: 1.8,
@@ -646,7 +608,7 @@ export default {
       textAlign: 'justify',
       textIndent: true,
       textColor: '#FFFFFF',
-      orderedListFont: 'NotoSansSCThin',
+      orderedListFont: this.$store.state.fonts.defaultFont,
       orderedListFontSize: 14,
       orderedListLetterSpacing: 0,
       orderedListLineHeight: 1.8,
@@ -654,7 +616,7 @@ export default {
       orderedListItemMargin: 0,
       orderedListIndent: 2,
       orderedListColor: '#FFFFFF',
-      unorderedListFont: 'NotoSansSCThin',
+      unorderedListFont: this.$store.state.fonts.defaultFont,
       unorderedListFontSize: 14,
       unorderedListLetterSpacing: 0,
       unorderedListLineHeight: 1.8,
@@ -664,10 +626,10 @@ export default {
       unorderedListColor: '#FFFFFF',
       imageBorderRadius: 0,
       imageMargin: 0.5,
-      imageLableFont: 'NotoSansSCThin',
-      imageLableFontSize: 12,
-      imageLableLetterSpacing: 0,
-      imageLableColor: '#C0C4CC',
+      imageLabelFont: this.$store.state.fonts.defaultFont,
+      imageLabelFontSize: 12,
+      imageLabelLetterSpacing: 0,
+      imageLabelColor: '#C0C4CC',
       blockquoteMargin: 0.5,
       blockquoteBorderColor: '#DCDFE6'
     }
@@ -802,17 +764,17 @@ export default {
     imageMargin: (value) => {
       document.getElementById('preview').style.setProperty('--image-margin', String(value) + 'em')
     },
-    imageLableFont: (value) => {
-      document.getElementById('preview').style.setProperty('--image-lable-font', value)
+    imageLabelFont: (value) => {
+      document.getElementById('preview').style.setProperty('--image-label-font', value)
     },
-    imageLableFontSize: (value) => {
-      document.getElementById('preview').style.setProperty('--image-lable-font-size', String(value) + 'px')
+    imageLabelFontSize: (value) => {
+      document.getElementById('preview').style.setProperty('--image-label-font-size', String(value) + 'px')
     },
-    imageLableLetterSpacing: (value) => {
-      document.getElementById('preview').style.setProperty('--image-lable-letter-spacing', String(value) + 'em')
+    imageLabelLetterSpacing: (value) => {
+      document.getElementById('preview').style.setProperty('--image-label-letter-spacing', String(value) + 'em')
     },
-    imageLableColor: (value) => {
-      document.getElementById('preview').style.setProperty('--image-lable-color', value)
+    imageLabelColor: (value) => {
+      document.getElementById('preview').style.setProperty('--image-label-color', value)
     },
     blockquoteMargin: (value) => {
       document.getElementById('preview').style.setProperty('--blockquote-margin', String(value) + 'em')
@@ -896,10 +858,10 @@ export default {
         unorderedListColor: this.unorderedListColor,
         imageBorderRadius: this.imageBorderRadius,
         imageMargin: this.imageMargin,
-        imageLableFont: this.imageLableFont,
-        imageLableFontSize: this.imageLableFontSize,
-        imageLableLetterSpacing: this.imageLableLetterSpacing,
-        imageLableColor: this.imageLableColor,
+        imageLabelFont: this.imageLabelFont,
+        imageLabelFontSize: this.imageLabelFontSize,
+        imageLabelLetterSpacing: this.imageLabelLetterSpacing,
+        imageLabelColor: this.imageLabelColor,
         blockquoteMargin: this.blockquoteMargin,
         blockquoteBorderColor: this.blockquoteBorderColor
       }
@@ -1050,10 +1012,10 @@ export default {
         unorderedListColor: this.unorderedListColor,
         imageBorderRadius: this.imageBorderRadius,
         imageMargin: this.imageMargin,
-        imageLableFont: this.imageLableFont,
-        imageLableFontSize: this.imageLableFontSize,
-        imageLableLetterSpacing: this.imageLableLetterSpacing,
-        imageLableColor: this.imageLableColor,
+        imageLabelFont: this.imageLabelFont,
+        imageLabelFontSize: this.imageLabelFontSize,
+        imageLabelLetterSpacing: this.imageLabelLetterSpacing,
+        imageLabelColor: this.imageLabelColor,
         blockquoteMargin: this.blockquoteMargin,
         blockquoteBorderColor: this.blockquoteBorderColor
       }
@@ -1206,10 +1168,10 @@ export default {
       this.unorderedListColor = this.$store.state.textToImage.templates[index].unorderedListColor
       this.imageBorderRadius = this.$store.state.textToImage.templates[index].imageBorderRadius
       this.imageMargin = this.$store.state.textToImage.templates[index].imageMargin
-      this.imageLableFont = this.$store.state.textToImage.templates[index].imageLableFont
-      this.imageLableFontSize = this.$store.state.textToImage.templates[index].imageLableFontSize
-      this.imageLableLetterSpacing = this.$store.state.textToImage.templates[index].imageLableLetterSpacing
-      this.imageLableColor = this.$store.state.textToImage.templates[index].imageLableColor
+      this.imageLabelFont = this.$store.state.textToImage.templates[index].imageLabelFont
+      this.imageLabelFontSize = this.$store.state.textToImage.templates[index].imageLabelFontSize
+      this.imageLabelLetterSpacing = this.$store.state.textToImage.templates[index].imageLabelLetterSpacing
+      this.imageLabelColor = this.$store.state.textToImage.templates[index].imageLabelColor
       this.blockquoteMargin = this.$store.state.textToImage.templates[index].blockquoteMargin
       this.blockquoteBorderColor = this.$store.state.textToImage.templates[index].blockquoteBorderColor
     }
@@ -1318,7 +1280,7 @@ export default {
       margin-bottom: 0;
       margin-top: 0;
       
-      --title-font: 'NotoSerifSCBlack';
+      --title-font: var(--main-font);
       --title-font-size: 24px;
       --title-letter-spacing: 0.3em;
       --title-line-height: 1.8em;
@@ -1326,7 +1288,7 @@ export default {
       --title-text-align: justify;
       --title-indent: 0;
       --title-color: #FFFFFF;
-      --subtitle-font: 'NotoSerifSCBlack';
+      --subtitle-font: var(--main-font);
       --subtitle-font-size: 18px;
       --subtitle-letter-spacing: 0.1em;
       --subtitle-line-height: 1.8em;
@@ -1334,7 +1296,7 @@ export default {
       --subtitle-text-align: justify;
       --subtitle-indent: 0;
       --subtitle-color: #FFFFFF;
-      --text-font: 'NotoSansSCThin';
+      --text-font: var(--main-font);
       --text-font-size: 14px;
       --text-letter-spacing: 0;
       --text-line-height: 1.8em;
@@ -1342,7 +1304,7 @@ export default {
       --text-align: justify;
       --text-indent: 2em;
       --text-color: #FFFFFF;
-      --ordered-list-font: 'NotoSansSCThin';
+      --ordered-list-font: var(--main-font);
       --ordered-list-font-size: 14px;
       --ordered-list-letter-spacing: 0;
       --ordered-list-line-height: 1.8em;
@@ -1350,7 +1312,7 @@ export default {
       --ordered-list-item-margin: 0;
       --ordered-list-indent: 2em;
       --ordered-list-color: #FFFFFF;
-      --unordered-list-font: 'NotoSansSCThin';
+      --unordered-list-font: var(--main-font);
       --unordered-list-font-size: 14px;
       --unordered-list-letter-spacing: 0;
       --unordered-list-line-height: 1.8em;
@@ -1360,10 +1322,10 @@ export default {
       --unordered-list-color: #FFFFFF;
       --image-margin: 0.5em;
       --image-border-radius: 0;
-      --image-lable-font: 'NotoSansSCThin';
-      --image-lable-font-size: 12px;
-      --image-lable-letter-spacing: 0;
-      --image-lable-color: #C0C4CC;
+      --image-label-font: var(--main-font);
+      --image-label-font-size: 12px;
+      --image-label-letter-spacing: 0;
+      --image-label-color: #C0C4CC;
       --blockquote-margin: 0.5em;
       --blockquote-border-color: #DCDFE6;
       
@@ -1469,11 +1431,11 @@ export default {
         }
         
         figcaption {
-          font-family: var(--image-lable-font);
-          font-size: var(--image-lable-font-size);
-          letter-spacing: var(--image-lable-letter-spacing);
+          font-family: var(--image-label-font);
+          font-size: var(--image-label-font-size);
+          letter-spacing: var(--image-label-letter-spacing);
           text-align: center;
-          color: var(--image-lable-color);
+          color: var(--image-label-color);
         }
       }
     }

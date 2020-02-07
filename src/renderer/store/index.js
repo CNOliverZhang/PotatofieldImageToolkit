@@ -21,6 +21,10 @@ export default new Vuex.Store({
           },
           textToImage: {
             templates: state.watermark.templates
+          },
+          fonts: {
+            fontsUpdated: state.fonts.fontsUpdated,
+            fontList: state.fonts.fontList
           }
         }
       }

@@ -206,21 +206,14 @@
         <div class="control-row">
           <div class="text">水印字体</div>
           <el-select v-model="font" placeholder="请选择" size="mini">
-            <el-option-group label="中英文字体">
-              <el-option label="思源黑体(细)" value="NotoSansSCThin" style="font-family: NotoSansSCThin;"/>
-              <el-option label="思源黑体(粗)" value="NotoSansSCBlack" style="font-family: NotoSansSCBlack;"/>
-              <el-option label="思源宋体(细)" value="NotoSerifSCThin" style="font-family: NotoSerifSCThin;"/>
-              <el-option label="思源宋体(粗)" value="NotoSerifSCBlack" style="font-family: NotoSerifSCBlack;"/>
-              <el-option label="站酷庆科黄油体" value="ZCoolHuangyou" style="font-family: ZCoolHuangyou;"/>
-              <el-option label="站酷小薇LOGO体" value="ZCoolXiaowei" style="font-family: ZCoolXiaowei;"/>
-              <el-option label="站酷快乐体" value="ZCoolKuaile" style="font-family: ZCoolKuaile;"/>
-              <el-option label="站酷文艺体" value="ZCoolWenyi" style="font-family: ZCoolWenyi;"/>
-              <el-option label="站酷酷黑体" value="ZCoolKuhei" style="font-family: ZCoolKuhei;"/>
-              <el-option label="站酷高端黑体" value="ZCoolGaoduanhei" style="font-family: ZCoolGaoduanhei;"/>
-            </el-option-group>
-            <el-option-group label="纯英文字体">
-              <el-option label="ZCOOL Addict Italic" value="ZCoolAddict" style="font-family: ZCoolAddict;"></el-option>
-            </el-option-group>
+            <el-option
+              v-for="(font, index) in this.$store.state.fonts.fontList"
+              :key="index"
+              :label="font.verbose + '（' + font.weight + '）'"
+              :value="font.fontFamily"
+              :style="{
+                'font-family': font.fontFamily
+              }"/>
           </el-select>
         </div>
         <div class="control-row">
@@ -320,7 +313,7 @@ export default {
       offsetY: 0,
       rotation: 0,
       color: '#FFFFFF',
-      font: "NotoSansSCThin",
+      font: this.$store.state.fonts.defaultFont,
       relativeFontSize: 5,
       sizeBaseX: 0,
       sizeBaseY: 0,

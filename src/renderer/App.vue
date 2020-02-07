@@ -5,77 +5,27 @@
 </template>
 
 <script>
+const path = require('path')
+
 export default {
-  name: 'potatofield-image-toolkit'
+  name: 'potatofield-image-toolkit',
+  mounted() {
+    let style = document.createElement('style')
+    this.$store.state.fonts.fontList.forEach((font) => {
+      style.appendChild(document.createTextNode(`
+        @font-face {
+            font-family: ${font.fontFamily};
+            src: url(${font.src})
+        }
+      `))
+    })
+    document.head.appendChild(style)
+    document.body.style.setProperty('--main-font', this.$store.state.fonts.defaultFont)
+  }
 }
 </script>
 
 <style lang="scss">
-@font-face {
-  font-family: NotoSansSCThin;
-  src: url('./assets/NotoSansSC-Thin.otf');
-}
-
-@font-face {
-  font-family: NotoSansSCRegular;
-  src: url('./assets/NotoSansSC-Regular.otf');
-}
-
-@font-face {
-  font-family: NotoSansSCBlack;
-  src: url('./assets/NotoSansSC-Black.otf');
-}
-
-@font-face {
-  font-family: NotoSerifSCThin;
-  src: url('./assets/NotoSerifSC-ExtraLight.otf');
-}
-
-@font-face {
-  font-family: NotoSerifSCRegular;
-  src: url('./assets/NotoSerifSC-Regular.otf');
-}
-
-@font-face {
-  font-family: NotoSerifSCBlack;
-  src: url('./assets/NotoSerifSC-Black.otf');
-}
-
-@font-face {
-  font-family: ZCoolHuangyou;
-  src: url('./assets/ZCOOLQingKeHuangYou-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolXiaowei;
-  src: url('./assets/ZCOOLXiaoWei-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolKuaile;
-  src: url('./assets/ZCOOLKuaiLe-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolWenyi;
-  src: url('./assets/ZCOOLWenYi-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolKuhei;
-  src: url('./assets/ZCOOLKuHei-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolGaoduanhei;
-  src: url('./assets/ZCOOLGaoDuanHei-Regular.ttf');
-}
-
-@font-face {
-  font-family: ZCoolAddict;
-  src: url('./assets/ZCOOLAddict-Italic.ttf');
-}
-
 :root {
   --main-font: "NotoSansSCThin";
   --main-color: #2196F3;

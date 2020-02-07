@@ -11,15 +11,17 @@ import { library, dom } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
+import { fab } from '@fortawesome/free-brands-svg-icons'
 import './theme/index.css'
 
 library.add(fas)
 library.add(far)
+library.add(fab)
 dom.watch()
 
 Vue.component('v-clamp', VClamp)
 
-Vue.use( CKEditor )
+Vue.use(CKEditor)
 Vue.use(ElementUI)
 Vue.use(dialog)
 
@@ -27,7 +29,6 @@ if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
-/* eslint-disable no-new */
 new Vue({
   components: { App },
   router,

@@ -56,14 +56,12 @@
             <div class="title">EXIF 读取工具</div>
           </el-card>
         </div>
-        <!--
         <div class="container" @click="open('/fonts', '字体管理工具')">
           <el-card class="card">
             <span class="fas fa-font icon"></span>
             <div class="title">字体管理工具</div>
           </el-card>
         </div>
-        -->
         <div class="space">&nbsp;</div>
       </div>
     </div>

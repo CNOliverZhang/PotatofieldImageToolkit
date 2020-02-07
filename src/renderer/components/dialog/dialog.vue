@@ -185,7 +185,7 @@ export default {
       padding: 0;
       
       button {
-        font-family: "NotoSansSC";
+        font-family: var(--main-font);
       }
     }
   }

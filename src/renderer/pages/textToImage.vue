@@ -517,7 +517,7 @@ export default {
       }
       
       h2 {
-        font-family: 'NotoSerifSCBlack';
+        font-family: var(--main-font);
         font-size: 24px;
         letter-spacing: 0.3em;
         margin-top: 0.5em;
@@ -528,7 +528,7 @@ export default {
       }
       
       h3 {
-        font-family: 'NotoSerifSCBlack';
+        font-family: var(--main-font);
         font-size: 18px;
         letter-spacing: 0.1em;
         margin-top: 0.5em;
@@ -539,7 +539,7 @@ export default {
       }
       
       p {
-        font-family: 'NotoSansSCThin';
+        font-family: var(--main-font);
         font-size: 14px;
         margin-top: 0.5em;
         margin-bottom: 0.5em;
@@ -550,7 +550,7 @@ export default {
       }
       
       ul {
-        font-family: 'NotoSansSCThin';
+        font-family: var(--main-font);
         font-size: 14px;
         padding-left: 2em;
         line-height: 1.8em;
@@ -564,7 +564,7 @@ export default {
       }
       
       ol {
-        font-family: 'NotoSansSCThin';
+        font-family: var(--main-font);
         font-size: 14px;
         padding-left: 2em;
         line-height: 1.8em;
@@ -598,7 +598,7 @@ export default {
         }
         
         figcaption {
-          font-family: 'NotoSansSCThin';
+          font-family: var(--main-font);
           font-size: 12px;
           text-align: center;
           color: var(--gray);
@@ -700,13 +700,14 @@ export default {
     
     #container {
       width: 100%;
+      height: 0;
       flex-grow: 1;
       display: flex;
       flex-wrap: wrap;
       
       .template-container {
         width: calc(100% / 3);
-        height: 210px;
+        height: 50%;
         box-sizing: border-box;
         padding: 10px;
         

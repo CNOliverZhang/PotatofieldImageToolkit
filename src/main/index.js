@@ -146,6 +146,16 @@ ipcMain.on('exit', () => {
   app.exit()
 })
 
+ipcMain.on('relaunch', () => {
+  windows.forEach((window) => {
+    if (window.isModal()) {
+      window.destroy()
+    }
+  })
+  app.relaunch()
+  app.exit()
+})
+
 ipcMain.on('open', (event, args) => {
   if (windowTitles.has(args.title)) {
     event.returnValue = false
@@ -171,8 +181,8 @@ ipcMain.on('version', (event) => {
   event.returnValue = app.getVersion()
 })
 
-ipcMain.on('app-path', (event) => {
-  event.returnValue = app.getAppPath()
+ipcMain.on('app-data-path', (event) => {
+  event.returnValue = app.getPath('userData')
 })
 
 ipcMain.on('select-folder', (event) => {
