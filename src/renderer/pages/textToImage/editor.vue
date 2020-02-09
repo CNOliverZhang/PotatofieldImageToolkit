@@ -580,7 +580,7 @@
       <div class="row">
         <el-button type="primary" size="mini" @click="close" class="control-button">退出编辑器</el-button>
         <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button">保存为模板</el-button>
-        <el-button type="primary" size="mini" @click="start" class="control-button">开始拼接</el-button>
+        <el-button type="primary" size="mini" @click="start" class="control-button">开始处理</el-button>
       </div>
     </div>
   </div>
@@ -588,6 +588,8 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import html2canvas from 'html2canvas'
+
 const path = require('path')
 const fs = require('fs')
 

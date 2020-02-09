@@ -56,7 +56,7 @@
                 <el-option label="常见手机相机横屏（4:3）" value="4:3"/>
                 <el-option label="常见手机相机竖屏（3:4）" value="3:4"/>
                 <el-option label="普通电脑显示器横屏（16:9）" value="16:9"/>
-                <el-option label="普通电脑显示器竖屏（9:6）" value="9:16"/>
+                <el-option label="普通电脑显示器竖屏（9:16）" value="9:16"/>
                 <el-option label="全面屏手机横屏（18:9）" value="18:9"/>
                 <el-option label="全面屏手机竖屏（9:18）" value="9:18"/>
                 <el-option label="宽屏电脑显示器横屏（21:9）" value="21:9"/>
