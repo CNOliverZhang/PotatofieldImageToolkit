@@ -462,33 +462,35 @@ export default {
         image.src = this.$store.state.splicer.fileList[index].fullpath
         image.onerror = () => {
           this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
-          if (index < this.$store.state.splicer.fileList.length - 1) {
-            return replace(index + 1)
-          } else {
-            dialog.change({
-              type: 'error',
-              title: '出现错误',
-              text: '生成预览失败，读取下列文件失败。即将关闭编辑器，请您从列表中移除出现错误的文件后再进入编辑器。',
-              content: this.$createElement('div', null, this.errorList.map((filename) => {
-                return this.$createElement('p', {
-                  style: {
-                    'line-height': '24px',
-                    'font-size': '12px',
-                    'width': '100%',
-                    'overflow': 'hidden',
-                    'text-overflow': 'ellipsis',
-                    'white-space': 'nowrap',
-                    'text-indent': '0'
-                  }
-                }, filename)
-              })),
-              showConfirm: true,
-              confirmFunction: () => {
-                ipcRenderer.send('close')
-                this.$destroy()
-              }
-            })
-          }
+          this.$store.dispatch('cropper/fileListDelete', index)
+          setTimeout(() => {
+            if (index < this.$store.state.splicer.fileList.length - 1) {
+              return replace(index)
+            } else {
+              dialog.change({
+                type: 'warning',
+                title: '出现错误',
+                text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
+                content: this.$createElement('div', null, this.errorList.map((filename) => {
+                  return this.$createElement('p', {
+                    style: {
+                      'line-height': '24px',
+                      'font-size': '12px',
+                      'width': '100%',
+                      'overflow': 'hidden',
+                      'text-overflow': 'ellipsis',
+                      'white-space': 'nowrap',
+                      'text-indent': '0'
+                    }
+                  }, filename)
+                })),
+                showConfirm: true,
+                confirmFunction: () => {
+                  this.errorList = []
+                }
+              })
+            }
+          }, 100)
         }
         image.onload = () => {
           EXIF.getData(image, () => {
@@ -538,9 +540,9 @@ export default {
                 dialog.close()
               } else {
                 dialog.change({
-                  type: 'error',
+                  type: 'warning',
                   title: '出现错误',
-                  text: '生成预览失败，读取下列文件失败。即将关闭编辑器，请您从列表中移除出现错误的文件后再进入编辑器。',
+                  text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
                   content: this.$createElement('div', null, this.errorList.map((filename) => {
                     return this.$createElement('p', {
                       style: {
@@ -556,8 +558,7 @@ export default {
                   })),
                   showConfirm: true,
                   confirmFunction: () => {
-                    ipcRenderer.send('close')
-                    this.$destroy()
+                    this.errorList = []
                   }
                 })
               }

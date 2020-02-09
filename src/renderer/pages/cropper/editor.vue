@@ -170,7 +170,7 @@ export default {
       let img = document.createElement('img')
       img.src = this.$store.state.cropper.fileList[this.imageIndex].fullpath
       img.onerror = () => {
-        if (this.$store.state.watermark.fileList.length == 1) {
+        if (this.$store.state.cropper.fileList.length == 1) {
           dialog.change({
             type: 'error',
             title: '出现错误',
