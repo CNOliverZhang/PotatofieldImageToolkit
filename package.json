@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新字体管理工具。\n支持自定义界面字体。\n大幅缩减安装包体积，优化升级体验。\n修复已知问题。"
+      "releaseNotes": "修复已知问题。"
     },
     "publish": [
       {

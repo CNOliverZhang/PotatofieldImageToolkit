@@ -869,7 +869,7 @@ export default {
         title: '操作确认',
         text: '确定要删除这个模板吗？',
         showCancel: true,
-        confirmFunction: (index) => {
+        confirmFunction: () => {
           this.$store.dispatch('textToImage/templateDelete', index)
         }
       })
