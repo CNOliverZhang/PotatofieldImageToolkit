@@ -41,8 +41,7 @@ export default {
       confirmText: '确定',
       cancelText: '取消',
       confirmFunction: () => {},
-      cancelFunction: () => {},
-      onShowFunction: () => {}
+      cancelFunction: () => {}
     }
   },
   methods: {
@@ -59,26 +58,24 @@ export default {
       this.$destroy()
     },
     change(args) {
-      this.type = args.type !== undefined ? args.type : this.type
-      this.title = args.title !== undefined ? args.title : this.title
-      this.text = args.text !== undefined ? args.text : this.text
-      this.showConfirm = args.showConfirm !== undefined ? args.showConfirm : this.showConfirm
-      this.showCancel = args.showCancel !== undefined ? args.showCancel : this.showCancel
-      this.confirmText = args.confirmText !== undefined ? args.confirmText : this.confirmText
-      this.cancelText = args.cancelText !== undefined ? args.cancelText : this.cancelText
-      this.confirmFunction = args.confirmFunction !== undefined ? args.confirmFunction : this.confirmFunction
-      this.cancelFunction = args.cancelFunction !== undefined ? args.cancelFunction : this.cancelFunction
-      this.onShowFunction = args.onShowFunction !== undefined ? args.onShowFunction : this.onShowFunction
-      if (args.content !== undefined) {
-        this.$slots.default = [args.content]
-        this.$mount()
-      }
+      return new Promise((resolve, reject) => {
+        this.type = args.type !== undefined ? args.type : this.type
+        this.title = args.title !== undefined ? args.title : this.title
+        this.text = args.text !== undefined ? args.text : this.text
+        this.showConfirm = args.showConfirm !== undefined ? args.showConfirm : this.showConfirm
+        this.showCancel = args.showCancel !== undefined ? args.showCancel : this.showCancel
+        this.confirmText = args.confirmText !== undefined ? args.confirmText : this.confirmText
+        this.cancelText = args.cancelText !== undefined ? args.cancelText : this.cancelText
+        this.confirmFunction = args.confirmFunction !== undefined ? args.confirmFunction : this.confirmFunction
+        this.cancelFunction = args.cancelFunction !== undefined ? args.cancelFunction : this.cancelFunction
+        if (args.content !== undefined) {
+          this.$slots.default = [args.content]
+        }
+        this.$nextTick(() => {
+          resolve()
+        })
+      })
     }
-  },
-  mounted() {
-    this.$nextTick(() => {
-      this.onShowFunction()
-    })
   }
 }
 </script>

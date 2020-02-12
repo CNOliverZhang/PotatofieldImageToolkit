@@ -184,12 +184,10 @@ export default {
   name: 'watermark',
   data () {
     return {
-      errorList: [],
       fileListPage: 1,
       templateListPage: 1,
       childDirectoryIncluded: false,
       srcDirectory: '',
-      errorLog: null,
       templateTitle: ''
     }
   },
@@ -204,11 +202,9 @@ export default {
     },
     clear() {
       this.$store.dispatch('watermark/fileListEmpty')
-      this.errorList = []
       this.fileListPage = 1
       this.childDirectoryIncluded = false
       this.srcDirectory = ''
-      this.errorLog = null
     },
     clearConfirm() {
       this.$dialog({
@@ -232,48 +228,6 @@ export default {
           filename: filename,
           ext: ext
         })
-      } else {
-        this.errorList.push(filename + '.' + ext)
-        if (this.errorLog) {
-          this.errorLog.change({
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            }))
-          })
-        } else {
-          this.errorLog = this.$dialog({
-            type: 'warning',
-            title: '部分图片导入失败',
-            text: '下列图片导入失败，请您检查文件格式。但已导入的图片不受影响，您仍可以继续处理列表中显示的已导入图片。',
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            })),
-            confirmFunction: () => {
-              this.errorList = []
-              this.errorLog = null
-            }
-          })
-        }
       }
     },
     handleFolder() {
@@ -283,12 +237,11 @@ export default {
           text: '您还没有选择需要扫描的文件夹！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在扫描文件夹',
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
           this.$store.dispatch('watermark/fileListAssign', result.fileList)
           this.errorList = result.errorList
@@ -323,7 +276,7 @@ export default {
               }
             })
           }
-        }, 0)
+        })
       }
     },
     handleDelete(index) {
@@ -337,80 +290,80 @@ export default {
       this.$store.dispatch('watermark/fileListDelete', index)
     },
     preview(index) {
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '图像预览',
         text: '正在生成预览',
         showConfirm: false
-      })
-      let url = this.$store.state.watermark.fileList[index].fullpath
-      let image = document.createElement('img')
-      image.src = url
-      image.onerror = () => {
-        dialog.change({
-          type: 'error',
-          title: '出现错误',
-          text: '生成预览失败，请检查图像文件是否正常。',
-          showConfirm: true
-        })
-      }
-      image.onload = () => {
-        EXIF.getData(image, () => {
-          let orientation = EXIF.getTag(image, 'Orientation')
-          if (orientation == 3 || orientation == 6 || orientation == 8) {
-            let canvas = document.createElement('canvas')
-            let width, height, x, y, rotation
-            if (orientation == 3) {
-              width = image.width
-              height = image.height
-              x = -width
-              y = -height
-              rotation = 180
-            } else if (orientation == 6) {
-              width = image.height
-              height = image.width
-              x = 0
-              y = -width
-              rotation = 90
-            } else {
-              width = image.height
-              height = image.width
-              x = -height
-              y = 0
-              rotation = 270
-            }
-            canvas.height = height
-            canvas.width = width
-            let context = canvas.getContext("2d")
-            context.rotate(rotation * Math.PI / 180)
-            context.drawImage(image, x, y)
-            dialog.change({
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'id': 'preview-image'
-                }
-              }),
-              onShowFunction: () => {
+      }).then((dialog) => {
+        let url = this.$store.state.watermark.fileList[index].fullpath
+        let image = document.createElement('img')
+        image.src = url
+        image.onerror = () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '生成预览失败，请检查图像文件是否正常。',
+            showConfirm: true
+          })
+        }
+        image.onload = () => {
+          EXIF.getData(image, () => {
+            let orientation = EXIF.getTag(image, 'Orientation')
+            if (orientation == 3 || orientation == 6 || orientation == 8) {
+              let canvas = document.createElement('canvas')
+              let width, height, x, y, rotation
+              if (orientation == 3) {
+                width = image.width
+                height = image.height
+                x = -width
+                y = -height
+                rotation = 180
+              } else if (orientation == 6) {
+                width = image.height
+                height = image.width
+                x = 0
+                y = -width
+                rotation = 90
+              } else {
+                width = image.height
+                height = image.width
+                x = -height
+                y = 0
+                rotation = 270
+              }
+              canvas.height = height
+              canvas.width = width
+              let context = canvas.getContext("2d")
+              context.rotate(rotation * Math.PI / 180)
+              context.drawImage(image, x, y)
+              dialog.change({
+                text: '',
+                showConfirm: true,
+                content: this.$createElement('img', {
+                  'attrs': {
+                    'id': 'preview-image'
+                  }
+                })
+              }).then(() => {
                 canvas.style.width = '100%'
                 canvas.style.display = 'block'
                 let previewImage = document.getElementById('preview-image')
                 previewImage.parentNode.replaceChild(canvas, previewImage)
-              }
-            })
-          } else {
-            dialog.change({
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'src': url
-                }
               })
-            })
-          }
-        })
-      }
+            } else {
+              dialog.change({
+                text: '',
+                showConfirm: true,
+                content: this.$createElement('img', {
+                  'attrs': {
+                    'src': url
+                  }
+                })
+              })
+            }
+          })
+        }
+      })
     },
     fileListPageChange(page) {
       this.fileListPage = page

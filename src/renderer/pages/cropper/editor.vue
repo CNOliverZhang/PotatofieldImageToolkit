@@ -50,7 +50,7 @@
                 placeholder="请选择"
                 size="mini"
                 class="interactable">
-                <el-option label="正方形（1:1）" value="1"/>
+                <el-option label="正方形（1:1）" value="1:1"/>
                 <el-option label="常见相机横屏（3:2）" value="3:2"/>
                 <el-option label="常见相机竖屏（2:3）" value="2:3"/>
                 <el-option label="常见手机相机横屏（4:3）" value="4:3"/>
@@ -143,86 +143,87 @@ export default {
     },
     handleDelete(index) {
       if (this.$store.state.cropper.fileList.length > 1) {
-        if (this.imageIndex > index) {
-          this.imageIndex -= 1
-        } else if (this.imageIndex == index) {
-          setTimeout(() => {
+        this.$store.dispatch('cropper/fileListDelete', index).then(() => {
+          if (this.imageIndex > index) {
+            this.imageIndex -= 1
+          } else if (this.imageIndex == index) {
             this.init(this.imageIndex)
-          }, 100)
-        }
-        this.$store.dispatch('cropper/fileListDelete', index)
+          }
+        })
       } else {
         this.close()
       }
     },
     init(index) {
       this.rotate = 0
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '正在载入图像',
         text: '即将完成，请稍后。',
         showConfirm: false
-      })
-      if (index >= this.$store.state.cropper.fileList.length) {
-        this.imageIndex = this.$store.state.cropper.fileList.length - 1
-      } else {
-        this.imageIndex = index
-      }
-      let img = document.createElement('img')
-      img.src = this.$store.state.cropper.fileList[this.imageIndex].fullpath
-      img.onerror = () => {
-        if (this.$store.state.cropper.fileList.length == 1) {
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '图像文件读取错误，生成预览失败。即将退出编辑器。',
-            showConfirm: true,
-            confirmFunction: () => {
-              this.close()
-            }
-          })
+      }).then((dialog) => {
+        if (index >= this.$store.state.cropper.fileList.length) {
+          this.imageIndex = this.$store.state.cropper.fileList.length - 1
         } else {
-          this.$store.dispatch('cropper/fileListDelete', index)
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '图像文件读取错误，生成预览失败。已从待处理列表中移除该文件。',
-            showConfirm: true,
-            confirmFunction: () => {
-              this.init(index)
+          this.imageIndex = index
+        }
+        let img = document.createElement('img')
+        img.src = this.$store.state.cropper.fileList[this.imageIndex].fullpath
+        img.onerror = () => {
+          if (this.$store.state.cropper.fileList.length == 1) {
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '图像文件读取错误，生成预览失败。即将退出编辑器。',
+              showConfirm: true,
+              confirmFunction: () => {
+                this.close()
+              }
+            })
+          } else {
+            this.$store.dispatch('cropper/fileListDelete', index)
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '图像文件读取错误，生成预览失败。已从待处理列表中移除该文件。',
+              showConfirm: true,
+              confirmFunction: () => {
+                this.init(index)
+              }
+            })
+          }
+        }
+        img.onload = () => {
+          EXIF.getData(img, () => {
+            let orientation = EXIF.getTag(img, 'Orientation')
+            let rotation
+            if (orientation == 3) {
+              rotation = 180
+            } else if (orientation == 6) {
+              rotation = 90
+            } else if (orientation == 8) {
+              rotation = 270
+            } else {
+              rotation = 0
             }
+            if (this.cropper != null) {
+              this.cropper.destroy()
+            }
+            let vm = this
+            let cropper = new Cropper(image, {
+              viewMode: 2,
+              dragMode: 'move',
+              autoCropArea: 0.5,
+              toggleDragModeOnDblclick: false,
+              ready() {
+                vm.cropper = this.cropper
+                vm.rotate = rotation
+                vm.setRatio()
+                dialog.close()
+              }
+            })
           })
         }
-      }
-      img.onload = () => {
-        EXIF.getData(img, () => {
-          let orientation = EXIF.getTag(img, 'Orientation')
-          let rotation
-          if (orientation == 3) {
-            rotation = 180
-          } else if (orientation == 6) {
-            rotation = 90
-          } else if (orientation == 8) {
-            rotation = 270
-          } else {
-            rotation = 0
-          }
-          if (this.cropper != null) {
-            this.cropper.destroy()
-          }
-          let vm = this
-          let cropper = new Cropper(image, {
-            viewMode: 3,
-            dragMode: 'move',
-            autoCropArea: 0.5,
-            toggleDragModeOnDblclick: false,
-            ready() {
-              vm.cropper = this.cropper
-              vm.rotate = rotation
-              dialog.close()
-            }
-          })
-        })
-      }
+      })
     },
     selectSaveFolder() {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
@@ -233,18 +234,17 @@ export default {
       this.cropper.setAspectRatio(ratio)
     },
     start() {
-      if (this.distDirectory == '') {
+      if (this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请选择保存的目录！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let ext = this.mimeType == 'png' ? '.png' : '.jpg'
           let filename = this.$store.state.cropper.fileList[this.imageIndex].filename + ext
           let distFullpath = path.join(this.distDirectory, filename)
@@ -269,10 +269,9 @@ export default {
                   text: '处理完成，裁剪后的图片已保存到目标文件夹。',
                   showConfirm: true,
                   confirmFunction: () => {
-                    setTimeout(() => {
+                    this.$store.dispatch('cropper/fileListDelete', this.imageIndex).then(() => {
                       this.init(this.imageIndex)
-                    }, 100)
-                    this.$store.dispatch('cropper/fileListDelete', this.imageIndex)
+                    })
                   }
                 })
               } else {
@@ -288,7 +287,7 @@ export default {
               }
             }
           })
-        }, 100)
+        })
       }
     }
   },

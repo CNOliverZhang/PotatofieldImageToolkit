@@ -261,8 +261,6 @@ export default {
     return {
       fileList: [],
       fileSet: new Set(),
-      errorList: [],
-      errorLog: null,
       fileListPage: 1,
       standard: 'percentage',
       percentage: 100,
@@ -287,8 +285,6 @@ export default {
     clear() {
       this.fileList = []
       this.fileSet = new Set()
-      this.errorList = []
-      this.errorLog = null
       this.fileListPage = 1
       this.standard = 'percentage'
       this.percentage = 100
@@ -324,48 +320,6 @@ export default {
           ext: ext
         })
         this.fileSet.add(file.raw.path)
-      } else {
-        this.errorList.push(filename + '.' + ext)
-        if (this.errorLog) {
-          this.errorLog.change({
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            }))
-          })
-        } else {
-          this.errorLog = this.$dialog({
-            type: 'warning',
-            title: '部分图片导入失败',
-            text: '下列图片导入失败，这可能是由于文件权限问题或图片已在列表中。但已导入的图片不受影响，您仍可以继续处理列表中显示的已导入图片。',
-            content: this.$createElement('div', null, this.errorList.map((filename) => {
-              return this.$createElement('p', {
-                style: {
-                  'line-height': '24px',
-                  'font-size': '12px',
-                  'width': '100%',
-                  'overflow': 'hidden',
-                  'text-overflow': 'ellipsis',
-                  'white-space': 'nowrap',
-                  'text-indent': '0'
-                }
-              }, filename)
-            })),
-            confirmFunction: () => {
-              this.errorList = []
-              this.errorLog = null
-            }
-          })
-        }
       }
     },
     handleFolder() {
@@ -375,12 +329,11 @@ export default {
           text: '您还没有选择需要扫描的文件夹！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在扫描文件夹',
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
           this.fileList = result.fileList
           this.errorList = result.errorList
@@ -415,7 +368,7 @@ export default {
               }
             })
           }
-        }, 100)
+        })
       }
     },
     handleDelete(index) {
@@ -430,80 +383,80 @@ export default {
       this.fileList.splice(index, 1)
     },
     preview(index) {
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '图像预览',
         text: '正在生成预览',
         showConfirm: false
-      })
-      let url = this.fileList[index].fullpath
-      let image = document.createElement('img')
-      image.src = url
-      image.onerror = () => {
-        dialog.change({
-          type: 'error',
-          title: '出现错误',
-          text: '生成预览失败，请检查图像文件是否正常。',
-          showConfirm: true
-        })
-      }
-      image.onload = () => {
-        EXIF.getData(image, () => {
-          let orientation = EXIF.getTag(image, 'Orientation')
-          if (orientation == 3 || orientation == 6 || orientation == 8) {
-            let canvas = document.createElement('canvas')
-            let width, height, x, y, rotation
-            if (orientation == 3) {
-              width = image.width
-              height = image.height
-              x = -width
-              y = -height
-              rotation = 180
-            } else if (orientation == 6) {
-              width = image.height
-              height = image.width
-              x = 0
-              y = -width
-              rotation = 90
-            } else {
-              width = image.height
-              height = image.width
-              x = -height
-              y = 0
-              rotation = 270
-            }
-            canvas.height = height
-            canvas.width = width
-            let context = canvas.getContext("2d")
-            context.rotate(rotation * Math.PI / 180)
-            context.drawImage(image, x, y)
-            dialog.change({
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'id': 'preview-image'
-                }
-              }),
-              onShowFunction: () => {
+      }).then((dialog) => {
+        let url = this.fileList[index].fullpath
+        let image = document.createElement('img')
+        image.src = url
+        image.onerror = () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '生成预览失败，请检查图像文件是否正常。',
+            showConfirm: true
+          })
+        }
+        image.onload = () => {
+          EXIF.getData(image, () => {
+            let orientation = EXIF.getTag(image, 'Orientation')
+            if (orientation == 3 || orientation == 6 || orientation == 8) {
+              let canvas = document.createElement('canvas')
+              let width, height, x, y, rotation
+              if (orientation == 3) {
+                width = image.width
+                height = image.height
+                x = -width
+                y = -height
+                rotation = 180
+              } else if (orientation == 6) {
+                width = image.height
+                height = image.width
+                x = 0
+                y = -width
+                rotation = 90
+              } else {
+                width = image.height
+                height = image.width
+                x = -height
+                y = 0
+                rotation = 270
+              }
+              canvas.height = height
+              canvas.width = width
+              let context = canvas.getContext("2d")
+              context.rotate(rotation * Math.PI / 180)
+              context.drawImage(image, x, y)
+              dialog.change({
+                text: '',
+                showConfirm: true,
+                content: this.$createElement('img', {
+                  'attrs': {
+                    'id': 'preview-image'
+                  }
+                })
+              }).then(() => {
                 canvas.style.width = '100%'
                 canvas.style.display = 'block'
                 let previewImage = document.getElementById('preview-image')
                 previewImage.parentNode.replaceChild(canvas, previewImage)
-              }
-            })
-          } else {
-            dialog.change({
-              text: '',
-              showConfirm: true,
-              content: this.$createElement('img', {
-                'attrs': {
-                  'src': url
-                }
               })
-            })
-          }
-        })
-      }
+            } else {
+              dialog.change({
+                text: '',
+                showConfirm: true,
+                content: this.$createElement('img', {
+                  'attrs': {
+                    'src': url
+                  }
+                })
+              })
+            }
+          })
+        }
+      })
     },
     fileListPageChange(page) {
       this.fileListPage = page
@@ -515,7 +468,7 @@ export default {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     start() {
-      if (this.customDistDirectory && this.distDirectory == '') {
+      if (this.customDistDirectory && this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请您选择保存的目录！'
@@ -531,183 +484,184 @@ export default {
           text: '请正确设置尺寸！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        let handle = (index) => {
-          let imageInfo = this.fileList[index]
-          let distExt
-          if (this.mimeType == '保持原格式') {
-            distExt = imageInfo.ext
-          } else if (this.mimeType == 'JPEG') {
-            distExt = 'jpg'
-          } else {
-            distExt = 'png'
-          }
-          let mimeType
-          if (distExt == 'png') {
-            mimeType = 'png'
-          } else {
-            mimeType = 'jpeg'
-          }
-          let distFilename = imageInfo.filename + this.append + '.' + distExt
-          let distPath
-          if (this.customDistDirectory) {
-            if (this.keepDirectoryStructure) {
-              distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+        }).then((dialog) => {
+          let handle = (index) => {
+            let imageInfo = this.fileList[index]
+            let distExt
+            if (this.mimeType == '保持原格式') {
+              distExt = imageInfo.ext
+            } else if (this.mimeType == 'JPEG') {
+              distExt = 'jpg'
             } else {
-              distPath = this.distDirectory
+              distExt = 'png'
             }
-          } else {
-            distPath = imageInfo.filepath
-          }
-          let distFullpath = path.join(distPath, distFilename)
-          let image = document.createElement('img')
-          image.src = imageInfo.fullpath
-          image.onerror = () => {
-            this.errorList.push(imageInfo.fullpath)
-            if (index < this.fileList.length - 1) {
-              dialog.change({
-                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
-              })
-              return handle(index + 1)
+            let mimeType
+            if (distExt == 'png') {
+              mimeType = 'png'
             } else {
-              if (this.errorList.length == 0) {
-                dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '全部图片处理完成。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.clear()
-                  }
-                })
+              mimeType = 'jpeg'
+            }
+            let distFilename = imageInfo.filename + this.append + '.' + distExt
+            let distPath
+            if (this.customDistDirectory) {
+              if (this.keepDirectoryStructure) {
+                distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
               } else {
-                dialog.change({
-                  type: 'warning',
-                  title: '完成',
-                  text: '队列中的图片已处理完成，但下列图片处理失败。',
-                  content: this.$createElement('div', null, this.errorList.map((filename) => {
-                    return this.$createElement('p', {
-                      style: {
-                        'line-height': '24px',
-                        'font-size': '12px',
-                        'width': '100%',
-                        'overflow': 'hidden',
-                        'text-overflow': 'ellipsis',
-                        'white-space': 'nowrap',
-                        'text-indent': '0'
-                      }
-                    }, filename)
-                  })),
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.clear()
-                  }
-                })
+                distPath = this.distDirectory
               }
-            }
-          }
-          image.onload = () => {
-            let scale
-            if (this.standard == 'percentage') {
-              scale = this.percentage / 100
-            } else if (this.standard == 'short') {
-              scale = this.length / Math.min(image.width, image.height)
             } else {
-              scale = this.length / Math.max(image.width, image.height)
+              distPath = imageInfo.filepath
             }
-            EXIF.getData(image, () => {
-              let orientation = EXIF.getTag(image, 'Orientation')
-              let canvas = document.createElement('canvas')
-              let width, height, x, y, rotation
-              if (orientation == 3) {
-                width = image.width
-                height = image.height
-                x = -width
-                y = -height
-                rotation = 180
-              } else if (orientation == 6) {
-                width = image.height
-                height = image.width
-                x = 0
-                y = -width
-                rotation = 90
-              } else if (orientation == 8) {
-                width = image.height
-                height = image.width
-                x = -height
-                y = 0
-                rotation = 270
+            let distFullpath = path.join(distPath, distFilename)
+            let image = document.createElement('img')
+            image.src = imageInfo.fullpath
+            image.onerror = () => {
+              this.errorList.push(imageInfo.fullpath)
+              if (index < this.fileList.length - 1) {
+                dialog.change({
+                  text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+                })
+                return handle(index + 1)
               } else {
-                width = image.width
-                height = image.height
-                x = 0
-                y = 0
-                rotation = 0
-              }
-              canvas.height = height * scale
-              canvas.width = width * scale
-              let context = canvas.getContext("2d")
-              context.rotate(rotation * Math.PI / 180)
-              context.drawImage(image, x * scale, y * scale, image.width * scale, image.height * scale)
-              context.rotate(-rotation * Math.PI / 180)
-              let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-              let buffer = new Buffer.from(url, 'base64')
-              CreateDirectory(distPath)
-              fs.writeFile(distFullpath, buffer, (error) => {
-                if (error) {
-                  this.errorList.push(imageInfo.fullpath)
-                }
-                if (index < this.fileList.length - 1) {
+                if (this.errorList.length == 0) {
                   dialog.change({
-                    text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+                    type: 'success',
+                    title: '成功',
+                    text: '全部图片处理完成。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.clear()
+                    }
                   })
-                  return handle(index + 1)
                 } else {
-                  if (this.errorList.length == 0) {
-                    dialog.change({
-                      type: 'success',
-                      title: '成功',
-                      text: '全部图片处理完成。',
-                      showConfirm: true,
-                      confirmFunction: () => {
-                        this.clear()
-                      }
-                    })
-                  } else {
-                    dialog.change({
-                      type: 'warning',
-                      title: '完成',
-                      text: '队列中的图片已处理完成，但下列图片处理失败。',
-                      content: this.$createElement('div', null, this.errorList.map((filename) => {
-                        return this.$createElement('p', {
-                          style: {
-                            'line-height': '24px',
-                            'font-size': '12px',
-                            'width': '100%',
-                            'overflow': 'hidden',
-                            'text-overflow': 'ellipsis',
-                            'white-space': 'nowrap',
-                            'text-indent': '0'
-                          }
-                        }, filename)
-                      })),
-                      showConfirm: true,
-                      confirmFunction: () => {
-                        this.errorList = []
-                        this.clear()
-                      }
-                    })
-                  }
+                  dialog.change({
+                    type: 'warning',
+                    title: '完成',
+                    text: '队列中的图片已处理完成，但下列图片处理失败。',
+                    content: this.$createElement('div', null, this.errorList.map((filename) => {
+                      return this.$createElement('p', {
+                        style: {
+                          'line-height': '24px',
+                          'font-size': '12px',
+                          'width': '100%',
+                          'overflow': 'hidden',
+                          'text-overflow': 'ellipsis',
+                          'white-space': 'nowrap',
+                          'text-indent': '0'
+                        }
+                      }, filename)
+                    })),
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.clear()
+                    }
+                  })
                 }
+              }
+            }
+            image.onload = () => {
+              let scale
+              if (this.standard == 'percentage') {
+                scale = this.percentage / 100
+              } else if (this.standard == 'short') {
+                scale = this.length / Math.min(image.width, image.height)
+              } else {
+                scale = this.length / Math.max(image.width, image.height)
+              }
+              EXIF.getData(image, () => {
+                let orientation = EXIF.getTag(image, 'Orientation')
+                let canvas = document.createElement('canvas')
+                let width, height, x, y, rotation
+                if (orientation == 3) {
+                  width = image.width
+                  height = image.height
+                  x = -width
+                  y = -height
+                  rotation = 180
+                } else if (orientation == 6) {
+                  width = image.height
+                  height = image.width
+                  x = 0
+                  y = -width
+                  rotation = 90
+                } else if (orientation == 8) {
+                  width = image.height
+                  height = image.width
+                  x = -height
+                  y = 0
+                  rotation = 270
+                } else {
+                  width = image.width
+                  height = image.height
+                  x = 0
+                  y = 0
+                  rotation = 0
+                }
+                canvas.height = height * scale
+                canvas.width = width * scale
+                let context = canvas.getContext("2d")
+                context.rotate(rotation * Math.PI / 180)
+                context.drawImage(image, x * scale, y * scale, image.width * scale, image.height * scale)
+                context.rotate(-rotation * Math.PI / 180)
+                let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+                let buffer = new Buffer.from(url, 'base64')
+                CreateDirectory(distPath)
+                fs.writeFile(distFullpath, buffer, (error) => {
+                  if (error) {
+                    this.errorList.push(imageInfo.fullpath)
+                  }
+                  if (index < this.fileList.length - 1) {
+                    dialog.change({
+                      text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
+                    })
+                    return handle(index + 1)
+                  } else {
+                    if (this.errorList.length == 0) {
+                      dialog.change({
+                        type: 'success',
+                        title: '成功',
+                        text: '全部图片处理完成。',
+                        showConfirm: true,
+                        confirmFunction: () => {
+                          this.clear()
+                        }
+                      })
+                    } else {
+                      dialog.change({
+                        type: 'warning',
+                        title: '完成',
+                        text: '队列中的图片已处理完成，但下列图片处理失败。',
+                        content: this.$createElement('div', null, this.errorList.map((filename) => {
+                          return this.$createElement('p', {
+                            style: {
+                              'line-height': '24px',
+                              'font-size': '12px',
+                              'width': '100%',
+                              'overflow': 'hidden',
+                              'text-overflow': 'ellipsis',
+                              'white-space': 'nowrap',
+                              'text-indent': '0'
+                            }
+                          }, filename)
+                        })),
+                        showConfirm: true,
+                        confirmFunction: () => {
+                          this.errorList = []
+                          this.clear()
+                        }
+                      })
+                    }
+                  }
+                })
               })
-            })
+            }
           }
-        }
-        handle(0)
+          handle(0)
+        })
       }
     }
   }

@@ -205,10 +205,6 @@ export default {
           url: 'https://github.com/FortAwesome/Font-Awesome'
         },
         {
-          title: 'Resize Observer',
-          url: 'https://github.com/juggle/resize-observer'
-        },
-        {
           title: 'html2canvas',
           url: 'https://github.com/niklasvh/html2canvas'
         },
@@ -244,39 +240,39 @@ export default {
     },
     checkForUpdate() {
       ipcRenderer.send('check-for-update')
-      let dialog = this.$dialog({
+      this.$dialog({
         text: '正在检查更新',
         showConfirm: false
-      })
-      ipcRenderer.once('error', () => {
-        dialog.change({
-          type: 'error',
-          title: '出现错误',
-          text: '检查更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
-          showConfirm: true
+      }).then((dialog) => {
+        ipcRenderer.once('error', () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '检查更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
+            showConfirm: true
+          })
+        })
+        ipcRenderer.once('update-not-available', () => {
+          dialog.close()
+          this.updateChecked = true
+        })
+        ipcRenderer.once('update-available', (event, info) => {
+          dialog.close()
+          this.updateChecked = true
+          this.update = {
+            version: info.version,
+            releaseNotes: info.releaseNotes.split('\n'),
+            releaseDate: info.releaseDate.slice(0, 4) + "年"
+            + info.releaseDate.slice(5, 7) + "月"
+            + info.releaseDate.slice(8, 10) + "日"
+          }
         })
       })
-      ipcRenderer.once('update-not-available', () => {
-        dialog.close()
-        this.updateChecked = true
-      })
-      ipcRenderer.once('update-available', (event, info) => {
-        dialog.close()
-        this.updateChecked = true
-        this.update = {
-          version: info.version,
-          releaseNotes: info.releaseNotes.split('\n'),
-          releaseDate: info.releaseDate.slice(0, 4) + "年"
-          + info.releaseDate.slice(5, 7) + "月"
-          + info.releaseDate.slice(8, 10) + "日"
-        }
-      })
-      
     },
     confirmUpdate() {
       ipcRenderer.send('download-update')
       ipcRenderer.removeAllListeners(['error'])
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '正在下载更新',
         content: this.$createElement('el-progress', {
           'style': {
@@ -289,42 +285,43 @@ export default {
           }
         }),
         showConfirm: false
-      })
-      ipcRenderer.once('error', () => {
-        dialog.change({
-          type: 'error',
-          title: '出现错误',
-          text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
-          content: null,
-          showConfirm: true
-        })
-      })
-      ipcRenderer.on('update-download-progress', (event, progress) => {
-        dialog.change({
-          content: this.$createElement('el-progress', {
-            'props': {
-              'text-inside': true,
-              'stroke-width': 20,
-              'percentage': Math.round(progress)
-            }
+      }).then((dialog) => {
+        ipcRenderer.once('error', () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
+            content: null,
+            showConfirm: true
           })
         })
-      })
-      ipcRenderer.once('update-downloaded', () => {
-        dialog.change({
-          type: 'success',
-          title: '更新下载完成',
-          text: '新版本的安装文件已经下载完成，即将开始更新。',
-          content: null,
-          showConfirm: true,
-          confirmFunction: () => {
-            ipcRenderer.send('update-now')
-            this.$dialog({
-              title: '正在安装更新',
-              text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
-              showConfirm: false
+        ipcRenderer.on('update-download-progress', (event, progress) => {
+          dialog.change({
+            content: this.$createElement('el-progress', {
+              'props': {
+                'text-inside': true,
+                'stroke-width': 20,
+                'percentage': Math.round(progress)
+              }
             })
-          }
+          })
+        })
+        ipcRenderer.once('update-downloaded', () => {
+          dialog.change({
+            type: 'success',
+            title: '更新下载完成',
+            text: '新版本的安装文件已经下载完成，即将开始更新。',
+            content: null,
+            showConfirm: true,
+            confirmFunction: () => {
+              ipcRenderer.send('update-now')
+              this.$dialog({
+                title: '正在安装更新',
+                text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
+                showConfirm: false
+              })
+            }
+          })
         })
       })
     },
@@ -343,12 +340,11 @@ export default {
           text: '请输入文件名！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let backup = {
             type: 'PotatofieldImageToolkitTemplatesBackup',
             version: this.version,
@@ -379,7 +375,7 @@ export default {
             this.distDirectory = ''
             this.filename = ''
           })
-        }, 100)
+        })
       }
     },
     clearTemplates() {
@@ -404,12 +400,11 @@ export default {
           text: '文件格式不正确。'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           try {
             let backup = JSON.parse(decodeURI(atob(fs.readFileSync(file.raw.path))))
             if (backup.type != 'PotatofieldImageToolkitTemplatesBackup') {
@@ -439,7 +434,7 @@ export default {
               showConfirm: true
             })
           }
-        }, 100)
+        })
       }
     }
   },

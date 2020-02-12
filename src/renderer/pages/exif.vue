@@ -150,112 +150,111 @@ export default {
       this.$destroy()
     },
     handleFile(file) {
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '正在读取',
         text: '即将完成，请稍候。',
         showConfirm: false
-      })
-      let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
-      let filename = file.name.substring(0, file.name.lastIndexOf("."))
-      if (['jpg', 'jpeg'].indexOf(ext) != -1) {
-        this.image = file.raw.path
-        let image = document.createElement('img')
-        image.src = this.image
-        image.onerror = () => {
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '读取图片失败，请检查图像文件是否正常。',
-            showConfirm: true
-          })
-          this.image = ''
-          this.info = null
-        }
-        image.onload = () => {
-          EXIF.getData(image, () => {
-            let tags = EXIF.getAllTags(image)
-            console.log(tags)
-            if (Object.keys(tags).length == 0) {
-              dialog.change({
-                type: 'error',
-                title: '未读取到信息',
-                text: '由照相机拍摄的 JPEG 文件才具有 EXIF 信息。',
-                showConfirm: true
-              })
-              this.image = ''
-              this.info = null
-            } else {
-              let orientation = tags.Orientation
-              let width, height, x, y, rotation
-              if (orientation == 3) {
-                width = image.width
-                height = image.height
-                x = -width
-                y = -height
-                rotation = 180
-              } else if (orientation == 6) {
-                width = image.height
-                height = image.width
-                x = 0
-                y = -width
-                rotation = 90
-              } else if (orientation == 8) {
-                width = image.height
-                height = image.width
-                x = -height
-                y = 0
-                rotation = 270
+      }).then((dialog) => {
+        let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
+        let filename = file.name.substring(0, file.name.lastIndexOf("."))
+        if (['jpg', 'jpeg'].indexOf(ext) != -1) {
+          this.image = file.raw.path
+          let image = document.createElement('img')
+          image.src = this.image
+          image.onerror = () => {
+            dialog.change({
+              type: 'error',
+              title: '出现错误',
+              text: '读取图片失败，请检查图像文件是否正常。',
+              showConfirm: true
+            })
+            this.image = ''
+            this.info = null
+          }
+          image.onload = () => {
+            EXIF.getData(image, () => {
+              let tags = EXIF.getAllTags(image)
+              console.log(tags)
+              if (Object.keys(tags).length == 0) {
+                dialog.change({
+                  type: 'error',
+                  title: '未读取到信息',
+                  text: '由照相机拍摄的 JPEG 文件才具有 EXIF 信息。',
+                  showConfirm: true
+                })
+                this.image = ''
+                this.info = null
               } else {
-                width = image.width
-                height = image.height
-                x = 0
-                y = 0
-                rotation = 0
-              }
-              let exposureMode = tags.ExposureMode
-              if (exposureMode == 0) {
-                exposureMode = '自动曝光'
-              } else if (exposureMode == 1) {
-                exposureMode = '手动曝光'
-              } else if (exposureMode == 2) {
-                exposureMode = '自动包围曝光'
-              } else {
-                exposureMode = null
-              }
-              let exposureProgram = tags.ExposureProgram
-              if (exposureProgram == 'Manual') {
-                exposureProgram = '手动曝光'
-              } else if (exposureProgram == 'Normal program') {
-                exposureProgram = '程序自动曝光'
-              } else if (exposureProgram == 'Aperture priority') {
-                exposureProgram = '光圈优先'
-              } else if (exposureProgram == 'Shutter priority') {
-                exposureProgram = '快门优先'
-              } else {
-                exposureProgram = null
-              }
-              let info = {
-                artist: tags.Artist,
-                make: tags.Make,
-                model: tags.Model,
-                time: tags.DateTime ? (tags.DateTime.replace(/ /, ' 日 ').replace(/:/, ' 年 ').replace(/:/, ' 月 ')) : null,
-                exposureBias: tags.ExposureBias ? (tags.ExposureBias + ' 档') : null,
-                exposureMode: exposureMode,
-                exposureProgram: exposureProgram,
-                shutterSpeed: tags.ExposureTime ? (tags.ExposureTime.numerator + ' / ' + tags.ExposureTime.denominator + ' 秒') : null,
-                apertureValue: tags.FNumber ? ('F / ' + tags.FNumber.numerator / tags.FNumber.denominator) : null,
-                focalLength: tags.FocalLength ? (tags.FocalLength.numerator / tags.FocalLength.denominator + ' mm') : null,
-                equivalenceFocalLength: tags.FocalLengthIn35mmFilm ? (tags.FocalLengthIn35mmFilm + ' mm') : null,
-                iso: tags.ISOSpeedRatings ? ('ISO ' + tags.ISOSpeedRatings) : null,
-                software: tags.Software,
-                width: tags.PixelXDimension ? (tags.PixelXDimension + ' 像素') : null,
-                height: tags.PixelYDimension ? (tags.PixelYDimension + ' 像素') : null,
-                rotatedWidth: width + ' 像素',
-                rotatedHeight: height + ' 像素'
-              }
-              this.info = info
-              dialog.close()
-              setTimeout(() => {
+                let orientation = tags.Orientation
+                let width, height, x, y, rotation
+                if (orientation == 3) {
+                  width = image.width
+                  height = image.height
+                  x = -width
+                  y = -height
+                  rotation = 180
+                } else if (orientation == 6) {
+                  width = image.height
+                  height = image.width
+                  x = 0
+                  y = -width
+                  rotation = 90
+                } else if (orientation == 8) {
+                  width = image.height
+                  height = image.width
+                  x = -height
+                  y = 0
+                  rotation = 270
+                } else {
+                  width = image.width
+                  height = image.height
+                  x = 0
+                  y = 0
+                  rotation = 0
+                }
+                let exposureMode = tags.ExposureMode
+                if (exposureMode == 0) {
+                  exposureMode = '自动曝光'
+                } else if (exposureMode == 1) {
+                  exposureMode = '手动曝光'
+                } else if (exposureMode == 2) {
+                  exposureMode = '自动包围曝光'
+                } else {
+                  exposureMode = null
+                }
+                let exposureProgram = tags.ExposureProgram
+                if (exposureProgram == 'Manual') {
+                  exposureProgram = '手动曝光'
+                } else if (exposureProgram == 'Normal program') {
+                  exposureProgram = '程序自动曝光'
+                } else if (exposureProgram == 'Aperture priority') {
+                  exposureProgram = '光圈优先'
+                } else if (exposureProgram == 'Shutter priority') {
+                  exposureProgram = '快门优先'
+                } else {
+                  exposureProgram = null
+                }
+                let info = {
+                  artist: tags.Artist,
+                  make: tags.Make,
+                  model: tags.Model,
+                  time: tags.DateTime ? (tags.DateTime.replace(/ /, ' 日 ').replace(/:/, ' 年 ').replace(/:/, ' 月 ')) : null,
+                  exposureBias: tags.ExposureBias ? (tags.ExposureBias + ' 档') : null,
+                  exposureMode: exposureMode,
+                  exposureProgram: exposureProgram,
+                  shutterSpeed: tags.ExposureTime ? (tags.ExposureTime.numerator + ' / ' + tags.ExposureTime.denominator + ' 秒') : null,
+                  apertureValue: tags.FNumber ? ('F / ' + tags.FNumber.numerator / tags.FNumber.denominator) : null,
+                  focalLength: tags.FocalLength ? (tags.FocalLength.numerator / tags.FocalLength.denominator + ' mm') : null,
+                  equivalenceFocalLength: tags.FocalLengthIn35mmFilm ? (tags.FocalLengthIn35mmFilm + ' mm') : null,
+                  iso: tags.ISOSpeedRatings ? ('ISO ' + tags.ISOSpeedRatings) : null,
+                  software: tags.Software,
+                  width: tags.PixelXDimension ? (tags.PixelXDimension + ' 像素') : null,
+                  height: tags.PixelYDimension ? (tags.PixelYDimension + ' 像素') : null,
+                  rotatedWidth: width + ' 像素',
+                  rotatedHeight: height + ' 像素'
+                }
+                this.info = info
+                dialog.close()
                 let canvas = document.createElement('canvas')
                 canvas.height = height
                 canvas.width = width
@@ -269,18 +268,18 @@ export default {
                 let img = document.getElementById('image')
                 img.parentNode.replaceChild(canvas, img)
                 canvas.id = 'image'
-              }, 100)
-            }
+              }
+            })
+          }
+        } else {
+          dialog.change({
+            type: 'error',
+            title: '格式不正确',
+            text: '仅支持读取 JPEG 文件的 EXIF 信息！',
+            showConfirm: true
           })
         }
-      } else {
-        dialog.change({
-          type: 'error',
-          title: '格式不正确',
-          text: '仅支持读取 JPEG 文件的 EXIF 信息！',
-          showConfirm: true
-        })
-      }
+      })
     }
   }
 }

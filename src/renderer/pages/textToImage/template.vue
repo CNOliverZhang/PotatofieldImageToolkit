@@ -38,7 +38,6 @@
           <li>vue-clamp</li>
           <li>Element UI</li>
           <li>Font Awesome</li>
-          <li>Resize Observer</li>
           <li>html2canvas</li>
           <li>CKEditor 5</li>
           <li>EXIF.js</li>
@@ -1174,6 +1173,9 @@ export default {
       this.imageLabelColor = this.$store.state.textToImage.templates[index].imageLabelColor
       this.blockquoteMargin = this.$store.state.textToImage.templates[index].blockquoteMargin
       this.blockquoteBorderColor = this.$store.state.textToImage.templates[index].blockquoteBorderColor
+      this.$dialog({
+        text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
+      })
     }
   }
 }

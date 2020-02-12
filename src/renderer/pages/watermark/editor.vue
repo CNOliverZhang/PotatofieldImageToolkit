@@ -284,7 +284,6 @@
 <script>
 import { ipcRenderer } from 'electron'
 import CreateDirectory from '../../utils/CreateDirectory'
-import ResizeObserver from 'resize-observer-polyfill'
 import html2canvas from 'html2canvas'
 import EXIF from 'exif-js'
 
@@ -330,7 +329,6 @@ export default {
       return this.relativeFontSize * this.sizeBaseX
     },
     x() {
-      let watermark = document.getElementById('watermark')
       if (this.position == 'top' || this.position == 'bottom' || this.position == 'center') {
         return ((this.sampleWidth - this.watermarkWidth) / 2)
       } else {
@@ -339,13 +337,54 @@ export default {
       }
     },
     y() {
-      let watermark = document.getElementById('watermark')
       if (this.position == 'left' || this.position == 'right' || this.position == 'center') {
         return ((this.sampleHeight - this.watermarkHeight) / 2)
       } else {
         let ratio = 1 - this.watermarkHeight / this.sampleHeight
         return this.offsetY * this.sizeBaseY * (ratio)
       }
+    }
+  },
+  watch: {
+    text() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    writingMode() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    textAlign() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    lineHeight() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    letterSpacing() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    rotation() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    font() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    relativeFontSize() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
     }
   },
   methods: {
@@ -366,25 +405,30 @@ export default {
             }
           }
         }
-        if (this.imageIndex > index) {
-          this.imageIndex -= 1
-        } else if (this.imageIndex == index) {
-          setTimeout(() => {
+        this.$store.dispatch('watermark/fileListDelete', index).then(() => {
+          if (this.imageIndex > index) {
+            this.imageIndex -= 1
+          } else if (this.imageIndex == index) {
             this.preview(this.imageIndex)
-          }, 100)
-        }
-        this.$store.dispatch('watermark/fileListDelete', index)
+          }
+        })
       } else {
         this.close()
       }
     },
+    initWatermarkSize() {
+      let watermarkStyle = window.getComputedStyle(document.getElementById('watermark'))
+      let watermarkWidth = watermarkStyle.getPropertyValue('width').slice(0, -2)
+      let watermarkHeight = watermarkStyle.getPropertyValue('height').slice(0, -2)
+      this.watermarkWidth = watermarkWidth
+      this.watermarkHeight = watermarkHeight
+    },
     preview(index) {
-      if (this.imageIndex != index) {
-        let dialog = this.$dialog({
-          title: '正在载入图像',
-          text: '即将完成，请稍候。',
-          showConfirm: false
-        })
+      this.$dialog({
+        title: '正在载入图像',
+        text: '即将完成，请稍候。',
+        showConfirm: false
+      }).then((dialog) => {
         if (index >= this.$store.state.watermark.fileList.length) {
           this.imageIndex = this.$store.state.watermark.fileList.length - 1
         } else {
@@ -459,16 +503,19 @@ export default {
             sample.parentNode.replaceChild(canvas, sample)
             canvas.id = 'sample'
             let style = window.getComputedStyle(canvas)
-            let viewWidth = style.getPropertyValue('width').slice(0, -2)
-            let viewHeight = style.getPropertyValue('height').slice(0, -2)
-            this.sampleWidth = viewWidth
-            this.sampleHeight = viewHeight
-            this.sizeBaseX = viewWidth / 100
-            this.sizeBaseY = viewHeight / 100
+            let sampleWidth = style.getPropertyValue('width').slice(0, -2)
+            let sampleHeight = style.getPropertyValue('height').slice(0, -2)
+            this.sampleWidth = sampleWidth
+            this.sampleHeight = sampleHeight
+            this.sizeBaseX = sampleWidth / 100
+            this.sizeBaseY = sampleHeight / 100
             dialog.close()
+            this.$nextTick(() => {
+              this.initWatermarkSize()
+            })
           })
         }
-      }
+      })
     },
     changePosition() {
       this.offsetX = 0
@@ -490,6 +537,13 @@ export default {
       this.color = this.$store.state.watermark.templates[index].color
       this.font = this.$store.state.watermark.templates[index].font
       this.relativeFontSize = this.$store.state.watermark.templates[index].relativeFontSize
+      this.$dialog({
+        type: 'success',
+        title: '成功',
+        text: '已成功应用模板。'
+      }).then(() => {
+        this.initWatermarkSize()
+      })
     },
     deleteTemplate(index) {
       this.$dialog({
@@ -652,119 +706,18 @@ export default {
           type: 'warning',
           text: '请您输入水印文字！'
         })
-      } else if (this.customDistDirectory && this.distDirectory == '') {
+      } else if (this.customDistDirectory && this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请您选择保存的目录！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
-        let distExt
-        if (this.mimeType == '保持原格式') {
-          distExt = imageInfo.ext
-        } else if (this.mimeType == 'JPEG') {
-          distExt = 'jpg'
-        } else {
-          distExt = 'png'
-        }
-        let mimeType
-        if (distExt == 'png') {
-          mimeType = 'png'
-        } else {
-          mimeType = 'jpeg'
-        }
-        let distFilename = imageInfo.filename + this.append + '.' + distExt
-        let distPath
-        if (this.customDistDirectory) {
-          if (this.keepDirectoryStructure) {
-            distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
-          } else {
-            distPath = this.distDirectory
-          }
-        } else {
-          distPath = imageInfo.filepath
-        }
-        let distFullpath = path.join(distPath, distFilename)
-        let baseCanvas = document.getElementById('sample')
-        let scale = baseCanvas.width / this.sampleWidth
-        html2canvas(document.getElementById('watermark-container'), {
-          scale: scale,
-          backgroundColor: null
-        }).then(canvas => {
-          let context = baseCanvas.getContext('2d')
-          context.drawImage(canvas, 0, 0)
-          let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-          let buffer = new Buffer.from(url, 'base64')
-          CreateDirectory(distPath)
-          fs.writeFile(distFullpath, buffer, (error) => {
-            if (error) {
-              dialog.change({
-                type: 'error',
-                title: '出现错误',
-                text: '写入文件失败，请检查目标文件夹权限。',
-                showConfirm: true
-              })
-            } else {
-              if (this.$store.state.watermark.fileList.length > 1) {
-                dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '处理完成，添加水印后的图片已保存到目标文件夹。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    if (this.fileListPage != 1) {
-                      if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
-                        if (this.$store.state.watermark.fileList.length % 100 == 1) {
-                          this.fileListPage -= 1
-                        }
-                      }
-                    }
-                    setTimeout(() => {
-                      this.preview(this.imageIndex)
-                    }, 100)
-                    this.$store.dispatch('watermark/fileListDelete', this.imageIndex)
-                  }
-                })
-              } else {
-                dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.close()
-                  }
-                })
-              }
-            }
-          })
-        })
-      }
-    },
-    startAll() {
-      if (this.text.length == 0) {
-        this.$dialog({
-          type: 'warning',
-          text: '请您输入水印文字！'
-        })
-      } else if (this.customDistDirectory && this.distDirectory == '') {
-        this.$dialog({
-          type: 'warning',
-          text: '请您选择保存的目录！'
-        })
-      } else {
-        let dialog = this.$dialog({
-          title: '正在处理',
-          text: '即将完成，请稍候。',
-          showConfirm: false
-        })
-        let handle = (index) => {
-          let imageInfo = this.$store.state.watermark.fileList[index]
+        }).then((dialog) => {
+          let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
           let distExt
           if (this.mimeType == '保持原格式') {
             distExt = imageInfo.ext
@@ -791,175 +744,273 @@ export default {
             distPath = imageInfo.filepath
           }
           let distFullpath = path.join(distPath, distFilename)
-          let image = document.createElement('img')
-          image.src = this.$store.state.watermark.fileList[index].fullpath
-          image.onerror = () => {
-            this.errorList.push(imageInfo.fullpath)
-            if (index < this.$store.state.watermark.fileList.length - 1) {
-              dialog.change({
-                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
-              })
-              return handle(index + 1)
-            } else {
-              if (this.errorList.length == 0) {
+          let baseCanvas = document.getElementById('sample')
+          let scale = baseCanvas.width / this.sampleWidth
+          html2canvas(document.getElementById('watermark-container'), {
+            scale: scale,
+            backgroundColor: null
+          }).then(canvas => {
+            let context = baseCanvas.getContext('2d')
+            context.drawImage(canvas, 0, 0)
+            let url = baseCanvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+            let buffer = new Buffer.from(url, 'base64')
+            CreateDirectory(distPath)
+            fs.writeFile(distFullpath, buffer, (error) => {
+              if (error) {
                 dialog.change({
-                  type: 'success',
-                  title: '成功',
-                  text: '全部图片处理完成。',
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.close()
-                  }
+                  type: 'error',
+                  title: '出现错误',
+                  text: '写入文件失败，请检查目标文件夹权限。',
+                  showConfirm: true
                 })
               } else {
-                dialog.change({
-                  type: 'warning',
-                  title: '完成',
-                  text: '队列中的图片已处理完成，但下列图片处理失败。',
-                  content: this.$createElement('div', null, this.errorList.map((filename) => {
-                    return this.$createElement('p', {
-                      style: {
-                        'line-height': '24px',
-                        'font-size': '12px',
-                        'width': '100%',
-                        'overflow': 'hidden',
-                        'text-overflow': 'ellipsis',
-                        'white-space': 'nowrap',
-                        'text-indent': '0'
+                if (this.$store.state.watermark.fileList.length > 1) {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      if (this.fileListPage != 1) {
+                        if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
+                          if (this.$store.state.watermark.fileList.length % 100 == 1) {
+                            this.fileListPage -= 1
+                          }
+                        }
                       }
-                    }, filename)
-                  })),
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.close()
-                  }
-                })
-              }
-            }
-          }
-          image.onload = () => {
-            EXIF.getData(image, () => {
-              let orientation = EXIF.getTag(image, 'Orientation')
-              let canvas = document.createElement('canvas')
-              let width, height, x, y, rotation
-              if (orientation == 3) {
-                width = image.width
-                height = image.height
-                x = -width
-                y = -height
-                rotation = 180
-              } else if (orientation == 6) {
-                width = image.height
-                height = image.width
-                x = 0
-                y = -width
-                rotation = 90
-              } else if (orientation == 8) {
-                width = image.height
-                height = image.width
-                x = -height
-                y = 0
-                rotation = 270
-              } else {
-                width = image.width
-                height = image.height
-                x = 0
-                y = 0
-                rotation = 0
-              }
-              canvas.height = height
-              canvas.width = width
-              let context = canvas.getContext("2d")
-              context.rotate(rotation * Math.PI / 180)
-              context.drawImage(image, x, y)
-              context.rotate(-rotation * Math.PI / 180)
-              canvas.style['max-width'] = '100%'
-              canvas.style['max-height'] = '100%'
-              canvas.style.display = 'block'
-              let sample = document.getElementById('sample')
-              sample.parentNode.replaceChild(canvas, sample)
-              canvas.id = 'sample'
-              let style = window.getComputedStyle(canvas)
-              let viewWidth = style.getPropertyValue('width').slice(0, -2)
-              let viewHeight = style.getPropertyValue('height').slice(0, -2)
-              this.sampleWidth = viewWidth
-              this.sampleHeight = viewHeight
-              this.sizeBaseX = viewWidth / 100
-              this.sizeBaseY = viewHeight / 100
-              let scale = width / viewWidth
-              setTimeout(() => {
-                html2canvas(document.getElementById('watermark-container'), {
-                  scale: scale,
-                  backgroundColor: null,
-                }).then((coverCanvas) => {
-                  context.drawImage(coverCanvas, 0, 0)
-                  let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
-                  let buffer = new Buffer.from(url, 'base64')
-                  CreateDirectory(distPath)
-                  fs.writeFile(distFullpath, buffer, (error) => {
-                    if (error) {
-                      this.errorList.push(imageInfo.fullpath)
-                    }
-                    if (index < this.$store.state.watermark.fileList.length - 1) {
-                      dialog.change({
-                        text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+                      this.$store.dispatch('watermark/fileListDelete', this.imageIndex).then(() => {
+                        this.preview(this.imageIndex)
                       })
-                      return handle(index + 1)
-                    } else {
-                      if (this.errorList.length == 0) {
-                        dialog.change({
-                          type: 'success',
-                          title: '成功',
-                          text: '全部图片处理完成。',
-                          showConfirm: true,
-                          confirmFunction: () => {
-                            this.close()
-                          }
-                        })
-                      } else {
-                        dialog.change({
-                          type: 'warning',
-                          title: '完成',
-                          text: '队列中的图片已处理完成，但下列图片处理失败。',
-                          content: this.$createElement('div', null, this.errorList.map((filename) => {
-                            return this.$createElement('p', {
-                              style: {
-                                'line-height': '24px',
-                                'font-size': '12px',
-                                'width': '100%',
-                                'overflow': 'hidden',
-                                'text-overflow': 'ellipsis',
-                                'white-space': 'nowrap',
-                                'text-indent': '0'
-                              }
-                            }, filename)
-                          })),
-                          showConfirm: true,
-                          confirmFunction: () => {
-                            this.close()
-                          }
-                        })
-                      }
                     }
                   })
-                })
-              }, 100)
+                } else {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                }
+              }
             })
+          })
+        })
+      }
+    },
+    startAll() {
+      if (this.text.length == 0) {
+        this.$dialog({
+          type: 'warning',
+          text: '请您输入水印文字！'
+        })
+      } else if (this.customDistDirectory && this.distDirectory === '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您选择保存的目录！'
+        })
+      } else {
+        this.$dialog({
+          title: '正在处理',
+          text: '即将完成，请稍候。',
+          showConfirm: false
+        }).then((dialog) => {
+          let handle = (index) => {
+            let imageInfo = this.$store.state.watermark.fileList[index]
+            let distExt
+            if (this.mimeType == '保持原格式') {
+              distExt = imageInfo.ext
+            } else if (this.mimeType == 'JPEG') {
+              distExt = 'jpg'
+            } else {
+              distExt = 'png'
+            }
+            let mimeType
+            if (distExt == 'png') {
+              mimeType = 'png'
+            } else {
+              mimeType = 'jpeg'
+            }
+            let distFilename = imageInfo.filename + this.append + '.' + distExt
+            let distPath
+            if (this.customDistDirectory) {
+              if (this.keepDirectoryStructure) {
+                distPath = path.join(this.distDirectory, path.relative(this.srcDirectory, imageInfo.filepath))
+              } else {
+                distPath = this.distDirectory
+              }
+            } else {
+              distPath = imageInfo.filepath
+            }
+            let distFullpath = path.join(distPath, distFilename)
+            let image = document.createElement('img')
+            image.src = this.$store.state.watermark.fileList[index].fullpath
+            image.onerror = () => {
+              this.errorList.push(imageInfo.fullpath)
+              if (index < this.$store.state.watermark.fileList.length - 1) {
+                dialog.change({
+                  text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+                })
+                return handle(index + 1)
+              } else {
+                if (this.errorList.length == 0) {
+                  dialog.change({
+                    type: 'success',
+                    title: '成功',
+                    text: '全部图片处理完成。',
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                } else {
+                  dialog.change({
+                    type: 'warning',
+                    title: '完成',
+                    text: '队列中的图片已处理完成，但下列图片处理失败。',
+                    content: this.$createElement('div', null, this.errorList.map((filename) => {
+                      return this.$createElement('p', {
+                        style: {
+                          'line-height': '24px',
+                          'font-size': '12px',
+                          'width': '100%',
+                          'overflow': 'hidden',
+                          'text-overflow': 'ellipsis',
+                          'white-space': 'nowrap',
+                          'text-indent': '0'
+                        }
+                      }, filename)
+                    })),
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.close()
+                    }
+                  })
+                }
+              }
+            }
+            image.onload = () => {
+              EXIF.getData(image, () => {
+                let orientation = EXIF.getTag(image, 'Orientation')
+                let canvas = document.createElement('canvas')
+                let width, height, x, y, rotation
+                if (orientation == 3) {
+                  width = image.width
+                  height = image.height
+                  x = -width
+                  y = -height
+                  rotation = 180
+                } else if (orientation == 6) {
+                  width = image.height
+                  height = image.width
+                  x = 0
+                  y = -width
+                  rotation = 90
+                } else if (orientation == 8) {
+                  width = image.height
+                  height = image.width
+                  x = -height
+                  y = 0
+                  rotation = 270
+                } else {
+                  width = image.width
+                  height = image.height
+                  x = 0
+                  y = 0
+                  rotation = 0
+                }
+                canvas.height = height
+                canvas.width = width
+                let context = canvas.getContext("2d")
+                context.rotate(rotation * Math.PI / 180)
+                context.drawImage(image, x, y)
+                context.rotate(-rotation * Math.PI / 180)
+                canvas.style['max-width'] = '100%'
+                canvas.style['max-height'] = '100%'
+                canvas.style.display = 'block'
+                let sample = document.getElementById('sample')
+                sample.parentNode.replaceChild(canvas, sample)
+                canvas.id = 'sample'
+                let style = window.getComputedStyle(canvas)
+                let sampleWidth = style.getPropertyValue('width').slice(0, -2)
+                let sampleHeight = style.getPropertyValue('height').slice(0, -2)
+                this.sampleWidth = sampleWidth
+                this.sampleHeight = sampleHeight
+                this.sizeBaseX = sampleWidth / 100
+                this.sizeBaseY = sampleHeight / 100
+                let scale = width / sampleWidth
+                this.$nextTick(() => {
+                  this.initWatermarkSize()
+                  this.$nextTick(() => {
+                    html2canvas(document.getElementById('watermark-container'), {
+                      scale: scale,
+                      backgroundColor: null,
+                    }).then((coverCanvas) => {
+                      context.drawImage(coverCanvas, 0, 0)
+                      let url = canvas.toDataURL('image/' + mimeType).replace(/^data:image\/\w+;base64,/, "")
+                      let buffer = new Buffer.from(url, 'base64')
+                      CreateDirectory(distPath)
+                      fs.writeFile(distFullpath, buffer, (error) => {
+                        if (error) {
+                          this.errorList.push(imageInfo.fullpath)
+                        }
+                        if (index < this.$store.state.watermark.fileList.length - 1) {
+                          dialog.change({
+                            text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+                          })
+                          return handle(index + 1)
+                        } else {
+                          if (this.errorList.length == 0) {
+                            dialog.change({
+                              type: 'success',
+                              title: '成功',
+                              text: '全部图片处理完成。',
+                              showConfirm: true,
+                              confirmFunction: () => {
+                                this.close()
+                              }
+                            })
+                          } else {
+                            dialog.change({
+                              type: 'warning',
+                              title: '完成',
+                              text: '队列中的图片已处理完成，但下列图片处理失败。',
+                              content: this.$createElement('div', null, this.errorList.map((filename) => {
+                                return this.$createElement('p', {
+                                  style: {
+                                    'line-height': '24px',
+                                    'font-size': '12px',
+                                    'width': '100%',
+                                    'overflow': 'hidden',
+                                    'text-overflow': 'ellipsis',
+                                    'white-space': 'nowrap',
+                                    'text-indent': '0'
+                                  }
+                                }, filename)
+                              })),
+                              showConfirm: true,
+                              confirmFunction: () => {
+                                this.close()
+                              }
+                            })
+                          }
+                        }
+                      })
+                    })
+                  })
+                })
+              })
+            }
           }
-        }
-        handle(0)
+          handle(0)
+        })
       }
     }
   },
   mounted() {
     this.preview(0)
-    const WatermarkSizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        this.watermarkWidth = entry.contentRect.width
-        this.watermarkHeight = entry.contentRect.height
-      })
-    })
-    WatermarkSizeObserver.observe(document.getElementById('watermark'))
   }
 }
 </script>

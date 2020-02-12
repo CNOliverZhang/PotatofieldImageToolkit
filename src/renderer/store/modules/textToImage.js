@@ -29,25 +29,46 @@ export default {
   },
   actions: {
     contentAssign (context, content) {
-      context.commit('CONTENT_ASSIGN', content)
+      return new Promise((resolve, reject) => {
+        context.commit('CONTENT_ASSIGN', content)
+        resolve()
+      })
     },
     contentReset (context) {
-      context.commit('CONTENT_RESET')
+      return new Promise((resolve, reject) => {
+        context.commit('CONTENT_RESET')
+        resolve()
+      })
     },
     templatesAssign (context, templates) {
-      context.commit('TEMPLATES_ASSIGN', templates)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATES_ASSIGN', templates)
+        resolve()
+      })
     },
     templatePush (context, template) {
-      context.commit('TEMPLATE_PUSH', template)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_PUSH', template)
+        resolve()
+      })
     },
     templateReplace (context, payload) {
-      context.commit('TEMPLATE_REPLACE', payload)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_REPLACE', payload)
+        resolve()
+      })
     },
     templateDelete (context, index) {
-      context.commit('TEMPLATE_DELETE', index)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_DELETE', index)
+        resolve()
+      })
     },
     templatesEmpty (context) {
-      context.commit('TEMPLATES_EMPTY')
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATES_EMPTY')
+        resolve()
+      })
     }
   }
 }

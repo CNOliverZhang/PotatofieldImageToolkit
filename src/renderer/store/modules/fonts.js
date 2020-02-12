@@ -34,19 +34,34 @@ export default {
   },
   actions: {
     markFontsUpdated (context) {
-      context.commit('MARK_FONTS_UPDATED')
+      return new Promise((resolve, reject) => {
+        context.commit('MARK_FONTS_UPDATED')
+        resolve()
+      })
     },
     markFontsUnupdated (context) {
-      context.commit('MARK_FONTS_UNUPDATED')
+      return new Promise((resolve, reject) => {
+        context.commit('MARK_FONTS_UNUPDATED')
+        resolve()
+      })
     },
     setDefaultFont (context, defaultFont) {
-      context.commit('SET_DEFAULT_FONT', defaultFont)
+      return new Promise((resolve, reject) => {
+        context.commit('SET_DEFAULT_FONT', defaultFont)
+        resolve()
+      })
     },
     fontListPush (context, font) {
-      context.commit('FONTLIST_PUSH', font)
+      return new Promise((resolve, reject) => {
+        context.commit('FONTLIST_PUSH', font)
+        resolve()
+      })
     },
     fontListDelete (context, index) {
-      context.commit('FONTLIST_DELETE', index)
+      return new Promise((resolve, reject) => {
+        context.commit('FONTLIST_DELETE', index)
+        resolve()
+      })
     }
   }
 }

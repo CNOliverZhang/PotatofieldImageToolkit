@@ -191,7 +191,6 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import ResizeObserver from 'resize-observer-polyfill'
 
 export default {
   name: 'watermarkTemplate',
@@ -225,7 +224,6 @@ export default {
       return this.relativeFontSize * this.sizeBaseX
     },
     x() {
-      let watermark = document.getElementById('watermark')
       if (this.position == 'top' || this.position == 'bottom' || this.position == 'center') {
         return ((this.sampleWidth - this.watermarkWidth) / 2)
       } else {
@@ -234,13 +232,54 @@ export default {
       }
     },
     y() {
-      let watermark = document.getElementById('watermark')
       if (this.position == 'left' || this.position == 'right' || this.position == 'center') {
         return ((this.sampleHeight - this.watermarkHeight) / 2)
       } else {
         let ratio = 1 - this.watermarkHeight / this.sampleHeight
         return this.offsetY * this.sizeBaseY * (ratio)
       }
+    }
+  },
+  watch: {
+    text() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    writingMode() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    textAlign() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    lineHeight() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    letterSpacing() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    rotation() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    font() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    relativeFontSize() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
     }
   },
   methods: {
@@ -262,6 +301,13 @@ export default {
           this.close()
         }
       })
+    },
+    initWatermarkSize() {
+      let watermarkStyle = window.getComputedStyle(document.getElementById('watermark'))
+      let watermarkWidth = watermarkStyle.getPropertyValue('width').slice(0, -2)
+      let watermarkHeight = watermarkStyle.getPropertyValue('height').slice(0, -2)
+      this.watermarkWidth = watermarkWidth
+      this.watermarkHeight = watermarkHeight
     },
     save() {
       if (this.text.length == 0) {
@@ -515,13 +561,6 @@ export default {
     }
   },
   mounted() {
-    const WatermarkSizeObserver = new ResizeObserver(entries => {
-      entries.forEach(entry => {
-        this.watermarkWidth = entry.contentRect.width
-        this.watermarkHeight = entry.contentRect.height
-      })
-    })
-    WatermarkSizeObserver.observe(document.getElementById('watermark'))
     let sample = document.getElementById('sample')
     let style = window.getComputedStyle(sample)
     let width = style.getPropertyValue('width').slice(0, -2)
@@ -545,6 +584,11 @@ export default {
       this.color = this.$store.state.watermark.templates[index].color
       this.font = this.$store.state.watermark.templates[index].font
       this.relativeFontSize = this.$store.state.watermark.templates[index].relativeFontSize
+      this.$dialog({
+        text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
+      }).then(() => {
+        this.initWatermarkSize()
+      })
     }
   }
 }

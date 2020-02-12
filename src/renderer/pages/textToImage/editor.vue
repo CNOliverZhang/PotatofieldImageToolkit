@@ -1050,23 +1050,22 @@ export default {
       })
     },
     start() {
-      if (this.distDirectory == '') {
+      if (this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请选择保存的目录！'
         })
-      } else if (this.filename == '') {
+      } else if (this.filename === '') {
         this.$dialog({
           type: 'warning',
           text: '请输入文件名！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let fullname = this.filename + '.jpg'
           let distFullpath = path.join(this.distDirectory, fullname)
           let previewContainer = document.getElementById('preview-container')
@@ -1108,7 +1107,7 @@ export default {
               }
             })
           })
-        }, 0)
+        })
       }
     }
   }

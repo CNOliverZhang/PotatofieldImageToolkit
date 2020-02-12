@@ -21,13 +21,22 @@ export default {
   },
   actions: {
     fileListPush (context, file) {
-      context.commit('FILELIST_PUSH', file)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_PUSH', file)
+        resolve()
+      })
     },
     fileListDelete (context, index) {
-      context.commit('FILELIST_DELETE', index)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_DELETE', index)
+        resolve()
+      })
     },
     fileListEmpty (context) {
-      context.commit('FILELIST_EMPTY')
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_EMPTY')
+        resolve()
+      })
     }
   }
 }

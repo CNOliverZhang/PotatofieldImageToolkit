@@ -388,84 +388,85 @@ export default {
       })
     },
     downloadFont(font) {
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '正在下载',
         text: '即将完成，请耐心等待。',
         showConfirm: false
-      })
-      let image, fontFile
-      this.$http({
-        url: font.image,
-        method: 'get',
-        responseType: 'arraybuffer'
-      }).catch((error) => {
-        dialog.change({
-          type: 'error',
-          title: '出现错误',
-          text: '下载字体失败，请检查您的网络。',
-          showConfirm: true
-        })
-      }).then((res) => {
-        image = new Uint8Array(res.data)
+      }).then((dialog) => {
+        let image, fontFile
         this.$http({
-          url: font.src,
+          url: font.image,
           method: 'get',
-          responseType: 'arraybuffer',
-          onDownloadProgress: (download) => {
-            let progress = Math.round(100 * (download.loaded / download.total))
-            dialog.change({
-              text: '',
-              content: this.$createElement('el-progress', {
-                'props': {
-                  'text-inside': true,
-                  'stroke-width': 20,
-                  'percentage': Math.round(progress)
-                }
-              })
-            })
-          }
+          responseType: 'arraybuffer'
         }).catch((error) => {
           dialog.change({
             type: 'error',
             title: '出现错误',
             text: '下载字体失败，请检查您的网络。',
-            content: null,
             showConfirm: true
           })
         }).then((res) => {
-          fontFile = new Uint8Array(res.data)
-          let fontFilename = font.src.split('/').pop()
-          let imageFilename = font.image.split('/').pop()
-          try {
-            let directory = path.join(this.fontsPath, font.verbose)
-            CreateDirectory(directory)
-            fs.writeFileSync(path.join(directory, fontFilename), fontFile, 'binary')
-            fs.writeFileSync(path.join(directory, imageFilename), image, 'binary')
-            this.$store.dispatch('fonts/fontListPush', {
-              fontFamily: font.fontFamily,
-              verbose: font.verbose,
-              weight: font.weight,
-              language: font.language,
-              src: path.join(directory, fontFilename).split(path.sep).join('/'),
-              image: path.join(directory, imageFilename).split(path.sep).join('/'),
-              builtin: false
-            })
-            dialog.change({
-              type: 'success',
-              title: '成功',
-              text: '字体已安装到本程序的字体库中。',
-              content: null,
-              showConfirm: true
-            })
-          } catch(e) {
+          image = new Uint8Array(res.data)
+          this.$http({
+            url: font.src,
+            method: 'get',
+            responseType: 'arraybuffer',
+            onDownloadProgress: (download) => {
+              let progress = Math.round(100 * (download.loaded / download.total))
+              dialog.change({
+                text: '',
+                content: this.$createElement('el-progress', {
+                  'props': {
+                    'text-inside': true,
+                    'stroke-width': 20,
+                    'percentage': Math.round(progress)
+                  }
+                })
+              })
+            }
+          }).catch((error) => {
             dialog.change({
               type: 'error',
               title: '出现错误',
-              text: '发生了未知错误，安装字体失败。',
+              text: '下载字体失败，请检查您的网络。',
               content: null,
               showConfirm: true
             })
-          }
+          }).then((res) => {
+            fontFile = new Uint8Array(res.data)
+            let fontFilename = font.src.split('/').pop()
+            let imageFilename = font.image.split('/').pop()
+            try {
+              let directory = path.join(this.fontsPath, font.verbose)
+              CreateDirectory(directory)
+              fs.writeFileSync(path.join(directory, fontFilename), fontFile, 'binary')
+              fs.writeFileSync(path.join(directory, imageFilename), image, 'binary')
+              this.$store.dispatch('fonts/fontListPush', {
+                fontFamily: font.fontFamily,
+                verbose: font.verbose,
+                weight: font.weight,
+                language: font.language,
+                src: path.join(directory, fontFilename).split(path.sep).join('/'),
+                image: path.join(directory, imageFilename).split(path.sep).join('/'),
+                builtin: false
+              })
+              dialog.change({
+                type: 'success',
+                title: '成功',
+                text: '字体已安装到本程序的字体库中。',
+                content: null,
+                showConfirm: true
+              })
+            } catch(e) {
+              dialog.change({
+                type: 'error',
+                title: '出现错误',
+                text: '发生了未知错误，安装字体失败。',
+                content: null,
+                showConfirm: true
+              })
+            }
+          })
         })
       })
     },
@@ -475,21 +476,22 @@ export default {
   },
   mounted() {
     this.fontsPath = path.join(ipcRenderer.sendSync('app-data-path'), 'fonts')
-    let dialog = this.$dialog({
+    this.$dialog({
       title: '正在获取字体',
       text: '正在向服务器请求在线字体数据，请稍候。',
       showConfirm: false
-    })
-    this.$http.get('https://imagetoolkit.potatofield.cn/fonts').catch((error) => {
-      dialog.change({
-        type: 'error',
-        title: '出现错误',
-        text: '获取在线字体列表失败，请检查您的网络。您仍可以查看本地字体。',
-        showConfirm: true
+    }).then((dialog) => {
+      this.$http.get('https://imagetoolkit.potatofield.cn/fonts').catch((error) => {
+        dialog.change({
+          type: 'error',
+          title: '出现错误',
+          text: '获取在线字体列表失败，请检查您的网络。您仍可以查看本地字体。',
+          showConfirm: true
+        })
+      }).then((res) => {
+        this.onlineFonts = res.data
+        dialog.close()
       })
-    }).then((res) => {
-      this.onlineFonts = res.data
-      dialog.close()
     })
   }
 }

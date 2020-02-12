@@ -369,27 +369,24 @@ export default {
       })
     },
     start() {
-      if (this.distDirectory == '') {
+      if (this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请选择保存的目录！'
         })
-      } else if (this.filename == '') {
+      } else if (this.filename === '') {
         this.$dialog({
           type: 'warning',
           text: '请输入文件名！'
         })
       } else {
-        let dialog = this.$dialog({
+        this.$dialog({
           title: '正在处理',
           text: '即将完成，请稍候。',
           showConfirm: false
-        })
-        setTimeout(() => {
+        }).then((dialog) => {
           let fullname = this.filename + '.jpg'
           let distFullpath = path.join(this.distDirectory, fullname)
-          let image = new Image()
-          image.src = this.$store.state.splicer.fileList[0].fullpath
           let images = document.getElementsByClassName('image')
           let maxWidth = 0
           for (let i = 0; i < images.length; i++) {
@@ -446,98 +443,25 @@ export default {
               }
             })
           })
-        }, 100)
+        })
       }
     },
     refresh() {
-      let dialog = this.$dialog({
+      this.$dialog({
         title: '正在更新预览',
         text: '即将完成，请稍候。',
         showConfirm: false
-      })
-      let wrappers = document.getElementsByClassName('image-wrapper')
-      let images = document.getElementsByClassName('image')
-      let replace = (index) => {
-        let image = document.createElement('img')
-        image.src = this.$store.state.splicer.fileList[index].fullpath
-        image.onerror = () => {
-          this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
-          this.$store.dispatch('cropper/fileListDelete', index)
-          setTimeout(() => {
-            if (index < this.$store.state.splicer.fileList.length - 1) {
-              return replace(index)
-            } else {
-              dialog.change({
-                type: 'warning',
-                title: '出现错误',
-                text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
-                content: this.$createElement('div', null, this.errorList.map((filename) => {
-                  return this.$createElement('p', {
-                    style: {
-                      'line-height': '24px',
-                      'font-size': '12px',
-                      'width': '100%',
-                      'overflow': 'hidden',
-                      'text-overflow': 'ellipsis',
-                      'white-space': 'nowrap',
-                      'text-indent': '0'
-                    }
-                  }, filename)
-                })),
-                showConfirm: true,
-                confirmFunction: () => {
-                  this.errorList = []
-                }
-              })
-            }
-          }, 100)
-        }
-        image.onload = () => {
-          EXIF.getData(image, () => {
-            let orientation = EXIF.getTag(image, 'Orientation')
-            let canvas = document.createElement('canvas')
-            let width, height, x, y, rotation
-            if (orientation == 3) {
-              width = image.width
-              height = image.height
-              x = -width
-              y = -height
-              rotation = 180
-            } else if (orientation == 6) {
-              width = image.height
-              height = image.width
-              x = 0
-              y = -width
-              rotation = 90
-            } else if (orientation == 8) {
-              width = image.height
-              height = image.width
-              x = -height
-              y = 0
-              rotation = 270
-            } else {
-              width = image.width
-              height = image.height
-              x = 0
-              y = 0
-              rotation = 0
-            }
-            canvas.height = height
-            canvas.width = width
-            let context = canvas.getContext("2d")
-            context.rotate(rotation * Math.PI / 180)
-            context.drawImage(image, x, y)
-            context.rotate(-rotation * Math.PI / 180)
-            canvas.className = 'image'
-            wrappers[index].replaceChild(canvas, images[index])
-            dialog.change({
-              text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.splicer.fileList.length) + ' 张。'
-            })
-            if (index < this.$store.state.splicer.fileList.length - 1) {
-              return replace(index + 1)
-            } else {
-              if (this.errorList.length == 0) {
-                dialog.close()
+      }).then((dialog) => {
+        let wrappers = document.getElementsByClassName('image-wrapper')
+        let images = document.getElementsByClassName('image')
+        let replace = (index) => {
+          let image = document.createElement('img')
+          image.src = this.$store.state.splicer.fileList[index].fullpath
+          image.onerror = () => {
+            this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
+            this.$store.dispatch('splicer/fileListDelete', index).then(() => {
+              if (index < this.$store.state.splicer.fileList.length - 1) {
+                return replace(index)
               } else {
                 dialog.change({
                   type: 'warning',
@@ -562,11 +486,84 @@ export default {
                   }
                 })
               }
-            }
-          })
+            })
+          }
+          image.onload = () => {
+            EXIF.getData(image, () => {
+              let orientation = EXIF.getTag(image, 'Orientation')
+              let canvas = document.createElement('canvas')
+              let width, height, x, y, rotation
+              if (orientation == 3) {
+                width = image.width
+                height = image.height
+                x = -width
+                y = -height
+                rotation = 180
+              } else if (orientation == 6) {
+                width = image.height
+                height = image.width
+                x = 0
+                y = -width
+                rotation = 90
+              } else if (orientation == 8) {
+                width = image.height
+                height = image.width
+                x = -height
+                y = 0
+                rotation = 270
+              } else {
+                width = image.width
+                height = image.height
+                x = 0
+                y = 0
+                rotation = 0
+              }
+              canvas.height = height
+              canvas.width = width
+              let context = canvas.getContext("2d")
+              context.rotate(rotation * Math.PI / 180)
+              context.drawImage(image, x, y)
+              context.rotate(-rotation * Math.PI / 180)
+              canvas.className = 'image'
+              wrappers[index].replaceChild(canvas, images[index])
+              dialog.change({
+                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.splicer.fileList.length) + ' 张。'
+              })
+              if (index < this.$store.state.splicer.fileList.length - 1) {
+                return replace(index + 1)
+              } else {
+                if (this.errorList.length == 0) {
+                  dialog.close()
+                } else {
+                  dialog.change({
+                    type: 'warning',
+                    title: '出现错误',
+                    text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
+                    content: this.$createElement('div', null, this.errorList.map((filename) => {
+                      return this.$createElement('p', {
+                        style: {
+                          'line-height': '24px',
+                          'font-size': '12px',
+                          'width': '100%',
+                          'overflow': 'hidden',
+                          'text-overflow': 'ellipsis',
+                          'white-space': 'nowrap',
+                          'text-indent': '0'
+                        }
+                      }, filename)
+                    })),
+                    showConfirm: true,
+                    confirmFunction: () => {
+                      this.errorList = []
+                    }
+                  })
+                }
+              }
+            })
+          }
         }
-      }
-      replace(0)
+        replace(0)
+      })
     }
   },
   mounted() {

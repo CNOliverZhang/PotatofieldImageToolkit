@@ -352,6 +352,9 @@ export default {
       this.spacing = this.$store.state.splicer.templates[index].spacing
       this.borderRadius = this.$store.state.splicer.templates[index].borderRadius
       this.backgroundColor = this.$store.state.splicer.templates[index].backgroundColor
+      this.$dialog({
+        text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
+      })
     }
   }
 }

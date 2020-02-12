@@ -130,7 +130,7 @@ export default {
         confirmText: '更新',
         confirmFunction: () => {
           ipcRenderer.send('download-update')
-          let dialog = this.$dialog({
+          this.$dialog({
             title: '正在下载更新',
             content: this.$createElement('el-progress', {
               'style': {
@@ -143,45 +143,46 @@ export default {
               }
             }),
             showConfirm: false
-          })
-          ipcRenderer.on('update-download-progress', (event, progress) => {
-            dialog.change({
-              content: this.$createElement('el-progress', {
-                'props': {
-                  'text-inside': true,
-                  'stroke-width': 20,
-                  'percentage': Math.round(progress)
+          }).then((dialog) => {
+            ipcRenderer.on('update-download-progress', (event, progress) => {
+              dialog.change({
+                content: this.$createElement('el-progress', {
+                  'props': {
+                    'text-inside': true,
+                    'stroke-width': 20,
+                    'percentage': Math.round(progress)
+                  }
+                })
+              })
+            })
+            ipcRenderer.once('update-downloaded', () => {
+              dialog.change({
+                type: 'success',
+                title: '更新下载完成',
+                text: '新版本的安装文件已经下载完成，即将开始更新。',
+                content: null,
+                showConfirm: true,
+                confirmFunction: () => {
+                  ipcRenderer.send('update-now')
+                  this.$dialog({
+                    title: '正在安装更新',
+                    text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
+                    showConfirm: false
+                  })
                 }
               })
             })
-          })
-          ipcRenderer.once('update-downloaded', () => {
-            dialog.change({
-              type: 'success',
-              title: '更新下载完成',
-              text: '新版本的安装文件已经下载完成，即将开始更新。',
-              content: null,
-              showConfirm: true,
-              confirmFunction: () => {
-                ipcRenderer.send('update-now')
-                this.$dialog({
-                  title: '正在安装更新',
-                  text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
-                  showConfirm: false
-                })
-              }
-            })
-          })
-          ipcRenderer.once('error', () => {
-            dialog.change({
-              type: 'error',
-              title: '出现错误',
-              text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以进入“关于”页面手动更新。',
-              content: null,
-              showConfirm: true,
-              confirmFunction: () => {
-                dialog.close()
-              }
+            ipcRenderer.once('error', () => {
+              dialog.change({
+                type: 'error',
+                title: '出现错误',
+                text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以进入“关于”页面手动更新。',
+                content: null,
+                showConfirm: true,
+                confirmFunction: () => {
+                  dialog.close()
+                }
+              })
             })
           })
         }

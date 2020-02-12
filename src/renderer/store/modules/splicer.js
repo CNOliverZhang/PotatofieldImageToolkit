@@ -38,34 +38,64 @@ export default {
   },
   actions: {
     fileListAssign (context, fileList) {
-      context.commit('FILELIST_ASSIGN', fileList)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_ASSIGN', fileList)
+        resolve()
+      })
     },
     fileListPush (context, file) {
-      context.commit('FILELIST_PUSH', file)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_PUSH', file)
+        resolve()
+      })
     },
     fileListReplace (context, payload) {
-      context.commit('FILELIST_REPLACE', payload)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_REPLACE', payload)
+        resolve()
+      })
     },
     fileListDelete (context, index) {
-      context.commit('FILELIST_DELETE', index)
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_DELETE', index)
+        resolve()
+      })
     },
     fileListEmpty (context) {
-      context.commit('FILELIST_EMPTY')
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_EMPTY')
+        resolve()
+      })
     },
     templatesAssign (context, templates) {
-      context.commit('TEMPLATES_ASSIGN', templates)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATES_ASSIGN', templates)
+        resolve()
+      })
     },
     templatePush (context, template) {
-      context.commit('TEMPLATE_PUSH', template)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_PUSH', template)
+        resolve()
+      })
     },
     templateReplace (context, payload) {
-      context.commit('TEMPLATE_REPLACE', payload)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_REPLACE', payload)
+        resolve()
+      })
     },
     templateDelete (context, index) {
-      context.commit('TEMPLATE_DELETE', index)
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATE_DELETE', index)
+        resolve()
+      })
     },
     templatesEmpty (context) {
-      context.commit('TEMPLATES_EMPTY')
+      return new Promise((resolve, reject) => {
+        context.commit('TEMPLATES_EMPTY')
+        resolve()
+      })
     }
   }
 }

@@ -45,7 +45,7 @@ function createWindow(args) {
     width: args.width ? args.width : 800,
     frame: false,
     fullscreenable: false,
-    resizable: false,
+    resizable: true,
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
