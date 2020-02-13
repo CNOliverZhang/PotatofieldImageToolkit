@@ -115,11 +115,11 @@
 </template>
 
 <script>
-const { ipcRenderer, clipboard } = require('electron')
+import { ipcRenderer, clipboard } from 'electron'
+import EXIF from 'exif-js'
+
 const ReadDirectory = require('../utils/ReadDirectory')
 const path = require('path')
-
-import EXIF from 'exif-js'
 
 export default {
   name: 'splicer',

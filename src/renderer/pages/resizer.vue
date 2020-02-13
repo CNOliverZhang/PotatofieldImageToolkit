@@ -247,11 +247,11 @@
 </template>
 
 <script>
+import { ipcRenderer } from 'electron'
 import CreateDirectory from '../utils/CreateDirectory'
 import ReadDirectory from '../utils/ReadDirectory'
 import EXIF from 'exif-js'
 
-const { ipcRenderer } = require('electron')
 const path = require('path')
 const fs = require('fs')
 

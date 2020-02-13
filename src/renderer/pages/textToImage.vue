@@ -98,12 +98,12 @@
 </template>
 
 <script>
-const { ipcRenderer, clipboard } = require('electron')
-const path = require('path')
-
+import { ipcRenderer, clipboard } from 'electron'
 import '@ckeditor/ckeditor5-build-classic/build/translations/zh-cn'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import UploadAdapterPlugin from '../utils/EditorUploadAdapter'
+
+const path = require('path')
 
 export default {
   name: 'textToImage',

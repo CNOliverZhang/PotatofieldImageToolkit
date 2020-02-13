@@ -173,6 +173,10 @@ export default {
           url: 'https://github.com/electron/electron'
         },
         {
+          title: 'electron-promise-ipc',
+          url: 'https://github.com/sibnerian/electron-promise-ipc'
+        },
+        {
           title: 'electron-buider',
           url: 'https://github.com/electron-userland/electron-builder'
         },
@@ -219,6 +223,10 @@ export default {
         {
           title: 'Cropper.js',
           url: 'https://github.com/fengyuanchen/cropperjs'
+        },
+        {
+          title: 'Color Thief',
+          url: 'https://github.com/lokesh/color-thief'
         }
       ],
       version: null,
@@ -329,12 +337,12 @@ export default {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     exportTemplates() {
-      if (this.distDirectory == '') {
+      if (this.distDirectory === '') {
         this.$dialog({
           type: 'warning',
           text: '请选择保存的目录！'
         })
-      } else if (this.filename == '') {
+      } else if (this.filename === '') {
         this.$dialog({
           type: 'warning',
           text: '请输入文件名！'

@@ -24,13 +24,13 @@ function showDialog(args) {
     if (args.content !== undefined) {
       dialogDom.$slots.default = [args.content]
     }
-    dialogDom.$mount()
-    document.body.appendChild(dialogDom.$el)
-    dialogDom.$nextTick(() => {
+    dialogDom.$on('mounted', () => {
       setTimeout(() => {
         resolve(dialogDom)
       }, 100)
     })
+    dialogDom.$mount()
+    document.body.appendChild(dialogDom.$el)
   })
 }
 

@@ -174,7 +174,6 @@ export default {
           image.onload = () => {
             EXIF.getData(image, () => {
               let tags = EXIF.getAllTags(image)
-              console.log(tags)
               if (Object.keys(tags).length == 0) {
                 dialog.change({
                   type: 'error',

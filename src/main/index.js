@@ -45,7 +45,7 @@ function createWindow(args) {
     width: args.width ? args.width : 800,
     frame: false,
     fullscreenable: false,
-    resizable: true,
+    resizable: false,
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
@@ -137,6 +137,14 @@ ipcMain.on('close', () => {
   currentWindow.destroy()
 })
 
+ipcMain.on('index-only', (event) => {
+  if (windows.size == 1) {
+    event.returnValue = true
+  } else {
+    event.returnValue = false
+  }
+})
+
 ipcMain.on('exit', () => {
   windows.forEach((window) => {
     if (window.isModal()) {
@@ -190,7 +198,7 @@ ipcMain.on('select-folder', (event) => {
     title: "选择文件夹",
     properties: ['openDirectory']
   }).then((result) => {
-    if (result) {
+    if (result.filePaths != 0) {
       event.returnValue = result.filePaths[0]
     } else {
       event.returnValue = ''

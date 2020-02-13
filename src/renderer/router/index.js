@@ -87,6 +87,11 @@ export default new Router({
       component: require('@/pages/fonts').default
     },
     {
+      path: '/palette',
+      name: 'palette',
+      component: require('@/pages/palette').default
+    },
+    {
       path: '*',
       redirect: '/'
     }
