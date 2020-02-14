@@ -64,6 +64,10 @@ npm run build
 管理本地（软件中）的字体，以及从在线字体库中下载字体。也可以更改本软件的界面字体，获得更加个性化的使用体验。
  
 通过软件下载的字体可以在本软件的其他工具中使用，也可以通过浏览器下载字体安装到系统中。在线字体库的字体全部经过筛选，确保是商用免费字体，不会产生版权纠纷。
+
+### 色彩提取工具
+
+从照片中提取色彩，可以获得最能代表照片的主题色以及由十种能代表照片基本色调的颜色组成的色板。支持将色板导出为图片，也可以将色板拼接在原图片下方导出。
  
 ### 全部模板导入导出
 
@@ -72,6 +76,8 @@ npm run build
 ## 相关开源项目
 
 [Electron](https://github.com/electron/electron)
+
+[electron-promise-ipc](https://github.com/sibnerian/electron-promise-ipc)
 
 [electron-buider](https://github.com/electron-userland/electron-builder)
 
@@ -89,8 +95,6 @@ npm run build
 
 [Font Awesome](https://github.com/FortAwesome/Font-Awesome)
 
-[Resize Observer](https://github.com/juggle/resize-observer)
-
 [html2canvas](https://github.com/niklasvh/html2canvas)
 
 [CKEditor 5](https://github.com/ckeditor/ckeditor5)
@@ -98,3 +102,5 @@ npm run build
 [EXIF.js](https://github.com/exif-js/exif-js)
 
 [Cropper.js](https://github.com/fengyuanchen/cropperjs')
+
+[Color Thief](https://github.com/lokesh/color-thief)
