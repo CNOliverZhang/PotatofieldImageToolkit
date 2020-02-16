@@ -71,6 +71,7 @@ export default {
         if (args.content !== undefined) {
           this.$slots.default = [args.content]
         }
+        this.$mount()
         this.$nextTick(() => {
           resolve()
         })

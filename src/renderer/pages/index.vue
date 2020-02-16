@@ -157,6 +157,7 @@ export default {
             showConfirm: false
           }).then((dialog) => {
             ipcRenderer.on('update-download-progress', (event, progress) => {
+              console.log(progress)
               dialog.change({
                 content: this.$createElement('el-progress', {
                   'props': {

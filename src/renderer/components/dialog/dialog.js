@@ -24,7 +24,7 @@ function showDialog(args) {
     if (args.content !== undefined) {
       dialogDom.$slots.default = [args.content]
     }
-    dialogDom.$on('mounted', () => {
+    dialogDom.$once('mounted', () => {
       setTimeout(() => {
         resolve(dialogDom)
       }, 100)
