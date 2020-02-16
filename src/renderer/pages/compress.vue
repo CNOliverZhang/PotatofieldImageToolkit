@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="resizer" @tab-click="clear">
+  <el-tabs type="card" tab-position="left" id="compress" @tab-click="clear">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
       <div id="single" class="tab-content">
@@ -37,33 +37,6 @@
         </div>
         <div v-if="this.fileList.length != 0" class="controller">
           <div class="control-row">
-            <div class="text">目标尺寸参考基准</div>
-            <el-radio-group v-model="standard" class="control interactable">
-              <el-radio label="percentage">百分比</el-radio>
-              <el-radio label="short">固定短边</el-radio>
-              <el-radio label="long">固定长边</el-radio>
-            </el-radio-group>
-          </div>
-          <div v-if="standard == 'percentage'" class="control-row">
-            <div class="text">目标百分比设置</div>
-            <el-slider
-              v-model="percentage"
-              class="control interactable"
-              :min="1"
-              :max="100"
-              :step="1"
-              :show-input="true"
-              input-size="mini"></el-slider>
-          </div>
-          <div v-else class="control-row">
-            <div class="text">目标尺寸设置</div>
-            <el-input size="mini" v-model="length" class="control interactable">
-              <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
-              <template v-else slot="prepend">固定较长边长度</template>
-              <template slot="append">像素</template>
-            </el-input>
-          </div>
-          <div class="control-row">
             <div class="text">图像质量</div>
             <el-slider
               v-model="quality"
@@ -89,14 +62,6 @@
             <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
               <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
             </el-input>
-          </div>
-          <div class="control-row">
-            <div class="text">保存的图片格式</div>
-            <el-radio-group v-model="mimeType" class="control interactable">
-              <el-radio label="JPEG"></el-radio>
-              <el-radio label="PNG"></el-radio>
-              <el-radio label="保持原格式"></el-radio>
-            </el-radio-group>
           </div>
           <div class="control-row">
             <div class="text">文件名后缀</div>
@@ -168,33 +133,6 @@
         </div>
         <div class="controller">
           <div class="control-row">
-            <div class="text">目标尺寸参考基准</div>
-            <el-radio-group v-model="standard" class="control interactable">
-              <el-radio label="percentage">百分比</el-radio>
-              <el-radio label="short">固定短边</el-radio>
-              <el-radio label="long">固定长边</el-radio>
-            </el-radio-group>
-          </div>
-          <div v-if="standard == 'percentage'" class="control-row">
-            <div class="text">目标百分比设置</div>
-            <el-slider
-              v-model="percentage"
-              class="control interactable"
-              :min="1"
-              :max="100"
-              :step="1"
-              :show-input="true"
-              input-size="mini"></el-slider>
-          </div>
-          <div v-else class="control-row">
-            <div class="text">目标尺寸设置</div>
-            <el-input size="mini" v-model="length" class="control interactable">
-              <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
-              <template v-else slot="prepend">固定较长边长度</template>
-              <template slot="append">像素</template>
-            </el-input>
-          </div>
-          <div class="control-row">
             <div class="text">图像质量</div>
             <el-slider
               v-model="quality"
@@ -230,14 +168,6 @@
               class="control"></el-switch>
           </div>
           <div class="control-row">
-            <div class="text">保存的图片格式</div>
-            <el-radio-group v-model="mimeType" class="control interactable">
-              <el-radio label="JPEG"></el-radio>
-              <el-radio label="PNG"></el-radio>
-              <el-radio label="保持原格式"></el-radio>
-            </el-radio-group>
-          </div>
-          <div class="control-row">
             <div class="text">文件名后缀</div>
             <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
           </div>
@@ -250,8 +180,8 @@
     <el-tab-pane disabled>
       <span slot="label" id="sidebar">
         <div id="tool-info">
-          <i id="tool-logo" class="fas fa-compress"></i>
-          <div class="text">尺寸调整工具</div>
+          <i id="tool-logo" class="fas fa-compress-arrows-alt"></i>
+          <div class="text">JPEG 压缩工具</div>
         </div>
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
@@ -278,19 +208,15 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'resizer',
+  name: 'compress',
   data () {
     return {
       fileList: [],
       fileSet: new Set(),
       fileListPage: 1,
       errorList: [],
-      standard: 'percentage',
-      percentage: 100,
-      length: 0,
       quality: 100,
-      mimeType: 'JPEG',
-      append: '_resized',
+      append: '_compressed',
       srcDirectory: '',
       distDirectory: '',
       childDirectoryIncluded: false,
@@ -311,12 +237,8 @@ export default {
       this.fileSet = new Set()
       this.fileListPage = 1
       this.errorList = []
-      this.standard = 'percentage'
-      this.percentage = 100
-      this.length = 0
       this.quality = 100
-      this.mimeType = 'JPEG'
-      this.append = '_resized'
+      this.append = '_compressed'
       this.srcDirectory = ''
       this.distDirectory = ''
       this.childDirectoryIncluded = false
@@ -338,7 +260,7 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+      if (['jpg', 'jpeg'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,
@@ -361,8 +283,10 @@ export default {
           showConfirm: false
         }).then((dialog) => {
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-          this.fileList = result.fileList
-          this.fileSet = new Set(result.fileList)
+          this.fileList = result.fileList.filter((file) => {
+            return file.ext != 'png'
+          })
+          this.fileSet = new Set(this.fileList)
           this.errorList = result.errorList
           dialog.change({
             type: 'success',
@@ -540,14 +464,6 @@ export default {
                   resolve()
                 }
                 image.onload = () => {
-                  let scale
-                  if (this.standard == 'percentage') {
-                    scale = this.percentage / 100
-                  } else if (this.standard == 'short') {
-                    scale = this.length / Math.min(image.width, image.height)
-                  } else {
-                    scale = this.length / Math.max(image.width, image.height)
-                  }
                   EXIF.getData(image, () => {
                     let orientation = EXIF.getTag(image, 'Orientation')
                     let canvas = document.createElement('canvas')
@@ -577,13 +493,13 @@ export default {
                       y = 0
                       rotation = 0
                     }
-                    canvas.height = height * scale
-                    canvas.width = width * scale
+                    canvas.height = height
+                    canvas.width = width
                     let context = canvas.getContext("2d")
                     context.rotate(rotation * Math.PI / 180)
-                    context.drawImage(image, x * scale, y * scale, image.width * scale, image.height * scale)
+                    context.drawImage(image, x, y, image.width, image.height)
                     context.rotate(-rotation * Math.PI / 180)
-                    let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
+                    let url = canvas.toDataURL('image/jpeg', this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
                     let buffer = new Buffer.from(url, 'base64')
                     CreateDirectory(distPath)
                     fs.writeFile(distFullpath, buffer, (error) => {
@@ -646,16 +562,6 @@ export default {
           type: 'warning',
           text: '请您选择保存的目录！'
         })
-      } else if (this.standard != 'percentage' && isNaN(Number(this.length))) {
-        this.$dialog({
-          type: 'warning',
-          text: '尺寸必须为数字！'
-        })
-      } else if (this.standard != 'percentage' && (Number(this.length) <= 0 || Number(this.length) >= 16000)) {
-        this.$dialog({
-          type: 'warning',
-          text: '请正确设置尺寸！'
-        })
       } else if (!this.customDistDirectory && this.append === '') {
         this.$dialog({
           type: 'warning',
@@ -675,7 +581,7 @@ export default {
 </script>
 
 <style lang="scss">
-#resizer {
+#compress {
   width: 100%;
   height: 100%;
   

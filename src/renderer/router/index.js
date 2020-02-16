@@ -92,6 +92,11 @@ export default new Router({
       component: require('@/pages/palette').default
     },
     {
+      path: '/compress',
+      name: 'compress',
+      component: require('@/pages/compress').default
+    },
+    {
       path: '*',
       redirect: '/'
     }

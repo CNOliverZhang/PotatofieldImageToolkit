@@ -23,48 +23,57 @@
       </div>
     </div>
     <div id="controller">
-      <div id="crop-setting">
+      <div class="side">
         <div class="row">
           <div class="subtitle">裁剪设置</div>
         </div>
         <div class="control-row">
           <div class="text">裁剪模式</div>
-          <div id="ratio-container" class="control">
-            <el-select v-model="mode" size="mini" class="interactable">
-              <el-option label="自由裁剪" value="free"/>
-              <el-option label="自定义比例" value="custom"/>
-              <el-option label="预定义比例" value="preset"/>
-            </el-select>
-            <div id="ratio" v-if="mode != 'free'">
-              <el-input
-                v-if="mode == 'custom'" size="mini"
-                v-model="ratio"
-                placeholder="格式为“3:2”"
-                class="interactable">
-                <el-button @click="setRatio" slot="append">确认</el-button>
-              </el-input>
-              <el-select
-                v-if="mode == 'preset'"
-                v-model="ratio"
-                @change="setRatio"
-                placeholder="请选择"
-                size="mini"
-                class="interactable">
-                <el-option label="正方形（1:1）" value="1:1"/>
-                <el-option label="常见相机横屏（3:2）" value="3:2"/>
-                <el-option label="常见相机竖屏（2:3）" value="2:3"/>
-                <el-option label="常见手机相机横屏（4:3）" value="4:3"/>
-                <el-option label="常见手机相机竖屏（3:4）" value="3:4"/>
-                <el-option label="普通电脑显示器横屏（16:9）" value="16:9"/>
-                <el-option label="普通电脑显示器竖屏（9:16）" value="9:16"/>
-                <el-option label="全面屏手机横屏（18:9）" value="18:9"/>
-                <el-option label="全面屏手机竖屏（9:18）" value="9:18"/>
-                <el-option label="宽屏电脑显示器横屏（21:9）" value="21:9"/>
-                <el-option label="宽屏电脑显示器竖屏（9:21）" value="9:21"/>
-                <el-option label="电影屏幕（2.39:1）" value="2.39:1"/>
-              </el-select>
-            </div>
-          </div>
+          <el-select v-model="mode" @change="changeMode" size="mini" class="control interactable">
+            <el-option label="自由裁剪" value="free"/>
+            <el-option label="自定义比例" value="custom"/>
+            <el-option label="预定义比例" value="preset"/>
+          </el-select>
+        </div>
+        <div class="control-row" v-if="mode == 'free'">
+          <div class="text">裁剪区域尺寸</div>
+          <el-input
+            :value="Math.round(this.width) + ' * ' + Math.round(this.height)"
+            size="mini"
+            disabled
+            class="control interactable">
+          </el-input>
+        </div>
+        <div class="control-row" v-else>
+          <div class="text">裁剪比例</div>
+          <el-input
+            v-if="mode == 'custom'"
+            size="mini"
+            v-model="ratio"
+            placeholder="格式为“3:2”"
+            class="control interactable">
+            <el-button @click="setRatio" slot="append">确认</el-button>
+          </el-input>
+          <el-select
+            v-if="mode == 'preset'"
+            v-model="ratio"
+            @change="setRatio"
+            placeholder="请选择"
+            size="mini"
+            class="control interactable">
+            <el-option label="正方形（1:1）" value="1:1"/>
+            <el-option label="常见相机横屏（3:2）" value="3:2"/>
+            <el-option label="常见相机竖屏（2:3）" value="2:3"/>
+            <el-option label="常见手机相机横屏（4:3）" value="4:3"/>
+            <el-option label="常见手机相机竖屏（3:4）" value="3:4"/>
+            <el-option label="普通电脑显示器横屏（16:9）" value="16:9"/>
+            <el-option label="普通电脑显示器竖屏（9:16）" value="9:16"/>
+            <el-option label="全面屏手机横屏（18:9）" value="18:9"/>
+            <el-option label="全面屏手机竖屏（9:18）" value="9:18"/>
+            <el-option label="宽屏电脑显示器横屏（21:9）" value="21:9"/>
+            <el-option label="宽屏电脑显示器竖屏（9:21）" value="9:21"/>
+            <el-option label="电影屏幕（2.39:1）" value="2.39:1"/>
+          </el-select>
         </div>
         <div class="control-row">
           <div class="text">旋转</div>
@@ -78,9 +87,20 @@
             input-size="mini"></el-slider>
         </div>
       </div>
-      <div id="save-setting">
+      <div class="side">
         <div class="row">
           <div class="subtitle">保存设置</div>
+        </div>
+        <div class="control-row">
+          <div class="text">图像质量</div>
+          <el-slider
+            v-model="quality"
+            class="control interactable"
+            :min="1"
+            :max="100"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
@@ -125,9 +145,12 @@ export default {
       mode: 'free',
       ratio: '',
       rotate: 0,
+      width: 0,
+      height: 0,
+      quality: 100,
       distDirectory: '',
       append: '_cropped',
-      mimeType: 'png'
+      mimeType: 'jpeg'
     }
   },
   watch: {
@@ -214,6 +237,10 @@ export default {
               dragMode: 'move',
               autoCropArea: 0.5,
               toggleDragModeOnDblclick: false,
+              crop(event) {
+                vm.width = event.detail.width
+                vm.height = event.detail.height
+              },
               ready() {
                 vm.cropper = this.cropper
                 vm.rotate = rotation
@@ -227,6 +254,10 @@ export default {
     },
     selectSaveFolder() {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
+    },
+    changeMode() {
+      this.ratio = ''
+      this.setRatio()
     },
     setRatio() {
       let numbers = this.ratio.split(':')
@@ -246,12 +277,12 @@ export default {
           showConfirm: false
         }).then((dialog) => {
           let ext = this.mimeType == 'png' ? '.png' : '.jpg'
-          let filename = this.$store.state.cropper.fileList[this.imageIndex].filename + ext
+          let filename = this.$store.state.cropper.fileList[this.imageIndex].filename + this.append + ext
           let distFullpath = path.join(this.distDirectory, filename)
           let canvas = this.cropper.getCroppedCanvas({
             imageSmoothingQuality: 'high'
           })
-          let url = canvas.toDataURL('image/' + this.mimeType).replace(/^data:image\/\w+;base64,/, "")
+          let url = canvas.toDataURL('image/' + this.mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
           let buffer = new Buffer.from(url, 'base64')
           fs.writeFile(distFullpath, buffer, (error) => {
             if (error) {
@@ -407,13 +438,18 @@ export default {
         
         &:before {
           content: '拖拽此区域以移动图片';
+          width: 100%;
+          height: 100%;
+          padding: 12px;
+          box-sizing: border-box;
+          overflow: hidden;
           font-size: 12px;
+          line-height: 18px;
           color: var(--white);
-          position: relative;
+          position: absolute;
           vertical-align: top;
-          top: 18px;
-          left: 12px;
           z-index: 1;
+          pointer-events:none;
         }
         
         .cropper-crop-box {
@@ -422,13 +458,18 @@ export default {
           
           &:before {
             content: '拖拽此区域以移动裁剪框';
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            box-sizing: border-box;
+            overflow: hidden;
             font-size: 12px;
+            line-height: 18px;
             color: var(--white);
-            position: relative;
+            position: absolute;
             vertical-align: top;
-            top: 18px;
-            left: 12px;
             z-index: 3;
+            pointer-events:none;
           }
         }
       }
@@ -527,11 +568,11 @@ export default {
     display: flex;
     justify-content: space-between;
     
-    #crop-setting {
-      width: calc(60% - 10px);
+    .side {
+      width: calc(50% - 10px);
       
       .control {
-        width: 80%;
+        width: 70%;
       }
       
       #ratio-container {
@@ -546,14 +587,6 @@ export default {
           width: calc(50% - 5px);
           margin-left: 10px;
         }
-      }
-    }
-    
-    #save-setting {
-      width: calc(40% - 10px);
-      
-      .control {
-        width: 60%;
       }
     }
   }

@@ -44,6 +44,12 @@
             <div class="title">尺寸调整工具</div>
           </el-card>
         </div>
+        <div class="container" @click="open('/compress', 'JPEG 压缩工具')">
+          <el-card class="card">
+            <span class="fas fa-compress-arrows-alt icon"></span>
+            <div class="title">JPEG 压缩工具</div>
+          </el-card>
+        </div>
         <div class="container" @click="open('/cropper', '图片裁剪工具')">
           <el-card class="card">
             <span class="fas fa-crop-alt icon"></span>
@@ -56,16 +62,16 @@
             <div class="title">EXIF 读取工具</div>
           </el-card>
         </div>
-        <div class="container" @click="open('/fonts', '字体管理工具')">
-          <el-card class="card">
-            <span class="fas fa-font icon"></span>
-            <div class="title">字体管理工具</div>
-          </el-card>
-        </div>
         <div class="container" @click="open('/palette', '色彩提取工具')">
           <el-card class="card">
             <span class="fas fa-palette icon"></span>
             <div class="title">色彩提取工具</div>
+          </el-card>
+        </div>
+        <div class="container" @click="open('/fonts', '字体管理工具')">
+          <el-card class="card">
+            <span class="fas fa-font icon"></span>
+            <div class="title">字体管理工具</div>
           </el-card>
         </div>
         <div class="space">&nbsp;</div>
@@ -103,14 +109,10 @@ export default {
       }
     },
     open(path, title) {
-      if (!ipcRenderer.sendSync('open', {
+      ipcRenderer.send('open', {
         title: title,
         path: '#' + path
-      })) {
-        this.$dialog({
-          text: '不支持同时打开两个相同的窗口。'
-        })
-      }
+      })
     },
     showDeveloping() {
       this.$dialog({

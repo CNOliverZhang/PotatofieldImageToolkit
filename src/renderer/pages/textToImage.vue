@@ -111,7 +111,6 @@ export default {
     return {
       editor: {
         editor: ClassicEditor,
-        uiColor: '#FFFFFF',
         config: {
           language: 'zh-cn',
           heading: {
@@ -154,13 +153,23 @@ export default {
           text: '请您输入内容！'
         })
       } else {
-        this.$store.dispatch('textToImage/contentAssign', this.content)
-        ipcRenderer.send('open', {
-          title: '样式编辑器',
-          path: '#/textToImage/editor',
-          modal: true,
-          height: 720,
-          width: 1000
+        this.$dialog({
+          text: '请在编辑器中继续操作。',
+          showConfirm: false
+        }).then((dialog) => {
+          this.$store.dispatch('textToImage/contentAssign', this.content).then(() => {
+            ipcRenderer.send('open', {
+              title: '样式编辑器',
+              path: '#/textToImage/editor',
+              modal: true,
+              height: 720,
+              width: 1000
+            })
+            ipcRenderer.on('modal-window-closed', () => {
+              dialog.close()
+              ipcRenderer.removeAllListeners('modal-window-closed')
+            })
+          })
         })
       }
     },
@@ -635,6 +644,7 @@ export default {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: hidden;
       
       .ck-editor {
         height: 0;

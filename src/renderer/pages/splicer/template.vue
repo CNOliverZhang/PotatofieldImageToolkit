@@ -346,12 +346,12 @@ export default {
   },
   mounted() {
     if (this.$route.query.index != -1) {
-      let index = this.$route.query.index
-      this.templateTitle = this.$store.state.splicer.templates[index].title
-      this.padding = this.$store.state.splicer.templates[index].padding
-      this.spacing = this.$store.state.splicer.templates[index].spacing
-      this.borderRadius = this.$store.state.splicer.templates[index].borderRadius
-      this.backgroundColor = this.$store.state.splicer.templates[index].backgroundColor
+      let template = this.$store.state.splicer.templates[this.$route.query.index]
+      this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
+      this.padding = template.padding !== undefined ? template.padding : this.padding
+      this.spacing = template.spacing !== undefined ? template.spacing : this.spacing
+      this.borderRadius = template.borderRadius !== undefined ? template.borderRadius : this.borderRadius
+      this.backgroundColor = template.backgroundColor !== undefined ? template.backgroundColor : this.backgroundColor
       this.$dialog({
         text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
       })

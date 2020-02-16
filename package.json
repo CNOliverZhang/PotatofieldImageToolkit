@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "张志毅",
   "description": "一个为摄影师设计的图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新色彩提取工具。\n修复已知问题。"
+      "releaseNotes": "更新 JPEG 压缩工具。\n图片加水印工具支持水印文字阴影和背景。\n部分工具支持设置输出图片质量。\n改变批量处理流程，优化内存占用。\n修复已知问题。"
     },
     "publish": [
       {

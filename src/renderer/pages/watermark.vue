@@ -12,14 +12,14 @@
           :auto-upload="false"
           :on-change="handleFile"
           :show-file-list="false"
-          :class="this.$store.state.watermark.fileList.length != 0 ? 'half' : ''">
+          :class="this.fileList.length != 0 ? 'half' : ''">
           <i class="fas fa-image"></i>
           <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
         </el-upload>
-        <div v-if="this.$store.state.watermark.fileList.length != 0" id="file-list" class="interactable">
+        <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
           <div id="list">
             <div
-              v-for="(file, index) in this.$store.state.watermark.fileList"
+              v-for="(file, index) in this.fileList"
               :key="file.fullpath"
               class="file"
               @click="preview(index)">
@@ -38,7 +38,7 @@
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content" v-if="this.$store.state.watermark.fileList.length == 0">
+      <div id="multiple" class="tab-content" v-if="this.fileList.length == 0">
         <div id="controller">
           <div class="row">
             <el-switch
@@ -68,7 +68,7 @@
       <div id="multiple" class="tab-content" v-else>
         <div id="file-list" class="interactable">
           <div
-            v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+            v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
             :key="file.fullpath"
             class="file"
             @click="preview(index + (fileListPage - 1) * 100)">
@@ -87,7 +87,7 @@
             layout="prev, pager, next"
             :pager-count="5"
             :page-size="100"
-            :total="this.$store.state.watermark.fileList.length"
+            :total="this.fileList.length"
             :current-page="fileListPage"
             :hide-on-single-page="true"
             @current-change="fileListPageChange">
@@ -184,6 +184,9 @@ export default {
   name: 'watermark',
   data () {
     return {
+      fileList: [],
+      fileSet: new Set(),
+      errorList: [],
       fileListPage: 1,
       templateListPage: 1,
       childDirectoryIncluded: false,
@@ -196,12 +199,13 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      this.$store.dispatch('watermark/fileListEmpty')
       ipcRenderer.send('close')
       this.$destroy()
     },
     clear() {
-      this.$store.dispatch('watermark/fileListEmpty')
+      this.fileList = []
+      this.fileSet = new Set()
+      this.errorList = []
       this.fileListPage = 1
       this.childDirectoryIncluded = false
       this.srcDirectory = ''
@@ -221,13 +225,14 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
-        this.$store.dispatch('watermark/fileListPush', {
+      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+        this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,
           filename: filename,
           ext: ext
         })
+        this.fileSet.add(file.raw.path)
       }
     },
     handleFolder() {
@@ -243,7 +248,8 @@ export default {
           showConfirm: false
         }).then((dialog) => {
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-          this.$store.dispatch('watermark/fileListAssign', result.fileList)
+          this.fileList = result.fileList
+          this.fileSet = new Set(result.fileList)
           this.errorList = result.errorList
           dialog.change({
             type: 'success',
@@ -281,13 +287,14 @@ export default {
     },
     handleDelete(index) {
       if (this.fileListPage != 1) {
-        if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
-          if (this.$store.state.watermark.fileList.length % 100 == 1) {
+        if (this.fileListPage == Math.ceil(this.fileList.length / 100)) {
+          if (this.fileList.length % 100 == 1) {
             this.fileListPage -= 1
           }
         }
       }
-      this.$store.dispatch('watermark/fileListDelete', index)
+      this.fileSet.delete(this.fileList[index].fullpath)
+      this.fileList.splice(index, 1)
     },
     preview(index) {
       this.$dialog({
@@ -295,7 +302,7 @@ export default {
         text: '正在生成预览',
         showConfirm: false
       }).then((dialog) => {
-        let url = this.$store.state.watermark.fileList[index].fullpath
+        let url = this.fileList[index].fullpath
         let image = document.createElement('img')
         image.src = url
         image.onerror = () => {
@@ -372,12 +379,24 @@ export default {
       this.templateListPage = page
     },
     edit() {
-      ipcRenderer.send('open', {
-        title: '水印编辑器',
-        path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
-        modal: true,
-        height: 720,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        this.$store.dispatch('watermark/fileListAssign', this.fileList).then(() => {
+          ipcRenderer.send('open', {
+            title: '水印编辑器',
+            path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
+            modal: true,
+            height: 720,
+            width: 1000
+          })
+          ipcRenderer.on('modal-window-closed', () => {
+            this.clear()
+            dialog.close()
+            ipcRenderer.removeAllListeners('modal-window-closed')
+          })
+        })
       })
     },
     selectSourceFolder() {

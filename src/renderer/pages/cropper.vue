@@ -12,14 +12,14 @@
           :auto-upload="false"
           :on-change="handleFile"
           :show-file-list="false"
-          :class="this.$store.state.cropper.fileList.length != 0 ? 'half' : ''">
+          :class="this.fileList.length != 0 ? 'half' : ''">
           <i class="fas fa-image"></i>
           <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
         </el-upload>
-        <div v-if="this.$store.state.cropper.fileList.length != 0" id="file-list" class="interactable">
+        <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
           <div id="list">
             <div
-              v-for="(file, index) in this.$store.state.cropper.fileList"
+              v-for="(file, index) in this.fileList"
               :key="file.fullpath"
               class="file"
               @click="preview(index)">
@@ -68,6 +68,8 @@ export default {
   name: 'cropper',
   data () {
     return {
+      fileList: [],
+      fileSet: new Set(),
       childDirectoryIncluded: false,
       srcDirectory: ''
     }
@@ -77,12 +79,12 @@ export default {
       ipcRenderer.send('minimize')
     },
     close() {
-      this.$store.dispatch('cropper/fileListEmpty')
       ipcRenderer.send('close')
       this.$destroy()
     },
     clear() {
-      this.$store.dispatch('cropper/fileListEmpty')
+      this.fileList = []
+      this.fileSet = new Set()
       this.childDirectoryIncluded = false
       this.srcDirectory = ''
     },
@@ -101,17 +103,19 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
-        this.$store.dispatch('cropper/fileListPush', {
+      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+        this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,
           filename: filename,
           ext: ext
         })
+        this.fileSet.add(file.raw.path)
       }
     },
     handleDelete(index) {
-      this.$store.dispatch('cropper/fileListDelete', index)
+      this.fileSet.delete(this.fileList[index].fullpath)
+      this.fileList.splice(index, 1)
     },
     preview(index) {
       this.$dialog({
@@ -119,7 +123,7 @@ export default {
         text: '正在生成预览',
         showConfirm: false
       }).then((dialog) => {
-        let url = this.$store.state.cropper.fileList[index].fullpath
+        let url = this.fileList[index].fullpath
         let image = document.createElement('img')
         image.src = url
         image.onerror = () => {
@@ -190,12 +194,24 @@ export default {
       })
     },
     edit() {
-      ipcRenderer.send('open', {
-        title: '裁剪编辑器',
-        path: '#/cropper/editor',
-        modal: true,
-        height: 720,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        this.$store.dispatch('cropper/fileListAssign', this.fileList).then(() => {
+          ipcRenderer.send('open', {
+            title: '裁剪编辑器',
+            path: '#/cropper/editor',
+            modal: true,
+            height: 720,
+            width: 1000
+          })
+          ipcRenderer.on('modal-window-closed', () => {
+            this.clear()
+            dialog.close()
+            ipcRenderer.removeAllListeners('modal-window-closed')
+          })
+        })
       })
     }
   }

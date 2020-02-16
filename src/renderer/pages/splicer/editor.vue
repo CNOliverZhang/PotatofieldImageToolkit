@@ -223,10 +223,16 @@ export default {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     applyTemplate(index) {
-      this.padding = this.$store.state.splicer.templates[index].padding
-      this.spacing = this.$store.state.splicer.templates[index].spacing
-      this.borderRadius = this.$store.state.splicer.templates[index].borderRadius
-      this.backgroundColor = this.$store.state.splicer.templates[index].backgroundColor
+      let template = this.$store.state.splicer.templates[index]
+      this.padding = template.padding !== undefined ? template.padding : this.padding
+      this.spacing = template.spacing !== undefined ? template.spacing : this.spacing
+      this.borderRadius = template.borderRadius !== undefined ? template.borderRadius : this.borderRadius
+      this.backgroundColor = template.backgroundColor !== undefined ? template.backgroundColor : this.backgroundColor
+      this.$dialog({
+        type: 'success',
+        title: '成功',
+        text: '已成功应用模板。'
+      })
     },
     deleteTemplate(index) {
       this.$dialog({
@@ -408,14 +414,14 @@ export default {
             allowTaint: true,
             imageTimeout: 0
           }).then(canvas => {
-            let url = canvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
+            let url = canvas.toDataURL('image/jpeg', 1).replace(/^data:image\/\w+;base64,/, "")
             let buffer = new Buffer.from(url, 'base64')
             fs.writeFile(distFullpath, buffer, (error) => {
               if (error) {
                 dialog.change({
                   type: 'error',
                   title: '出现错误',
-                  text: '写入文件失败，请检查目标文件夹权限。',
+                  text: '写入文件失败，请检查目标文件夹权限。即将退出编辑器。',
                   showConfirm: true
                 })
               } else {
@@ -423,7 +429,7 @@ export default {
                   dialog.change({
                     type: 'success',
                     title: '成功',
-                    text: '处理完成，拼接后的长图已保存到目标文件夹。因为图片数量过多或原图尺寸过大，拼接后图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。',
+                    text: '处理完成，拼接后的长图已保存到目标文件夹。因为图片数量过多或原图尺寸过大，拼接后图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。即将退出编辑器。',
                     showConfirm: true,
                     confirmFunction: () => {
                       this.close()
@@ -452,127 +458,145 @@ export default {
         text: '即将完成，请稍候。',
         showConfirm: false
       }).then((dialog) => {
+        let total = this.$store.state.splicer.fileList.length
         let wrappers = document.getElementsByClassName('image-wrapper')
         let images = document.getElementsByClassName('image')
         let replace = (index) => {
-          let image = document.createElement('img')
-          image.src = this.$store.state.splicer.fileList[index].fullpath
-          image.onerror = () => {
-            this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
-            this.$store.dispatch('splicer/fileListDelete', index).then(() => {
-              if (index < this.$store.state.splicer.fileList.length - 1) {
-                return replace(index)
-              } else {
-                dialog.change({
-                  type: 'warning',
-                  title: '出现错误',
-                  text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
-                  content: this.$createElement('div', null, this.errorList.map((filename) => {
-                    return this.$createElement('p', {
-                      style: {
-                        'line-height': '24px',
-                        'font-size': '12px',
-                        'width': '100%',
-                        'overflow': 'hidden',
-                        'text-overflow': 'ellipsis',
-                        'white-space': 'nowrap',
-                        'text-indent': '0'
-                      }
-                    }, filename)
-                  })),
-                  showConfirm: true,
-                  confirmFunction: () => {
-                    this.errorList = []
-                  }
-                })
-              }
-            })
-          }
-          image.onload = () => {
-            EXIF.getData(image, () => {
-              let orientation = EXIF.getTag(image, 'Orientation')
-              let canvas = document.createElement('canvas')
-              let width, height, x, y, rotation
-              if (orientation == 3) {
-                width = image.width
-                height = image.height
-                x = -width
-                y = -height
-                rotation = 180
-              } else if (orientation == 6) {
-                width = image.height
-                height = image.width
-                x = 0
-                y = -width
-                rotation = 90
-              } else if (orientation == 8) {
-                width = image.height
-                height = image.width
-                x = -height
-                y = 0
-                rotation = 270
-              } else {
-                width = image.width
-                height = image.height
-                x = 0
-                y = 0
-                rotation = 0
-              }
-              canvas.height = height
-              canvas.width = width
-              let context = canvas.getContext("2d")
-              context.rotate(rotation * Math.PI / 180)
-              context.drawImage(image, x, y)
-              context.rotate(-rotation * Math.PI / 180)
-              canvas.className = 'image'
-              wrappers[index].replaceChild(canvas, images[index])
-              dialog.change({
-                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.splicer.fileList.length) + ' 张。'
-              })
-              if (index < this.$store.state.splicer.fileList.length - 1) {
-                return replace(index + 1)
-              } else {
-                if (this.errorList.length == 0) {
-                  dialog.close()
-                } else {
+          dialog.change({
+            text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(total) + ' 张。'
+          }).then(() => {
+            let image = document.createElement('img')
+            image.src = this.$store.state.splicer.fileList[index].fullpath
+            image.onerror = () => {
+              this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
+              this.$store.dispatch('splicer/fileListDelete', index).then(() => {
+                if (this.$store.state.splicer.fileList.length == 0) {
                   dialog.change({
-                    type: 'warning',
+                    type: 'error',
                     title: '出现错误',
-                    text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
-                    content: this.$createElement('div', null, this.errorList.map((filename) => {
-                      return this.$createElement('p', {
-                        style: {
-                          'line-height': '24px',
-                          'font-size': '12px',
-                          'width': '100%',
-                          'overflow': 'hidden',
-                          'text-overflow': 'ellipsis',
-                          'white-space': 'nowrap',
-                          'text-indent': '0'
-                        }
-                      }, filename)
-                    })),
+                    text: '全部图片读取失败，即将退出编辑器。',
                     showConfirm: true,
                     confirmFunction: () => {
-                      this.errorList = []
+                      this.close()
                     }
                   })
+                } else {
+                  if (index < this.$store.state.splicer.fileList.length) {
+                    return replace(index)
+                  } else {
+                    dialog.change({
+                      type: 'warning',
+                      title: '出现错误',
+                      text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
+                      content: this.$createElement('div', null, this.errorList.map((filename) => {
+                        return this.$createElement('p', {
+                          style: {
+                            'line-height': '24px',
+                            'font-size': '12px',
+                            'width': '100%',
+                            'overflow': 'hidden',
+                            'text-overflow': 'ellipsis',
+                            'white-space': 'nowrap',
+                            'text-indent': '0'
+                          }
+                        }, filename)
+                      })),
+                      showConfirm: true,
+                      confirmFunction: () => {
+                        this.errorList = []
+                      }
+                    })
+                  }
                 }
-              }
-            })
-          }
+              })
+            }
+            image.onload = () => {
+              EXIF.getData(image, () => {
+                let orientation = EXIF.getTag(image, 'Orientation')
+                let canvas = document.createElement('canvas')
+                let width, height, x, y, rotation
+                if (orientation == 3) {
+                  width = image.width
+                  height = image.height
+                  x = -width
+                  y = -height
+                  rotation = 180
+                } else if (orientation == 6) {
+                  width = image.height
+                  height = image.width
+                  x = 0
+                  y = -width
+                  rotation = 90
+                } else if (orientation == 8) {
+                  width = image.height
+                  height = image.width
+                  x = -height
+                  y = 0
+                  rotation = 270
+                } else {
+                  width = image.width
+                  height = image.height
+                  x = 0
+                  y = 0
+                  rotation = 0
+                }
+                canvas.height = height
+                canvas.width = width
+                let context = canvas.getContext("2d")
+                context.rotate(rotation * Math.PI / 180)
+                context.drawImage(image, x, y)
+                context.rotate(-rotation * Math.PI / 180)
+                canvas.className = 'image'
+                images[index].parentNode.replaceChild(canvas, images[index])
+                if (index < this.$store.state.splicer.fileList.length - 1) {
+                  return replace(index + 1)
+                } else {
+                  if (this.errorList.length == 0) {
+                    dialog.close()
+                  } else {
+                    dialog.change({
+                      type: 'warning',
+                      title: '出现错误',
+                      text: '部分图片读取失败，但您仍可以使用余下的图片生成长图。以下为读取失败的文件：',
+                      content: this.$createElement('div', null, this.errorList.map((filename) => {
+                        return this.$createElement('p', {
+                          style: {
+                            'line-height': '24px',
+                            'font-size': '12px',
+                            'width': '100%',
+                            'overflow': 'hidden',
+                            'text-overflow': 'ellipsis',
+                            'white-space': 'nowrap',
+                            'text-indent': '0'
+                          }
+                        }, filename)
+                      })),
+                      showConfirm: true,
+                      confirmFunction: () => {
+                        this.errorList = []
+                      }
+                    })
+                  }
+                }
+              })
+            }
+          })
         }
         replace(0)
       })
     }
   },
   mounted() {
-    this.refresh()
+    this.$nextTick(() => {
+      this.refresh()
+    })
   },
   updated() {
     if (this.imagesChanged) {
-      this.refresh()
+      this.$nextTick(() => {
+        this.refresh()
       this.imagesChanged = false
+      })
     }
   }
 }

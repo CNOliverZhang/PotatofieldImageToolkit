@@ -134,6 +134,9 @@ ipcMain.on('minimize', () => {
 
 ipcMain.on('close', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
+  if (currentWindow.webContents.browserWindowOptions.modal) {
+    currentWindow.webContents.browserWindowOptions.parent.webContents.send('modal-window-closed')
+  }
   currentWindow.destroy()
 })
 
@@ -166,23 +169,29 @@ ipcMain.on('relaunch', () => {
 
 ipcMain.on('open', (event, args) => {
   if (windowTitles.has(args.title)) {
-    event.returnValue = false
-    return
+    windows.forEach((window) => {
+      if (window.webContents.browserWindowOptions.title == args.title) {
+        if (window.isMinimized()) {
+          window.restore()
+        }
+        window.focus()
+      }
+    })
+  } else {
+    let targetArgs = {
+      title: args.title,
+      path: args.path,
+    }
+    if (args.modal) {
+      targetArgs.parent = BrowserWindow.getFocusedWindow()
+      targetArgs.modal = true
+    }
+    if (args.width) {
+      targetArgs.width = args.width
+      targetArgs.height = args.height
+    }
+    createWindow(targetArgs)
   }
-  let targetArgs = {
-    title: args.title,
-    path: args.path,
-  }
-  if (args.modal) {
-    targetArgs.parent = BrowserWindow.getFocusedWindow()
-    targetArgs.modal = true
-  }
-  if (args.width) {
-    targetArgs.width = args.width
-    targetArgs.height = args.height
-  }
-  createWindow(targetArgs)
-  event.returnValue = true
 })
 
 ipcMain.on('version', (event) => {

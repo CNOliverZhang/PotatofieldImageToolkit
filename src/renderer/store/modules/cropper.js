@@ -4,6 +4,9 @@ export default {
     fileList: []
   },
   mutations: {
+    FILELIST_ASSIGN (state, fileList) {
+      state.fileList = fileList
+    },
     FILELIST_PUSH (state, file) {
       for (let i = 0; i < state.fileList.length; i++) {
         if (state.fileList[i].fullpath == file.fullpath) {
@@ -20,6 +23,12 @@ export default {
     }
   },
   actions: {
+    fileListAssign (context, fileList) {
+      return new Promise((resolve, reject) => {
+        context.commit('FILELIST_ASSIGN', fileList)
+        resolve()
+      })
+    },
     fileListPush (context, file) {
       return new Promise((resolve, reject) => {
         context.commit('FILELIST_PUSH', file)

@@ -25,16 +25,21 @@
               'transform': 'rotate(' + rotation + 'deg)',
               'writing-mode': writingMode,
               'text-align': textAlign,
-              'line-height': lineHeight + 'em'
+              'padding': backgroundSize / 100 + 'em',
+              'background-color': backgroundColor,
+              'text-shadow': textShadow
             }">
             <div
-              v-for="(line, index) in text.split('\n')" :key="index">
+              v-for="(line, index) in text.split('\n')"
+              :key="index"
+              :style="{
+                'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
+              }">
               <span
                 v-for="(char, index) in line"
                 :key="index"
                 :style="{
-                  'margin-left': letterSpacing / 10 + 'em',
-                  'margin-right': letterSpacing / 10 + 'em'
+                  'margin-left': index == 0 ? 0 : letterSpacing / 5 + 'em'
                 }">{{ char }}</span>
             </div>
           </div>
@@ -52,137 +57,204 @@
     </div>
     <div id="control" class="interactable">
       <div>
-        <el-input
-          :rows="5"
-          v-model="text"
-          type="textarea"
-          resize="none"
-          placeholder="请输入水印内容"></el-input>
-        <div class="control-row">
-          <div class="text">水印文字方向</div>
-          <el-select v-model="writingMode" placeholder="请选择" size="mini">
-            <el-option label="水平" value="horizontal-tb"/>
-            <el-option label="垂直从右至左" value="vertical-rl"/>
-            <el-option label="垂直从左至右" value="vertical-lr"/>
-          </el-select>
+        <div class="row">
+          <div class="subtitle">水印设置</div>
         </div>
-        <div class="control-row">
-          <div class="text">多行水印对齐方式</div>
-          <el-select v-model="textAlign" placeholder="请选择" size="mini">
-            <el-option label="居中对齐" value="center"/>
-            <el-option label="行首对齐" value="left"/>
-            <el-option label="行尾对其" value="right"/>
-          </el-select>
-        </div>
-        <div class="control-row">
-          <div class="text">多行水印行距</div>
-          <el-slider
-            v-model="lineHeight"
-            class="control"
-            :min="1"
-            :max="10"
-            :step="0.1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">水印文字间距</div>
-          <el-slider
-            v-model="letterSpacing"
-            class="control"
-            :min="0"
-            :max="100"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">水印位置基准</div>
-          <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
-            <el-option label="中央" value="center"/>
-            <el-option label="左上角" value="left-top"/>
-            <el-option label="右上角" value="right-top"/>
-            <el-option label="左下角" value="left-bottom"/>
-            <el-option label="右下角" value="right-bottom"/>
-            <el-option label="上方" value="top"/>
-            <el-option label="下方" value="bottom"/>
-            <el-option label="左侧" value="left"/>
-            <el-option label="右侧" value="right"/>
-          </el-select>
-        </div>
-        <div
-          v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-          class="control-row">
-          <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">水印与左边缘的距离</div>
-          <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
-          <el-slider
-            v-model="offsetX"
-            class="control"
-            :min="0"
-            :max="100"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div
-          v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-          class="control-row">
-          <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">水印与上边缘的距离</div>
-          <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
-          <el-slider
-            v-model="offsetY"
-            class="control"
-            :min="0"
-            :max="100"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">水印旋转角度</div>
-          <el-slider
-            v-model="rotation"
-            class="control"
-            :min="-180"
-            :max="180"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">水印字体</div>
-          <el-select v-model="font" placeholder="请选择" size="mini">
-            <el-option
-              v-for="(font, index) in this.$store.state.fonts.fontList"
-              :key="index"
-              :label="font.verbose + '（' + font.weight + '）'"
-              :value="font.fontFamily"
-              :style="{
-                'font-family': font.fontFamily
-              }"/>
-          </el-select>
-        </div>
-        <div class="control-row">
-          <div class="text">水印字体大小</div>
-          <el-slider
-            v-model="relativeFontSize"
-            class="control"
-            :min="1"
-            :max="100"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">水印颜色</div>
-          <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
-        </div>
+        <el-collapse value="content" accordion>
+          <el-collapse-item title="水印内容" name="content">
+            <el-input
+              :rows="5"
+              v-model="text"
+              type="textarea"
+              resize="none"
+              placeholder="请输入水印内容"></el-input>
+          </el-collapse-item>
+          <el-collapse-item title="水印文字样式" name="style">
+            <div class="control-row">
+              <div class="text">水印字体</div>
+              <el-select v-model="font" placeholder="请选择" size="mini">
+                <el-option
+                  v-for="(font, index) in this.$store.state.fonts.fontList"
+                  :key="index"
+                  :label="font.verbose + '（' + font.weight + '）'"
+                  :value="font.fontFamily"
+                  :style="{
+                    'font-family': font.fontFamily
+                  }"/>
+              </el-select>
+            </div>
+            <div class="control-row">
+              <div class="text">水印字体大小</div>
+              <el-slider
+                v-model="relativeFontSize"
+                class="control"
+                :min="1"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印字体颜色</div>
+              <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印文字装饰" name="decoration">
+            <div class="control-row">
+              <div class="text">水印背景尺寸</div>
+              <el-slider
+                v-model="backgroundSize"
+                class="control"
+                :min="0"
+                :max="300"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印背景颜色</div>
+              <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
+            </div>
+            <div class="control-row">
+              <div class="text">水印阴影水平位置</div>
+              <el-slider
+                v-model="textShadowX"
+                class="control"
+                :min="-1"
+                :max="1"
+                :step="0.01"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印阴影垂直位置</div>
+              <el-slider
+                v-model="textShadowY"
+                class="control"
+                :min="-1"
+                :max="1"
+                :step="0.01"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印阴影模糊</div>
+              <el-slider
+                v-model="textShadowBlur"
+                class="control"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印阴影颜色</div>
+              <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印文字位置" name="position">
+            <div class="control-row">
+              <div class="text">水印位置基准</div>
+              <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
+                <el-option label="中央" value="center"/>
+                <el-option label="左上角" value="left-top"/>
+                <el-option label="右上角" value="right-top"/>
+                <el-option label="左下角" value="left-bottom"/>
+                <el-option label="右下角" value="right-bottom"/>
+                <el-option label="上方" value="top"/>
+                <el-option label="下方" value="bottom"/>
+                <el-option label="左侧" value="left"/>
+                <el-option label="右侧" value="right"/>
+              </el-select>
+            </div>
+            <div
+              v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
+              class="control-row">
+              <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">水印与左边缘的距离</div>
+              <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
+              <el-slider
+                v-model="offsetX"
+                class="control"
+                :min="0"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div
+              v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
+              class="control-row">
+              <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">水印与上边缘的距离</div>
+              <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
+              <el-slider
+                v-model="offsetY"
+                class="control"
+                :min="0"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印旋转角度</div>
+              <el-slider
+                v-model="rotation"
+                class="control"
+                :min="-180"
+                :max="180"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印文字排版" name="typesetting">
+            <div class="control-row">
+              <div class="text">水印文字方向</div>
+              <el-select v-model="writingMode" placeholder="请选择" size="mini">
+                <el-option label="水平" value="horizontal-tb"/>
+                <el-option label="垂直从右至左" value="vertical-rl"/>
+                <el-option label="垂直从左至右" value="vertical-lr"/>
+              </el-select>
+            </div>
+            <div class="control-row">
+              <div class="text">多行水印对齐方式</div>
+              <el-select v-model="textAlign" placeholder="请选择" size="mini">
+                <el-option label="居中对齐" value="center"/>
+                <el-option label="行首对齐" value="left"/>
+                <el-option label="行尾对其" value="right"/>
+              </el-select>
+            </div>
+            <div class="control-row">
+              <div class="text">多行水印行距</div>
+              <el-slider
+                v-model="lineHeight"
+                class="control"
+                :min="1"
+                :max="10"
+                :step="0.1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">水印文字间距</div>
+              <el-slider
+                v-model="letterSpacing"
+                class="control"
+                :min="0"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </div>
       <div class="row">
         <div class="text">参照背景颜色</div>
         <el-select v-model="background" placeholder="请选择" size="mini">
-          <el-option label="深色" value="var(--dark-gray)"/>
-          <el-option label="浅色" value="var(--light-gray)"/>
+          <el-option label="深色" value="var(--black-gray)"/>
+          <el-option label="浅色" value="var(--white-gray)"/>
         </el-select>
       </div>
     </div>
@@ -206,16 +278,22 @@ export default {
       offsetX: 0,
       offsetY: 0,
       rotation: 0,
-      color: '#FFFFFF',
+      color: 'rgba(255, 255, 255, 1)',
       font: this.$store.state.fonts.defaultFont,
       relativeFontSize: 5,
+      backgroundSize: 0,
+      backgroundColor: 'rgba(255, 255, 255, 0)',
+      textShadowX: 0,
+      textShadowY: 0,
+      textShadowBlur: 0,
+      textShadowColor: 'rgba(255, 255, 255, 0)',
       sizeBaseX: 0,
       sizeBaseY: 0,
       sampleWidth: 0,
       sampleHeight: 0,
       watermarkWidth: 0,
       watermarkHeight: 0,
-      background: 'var(--dark-gray)',
+      background: 'var(--black-gray)',
       templateTitle: ''
     }
   },
@@ -238,6 +316,9 @@ export default {
         let ratio = 1 - this.watermarkHeight / this.sampleHeight
         return this.offsetY * this.sizeBaseY * (ratio)
       }
+    },
+    textShadow() {
+      return this.textShadowX + 'em ' + this.textShadowY + 'em ' + this.textShadowBlur + 'em ' + this.textShadowColor
     }
   },
   watch: {
@@ -277,6 +358,31 @@ export default {
       })
     },
     relativeFontSize() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    backgroundSize() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    backgroundColor() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    textShadowX() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    textShadowY() {
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
+    },
+    textShadowBlur() {
       this.$nextTick(() => {
         this.initWatermarkSize()
       })
@@ -330,6 +436,12 @@ export default {
           color: this.color,
           font: this.font,
           relativeFontSize: this.relativeFontSize,
+          backgroundSize: this.backgroundSize,
+          backgroundColor: this.backgroundColor,
+          textShadowX: this.textShadowX,
+          textShadowY: this.textShadowY,
+          textShadowBlur: this.textShadowBlur,
+          textShadowColor: this.textShadowColor,
         }
         let checkName = (title) => {
           if (title == '') {
@@ -453,6 +565,12 @@ export default {
           color: this.color,
           font: this.font,
           relativeFontSize: this.relativeFontSize,
+          backgroundSize: this.backgroundSize,
+          backgroundColor: this.backgroundColor,
+          textShadowX: this.textShadowX,
+          textShadowY: this.textShadowY,
+          textShadowBlur: this.textShadowBlur,
+          textShadowColor: this.textShadowColor,
         }
         let checkName = (title) => {
           if (title == '') {
@@ -570,24 +688,33 @@ export default {
     this.sizeBaseX = width / 100
     this.sizeBaseY = height / 100
     if (this.$route.query.index != -1) {
-      let index = this.$route.query.index
-      this.templateTitle = this.$store.state.watermark.templates[index].title
-      this.text = this.$store.state.watermark.templates[index].text
-      this.writingMode = this.$store.state.watermark.templates[index].writingMode
-      this.textAlign = this.$store.state.watermark.templates[index].textAlign
-      this.lineHeight = this.$store.state.watermark.templates[index].lineHeight
-      this.letterSpacing = this.$store.state.watermark.templates[index].letterSpacing
-      this.position = this.$store.state.watermark.templates[index].position
-      this.offsetX = this.$store.state.watermark.templates[index].offsetX
-      this.offsetY = this.$store.state.watermark.templates[index].offsetY
-      this.rotation = this.$store.state.watermark.templates[index].rotation
-      this.color = this.$store.state.watermark.templates[index].color
-      this.font = this.$store.state.watermark.templates[index].font
-      this.relativeFontSize = this.$store.state.watermark.templates[index].relativeFontSize
-      this.$dialog({
-        text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
-      }).then(() => {
-        this.initWatermarkSize()
+      let template = this.$store.state.watermark.templates[this.$route.query.index]
+      this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
+      this.text = template.text !== undefined ? template.text : this.text
+      this.writingMode = template.writingMode !== undefined ? template.writingMode : this.writingMode
+      this.textAlign = template.textAlign !== undefined ? template.textAlign : this.textAlign
+      this.lineHeight = template.lineHeight !== undefined ? template.lineHeight : this.lineHeight
+      this.letterSpacing = template.letterSpacing !== undefined ? template.letterSpacing : this.letterSpacing
+      this.position = template.position !== undefined ? template.position : this.position
+      this.offsetX = template.offsetX !== undefined ? template.offsetX : this.offsetX
+      this.offsetY = template.offsetY !== undefined ? template.offsetY : this.offsetY
+      this.rotation = template.rotation !== undefined ? template.rotation : this.rotation
+      this.color = template.color !== undefined ? template.color : this.color
+      this.font = template.font !== undefined ? template.font : this.font
+      this.relativeFontSize = template.relativeFontSize !== undefined ? template.relativeFontSize : this.relativeFontSize
+      this.backgroundSize = template.backgroundSize !== undefined ? template.backgroundSize : this.backgroundSize
+      this.backgroundColor = template.backgroundColor !== undefined ? template.backgroundColor : this.backgroundColor
+      this.textShadowX = template.textShadowX !== undefined ? template.textShadowX : this.textShadowX
+      this.textShadowY = template.textShadowY !== undefined ? template.textShadowY : this.textShadowY
+      this.textShadowBlur = template.textShadowBlur !== undefined ? template.textShadowBlur : this.textShadowBlur
+      this.textShadowColor = template.textShadowColor !== undefined ? template.textShadowColor : this.textShadowColor
+      this.$nextTick(() => {
+        this.$dialog({
+          text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。',
+          confirmFunction: () => {
+            this.initWatermarkSize()
+          }
+        })
       })
     }
   }
@@ -693,6 +820,7 @@ export default {
         position: absolute;
         width: fit-content;
         height: fit-content;
+        box-sizing: border-box;
         line-height: 1em;
       }
     }
@@ -724,6 +852,16 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    
+    .el-collapse-item__header {
+      height: 30px;
+      font-size: 14px;
+    }
+    
+    .el-collapse-item__content {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
     
     .el-textarea__inner {
       font-family: var(--main-font)

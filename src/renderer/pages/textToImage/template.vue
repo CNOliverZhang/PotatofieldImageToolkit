@@ -12,22 +12,65 @@
           'padding': padding + 'px',
           'background-color': backgroundColor
         }">
-        <h2>标题样例</h2>
-        <h3>二级标题样例</h3>
-        <p>这是一篇样例文章，用于在创建模板时提供参考。下列内容来自公有领域，或由本程序开发者创作并享有著作权。</p>
-        <h3>洋芋田图像工具箱</h3>
+        <h2>洋芋田图像工具箱</h2>
         <p>洋芋田图像工具箱是一个基于 Electron 和 Vue.js 的具有多种图像相关功能的工具软件。目前它具有以下功能：</p>
-        <ul>
-          <li>图片加水印工具：具备丰富的样式设置，水印的内容和外观均可随心定制。可单张处理，亦可批量处理，操作便捷高效。性能良好，处理图片迅速；运行稳定，大尺寸图片轻松应对。</li>
-          <li>长图拼接工具：可以将若干图片拼接为一张长图，也能为单张图片添加简单边框。不限制输入图片数量，最大支持输出高度为 16000 像素或面积为 256000000 像素的图片，能尽可能多地保留原图片的细节。</li>
-          <li>富文本制图工具：将富文本内容输出为图片，支持文本、标题、项目列表、图片和引用内容。每一类富文本元素都有丰富的自定义设置，可以随心定制外观样式，还可以将样式保存为模板以供下次使用。</li>
-          <li>尺寸调整工具：对图片进行批量调整大小的操作，支持固定比例、固定长边和固定短边三种模式。同样具有良好的性能和稳定性，短时间内可以处理大量图片，也可以处理大尺寸图片。</li>
-          <li>图片裁剪工具：可以采用自由模式裁剪，可以采用预置的多种常用比例裁剪，也可以自定义比例裁剪。支持批量导入图片，在工作流程中能够维持裁剪设置和保存设置不变，提升效率。</li>
-          <li>EXIF 读取工具：从 JPEG 文件中读取 EXIF 信息，支持相机制造商、型号等设备信息和曝光补偿、镜头焦距、光圈、快门、感光度等曝光参数以及作者、图像尺寸等图像文件信息。</li>
-          <li>字体管理工具：管理本地字体库，还可以从在线字体库中下载字体。在线字体库现有数十款字体，全部为商用免费字体，且仍在持续更新。支持将下载的字体用于其他工具，也能设为界面字体。</li>
-          <li>色彩提取工具：从照片中提取色彩，可以获得最能代表照片的主题色以及由十种能代表照片基本色调的颜色组成的色板。支持将色板导出为图片，也可以将色板拼接在原图片下方导出。</li>
-        </ul>
-        <p>洋芋田图像工具箱基于 MIT 协议开源。目前提供适用于 Windows 的构建版本，使用其他平台的用户可以自行下载源码并构建。</p>
+        <h3>图片加水印工具</h3>
+        <p>单张或批量为图片添加水印，支持自定义水印内容及样式。支持模板功能，能将水印内容和样式保存为模板。</p>
+        <figure>
+          <img src="static/sample/watermark.png" />
+          <figcaption>图片加水印工具</figcaption>
+        </figure>
+        <h3>长图拼接工具</h3>
+        <p>可以将若干图片拼接为一张长图，也能为单张图片添加简单边框。支持将拼图边框样式保存为模板。</p>
+        <figure>
+          <img src="static/sample/splicer.png" />
+          <figcaption>长图拼接工具</figcaption>
+        </figure>
+        <h3>富文本制图工具</h3>
+        <p>将富文本内容输出为图片，支持文本、标题、项目列表、图片和引用内容。支持自定义样式，支持模板功能。</p>
+        <figure>
+          <img src="static/sample/text.png" />
+          <figcaption>富文本制图工具</figcaption>
+        </figure>
+        <h3>尺寸调整工具</h3>
+        <p>对图片进行批量调整大小的操作，支持固定缩放比例、固定图片长边和固定图片短边三种模式。</p>
+        <figure>
+          <img src="static/sample/resizer.png" />
+          <figcaption>尺寸调整工具</figcaption>
+        </figure>
+        <h3>JPEG 压缩工具</h3>
+        <p>对 JPEG 文件进行压缩，减小文件体积。支持自定义输出质量。</p>
+        <figure>
+          <img src="static/sample/compress.png" />
+          <figcaption>JPEG 压缩工具</figcaption>
+        </figure>
+        <h3>图片裁剪工具</h3>
+        <p>对图片进行裁剪，可以采用自由模式裁剪，可以采用预置的多种常用比例裁剪，也可以自定义比例裁剪。</p>
+        <figure>
+          <img src="static/sample/cropper.png" />
+          <figcaption>图片裁剪工具</figcaption>
+        </figure>
+        <h3>EXIF 读取工具</h3>
+        <p>从 JPEG 文件中读取 EXIF 信息，支持相机制造商、型号等设备信息和曝光补偿、镜头焦距、光圈、快门、感光度等曝光参数。</p>
+        <figure>
+          <img src="static/sample/exif.png" />
+          <figcaption>EXIF 读取工具</figcaption>
+        </figure>
+        <h3>色彩提取工具</h3>
+        <p>从照片中提取色彩，可以获得最能代表照片的主题色以及由十种能代表照片基本色调的颜色组成的色板。</p>
+        <figure>
+          <img src="static/sample/palette.png" />
+          <figcaption>色彩提取工具</figcaption>
+        </figure>
+        <h3>字体管理工具</h3>
+        <p>管理本地字体库，还可以从在线字体库中下载字体。支持将下载的字体用于其他工具，也能设为界面字体。</p>
+        <figure>
+          <img src="static/sample/fonts.png" />
+          <figcaption>字体管理工具</figcaption>
+        </figure>
+        <blockquote>
+          <p>洋芋田图像工具箱基于 MIT 协议开源。目前提供适用于 Windows 的构建版本，使用其他平台的用户可以自行下载源码并构建。</p>
+        </blockquote>
         <p>洋芋田图像工具箱在开发过程中使用了下列开源组件和库：</p>
         <ul>
           <li>Electron</li>
@@ -46,15 +89,6 @@
           <li>Cropper.js</li>
           <li>Color Thief</li>
         </ul>
-        <h3>爱莲说</h3>
-        <blockquote>
-          <p>水陆草木之花，可爱者甚蕃。晋陶渊明独爱菊。自李唐来，世人盛爱牡丹。予独爱莲之出淤泥而不染，濯清涟而不妖，中通外直，不蔓不枝，香远益清，亭亭净植，可远观而不可亵玩焉。</p>
-          <figure>
-            <img src="static/sample/lotus.jpg" />
-            <figcaption>莲花</figcaption>
-          </figure>
-          <P>予谓菊，花之隐逸者也；牡丹，花之富贵者也；莲，花之君子者也。噫！菊之爱，陶后鲜有闻；莲之爱，同予者何人? 牡丹之爱，宜乎众矣。</P>
-        </blockquote>
       </div>
     </div>
     <div id="control" class="interactable">
@@ -593,7 +627,7 @@ export default {
       titleMargin: 0.5,
       titleTextAlign: 'justify',
       titleIndent: false,
-      titleColor: '#FFFFFF',
+      titleColor: 'rgba(255, 255, 255, 1)',
       subtitleFont: this.$store.state.fonts.defaultFont,
       subtitleFontSize: 18,
       subtitleLetterSpacing: 0.1,
@@ -601,7 +635,7 @@ export default {
       subtitleMargin: 0.5,
       subtitleTextAlign: 'justify',
       subtitleIndent: false,
-      subtitleColor: '#FFFFFF',
+      subtitleColor: 'rgba(255, 255, 255, 1)',
       textFont: this.$store.state.fonts.defaultFont,
       textFontSize: 14,
       textLetterSpacing: 0,
@@ -609,7 +643,7 @@ export default {
       textMargin: 0.5,
       textAlign: 'justify',
       textIndent: true,
-      textColor: '#FFFFFF',
+      textColor: 'rgba(255, 255, 255, 1)',
       orderedListFont: this.$store.state.fonts.defaultFont,
       orderedListFontSize: 14,
       orderedListLetterSpacing: 0,
@@ -617,7 +651,7 @@ export default {
       orderedListMargin: 0.5,
       orderedListItemMargin: 0,
       orderedListIndent: 2,
-      orderedListColor: '#FFFFFF',
+      orderedListColor: 'rgba(255, 255, 255, 1)',
       unorderedListFont: this.$store.state.fonts.defaultFont,
       unorderedListFontSize: 14,
       unorderedListLetterSpacing: 0,
@@ -625,15 +659,15 @@ export default {
       unorderedListMargin: 0.5,
       unorderedListItemMargin: 0,
       unorderedListIndent: 2,
-      unorderedListColor: '#FFFFFF',
+      unorderedListColor: 'rgba(255, 255, 255, 1)',
       imageBorderRadius: 0,
       imageMargin: 0.5,
       imageLabelFont: this.$store.state.fonts.defaultFont,
       imageLabelFontSize: 12,
       imageLabelLetterSpacing: 0,
-      imageLabelColor: '#C0C4CC',
+      imageLabelColor: 'rgba(192, 196, 204, 1)',
       blockquoteMargin: 0.5,
-      blockquoteBorderColor: '#DCDFE6'
+      blockquoteBorderColor: 'rgba(220, 223, 230, 1)'
     }
   },
   watch: {
@@ -1124,58 +1158,58 @@ export default {
   },
   mounted() {
     if (this.$route.query.index != -1) {
-      let index = this.$route.query.index
-      this.templateTitle = this.$store.state.textToImage.templates[index].title
-      this.padding = this.$store.state.textToImage.templates[index].padding
-      this.backgroundColor = this.$store.state.textToImage.templates[index].backgroundColor
-      this.titleFont = this.$store.state.textToImage.templates[index].titleFont
-      this.titleFontSize = this.$store.state.textToImage.templates[index].titleFontSize
-      this.titleLetterSpacing = this.$store.state.textToImage.templates[index].titleLetterSpacing
-      this.titleLineHeight = this.$store.state.textToImage.templates[index].titleLineHeight
-      this.titleMargin = this.$store.state.textToImage.templates[index].titleMargin
-      this.titleTextAlign = this.$store.state.textToImage.templates[index].titleTextAlign
-      this.titleIndent = this.$store.state.textToImage.templates[index].titleIndent
-      this.titleColor = this.$store.state.textToImage.templates[index].titleColor
-      this.subtitleFont = this.$store.state.textToImage.templates[index].subtitleFont
-      this.subtitleFontSize = this.$store.state.textToImage.templates[index].subtitleFontSize
-      this.subtitleLetterSpacing = this.$store.state.textToImage.templates[index].subtitleLetterSpacing
-      this.subtitleLineHeight = this.$store.state.textToImage.templates[index].subtitleLineHeight
-      this.subtitleMargin = this.$store.state.textToImage.templates[index].subtitleMargin
-      this.subtitleTextAlign = this.$store.state.textToImage.templates[index].subtitleTextAlign
-      this.subtitleIndent = this.$store.state.textToImage.templates[index].subtitleIndent
-      this.subtitleColor = this.$store.state.textToImage.templates[index].subtitleColor
-      this.textFont = this.$store.state.textToImage.templates[index].textFont
-      this.textFontSize = this.$store.state.textToImage.templates[index].textFontSize
-      this.textLetterSpacing = this.$store.state.textToImage.templates[index].textLetterSpacing
-      this.textLineHeight = this.$store.state.textToImage.templates[index].textLineHeight
-      this.textMargin = this.$store.state.textToImage.templates[index].textMargin
-      this.textAlign = this.$store.state.textToImage.templates[index].textAlign
-      this.textIndent = this.$store.state.textToImage.templates[index].textIndent
-      this.textColor = this.$store.state.textToImage.templates[index].textColor
-      this.orderedListFont = this.$store.state.textToImage.templates[index].orderedListFont
-      this.orderedListFontSize = this.$store.state.textToImage.templates[index].orderedListFontSize
-      this.orderedListLetterSpacing = this.$store.state.textToImage.templates[index].orderedListLetterSpacing
-      this.orderedListLineHeight = this.$store.state.textToImage.templates[index].orderedListLineHeight
-      this.orderedListMargin = this.$store.state.textToImage.templates[index].orderedListMargin
-      this.orderedListItemMargin = this.$store.state.textToImage.templates[index].orderedListItemMargin
-      this.orderedListIndent = this.$store.state.textToImage.templates[index].orderedListIndent
-      this.orderedListColor = this.$store.state.textToImage.templates[index].orderedListColor
-      this.unorderedListFont = this.$store.state.textToImage.templates[index].unorderedListFont
-      this.unorderedListFontSize = this.$store.state.textToImage.templates[index].unorderedListFontSize
-      this.unorderedListLetterSpacing = this.$store.state.textToImage.templates[index].unorderedListLetterSpacing
-      this.unorderedListLineHeight = this.$store.state.textToImage.templates[index].unorderedListLineHeight
-      this.unorderedListMargin = this.$store.state.textToImage.templates[index].unorderedListMargin
-      this.unorderedListItemMargin = this.$store.state.textToImage.templates[index].unorderedListItemMargin
-      this.unorderedListIndent = this.$store.state.textToImage.templates[index].unorderedListIndent
-      this.unorderedListColor = this.$store.state.textToImage.templates[index].unorderedListColor
-      this.imageBorderRadius = this.$store.state.textToImage.templates[index].imageBorderRadius
-      this.imageMargin = this.$store.state.textToImage.templates[index].imageMargin
-      this.imageLabelFont = this.$store.state.textToImage.templates[index].imageLabelFont
-      this.imageLabelFontSize = this.$store.state.textToImage.templates[index].imageLabelFontSize
-      this.imageLabelLetterSpacing = this.$store.state.textToImage.templates[index].imageLabelLetterSpacing
-      this.imageLabelColor = this.$store.state.textToImage.templates[index].imageLabelColor
-      this.blockquoteMargin = this.$store.state.textToImage.templates[index].blockquoteMargin
-      this.blockquoteBorderColor = this.$store.state.textToImage.templates[index].blockquoteBorderColor
+      let template = this.$store.state.textToImage.templates[this.$route.query.index]
+      this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
+      this.padding = template.padding !== undefined ? template.padding : this.padding
+      this.backgroundColor = template.backgroundColor !== undefined ? template.backgroundColor : this.backgroundColor
+      this.titleFont = template.titleFont !== undefined ? template.titleFont : this.titleFont
+      this.titleFontSize = template.titleFontSize !== undefined ? template.titleFontSize : this.titleFontSize
+      this.titleLetterSpacing = template.titleLetterSpacing !== undefined ? template.titleLetterSpacing : this.titleLetterSpacing
+      this.titleLineHeight = template.titleLineHeight !== undefined ? template.titleLineHeight : this.titleLineHeight
+      this.titleMargin = template.titleMargin !== undefined ? template.titleMargin : this.titleMargin
+      this.titleTextAlign = template.titleTextAlign !== undefined ? template.titleTextAlign : this.titleTextAlign
+      this.titleIndent = template.titleIndent !== undefined ? template.titleIndent : this.titleIndent
+      this.titleColor = template.titleColor !== undefined ? template.titleColor : this.titleColor
+      this.subtitleFont = template.subtitleFont !== undefined ? template.subtitleFont : this.subtitleFont
+      this.subtitleFontSize = template.subtitleFontSize !== undefined ? template.subtitleFontSize : this.subtitleFontSize
+      this.subtitleLetterSpacing = template.subtitleLetterSpacing !== undefined ? template.subtitleLetterSpacing : this.subtitleLetterSpacing
+      this.subtitleLineHeight = template.subtitleLineHeight !== undefined ? template.subtitleLineHeight : this.subtitleLineHeight
+      this.subtitleMargin = template.subtitleMargin !== undefined ? template.subtitleMargin : this.subtitleMargin
+      this.subtitleTextAlign = template.subtitleTextAlign !== undefined ? template.subtitleTextAlign : this.subtitleTextAlign
+      this.subtitleIndent = template.subtitleIndent !== undefined ? template.subtitleIndent : this.subtitleIndent
+      this.subtitleColor = template.subtitleColor !== undefined ? template.subtitleColor : this.subtitleColor
+      this.textFont = template.textFont !== undefined ? template.textFont : this.textFont
+      this.textFontSize = template.textFontSize !== undefined ? template.textFontSize : this.textFontSize
+      this.textLetterSpacing = template.textLetterSpacing !== undefined ? template.textLetterSpacing : this.textLetterSpacing
+      this.textLineHeight = template.textLineHeight !== undefined ? template.textLineHeight : this.textLineHeight
+      this.textMargin = template.textMargin !== undefined ? template.textMargin : this.textMargin
+      this.textAlign = template.textAlign !== undefined ? template.textAlign : this.textAlign
+      this.textIndent = template.textIndent !== undefined ? template.textIndent : this.textIndent
+      this.textColor = template.textColor !== undefined ? template.textColor : this.textColor
+      this.orderedListFont = template.orderedListFont !== undefined ? template.orderedListFont : this.orderedListFont
+      this.orderedListFontSize = template.orderedListFontSize !== undefined ? template.orderedListFontSize : this.orderedListFontSize
+      this.orderedListLetterSpacing = template.orderedListLetterSpacing !== undefined ? template.orderedListLetterSpacing : this.orderedListLetterSpacing
+      this.orderedListLineHeight = template.orderedListLineHeight !== undefined ? template.orderedListLineHeight : this.orderedListLineHeight
+      this.orderedListMargin = template.orderedListMargin !== undefined ? template.orderedListMargin : this.orderedListMargin
+      this.orderedListItemMargin = template.orderedListItemMargin !== undefined ? template.orderedListItemMargin : this.orderedListItemMargin
+      this.orderedListIndent = template.orderedListIndent !== undefined ? template.orderedListIndent : this.orderedListIndent
+      this.orderedListColor = template.orderedListColor !== undefined ? template.orderedListColor : this.orderedListColor
+      this.unorderedListFont = template.unorderedListFont !== undefined ? template.unorderedListFont : this.unorderedListFont
+      this.unorderedListFontSize = template.unorderedListFontSize !== undefined ? template.unorderedListFontSize : this.unorderedListFontSize
+      this.unorderedListLetterSpacing = template.unorderedListLetterSpacing !== undefined ? template.unorderedListLetterSpacing : this.unorderedListLetterSpacing
+      this.unorderedListLineHeight = template.unorderedListLineHeight !== undefined ? template.unorderedListLineHeight : this.unorderedListLineHeight
+      this.unorderedListMargin = template.unorderedListMargin !== undefined ? template.unorderedListMargin : this.unorderedListMargin
+      this.unorderedListItemMargin = template.unorderedListItemMargin !== undefined ? template.unorderedListItemMargin : this.unorderedListItemMargin
+      this.unorderedListIndent = template.unorderedListIndent !== undefined ? template.unorderedListIndent : this.unorderedListIndent
+      this.unorderedListColor = template.unorderedListColor !== undefined ? template.unorderedListColor : this.unorderedListColor
+      this.imageBorderRadius = template.imageBorderRadius !== undefined ? template.imageBorderRadius : this.imageBorderRadius
+      this.imageMargin = template.imageMargin !== undefined ? template.imageMargin : this.imageMargin
+      this.imageLabelFont = template.imageLabelFont !== undefined ? template.imageLabelFont : this.imageLabelFont
+      this.imageLabelFontSize = template.imageLabelFontSize !== undefined ? template.imageLabelFontSize : this.imageLabelFontSize
+      this.imageLabelLetterSpacing = template.imageLabelLetterSpacing !== undefined ? template.imageLabelLetterSpacing : this.imageLabelLetterSpacing
+      this.imageLabelColor = template.imageLabelColor !== undefined ? template.imageLabelColor : this.imageLabelColor
+      this.blockquoteMargin = template.blockquoteMargin !== undefined ? template.blockquoteMargin : this.blockquoteMargin
+      this.blockquoteBorderColor = template.blockquoteBorderColor !== undefined ? template.blockquoteBorderColor : this.blockquoteBorderColor
       this.$dialog({
         text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
       })

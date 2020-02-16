@@ -338,7 +338,7 @@ export default {
               let context = baseCanvas.getContext('2d')
               context.drawImage(originalImage, 0, 0)
               context.drawImage(canvas, 0, originalImage.height)
-              let url = baseCanvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
+              let url = baseCanvas.toDataURL('image/jpeg', 1).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
               fs.writeFile(distFullpath, buffer, (error) => {
                 if (error) {
@@ -370,7 +370,7 @@ export default {
               allowTaint: true,
               imageTimeout: 0
             }).then(canvas => {
-              let url = canvas.toDataURL('image/jpeg').replace(/^data:image\/\w+;base64,/, "")
+              let url = canvas.toDataURL('image/jpeg', 1).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
               fs.writeFile(distFullpath, buffer, (error) => {
                 if (error) {
