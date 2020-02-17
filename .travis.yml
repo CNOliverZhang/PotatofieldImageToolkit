@@ -5,6 +5,7 @@ language: c
 matrix:
   include:
   - os: osx
+  - os: windows
 cache:
   directories:
   - node_modules
