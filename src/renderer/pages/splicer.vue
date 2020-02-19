@@ -31,13 +31,13 @@
           </div>
           <div class="row">
             <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入拼图编辑器</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入长图拼接编辑器</el-button>
           </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-images"></i> 拼图模板库</span>
+      <span slot="label" class="interactable"><i class="fas fa-images"></i> 拼接模板库</span>
       <div id="templates" class="tab-content">
         <div id="container" v-if="this.$store.state.splicer.templates.length != 0">
           <div
@@ -88,8 +88,8 @@
             :hide-on-single-page="true"
             @current-change="templateListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="bar-button interactable">导入拼图模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="bar-button interactable">创建拼图模板</el-button>
+          <el-button type="primary" size="mini" @click="importTemplate" class="bar-button interactable">导入长图拼接模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="bar-button interactable">创建长图拼接模板</el-button>
         </div>
       </div>
     </el-tab-pane>
@@ -102,7 +102,7 @@
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
             <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+            <div>隐藏</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -256,7 +256,7 @@ export default {
       }).then((dialog) => {
         this.$store.dispatch('splicer/fileListAssign', this.fileList).then(() => {
           ipcRenderer.send('open', {
-            title: '拼图编辑器',
+            title: '长图拼接编辑器',
             path: '#/splicer/editor',
             modal: true,
             height: 720,
@@ -271,12 +271,22 @@ export default {
       })
     },
     editTemplate(index) {
-      ipcRenderer.send('open', {
-        title: '拼图模板编辑器',
-        path: '#/splicer/template?index=' + String(index),
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '长图拼接模板编辑器',
+          path: '#/splicer/template?index=' + String(index),
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     },
     shareTemplate(index) {
@@ -287,7 +297,7 @@ export default {
       this.$dialog({
         type: 'success',
         title: '成功',
-        text: '已成功将拼图模板复制到剪贴板。'
+        text: '已成功将长图拼接模板复制到剪贴板。'
       })
     },
     deleteTemplate(index) {
@@ -317,7 +327,7 @@ export default {
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入拼图模板标题',
+                    title: '请输入长图拼接模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -357,7 +367,7 @@ export default {
                     showCancel: true,
                     confirmFunction: () => {
                       this.$dialog({
-                        title: '请输入拼图模板标题',
+                        title: '请输入长图拼接模板标题',
                         content: this.$createElement('div', {
                           'class': 'el-input el-input--mini'
                         }, [
@@ -395,7 +405,7 @@ export default {
               this.$dialog({
                 type: 'success',
                 title: '成功',
-                text: '拼图模板导入成功。'
+                text: '长图拼接模板导入成功。'
               })
             }
           }
@@ -405,17 +415,27 @@ export default {
         this.$dialog({
           type: 'error',
           title: '导入失败',
-          text: '未能从您的剪贴板中读取到拼图模板信息！'
+          text: '未能从您的剪贴板中读取到长图拼接模板信息！'
         })
       }
     },
     createTemplate() {
-      ipcRenderer.send('open', {
-        title: '拼图模板编辑器',
-        path: '#/splicer/template?index=-1',
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '长图拼接模板编辑器',
+          path: '#/splicer/template?index=-1',
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     }
   }
@@ -569,10 +589,6 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .controller {
-      width: 60%;
-    }
-    
     &:first-child {
       margin-top: 0;
     }
@@ -583,7 +599,12 @@ export default {
   }
   
   .bar-button {
-    width: 100%;
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
     margin-left: 5px;
     margin-right: 5px;
     

@@ -25,6 +25,9 @@
       <el-button v-if="showCancel" size="mini" @click="cancel">{{ cancelText }}</el-button>
       <el-button v-if="showConfirm" type="primary" size="mini" @click="confirm">{{ confirmText }}</el-button>
     </span>
+    <el-button type="primary" circle id="minimize" class="interactable" @click="minimize">
+      <span class="fa fa-angle-double-down"></span>
+    </el-button>
   </el-dialog>
 </template>
 
@@ -56,6 +59,9 @@ export default {
     close() {
       document.body.removeChild(this.$el)
       this.$destroy()
+    },
+    minimize() {
+      this.$emit('minimize')
     },
     change(args) {
       return new Promise((resolve, reject) => {
@@ -93,6 +99,15 @@ export default {
   justify-content: center;
   align-items: center;
   -webkit-app-region: drag;
+  
+  #minimize {
+    width: 50px;
+    height: 50px;
+    position: fixed;
+    z-index: 3000;
+    right: 50px;
+    bottom: 50px;
+  }
   
   .el-dialog {
     width: 400px;

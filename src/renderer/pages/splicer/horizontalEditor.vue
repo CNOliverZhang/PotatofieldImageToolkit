@@ -1,111 +1,111 @@
 <template>
-  <div id="splicer-editor">
-    <div id="left">
-      <div id="sample-container" class="interactable">
+  <div id="splicer-horizontal-editor">
+    <div id="sample-container" class="interactable">
+      <div
+        id="sample"
+        :style="{
+          'padding': padding + 'px',
+          'background-color': backgroundColor
+        }">
         <div
-          id="sample"
+          v-for="(image, index) in this.$store.state.splicer.fileList"
+          class="image-container"
+          :key="index"
           :style="{
-            'padding': padding + 'px',
-            'background-color': backgroundColor
+            'margin-left': index == 0 ? 0 : (spacing + 'px')
           }">
           <div
-            v-for="(image, index) in this.$store.state.splicer.fileList"
-            class="image-container"
-            :key="index"
+            class="image-wrapper"
             :style="{
-              'margin-bottom': index != ($store.state.splicer.fileList.length - 1) ? (spacing + 'px') : 0
+              'border-radius': borderRadius + 'px'
             }">
-            <div
-              class="image-wrapper"
-              :style="{
-                'border-radius': borderRadius + 'px'
-              }">
-              <img
-                class="image"
-                :src="image.fullpath"/>
+            <img
+              class="image"
+              :src="image.fullpath"/>
+          </div>
+          <div
+            class="image-controller"
+            :style="{
+              'border-radius': borderRadius + 'px'
+            }">
+            <div v-if="index != 0" class="action move interactable" @click="moveUp(index)">
+              <span class="fa fa-arrow-left"></span>
+              <div>左移</div>
             </div>
-            <div
-              class="image-controller"
-              :style="{
-                'border-radius': borderRadius + 'px'
-              }">
-              <div v-if="index != 0" class="action move interactable" @click="moveUp(index)">
-                <span class="fa fa-arrow-up"></span>
-                <div>上移</div>
-              </div>
-              <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="action move interactable" @click="moveDown(index)">
-                <span class="fa fa-arrow-down"></span>
-                <div>下移</div>
-              </div>
-              <div class="action interactable delete" @click="handleDelete(index)">
-                <span class="fa fa-trash-alt"></span>
-                <div>删除</div>
-              </div>
+            <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="action move interactable" @click="moveDown(index)">
+              <span class="fa fa-arrow-right"></span>
+              <div>右移</div>
+            </div>
+            <div class="action interactable delete" @click="handleDelete(index)">
+              <span class="fa fa-trash-alt"></span>
+              <div>删除</div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="row">
-        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
       </div>
     </div>
     <div id="control" class="interactable">
-      <div id="lists">
-        <div id="file-list">
-          <div class="row">
-            <div class="subtitle">待处理的文件</div>
-          </div>
-          <div id="list">
-            <div
-              v-for="(file, index) in this.$store.state.splicer.fileList"
-              :key="index"
-              class="file">
-              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-              <div v-if="index != 0" @click.stop="moveUp(index)">
-                <i class="fas fa-arrow-up move"></i>
-              </div>
-              <div v-if="index != $store.state.splicer.fileList.length - 1" @click.stop="moveDown(index)">
-                <i class="fas fa-arrow-down move"></i>
-              </div>
-              <div @click.stop="handleDelete(index)">
-                <i class="fas fa-trash-alt delete"></i>
-              </div>
-            </div>
-          </div>
+      <div id="left">
+        <div class="row">
+          <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
         </div>
-        <div id="template-list">
-          <div class="row">
-            <div class="subtitle">已保存的模板</div>
-          </div>
-          <div v-if="this.$store.state.splicer.templates.length != 0" id="list">
-            <div
-              v-for="(template, index) in this.$store.state.splicer.templates"
-              :key="template.title"
-              class="template">
-              <div class="cover">
-                <div class="action" @click="applyTemplate(index)">
-                  <span class="fa fa-check-circle"></span>
-                  <div>应用</div>
+        <div id="lists">
+          <div id="file-list">
+            <div class="row">
+              <div class="subtitle">待处理的文件</div>
+            </div>
+            <div id="list">
+              <div
+                v-for="(file, index) in this.$store.state.splicer.fileList"
+                :key="index"
+                class="file">
+                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+                <div v-if="index != 0" @click.stop="moveUp(index)">
+                  <i class="fas fa-arrow-up move"></i>
                 </div>
-                <div class="action" @click="deleteTemplate(index)">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>删除</div>
+                <div v-if="index != $store.state.splicer.fileList.length - 1" @click.stop="moveDown(index)">
+                  <i class="fas fa-arrow-down move"></i>
+                </div>
+                <div @click.stop="handleDelete(index)">
+                  <i class="fas fa-trash-alt delete"></i>
                 </div>
               </div>
-              <div class="text">{{ template.title }}</div>
-              <div class="subtext">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
-              <div class="subtext">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
             </div>
           </div>
-          <div v-else id="empty-container">
-            <div id="empty">
-              <i class="far fa-folder-open"></i>
-              <div>尚无已保存的模板</div>
+          <div id="template-list">
+            <div class="row">
+              <div class="subtitle">已保存的模板</div>
+            </div>
+            <div v-if="this.$store.state.splicer.templates.length != 0" id="list">
+              <div
+                v-for="(template, index) in this.$store.state.splicer.templates"
+                :key="template.title"
+                class="template">
+                <div class="cover">
+                  <div class="action" @click="applyTemplate(index)">
+                    <span class="fa fa-check-circle"></span>
+                    <div>应用</div>
+                  </div>
+                  <div class="action" @click="deleteTemplate(index)">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>删除</div>
+                  </div>
+                </div>
+                <div class="text">{{ template.title }}</div>
+                <div class="subtext">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
+                <div class="subtext">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
+              </div>
+            </div>
+            <div v-else id="empty-container">
+              <div id="empty">
+                <i class="far fa-folder-open"></i>
+                <div>尚无已保存的模板</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div>
+      <div id="settings">
         <div class="row">
           <div class="subtitle">长图拼接样式设置</div>
         </div>
@@ -161,23 +161,23 @@
             <template slot="append">.jpg</template>
           </el-input>
         </div>
-      </div>
-      <div class="row">
-        <el-dropdown
-          size="mini"
-          split-button
-          type="primary"
-          trigger="click"
-          class="bar-button interactable"
-          @click="hide"
-          @command="(command) => {command()}">
-          最小化
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
-        <el-button type="primary" size="mini" @click="start" class="bar-button">开始拼接</el-button>
+        <div class="row">
+          <el-dropdown
+            size="mini"
+            split-button
+            type="primary"
+            trigger="click"
+            class="bar-button interactable"
+            @click="hide"
+            @command="(command) => {command()}">
+            最小化
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
+          <el-button type="primary" size="mini" @click="start" class="bar-button">开始拼接</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -192,7 +192,7 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'splicerEditor',
+  name: 'splicerHorizontalEditor',
   data () {
     return  {
       padding: 0,
@@ -216,7 +216,7 @@ export default {
       this.$destroy()
     },
     switchDirection() {
-      this.$router.replace('/splicer/horizontalEditor')
+      this.$router.replace('/splicer/editor')
     },
     moveUp(index) {
       let fileList = this.$store.state.splicer.fileList
@@ -417,17 +417,17 @@ export default {
           let fullname = this.filename + '.jpg'
           let distFullpath = path.join(this.distDirectory, fullname)
           let images = document.getElementsByClassName('image')
-          let maxWidth = 0
+          let maxHeight = 0
           for (let i = 0; i < images.length; i++) {
-            maxWidth = Math.max(maxWidth, images[i].width)
+            maxHeight = Math.max(maxHeight, images[i].height)
           }
           let sampleContainer = document.getElementById('sample-container')
-          sampleContainer.style['overflow-y'] = 'hidden'
+          sampleContainer.style['overflow-x'] = 'hidden'
           let sample = document.getElementById('sample')
           let width = window.getComputedStyle(sample).getPropertyValue('width').slice(0, -2)
           let height = window.getComputedStyle(sample).getPropertyValue('height').slice(0, -2)
-          maxWidth = maxWidth * (width / (width - this.padding * 2))
-          let scale = Math.min((maxWidth / width), (16000 / height), Math.sqrt(256000000 / (width * height)))
+          maxHeight = maxHeight * (height / (height - this.padding * 2))
+          let scale = Math.min((maxHeight / height), (16000 / width), Math.sqrt(256000000 / (width * height)))
           let canvas = document.createElement('canvas')
           canvas.width = width * scale
           canvas.height = height * scale
@@ -449,7 +449,7 @@ export default {
                   showConfirm: true
                 })
               } else {
-                if (scale < (maxWidth / width)) {
+                if (scale < (maxHeight / height)) {
                   dialog.change({
                     type: 'success',
                     title: '成功',
@@ -611,6 +611,10 @@ export default {
     }
   },
   mounted() {
+    document.getElementById('sample-container').addEventListener('mousewheel', (event) => {
+      document.getElementById('sample-container').scrollLeft -= event.wheelDelta / 2
+      event.preventDefault()
+    })
     this.$nextTick(() => {
       this.refresh()
     })
@@ -639,13 +643,13 @@ export default {
   -webkit-app-region: no-drag;
 }
 
-#splicer-editor {
+#splicer-horizontal-editor {
   width: 100%;
   height: 100%;
   padding: 20px;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   
@@ -730,387 +734,396 @@ export default {
     padding: 0;
     height: 28px;
   }
-  
-  #left {
-    width: calc(50% - 10px);
-    height: 100%;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     
-    #sample-container {
-      width: 100%;
-      height: 0;
-      flex-grow: 1;
-      background-color: var(--black-gray);
-      border-color: var(--light-gray);
-      border-style: solid;
-      border-width: 1px;
+  #sample-container {
+    width: 100%;
+    height: 0;
+    flex-grow: 1;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    background-color: var(--black-gray);
+    border-color: var(--light-gray);
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+      
+    #sample {
+      height: 100%;
+      width: fit-content;
       box-sizing: border-box;
-      border-radius: 6px;
-      overflow-x: hidden;
-      overflow-y: auto;
+      white-space: nowrap;
+      
+      .image-container {
+        height: 100%;
+        position: relative;
+        display: inline-block;
         
-      #sample {
-        width: 100%;
-        box-sizing: border-box;
-        
-        .image-container {
-          width: 100%;
-          position: relative;
+        .image-wrapper {
+          height: 100%;
+          overflow: hidden;
           
-          .image-wrapper {
-            width: 100%;
-            overflow: hidden;
-            
-            .image {
-              width: 100%;
-              display: block;
-            }
-          }
-          
-          .image-controller {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+          .image {
             height: 100%;
+            display: block;
+          }
+        }
+        
+        .image-controller {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background-color: var(--transparent-black-cover);
+          transition: 0.2s;
+          opacity: 0;
+            
+          .action {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            background-color: var(--transparent-black-cover);
+            cursor: pointer;
+            font-size: 12px;
+            width: 32px;
+            margin-left: 10px;
+            margin-right: 10px;
+            color: var(--white);
             transition: 0.2s;
-            opacity: 0;
-              
-            .action {
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              cursor: pointer;
-              font-size: 12px;
-              width: 32px;
-              margin-left: 10px;
-              margin-right: 10px;
-              color: var(--white);
-              transition: 0.2s;
-              
-              svg {
-                font-size: 20px;
-                margin: 5px;
-              }
-              
-              &:active {
-                filter: brightness(0.9);
-              }
+            
+            svg {
+              font-size: 20px;
+              margin: 5px;
             }
             
-            &:hover {
-              opacity: 1;
+            &:active {
+              filter: brightness(0.9);
             }
-            
-            .move:hover {
-              color: var(--main-color);
-            }
-            
-            .delete:hover {
-              color: var(--warning-red);
-            }
+          }
+          
+          &:hover {
+            opacity: 1;
+          }
+          
+          .move:hover {
+            color: var(--main-color);
+          }
+          
+          .delete:hover {
+            color: var(--warning-red);
           }
         }
       }
-      
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: var(--white-gray);
+    }
+    
+    &::-webkit-scrollbar {
+      height: 10px;
+    }
         
-        &:hover {
-          background-color: var(--light-gray);
-        }
-      }
+    &::-webkit-scrollbar-track {
+      border-radius: 5px;
+      background-color: var(--white-gray);
       
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: var(--gray);
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: var(--dark-gray);
-        }
+      &:hover {
+        background-color: var(--light-gray);
+      }
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: var(--gray);
+      transition: 0.2s;
+      
+      &:hover {
+        background-color: var(--dark-gray);
       }
     }
   }
   
   #control {
-    width: calc(50% - 10px);
-    height: 100%;
+    width: 100%;
+    height: fit-content;
+    flex-shrink: 1;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
     
-    #lists {
-      width: 100%;
-      height: 0;
-      flex-grow: 1;
-      margin-bottom: 10px;
+    #left {
+      width: calc(50% - 10px);
+      height: 100%;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
       
-      #file-list {
-        width: calc(50% - 5px);
-        height: 100%;
+      #lists {
+        width: 100%;
+        height: 0;
+        flex-grow: 1;
         display: flex;
-        flex-direction: column;
         justify-content: space-between;
         
-        #list {
-          width: 100%;
-          flex-grow: 1;
-          background-color: var(--white-gray);
-          box-sizing: border-box;
-          border-radius: 6px;
-          border-color: var(--light-gray);
-          border-style: solid;
-          border-width: 1px;
-          overflow-y: auto;
-          overflow-x: hidden;
+        #file-list {
+          width: calc(50% - 5px);
+          height: 100%;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
           
-          .file {
-            height: 28px;
+          #list {
             width: 100%;
-            line-height: 24px;
-            font-size: 12px;
-            padding-left: 5px;
-            padding-right: 5px;
+            height: 100%;
+            background-color: var(--white-gray);
             box-sizing: border-box;
-            background-color: var(--white);
-            border-bottom-color: var(--light-gray);
-            border-bottom-style: solid;
-            border-bottom-width: 1px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: 0.2s;
+            border-radius: 6px;
+            border-color: var(--light-gray);
+            border-style: solid;
+            border-width: 1px;
+            overflow-y: auto;
+            overflow-x: hidden;
             
-            &:hover {
-              background-color: var(--white-gray);
-            }
-            
-            .filename {
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-              flex-grow: 1;
-              padding-right: 10px;
-            }
-            
-            .delete {
-              color: var(--light-gray);
-              cursor: pointer;
-              transition: 0.2s;
-              margin-right: 5px;
-              margin-left: 5px;
-              
-              &:hover {
-                color: var(--warning-red);
-              }
-              
-              &:first-index {
-                margin-left: 0;
-              }
-              
-              &:last-index {
-                margin-right: 0;
-              }
-            }
-            
-            .move {
-              color: var(--light-gray);
-              cursor: pointer;
-              transition: 0.2s;
-              margin-right: 5px;
-              margin-left: 5px;
-              
-              &:hover {
-                color: var(--main-color);
-              }
-              
-              &:first-index {
-                margin-left: 0;
-              }
-              
-              &:last-index {
-                margin-right: 0;
-              }
-            }
-          }
-          
-          &::-webkit-scrollbar {
-            width: 10px;
-          }
-              
-          &::-webkit-scrollbar-track {
-            border-radius: 5px;
-            background-color: var(--transparent);
-            
-            &:hover {
-              background-color: var(--white-gray);
-            }
-          }
-          
-          &::-webkit-scrollbar-thumb {
-            border-radius: 5px;
-            background-color: var(--light-gray);
-            transition: 0.2s;
-            
-            &:hover {
-              background-color: var(--gray);
-            }
-          }
-        }
-      }
-      
-      #template-list {
-        width: calc(50% - 5px);
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        
-        #list {
-          width: 100%;
-          flex-grow: 1;
-          background-color: var(--white-gray);
-          box-sizing: border-box;
-          border-radius: 6px;
-          border-color: var(--light-gray);
-          border-style: solid;
-          border-width: 1px;
-          overflow-y: auto;
-          overflow-x: hidden;
-          
-          .template {
-            position: relative;
-            height: 80px;
-            padding: 10px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            background-color: var(--white);
-            border-bottom-color: var(--light-gray);
-            border-bottom-style: solid;
-            border-bottom-width: 1px;
-            
-            .text {
+            .file {
+              height: 28px;
               width: 100%;
-              overflow: hidden;
-              white-space: nowrap;
-              text-overflow: ellipsis;
-            }
-            
-            .cover {
-              position: absolute;
-              width: 100%;
-              height: 100%;
-              top: 0;
-              left: 0;
-              display: flex;
-              justify-content: center;
-              align-items: center;
+              line-height: 24px;
+              font-size: 12px;
+              padding-left: 5px;
+              padding-right: 5px;
+              box-sizing: border-box;
               background-color: var(--white);
-              opacity: 0;
+              border-bottom-color: var(--light-gray);
+              border-bottom-style: solid;
+              border-bottom-width: 1px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
               transition: 0.2s;
               
-              .action {
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
+              &:hover {
+                background-color: var(--white-gray);
+              }
+              
+              .filename {
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                flex-grow: 1;
+                padding-right: 10px;
+              }
+              
+              .delete {
+                color: var(--light-gray);
                 cursor: pointer;
-                font-size: 12px;
-                width: 32px;
-                margin-left: 10px;
-                margin-right: 10px;
                 transition: 0.2s;
+                margin-right: 5px;
+                margin-left: 5px;
                 
-                svg {
-                  font-size: 20px;
-                  margin: 5px;
+                &:hover {
+                  color: var(--warning-red);
                 }
+                
+                &:first-index {
+                  margin-left: 0;
+                }
+                
+                &:last-index {
+                  margin-right: 0;
+                }
+              }
+              
+              .move {
+                color: var(--light-gray);
+                cursor: pointer;
+                transition: 0.2s;
+                margin-right: 5px;
+                margin-left: 5px;
                 
                 &:hover {
                   color: var(--main-color);
                 }
                 
-                &:active {
-                  filter: brightness(0.9);
+                &:first-index {
+                  margin-left: 0;
+                }
+                
+                &:last-index {
+                  margin-right: 0;
                 }
               }
+            }
+            
+            &::-webkit-scrollbar {
+              width: 10px;
+            }
+                
+            &::-webkit-scrollbar-track {
+              border-radius: 5px;
+              background-color: var(--transparent);
               
               &:hover {
-                opacity: 1;
+                background-color: var(--white-gray);
               }
             }
-          }
-          
-          &::-webkit-scrollbar {
-            width: 10px;
-          }
+            
+            &::-webkit-scrollbar-thumb {
+              border-radius: 5px;
+              background-color: var(--light-gray);
+              transition: 0.2s;
               
-          &::-webkit-scrollbar-track {
-            border-radius: 5px;
-            background-color: var(--transparent);
-            
-            &:hover {
-              background-color: var(--white-gray);
-            }
-          }
-          
-          &::-webkit-scrollbar-thumb {
-            border-radius: 5px;
-            background-color: var(--light-gray);
-            transition: 0.2s;
-            
-            &:hover {
-              background-color: var(--gray);
+              &:hover {
+                background-color: var(--gray);
+              }
             }
           }
         }
         
-        #empty-container {
-          width: 100%;
-          flex-grow: 1;
+        #template-list {
+          width: calc(50% - 5px);
+          height: 100%;
           display: flex;
-          justify-content: center;
-          align-items: center;
-          background-color: var(--white-gray);
-          box-sizing: border-box;
-          border-radius: 6px;
-          border-color: var(--light-gray);
-          border-style: solid;
-          border-width: 1px;
+          flex-direction: column;
+          justify-content: space-between;
           
-          #empty {
+          #list {
+            width: 100%;
+            height: 100%;
+            background-color: var(--white-gray);
+            box-sizing: border-box;
+            border-radius: 6px;
+            border-color: var(--light-gray);
+            border-style: solid;
+            border-width: 1px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            
+            .template {
+              position: relative;
+              height: 80px;
+              padding: 10px;
+              box-sizing: border-box;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: flex-start;
+              background-color: var(--white);
+              border-bottom-color: var(--light-gray);
+              border-bottom-style: solid;
+              border-bottom-width: 1px;
+              
+              .text {
+                width: 100%;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+              }
+              
+              .cover {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: var(--white);
+                opacity: 0;
+                transition: 0.2s;
+                
+                .action {
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  cursor: pointer;
+                  font-size: 12px;
+                  width: 32px;
+                  margin-left: 10px;
+                  margin-right: 10px;
+                  transition: 0.2s;
+                  
+                  svg {
+                    font-size: 20px;
+                    margin: 5px;
+                  }
+                  
+                  &:hover {
+                    color: var(--main-color);
+                  }
+                  
+                  &:active {
+                    filter: brightness(0.9);
+                  }
+                }
+                
+                &:hover {
+                  opacity: 1;
+                }
+              }
+            }
+            
+            &::-webkit-scrollbar {
+              width: 10px;
+            }
+                
+            &::-webkit-scrollbar-track {
+              border-radius: 5px;
+              background-color: var(--transparent);
+              
+              &:hover {
+                background-color: var(--white-gray);
+              }
+            }
+            
+            &::-webkit-scrollbar-thumb {
+              border-radius: 5px;
+              background-color: var(--light-gray);
+              transition: 0.2s;
+              
+              &:hover {
+                background-color: var(--gray);
+              }
+            }
+          }
+          
+          #empty-container {
+            width: 100%;
+            flex-grow: 1;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 14px;
+            background-color: var(--white-gray);
+            box-sizing: border-box;
+            border-radius: 6px;
+            border-color: var(--light-gray);
+            border-style: solid;
+            border-width: 1px;
             
-            svg {
-              font-size: 40px;
-              margin: 14px;
+            #empty {
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              font-size: 14px;
+              
+              svg {
+                font-size: 40px;
+                margin: 14px;
+              }
             }
           }
         }
       }
+    }
+    
+    #settings {
+      width: calc(50% - 10px);
+      height: fit-content;
     }
   }
 }

@@ -1,35 +1,33 @@
 <template>
-  <div id="splicer-template">
-    <div id="left">
-      <div id="samples-container" class="interactable">
+  <div id="splicer-horizontal-template">
+    <div id="samples-container" class="interactable">
+      <div
+        id="samples"
+        :style="{
+          'padding': padding + 'px',
+          'background-color': backgroundColor
+        }">
         <div
-          id="samples"
-          :style="{
-            'padding': padding + 'px',
-            'background-color': backgroundColor
-          }">
+          v-for="(color, index) in ['--black-gray', '--dark-gray', '--gray', '--light-gray']"
+          :key="index"
+          class="sample-container">
           <div
-            v-for="(color, index) in ['--black-gray', '--dark-gray', '--gray', '--light-gray']"
-            :key="index"
-            class="sample-container">
-            <div
-              class="sample"
-              :style="{
-                'margin-top': index == 0 ? 0 : spacing + 'px',
-                'border-radius': borderRadius + 'px',
-                'background-color': 'var(' + color + ')'
-              }">
-              <div class="subtitle">样例图片</div>
-            </div>
+            class="sample"
+            :style="{
+              'margin-left': index == 0 ? 0 : spacing + 'px',
+              'border-radius': borderRadius + 'px',
+              'background-color': 'var(' + color + ')'
+            }">
+            <div class="subtitle">样例图片</div>
           </div>
         </div>
       </div>
-      <div class="row">
-        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
-      </div>
     </div>
     <div id="control" class="interactable">
-      <div id="controller">
+      <div id="left">
+        <div class="row">
+          <el-button type="primary" size="mini" @click="switchDirection" class="bar-button">切换拼接方向</el-button>
+        </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
           <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
@@ -68,24 +66,26 @@
             input-size="mini"></el-slider>
         </div>
       </div>
-      <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
-      <div class="row">
-        <el-dropdown
-          size="mini"
-          split-button
-          type="primary"
-          trigger="click"
-          class="bar-button interactable"
-          @click="hide"
-          @command="(command) => {command()}">
-          最小化
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button">保存</el-button>
-        <el-button type="primary" size="mini" @click="saveAsNew" class="bar-button">{{ index == -1 ? '保存' : '另存'}}</el-button>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="bar-button">删除</el-button>
+      <div id="right">
+        <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
+        <div class="row">
+          <el-dropdown
+            size="mini"
+            split-button
+            type="primary"
+            trigger="click"
+            class="bar-button interactable"
+            @click="hide"
+            @command="(command) => {command()}">
+            最小化
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button">保存</el-button>
+          <el-button type="primary" size="mini" @click="saveAsNew" class="bar-button">{{ index == -1 ? '保存' : '另存'}}</el-button>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="bar-button">删除</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -95,7 +95,7 @@
 import { ipcRenderer } from 'electron'
 
 export default {
-  name: 'splicerTemplate',
+  name: 'splicerHorizontalTemplate',
   data () {
     return  {
       index: this.$route.query.index,
@@ -126,7 +126,7 @@ export default {
       })
     },
     switchDirection() {
-      this.$router.replace('/splicer/horizontalTemplate?index=' + this.index)
+      this.$router.replace('/splicer/template?index=' + this.index)
     },
     save() {
       let template =  {
@@ -350,6 +350,10 @@ export default {
     }
   },
   mounted() {
+    document.getElementById('samples-container').addEventListener('mousewheel', (event) => {
+      document.getElementById('samples-container').scrollLeft -= event.wheelDelta / 2
+      event.preventDefault()
+    })
     if (this.$route.query.index != -1) {
       let template = this.$store.state.splicer.templates[this.$route.query.index]
       this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
@@ -378,13 +382,13 @@ export default {
   -webkit-app-region: no-drag;
 }
 
-#splicer-template {
+#splicer-horizontal-template {
   width: 100%;
   height: 100%;
   padding: 20px;
   box-sizing: border-box;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   
@@ -469,81 +473,81 @@ export default {
     padding: 0;
     height: 28px;
   }
-  
-  #left {
-    width: calc(50% - 10px);
-    height: 100%;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     
-    #samples-container {
-      width: 100%;
-      height: 0;
-      flex-grow: 1;
-      background-color: var(--dark-gray);
-      border-color: var(--light-gray);
-      border-style: solid;
-      border-width: 1px;
+  #samples-container {
+    width: 100%;
+    height: 0;
+    flex-grow: 1;
+    margin-bottom: 10px;
+    background-color: var(--black-gray);
+    border-color: var(--light-gray);
+    border-style: solid;
+    border-width: 1px;
+    box-sizing: border-box;
+    border-radius: 6px;
+    overflow-x: auto;
+    overflow-y: hidden;
+      
+    #samples {
+      height: 100%;
+      width: fit-content;
       box-sizing: border-box;
-      border-radius: 6px;
-      overflow-x: hidden;
-      overflow-y: auto;
-        
-      #samples {
-        width: 100%;
-        box-sizing: border-box;
-        
-        .sample-container {
-          width: 100%;
-          position: relative;
-          
-          .sample {
-            width: 100%;
-            height: 300px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--white);
-          }
-        }
-      }
+      white-space: nowrap;
       
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: var(--white-gray);
+      .sample-container {
+        height: 100%;
+        display: inline-block;
         
-        &:hover {
-          background-color: var(--light-gray);
-        }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: var(--gray);
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: var(--dark-gray);
+        .sample {
+          width: 450px;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: var(--white);
         }
       }
     }
-  }  
+    
+    &::-webkit-scrollbar {
+      height: 10px;
+    }
+        
+    &::-webkit-scrollbar-track {
+      border-radius: 5px;
+      background-color: var(--white-gray);
+      
+      &:hover {
+        background-color: var(--light-gray);
+      }
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      border-radius: 5px;
+      background-color: var(--gray);
+      transition: 0.2s;
+      
+      &:hover {
+        background-color: var(--dark-gray);
+      }
+    }
+  }
   
   #control {
-    width: calc(50% - 10px);
-    height: 100%;
+    width: 100%;
     display: flex;
-    flex-direction: column;
     justify-content: space-between;
     
-    #controller {
-      flex-grow: 1;
+    #left {
+      width: calc(50% - 10px);
+    }
+    
+    #right {
+      width: calc(50% - 10px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
     }
   }
 }

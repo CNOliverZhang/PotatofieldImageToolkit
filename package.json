@@ -53,11 +53,15 @@
     },
     "win": {
       "icon": "build/icons/icon.ico",
-      "target": ["nsis", "portable "]
+      "target": [
+        "nsis",
+        "portable "
+      ]
     }
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^16.0.0",
+    "@ckeditor/ckeditor5-clipboard": "^16.0.0",
     "@ckeditor/ckeditor5-vue": "^1.0.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.26",
     "@fortawesome/free-brands-svg-icons": "^5.12.1",

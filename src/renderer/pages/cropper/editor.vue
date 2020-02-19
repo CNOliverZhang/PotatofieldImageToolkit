@@ -120,7 +120,19 @@
       </div>
     </div>
     <div class="row">
-      <el-button type="primary" size="mini" @click="close" class="bar-button interactable">退出编辑器</el-button>
+      <el-dropdown
+        size="mini"
+        split-button
+        type="primary"
+        trigger="click"
+        class="bar-button interactable"
+        @click="hide"
+        @command="(command) => {command()}">
+        最小化
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
       <el-button type="primary" size="mini" @click="init(imageIndex)" class="bar-button interactable">重置</el-button>
       <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
     </div>
@@ -159,6 +171,9 @@ export default {
     }
   },
   methods: {
+    hide() {
+      ipcRenderer.send('minimize')
+    },
     close() {
       this.$store.dispatch('cropper/fileListEmpty')
       ipcRenderer.send('close')
@@ -329,7 +344,7 @@ export default {
 </script>
 
 <style lang="scss">
-.el-select-dropdown {
+.el-popper {
   -webkit-app-region: no-drag;
 }
 
@@ -392,7 +407,10 @@ export default {
   }
   
   .bar-button {
-    width: 100%;
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
     margin-left: 5px;
     margin-right: 5px;
     
@@ -403,6 +421,19 @@ export default {
     &:last-child {
       margin-right: 0;
     }
+  }
+  
+  .el-button-group {
+    display: flex;
+    
+    button:not(.el-dropdown__caret-button) {
+      width: 100%
+    }
+  }
+  
+  .el-button--primary:not(.el-dropdown__caret-button) {
+    padding: 0;
+    height: 28px;
   }
   
   .el-input .el-select {

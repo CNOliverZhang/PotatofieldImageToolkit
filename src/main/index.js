@@ -45,11 +45,10 @@ function createWindow(args) {
     width: args.width ? args.width : 800,
     frame: false,
     fullscreenable: false,
-    resizable: false,
+    resizable: true,
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
-    modal: args.modal,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true
@@ -57,6 +56,12 @@ function createWindow(args) {
   })
 
   newWindow.loadURL(baseURL + args.path)
+  
+  if (args.modal) {
+    newWindow.on('minimize', () => {
+      args.parent.minimize()
+    })
+  }
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
@@ -127,6 +132,14 @@ ipcMain.on('update-now', () => {
   autoUpdater.quitAndInstall(true, true)
 })
 
+ipcMain.on('show', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
+  if (currentWindow.isMinimized()) {
+    currentWindow.restore()
+  }
+  currentWindow.show()
+})
+
 ipcMain.on('minimize', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
   currentWindow.minimize()
@@ -134,10 +147,17 @@ ipcMain.on('minimize', () => {
 
 ipcMain.on('close', () => {
   let currentWindow = BrowserWindow.getFocusedWindow()
-  if (currentWindow.webContents.browserWindowOptions.modal) {
-    currentWindow.webContents.browserWindowOptions.parent.webContents.send('modal-window-closed')
+  if (currentWindow.webContents.browserWindowOptions.parent) {
+    let parent = currentWindow.webContents.browserWindowOptions.parent
+    currentWindow.destroy()
+    parent.webContents.send('modal-window-closed')
+    if (parent.isMinimized()) {
+      parent.restore()
+    }
+    parent.focus()
+  } else {
+    currentWindow.destroy()
   }
-  currentWindow.destroy()
 })
 
 ipcMain.on('index-only', (event) => {

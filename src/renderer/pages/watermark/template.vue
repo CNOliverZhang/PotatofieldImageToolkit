@@ -45,21 +45,16 @@
           </div>
         </div>
       </div>
-      <div class="row">
-        <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini" class="interactable"></el-input>
-      </div>
-      <div id="control-buttons">
-        <el-button type="primary" size="mini" @click="exit" class="control-button interactable">退出编辑器</el-button>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="control-button interactable">保存</el-button>
-        <el-button type="primary" size="mini" @click="saveAsNew" class="control-button interactable">{{ index == -1 ? '保存' : '另存'}}</el-button>
-        <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="control-button interactable">删除</el-button>
+      <div class="row interactable">
+        <div class="text">参照背景颜色</div>
+        <el-select v-model="background" placeholder="请选择" size="mini">
+          <el-option label="深色" value="var(--black-gray)"/>
+          <el-option label="浅色" value="var(--white-gray)"/>
+        </el-select>
       </div>
     </div>
     <div id="control" class="interactable">
       <div>
-        <div class="row">
-          <div class="subtitle">水印设置</div>
-        </div>
         <el-collapse value="content" accordion>
           <el-collapse-item title="水印内容" name="content">
             <el-input
@@ -99,7 +94,7 @@
               <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印文字装饰" name="decoration">
+          <el-collapse-item title="水印背景" name="background">
             <div class="control-row">
               <div class="text">水印背景尺寸</div>
               <el-slider
@@ -115,6 +110,8 @@
               <div class="text">水印背景颜色</div>
               <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
             </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印阴影" name="shadow">
             <div class="control-row">
               <div class="text">水印阴影水平位置</div>
               <el-slider
@@ -250,12 +247,28 @@
           </el-collapse-item>
         </el-collapse>
       </div>
-      <div class="row">
-        <div class="text">参照背景颜色</div>
-        <el-select v-model="background" placeholder="请选择" size="mini">
-          <el-option label="深色" value="var(--black-gray)"/>
-          <el-option label="浅色" value="var(--white-gray)"/>
-        </el-select>
+      <div>
+        <div class="row">
+          <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
+        </div>
+        <div class="row">
+          <el-dropdown
+            size="mini"
+            split-button
+            type="primary"
+            trigger="click"
+            class="bar-button interactable"
+            @click="hide"
+            @command="(command) => {command()}">
+            最小化
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button">保存</el-button>
+          <el-button type="primary" size="mini" @click="saveAsNew" class="bar-button">{{ index == -1 ? '保存' : '另存'}}</el-button>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="bar-button">删除</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -389,6 +402,9 @@ export default {
     }
   },
   methods: {
+    hide() {
+      ipcRenderer.send('minimize')
+    },
     close() {
       ipcRenderer.send('close')
       this.$destroy()
@@ -730,6 +746,10 @@ export default {
   }
 }
 
+.el-popper {
+  -webkit-app-region: no-drag;
+}
+
 #watermark-template {
   width: 100%;
   height: 100%;
@@ -750,7 +770,7 @@ export default {
   
   .control-row {
     width: 100%;
-    height: 21px;
+    height: 28px;
     flex-shrink: 0;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -792,6 +812,36 @@ export default {
     }
   }
   
+  .bar-button {
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    margin-left: 5px;
+    margin-right: 5px;
+    
+    &:first-child {
+      margin-left: 0;
+    }
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  
+  .el-button-group {
+    display: flex;
+    
+    button:not(.el-dropdown__caret-button) {
+      width: 100%
+    }
+  }
+  
+  .el-button--primary:not(.el-dropdown__caret-button) {
+    padding: 0;
+    height: 28px;
+  }
+  
   #preview {
     width: calc(50% - 10px);
     height: 100%;
@@ -822,26 +872,6 @@ export default {
         height: fit-content;
         box-sizing: border-box;
         line-height: 1em;
-      }
-    }
-    
-    #control-buttons {
-      display: flex;
-      justify-content: space-between;
-      justify-content: flex-end;
-      
-      .control-button {
-        width: 100%;
-        margin-left: 5px;
-        margin-right: 5px;
-        
-        &:first-child {
-          margin-left: 0;
-        }
-        
-        &:last-child {
-          margin-right: 0;
-        }
       }
     }
   }

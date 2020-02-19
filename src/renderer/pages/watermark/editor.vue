@@ -150,7 +150,7 @@
               <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印文字装饰" name="decoration">
+          <el-collapse-item title="水印背景" name="background">
             <div class="control-row">
               <div class="text">水印背景尺寸</div>
               <el-slider
@@ -166,6 +166,8 @@
               <div class="text">水印背景颜色</div>
               <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
             </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印阴影" name="shadow">
             <div class="control-row">
               <div class="text">水印阴影水平位置</div>
               <el-slider
@@ -300,6 +302,8 @@
             </div>
           </el-collapse-item>
         </el-collapse>
+      </div>
+      <div>
         <div class="row">
           <div class="subtitle">保存设置</div>
         </div>
@@ -350,12 +354,24 @@
           <div class="text">文件名后缀</div>
           <el-input size="mini" v-model="append" maxlength="12" class="control"></el-input>
         </div>
-      </div>
-      <div id="control-buttons">
-        <el-button type="primary" size="mini" @click="close" class="control-button">退出编辑器</el-button>
-        <el-button type="primary" size="mini" @click="saveAsTemplate" class="control-button">保存为模板</el-button>
-        <el-button type="primary" size="mini" @click="start" class="control-button">处理这张图片</el-button>
-        <el-button type="primary" size="mini" @click="startAll" class="control-button">处理全部图片</el-button>
+        <div class="row">
+          <el-dropdown
+            size="mini"
+            split-button
+            type="primary"
+            trigger="click"
+            class="bar-button interactable"
+            @click="hide"
+            @command="(command) => {command()}">
+            最小化
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
+          <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
+          <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -503,6 +519,9 @@ export default {
     }
   },
   methods: {
+    hide() {
+      ipcRenderer.send('minimize')
+    },
     close() {
       this.$store.dispatch('watermark/fileListEmpty')
       ipcRenderer.send('close')
@@ -1041,14 +1060,14 @@ export default {
                     this.sizeBaseX = sampleWidth / 100
                     this.sizeBaseY = sampleHeight / 100
                     let scale = width / sampleWidth
-                    // 匹配模糊半径，等待 html2canvas 作者更新
-                    let shadow = watermark.style['text-shadow'].split(' ')
-                    shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
-                    watermark.style['text-shadow'] = shadow.join(' ')
-                    // 完成匹配
                     this.$nextTick(() => {
                       this.initWatermarkSize()
                       this.$nextTick(() => {
+                        // 匹配模糊半径，等待 html2canvas 作者更新
+                        let shadow = watermark.style['text-shadow'].split(' ')
+                        shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
+                        watermark.style['text-shadow'] = shadow.join(' ')
+                        // 完成匹配
                         html2canvas(document.getElementById('watermark-container'), {
                           canvas: canvas,
                           scale: scale,
@@ -1087,6 +1106,14 @@ export default {
                 confirmFunction: () => {
                   this.close()
                 }
+              }).then(() => {
+                let notification = new Notification('图片加水印工具', {
+                  body: '队列中的图片已处理完成。',
+                  icon: path.join(__static, 'images/icon.ico')
+                })
+                notification.onclick = () => {
+                  ipcRenderer.send('show')
+                }
               })
             } else {
               dialog.change({
@@ -1109,6 +1136,14 @@ export default {
                 showConfirm: true,
                 confirmFunction: () => {
                   this.close()
+                }
+              }).then(() => {
+                let notification = new Notification('图片加水印工具', {
+                  body: '队列中的图片已处理完成。',
+                  icon: path.join(__static, 'images/icon.ico')
+                })
+                notification.onclick = () => {
+                  ipcRenderer.send('show')
                 }
               })
             }
@@ -1155,6 +1190,10 @@ export default {
   }
 }
 
+.el-popper {
+  -webkit-app-region: no-drag;
+}
+
 #watermark-editor {
   width: 100%;
   height: 100%;
@@ -1175,7 +1214,7 @@ export default {
   
   .control-row {
     width: 100%;
-    height: 21px;
+    height: 28px;
     flex-shrink: 0;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -1225,6 +1264,36 @@ export default {
     &:last-child {
       margin-bottom: 0;
     }
+  }
+  
+  .bar-button {
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    margin-left: 5px;
+    margin-right: 5px;
+    
+    &:first-child {
+      margin-left: 0;
+    }
+    
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  
+  .el-button-group {
+    display: flex;
+    
+    button:not(.el-dropdown__caret-button) {
+      width: 100%
+    }
+  }
+  
+  .el-button--primary:not(.el-dropdown__caret-button) {
+    padding: 0;
+    height: 28px;
   }
   
   #preview {
@@ -1558,26 +1627,6 @@ export default {
         
         &:hover {
           background-color: var(--gray);
-        }
-      }
-    }
-    
-    #control-buttons {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      
-      .control-button {
-        width: 100%;
-        margin-left: 5px;
-        margin-right: 5px;
-        
-        &:first-child {
-          margin-left: 0;
-        }
-        
-        &:last-child {
-          margin-right: 0;
         }
       }
     }

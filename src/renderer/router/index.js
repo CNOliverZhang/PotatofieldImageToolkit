@@ -47,6 +47,26 @@ export default new Router({
       component: require('@/pages/splicer/template').default
     },
     {
+      path: '/splicer/horizontalEditor',
+      name: 'splicerHorizontalEditor',
+      component: require('@/pages/splicer/horizontalEditor').default
+    },
+    {
+      path: '/splicer/horizontalTemplate',
+      name: 'splicerHorizontalTemplate',
+      component: require('@/pages/splicer/horizontalTemplate').default
+    },
+    {
+      path: '/slice',
+      name: 'slice',
+      component: require('@/pages/slice').default
+    },
+    {
+      path: '/slice/editor',
+      name: 'sliceEditor',
+      component: require('@/pages/slice/editor').default
+    },
+    {
       path: '/textToImage',
       name: 'textToImage',
       component: require('@/pages/textToImage').default

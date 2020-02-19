@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="cropper" @tab-click="clear">
+  <el-tabs type="card" tab-position="left" id="slice" @tab-click="clear">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
       <div class="tab-content">
@@ -39,8 +39,8 @@
     <el-tab-pane disabled>
       <span slot="label" id="sidebar">
         <div id="tool-info">
-          <i id="tool-logo" class="fas fa-crop-alt"></i>
-          <div class="text">图片裁剪工具</div>
+          <i id="tool-logo" class="fas fa-th"></i>
+          <div class="text">图片分割工具</div>
         </div>
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
@@ -65,7 +65,7 @@ import ReadDirectory from '../utils/ReadDirectory'
 const path = require('path')
 
 export default {
-  name: 'cropper',
+  name: 'slice',
   data () {
     return {
       fileList: [],
@@ -198,10 +198,10 @@ export default {
         text: '请在编辑器中继续操作。',
         showConfirm: false
       }).then((dialog) => {
-        this.$store.dispatch('cropper/fileListAssign', this.fileList).then(() => {
+        this.$store.dispatch('slice/fileListAssign', this.fileList).then(() => {
           ipcRenderer.send('open', {
             title: '裁剪编辑器',
-            path: '#/cropper/editor',
+            path: '#/slice/editor',
             modal: true,
             height: 720,
             width: 1000
@@ -219,7 +219,7 @@ export default {
 </script>
 
 <style lang="scss">
-#cropper {
+#slice {
   width: 100%;
   height: 100%;
   

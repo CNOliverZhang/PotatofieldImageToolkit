@@ -1,7 +1,7 @@
 <template>
   <el-tabs type="card" tab-position="left" id="textToImage">
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-file-alt"></i> 输入内容</span>
+      <span slot="label" class="interactable"><i class="fas fa-keyboard"></i> 输入内容</span>
       <div id="editor" class="tab-content">
         <div id="preview" class="interactable" v-html="content"></div>
         <div id="controller" class="interactable">
@@ -14,7 +14,7 @@
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-palette"></i> 样式模板库</span>
+      <span slot="label" class="interactable"><i class="fas fa-file-alt"></i> 样式模板库</span>
       <div id="templates" class="tab-content">
         <div id="container" v-if="this.$store.state.textToImage.templates.length != 0">
           <div
@@ -85,7 +85,7 @@
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
             <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+            <div>隐藏</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -174,12 +174,22 @@ export default {
       }
     },
     editTemplate(index) {
-      ipcRenderer.send('open', {
-        title: '样式模板编辑器',
-        path: '#/textToImage/template?index=' + String(index),
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '样式模板编辑器',
+          path: '#/textToImage/template?index=' + String(index),
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     },
     shareTemplate(index) {
@@ -313,12 +323,22 @@ export default {
       }
     },
     createTemplate() {
-      ipcRenderer.send('open', {
-        title: '样式模板编辑器',
-        path: '#/textToImage/template?index=-1',
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '样式模板编辑器',
+          path: '#/textToImage/template?index=-1',
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     }
   }
@@ -472,10 +492,6 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .controller {
-      width: 60%;
-    }
-    
     &:first-child {
       margin-top: 0;
     }
@@ -486,7 +502,12 @@ export default {
   }
   
   .bar-button {
-    width: 100%;
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
     margin-left: 5px;
     margin-right: 5px;
     

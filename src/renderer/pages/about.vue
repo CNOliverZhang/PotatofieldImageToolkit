@@ -145,7 +145,7 @@
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
             <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+            <div>隐藏</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -576,7 +576,7 @@ export default {
   
   .control-row {
     width: 100%;
-    height: 21px;
+    height: 28px;
     flex-shrink: 0;
     margin-top: 10px;
     margin-bottom: 10px;

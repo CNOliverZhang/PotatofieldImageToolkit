@@ -38,6 +38,7 @@ export default {
   --white: #FFFFFF;
   --transparent: rgba(255, 255, 255, 0);
   --transparent-black-cover: rgba(0, 0, 0, 0.3);
+  --transparent-black-cover: rgba(255, 255, 255, 0.3);
 }
 
 body {

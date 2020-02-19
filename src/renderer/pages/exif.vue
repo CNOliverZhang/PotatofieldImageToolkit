@@ -111,13 +111,13 @@
     <el-tab-pane disabled>
       <span slot="label" id="sidebar">
         <div id="tool-info">
-          <i id="tool-logo" class="fas fa-info"></i>
+          <i id="tool-logo" class="fas fa-camera"></i>
           <div class="text">EXIF 读取工具</div>
         </div>
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
             <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+            <div>隐藏</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -446,7 +446,12 @@ export default {
   }
   
   .bar-button {
-    width: 100%;
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
     margin-left: 5px;
     margin-right: 5px;
     
@@ -457,10 +462,6 @@ export default {
     &:last-child {
       margin-right: 0;
     }
-  }
-  
-  .controller {
-    width: 100%;
   }
     
   #image-container {

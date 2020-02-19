@@ -32,6 +32,18 @@
             <div class="title">长图拼接工具</div>
           </el-card>
         </div>
+        <div class="container" @click="open('/cropper', '图片裁剪工具')">
+          <el-card class="card">
+            <span class="fas fa-crop-alt icon"></span>
+            <div class="title">图片裁剪工具</div>
+          </el-card>
+        </div>
+        <div class="container" @click="open('/slice', '图片分割工具')">
+          <el-card class="card">
+            <i class="fas fa-th icon"></i>
+            <div class="title">图片分割工具</div>
+          </el-card>
+        </div>
         <div class="container" @click="open('/textToImage', '富文本制图工具')">
           <el-card class="card">
             <span class="fas fa-file-alt icon"></span>
@@ -50,15 +62,9 @@
             <div class="title">JPEG 压缩工具</div>
           </el-card>
         </div>
-        <div class="container" @click="open('/cropper', '图片裁剪工具')">
-          <el-card class="card">
-            <span class="fas fa-crop-alt icon"></span>
-            <div class="title">图片裁剪工具</div>
-          </el-card>
-        </div>
         <div class="container" @click="open('/exif', 'EXIF 读取工具')">
           <el-card class="card">
-            <span class="fas fa-info icon"></span>
+            <span class="fas fa-camera icon"></span>
             <div class="title">EXIF 读取工具</div>
           </el-card>
         </div>
@@ -132,8 +138,11 @@ export default {
         text: '当前最新版本为 ' + info.version + ' ，新版本特性如下：',
         content: this.$createElement('div', null, info.releaseNotes.split('\n').map((releaseNote) => {
           return this.$createElement('p', {
-            'style': {
-              'text-indent': 0
+            style: {
+              'line-height': '24px',
+              'font-size': '12px',
+              'text-align': 'justify',
+              'text-indent': '0'
             }
           }, releaseNote)
         })),

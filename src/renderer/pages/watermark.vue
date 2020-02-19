@@ -161,7 +161,7 @@
         <div id="control-button-holder">
           <div class="control-button interactable" @click="hide">
             <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+            <div>隐藏</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -403,12 +403,22 @@ export default {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
     },
     editTemplate(index) {
-      ipcRenderer.send('open', {
-        title: '水印模板编辑器',
-        path: '#/watermark/template?index=' + String(index),
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '水印模板编辑器',
+          path: '#/watermark/template?index=' + String(index),
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     },
     shareTemplate(index) {
@@ -549,12 +559,22 @@ export default {
       }
     },
     createTemplate() {
-      ipcRenderer.send('open', {
-        title: '水印模板编辑器',
-        path: '#/watermark/template?index=-1',
-        modal: true,
-        height: 600,
-        width: 1000
+      this.$dialog({
+        text: '请在编辑器中继续操作。',
+        showConfirm: false
+      }).then((dialog) => {
+        ipcRenderer.send('open', {
+          title: '水印模板编辑器',
+          path: '#/watermark/template?index=-1',
+          modal: true,
+          height: 600,
+          width: 1000
+        })
+        ipcRenderer.on('modal-window-closed', () => {
+          this.clear()
+          dialog.close()
+          ipcRenderer.removeAllListeners('modal-window-closed')
+        })
       })
     }
   }
@@ -722,7 +742,12 @@ export default {
   }
   
   .bar-button {
-    width: 100%;
+    width: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
     margin-left: 5px;
     margin-right: 5px;
     
