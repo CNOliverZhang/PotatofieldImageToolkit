@@ -49,7 +49,7 @@
         <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
       </div>
     </div>
-    <div id="control" class="interactable">
+    <div id="right" class="interactable">
       <div id="lists">
         <div id="file-list">
           <div class="row">
@@ -169,7 +169,7 @@
           type="primary"
           trigger="click"
           class="bar-button interactable"
-          @click="hide"
+          @click="minimize"
           @command="(command) => {command()}">
           最小化
           <el-dropdown-menu slot="dropdown">
@@ -207,7 +207,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -628,8 +628,6 @@ export default {
 
 <style lang="scss">  
 .el-color-picker__panel {
-  -webkit-app-region: no-drag;
-  
   button {
     font-family: var(--main-font);
   }
@@ -670,7 +668,7 @@ export default {
     align-items: center;
     
     .control {
-      width: 60%;
+      width: 70%;
     }
     
     &:first-child {
@@ -703,6 +701,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -718,6 +717,24 @@ export default {
     }
   }
   
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   .el-button-group {
     display: flex;
     
@@ -728,6 +745,12 @@ export default {
   
   .el-button--primary:not(.el-dropdown__caret-button) {
     padding: 0;
+    height: 28px;
+  }
+  
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
     height: 28px;
   }
   
@@ -846,7 +869,7 @@ export default {
     }
   }
   
-  #control {
+  #right {
     width: calc(50% - 10px);
     height: 100%;
     display: flex;

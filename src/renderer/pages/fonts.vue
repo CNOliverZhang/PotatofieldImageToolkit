@@ -241,9 +241,9 @@
           <div class="text">字体管理工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -321,7 +321,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -617,11 +617,21 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
   }
   
   .row {
@@ -650,6 +660,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -667,130 +678,119 @@ export default {
     }
   }
   
-  .tab-content {
+  .container {
     width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
+    height: 0;
+    flex-grow: 1;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    flex-wrap: wrap;
     
-    .container {
-      width: 100%;
-      height: 0;
-      flex-grow: 1;
-      display: flex;
-      flex-wrap: wrap;
+    .card-container {
+      width: 50%;
+      height: 50%;
+      box-sizing: border-box;
+      padding: 10px;
       
-      .card-container {
-        width: 50%;
-        height: 50%;
-        box-sizing: border-box;
-        padding: 10px;
+      .card {
+        width: 100%;
+        height: 100%;
+        color: var(--dark-gray);
         
-        .card {
+        .el-card__body {
           width: 100%;
           height: 100%;
-          color: var(--dark-gray);
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
           
-          .el-card__body {
+          .font-preview {
             width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            
-            .font-preview {
-              width: 100%;
-            }
-            
-            .actions {
-              width: 100%;
-              flex-grow: 1;
-              align-items: flex-end;
-              
-              .action {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                color: var(--gray);
-                font-size: 12px;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 14px;
-                  margin-right: 5px;
-                }
-              }
-              
-              .active {
-                color: var(--dark-gray);
-                cursor: pointer;
-                
-                &:hover {
-                  color: var(--main-color);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
-              }
-            }
           }
           
-          &:hover {
-            transform: scale(1.05);
+          .actions {
+            width: 100%;
+            flex-grow: 1;
+            align-items: flex-end;
+            
+            .action {
+              width: 100%;
+              display: flex;
+              align-items: center;
+              color: var(--gray);
+              font-size: 12px;
+              transition: 0.2s;
+              
+              svg {
+                font-size: 14px;
+                margin-right: 5px;
+              }
+            }
+            
+            .active {
+              color: var(--dark-gray);
+              cursor: pointer;
+              
+              &:hover {
+                color: var(--main-color);
+              }
+              
+              &:active {
+                filter: brightness(0.9);
+              }
+            }
           }
+        }
+        
+        &:hover {
+          transform: scale(1.05);
         }
       }
     }
+  }
+  
+  .empty-container {
+    width: 100%;
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     
-    .empty-container {
-      width: 100%;
-      flex-grow: 1;
+    .empty {
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
+      font-size: 14px;
       
-      .empty {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        
-        svg {
-          font-size: 40px;
-          margin: 14px;
-        }
+      svg {
+        font-size: 40px;
+        margin: 14px;
       }
     }
+  }
+  
+  .el-pagination {
+    padding: 0;
+    margin-right: 10px;
     
-    .el-pagination {
-      padding: 0;
-      margin-right: 10px;
-      
-      li {
-        min-width: 24px;
-        height: 28px;
-        line-height: 28px;
-      }
-      
-      .btn-prev {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-left: 0;
-      }
-      
-      .btn-next {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-right: 0;
-      }
+    li {
+      min-width: 24px;
+      height: 28px;
+      line-height: 28px;
+    }
+    
+    .btn-prev {
+      width: 24px;
+      height: 28px;
+      line-height: 28px;
+      margin-left: 0;
+    }
+    
+    .btn-next {
+      width: 24px;
+      height: 28px;
+      line-height: 28px;
+      margin-right: 0;
     }
   }
 }

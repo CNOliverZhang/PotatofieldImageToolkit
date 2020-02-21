@@ -16,19 +16,569 @@
           }">
         </div>
       </div>
-      <div id="save" class="interactable">
+    </div>
+    <div id="right" class="interactable">
+      <div id="control">
+        <div id="settings">
+          <div class="row">
+            <div class="subtitle">样式设置</div>
+          </div>
+          <el-collapse value="basic" accordion>
+            <el-collapse-item title="基本样式" name="basic">
+              <div class="control-row">
+                <div class="text">外边距</div>
+                <el-slider
+                  v-model="padding"
+                  class="control"
+                  :min="0"
+                  :max="30"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">背景颜色</div>
+                <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="标题样式" name="title">
+              <div class="control-row">
+                <div class="text">字体</div>
+                <el-select v-model="titleFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">字体大小</div>
+                <el-slider
+                  v-model="titleFontSize"
+                  class="control"
+                  :min="15"
+                  :max="100"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字间距</div>
+                <el-slider
+                  v-model="titleLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">行距</div>
+                <el-slider
+                  v-model="titleLineHeight"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">段间距</div>
+                <el-slider
+                  v-model="titleMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">对齐方式</div>
+                <el-select v-model="titleTextAlign" placeholder="请选择" size="mini" class="control">
+                  <el-option label="左对齐" value="justify"/>
+                  <el-option label="居中对齐" value="center"/>
+                  <el-option label="右对齐" value="right"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">缩进设置</div>
+                <el-switch
+                  v-model="titleIndent"
+                  active-text="缩进"
+                  inactive-text="不缩进"
+                  class="control"></el-switch>
+              </div>
+              <div class="control-row">
+                <div class="text">字体颜色</div>
+                <el-color-picker v-model="titleColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="二级标题样式" name="subtitle">
+              <div class="control-row">
+                <div class="text">字体</div>
+                <el-select v-model="subtitleFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">字体大小</div>
+                <el-slider
+                  v-model="subtitleFontSize"
+                  class="control"
+                  :min="10"
+                  :max="80"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字间距</div>
+                <el-slider
+                  v-model="subtitleLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">行距</div>
+                <el-slider
+                  v-model="subtitleLineHeight"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">段间距</div>
+                <el-slider
+                  v-model="subtitleMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">对齐方式</div>
+                <el-select v-model="subtitleTextAlign" placeholder="请选择" size="mini" class="control">
+                  <el-option label="左对齐" value="justify"/>
+                  <el-option label="居中对齐" value="center"/>
+                  <el-option label="右对齐" value="right"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">缩进设置</div>
+                <el-switch
+                  v-model="subtitleIndent"
+                  active-text="缩进"
+                  inactive-text="不缩进"
+                  class="control"></el-switch>
+              </div>
+              <div class="control-row">
+                <div class="text">字体颜色</div>
+                <el-color-picker v-model="subtitleColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="文本样式" name="text">
+              <div class="control-row">
+                <div class="text">字体</div>
+                <el-select v-model="textFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">字体大小</div>
+                <el-slider
+                  v-model="textFontSize"
+                  class="control"
+                  :min="5"
+                  :max="60"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字间距</div>
+                <el-slider
+                  v-model="textLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">行距</div>
+                <el-slider
+                  v-model="textLineHeight"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">段间距</div>
+                <el-slider
+                  v-model="textMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">对齐方式</div>
+                <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
+                  <el-option label="左对齐" value="justify"/>
+                  <el-option label="居中对齐" value="center"/>
+                  <el-option label="右对齐" value="right"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">段首缩进设置</div>
+                <el-switch
+                  v-model="textIndent"
+                  active-text="缩进"
+                  inactive-text="不缩进"
+                  class="control"></el-switch>
+              </div>
+              <div class="control-row">
+                <div class="text">字体颜色</div>
+                <el-color-picker v-model="textColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="有序列表样式" name="orderedList">
+              <div class="control-row">
+                <div class="text">字体</div>
+                <el-select v-model="orderedListFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">字体大小</div>
+                <el-slider
+                  v-model="orderedListFontSize"
+                  class="control"
+                  :min="5"
+                  :max="60"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字间距</div>
+                <el-slider
+                  v-model="orderedListLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">行距</div>
+                <el-slider
+                  v-model="orderedListLineHeight"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">项目间距</div>
+                <el-slider
+                  v-model="orderedListItemMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">段间距</div>
+                <el-slider
+                  v-model="orderedListMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">缩进设置</div>
+                <el-slider
+                  v-model="orderedListIndent"
+                  class="control"
+                  :min="1"
+                  :max="5"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字体颜色</div>
+                <el-color-picker v-model="orderedListColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="无序列表样式" name="unorderdList">
+              <div class="control-row">
+                <div class="text">字体</div>
+                <el-select v-model="orderedListFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">字体大小</div>
+                <el-slider
+                  v-model="unorderedListFontSize"
+                  class="control"
+                  :min="5"
+                  :max="60"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字间距</div>
+                <el-slider
+                  v-model="unorderedListLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">行距</div>
+                <el-slider
+                  v-model="unorderedListLineHeight"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">项目间距</div>
+                <el-slider
+                  v-model="unorderedListItemMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">段间距</div>
+                <el-slider
+                  v-model="unorderedListMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">缩进设置</div>
+                <el-slider
+                  v-model="unorderedListIndent"
+                  class="control"
+                  :min="1"
+                  :max="5"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">字体颜色</div>
+                <el-color-picker v-model="unorderedListColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+            <el-collapse-item title="其他元素样式" name="other">
+              <div class="control-row">
+                <div class="text">图片圆角</div>
+                <el-slider
+                  v-model="imageBorderRadius"
+                  class="control"
+                  :min="0"
+                  :max="30"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">图片段间距</div>
+                <el-slider
+                  v-model="imageMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">注释字体</div>
+                <el-select v-model="imageLabelFont" placeholder="请选择" size="mini" class="control">
+                  <el-option
+                    v-for="(font, index) in this.$store.state.fonts.fontList"
+                    :key="index"
+                    :label="font.verbose + '（' + font.weight + '）'"
+                    :value="font.fontFamily"
+                    :style="{
+                      'font-family': font.fontFamily
+                    }"/>
+                </el-select>
+              </div>
+              <div class="control-row">
+                <div class="text">注释字体大小</div>
+                <el-slider
+                  v-model="imageLabelFontSize"
+                  class="control"
+                  :min="3"
+                  :max="40"
+                  :step="1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">注释字间距</div>
+                <el-slider
+                  v-model="imageLabelLetterSpacing"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">注释字体颜色</div>
+                <el-color-picker v-model="imageLabelColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+              <div class="control-row">
+                <div class="text">引用段间距</div>
+                <el-slider
+                  v-model="blockquoteMargin"
+                  class="control"
+                  :min="0"
+                  :max="3"
+                  :step="0.1"
+                  :show-input="true"
+                  input-size="mini"></el-slider>
+              </div>
+              <div class="control-row">
+                <div class="text">引用标示颜色</div>
+                <el-color-picker v-model="blockquoteBorderColor" size="mini" :show-alpha="true"></el-color-picker>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
+        <div id="template-list">
+          <div class="row">
+            <div class="subtitle">已保存的模板</div>
+          </div>
+          <div v-if="this.$store.state.textToImage.templates.length != 0" id="list" class="interactable">
+            <div
+              v-for="(template, index) in this.$store.state.textToImage.templates"
+              :key="template.title"
+              class="template">
+              <div class="cover">
+                <div class="action interactable" @click="applyTemplate(index)">
+                  <span class="fa fa-check-circle"></span>
+                  <div>应用</div>
+                </div>
+                <div class="action interactable" @click="deleteTemplate(index)">
+                  <span class="fa fa-trash-alt"></span>
+                  <div>删除</div>
+                </div>
+              </div>
+              <div class="text">{{ template.title }}</div>
+              <div class="subtext">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
+              <div class="subtext">背景颜色：
+                <div
+                  class="color-sample"
+                  :style="{
+                    'background-color': template.backgroundColor
+                  }"></div>
+              </div>
+            </div>
+          </div>
+          <div v-else id="empty-container">
+            <div id="empty">
+              <i class="far fa-folder-open"></i>
+              <div>尚无已保存的模板</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="save">
         <div class="row">
           <div class="subtitle">保存设置</div>
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control">
+          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="control-row">
           <div class="text">文件名</div>
-          <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
+          <el-input size="mini" v-model="filename" class="control interactable" placeholder="请输入文件名">
             <template slot="append">.jpg</template>
           </el-input>
         </div>
@@ -39,7 +589,7 @@
             type="primary"
             trigger="click"
             class="bar-button interactable"
-            @click="hide"
+            @click="minimize"
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
@@ -49,554 +599,6 @@
           <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
           <el-button type="primary" size="mini" @click="start" class="bar-button">开始处理</el-button>
         </div>
-      </div>
-    </div>
-    <div id="template-list">
-      <div class="row">
-        <div class="subtitle">已保存的模板</div>
-      </div>
-      <div v-if="this.$store.state.textToImage.templates.length != 0" id="list" class="interactable">
-        <div
-          v-for="(template, index) in this.$store.state.textToImage.templates"
-          :key="template.title"
-          class="template">
-          <div class="cover">
-            <div class="action interactable" @click="applyTemplate(index)">
-              <span class="fa fa-check-circle"></span>
-              <div>应用</div>
-            </div>
-            <div class="action interactable" @click="deleteTemplate(index)">
-              <span class="fa fa-trash-alt"></span>
-              <div>删除</div>
-            </div>
-          </div>
-          <div class="text">{{ template.title }}</div>
-          <div class="subtext">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
-          <div class="subtext">背景颜色：
-            <div
-              class="color-sample"
-              :style="{
-                'background-color': template.backgroundColor
-              }"></div>
-          </div>
-        </div>
-      </div>
-      <div v-else id="empty-container">
-        <div id="empty">
-          <i class="far fa-folder-open"></i>
-          <div>尚无已保存的模板</div>
-        </div>
-      </div>
-    </div>
-    <div id="control" class="interactable">
-      <div>
-        <div class="row">
-          <div class="subtitle">样式设置</div>
-        </div>
-        <el-collapse value="basic" accordion>
-          <el-collapse-item title="基本样式" name="basic">
-            <div class="control-row">
-              <div class="text">外边距</div>
-              <el-slider
-                v-model="padding"
-                class="control"
-                :min="0"
-                :max="30"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">背景颜色</div>
-              <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="标题样式" name="title">
-            <div class="control-row">
-              <div class="text">字体</div>
-              <el-select v-model="titleFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">字体大小</div>
-              <el-slider
-                v-model="titleFontSize"
-                class="control"
-                :min="15"
-                :max="100"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字间距</div>
-              <el-slider
-                v-model="titleLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">行距</div>
-              <el-slider
-                v-model="titleLineHeight"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">段间距</div>
-              <el-slider
-                v-model="titleMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">对齐方式</div>
-              <el-select v-model="titleTextAlign" placeholder="请选择" size="mini">
-                <el-option label="左对齐" value="justify"/>
-                <el-option label="居中对齐" value="center"/>
-                <el-option label="右对齐" value="right"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">缩进设置</div>
-              <el-switch
-                v-model="titleIndent"
-                active-text="缩进"
-                inactive-text="不缩进"
-                class="control"></el-switch>
-            </div>
-            <div class="control-row">
-              <div class="text">字体颜色</div>
-              <el-color-picker v-model="titleColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="二级标题样式" name="subtitle">
-            <div class="control-row">
-              <div class="text">字体</div>
-              <el-select v-model="subtitleFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">字体大小</div>
-              <el-slider
-                v-model="subtitleFontSize"
-                class="control"
-                :min="10"
-                :max="80"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字间距</div>
-              <el-slider
-                v-model="subtitleLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">行距</div>
-              <el-slider
-                v-model="subtitleLineHeight"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">段间距</div>
-              <el-slider
-                v-model="subtitleMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">对齐方式</div>
-              <el-select v-model="subtitleTextAlign" placeholder="请选择" size="mini">
-                <el-option label="左对齐" value="justify"/>
-                <el-option label="居中对齐" value="center"/>
-                <el-option label="右对齐" value="right"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">缩进设置</div>
-              <el-switch
-                v-model="subtitleIndent"
-                active-text="缩进"
-                inactive-text="不缩进"
-                class="control"></el-switch>
-            </div>
-            <div class="control-row">
-              <div class="text">字体颜色</div>
-              <el-color-picker v-model="subtitleColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="文本样式" name="text">
-            <div class="control-row">
-              <div class="text">字体</div>
-              <el-select v-model="textFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">字体大小</div>
-              <el-slider
-                v-model="textFontSize"
-                class="control"
-                :min="5"
-                :max="60"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字间距</div>
-              <el-slider
-                v-model="textLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">行距</div>
-              <el-slider
-                v-model="textLineHeight"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">段间距</div>
-              <el-slider
-                v-model="textMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">对齐方式</div>
-              <el-select v-model="textAlign" placeholder="请选择" size="mini">
-                <el-option label="左对齐" value="justify"/>
-                <el-option label="居中对齐" value="center"/>
-                <el-option label="右对齐" value="right"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">段首缩进设置</div>
-              <el-switch
-                v-model="textIndent"
-                active-text="缩进"
-                inactive-text="不缩进"
-                class="control"></el-switch>
-            </div>
-            <div class="control-row">
-              <div class="text">字体颜色</div>
-              <el-color-picker v-model="textColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="有序列表样式" name="orderedList">
-            <div class="control-row">
-              <div class="text">字体</div>
-              <el-select v-model="orderedListFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">字体大小</div>
-              <el-slider
-                v-model="orderedListFontSize"
-                class="control"
-                :min="5"
-                :max="60"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字间距</div>
-              <el-slider
-                v-model="orderedListLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">行距</div>
-              <el-slider
-                v-model="orderedListLineHeight"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">项目间距</div>
-              <el-slider
-                v-model="orderedListItemMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">段间距</div>
-              <el-slider
-                v-model="orderedListMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">缩进设置</div>
-              <el-slider
-                v-model="orderedListIndent"
-                class="control"
-                :min="1"
-                :max="5"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字体颜色</div>
-              <el-color-picker v-model="orderedListColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="无序列表样式" name="unorderdList">
-            <div class="control-row">
-              <div class="text">字体</div>
-              <el-select v-model="orderedListFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">字体大小</div>
-              <el-slider
-                v-model="unorderedListFontSize"
-                class="control"
-                :min="5"
-                :max="60"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字间距</div>
-              <el-slider
-                v-model="unorderedListLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">行距</div>
-              <el-slider
-                v-model="unorderedListLineHeight"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">项目间距</div>
-              <el-slider
-                v-model="unorderedListItemMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">段间距</div>
-              <el-slider
-                v-model="unorderedListMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">缩进设置</div>
-              <el-slider
-                v-model="unorderedListIndent"
-                class="control"
-                :min="1"
-                :max="5"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">字体颜色</div>
-              <el-color-picker v-model="unorderedListColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-          <el-collapse-item title="其他元素样式" name="other">
-            <div class="control-row">
-              <div class="text">图片圆角</div>
-              <el-slider
-                v-model="imageBorderRadius"
-                class="control"
-                :min="0"
-                :max="30"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">图片段间距</div>
-              <el-slider
-                v-model="imageMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">注释字体</div>
-              <el-select v-model="imageLabelFont" placeholder="请选择" size="mini">
-                <el-option
-                  v-for="(font, index) in this.$store.state.fonts.fontList"
-                  :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
-                  :value="font.fontFamily"
-                  :style="{
-                    'font-family': font.fontFamily
-                  }"/>
-              </el-select>
-            </div>
-            <div class="control-row">
-              <div class="text">注释字体大小</div>
-              <el-slider
-                v-model="imageLabelFontSize"
-                class="control"
-                :min="3"
-                :max="40"
-                :step="1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">注释字间距</div>
-              <el-slider
-                v-model="imageLabelLetterSpacing"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">注释字体颜色</div>
-              <el-color-picker v-model="imageLabelColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-            <div class="control-row">
-              <div class="text">引用段间距</div>
-              <el-slider
-                v-model="blockquoteMargin"
-                class="control"
-                :min="0"
-                :max="3"
-                :step="0.1"
-                :show-input="true"
-                input-size="mini"></el-slider>
-            </div>
-            <div class="control-row">
-              <div class="text">引用标示颜色</div>
-              <el-color-picker v-model="blockquoteBorderColor" size="mini" :show-alpha="true"></el-color-picker>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
       </div>
     </div>
   </div>
@@ -819,7 +821,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -1141,8 +1143,6 @@ export default {
 
 <style lang="scss">  
 .el-color-picker__panel {
-  -webkit-app-region: no-drag;
-  
   button {
     font-family: var(--main-font);
   }
@@ -1182,16 +1182,6 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .el-switch {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    .el-radio-group {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
     .control {
       width: 70%;
     }
@@ -1226,6 +1216,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -1241,6 +1232,29 @@ export default {
     }
   }
   
+  .el-switch {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   .el-button-group {
     display: flex;
     
@@ -1251,6 +1265,12 @@ export default {
   
   .el-button--primary:not(.el-dropdown__caret-button) {
     padding: 0;
+    height: 28px;
+  }
+  
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
     height: 28px;
   }
   
@@ -1465,182 +1485,193 @@ export default {
         }
       }
     }
-    
-    #save {
-      width: 100%;
-      margin-top: 10px;
-    }
   }
   
-  #template-list {
+  #right {
     flex-grow: 1;
     height: 100%;
     margin-left: 20px;
-    margin-right: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     
-    #list {
+    #control {
       width: 100%;
+      height: 0;
       flex-grow: 1;
-      background-color: var(--white-gray);
-      box-sizing: border-box;
-      border-radius: 6px;
-      border-color: var(--light-gray);
-      border-style: solid;
-      border-width: 1px;
-      overflow-y: auto;
-      overflow-x: hidden;
+      display: flex;
+      justify-content: space-between;
       
-      .template {
-        position: relative;
-        height: 80px;
-        padding: 10px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        background-color: var(--white);
-        border-bottom-color: var(--light-gray);
-        border-bottom-style: solid;
-        border-bottom-width: 1px;
+      #settings {
+        width: 60%;
+        height: 100%;
         
-        .text {
-          width: 100%;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
+        .el-collapse-item__header {
+          height: 30px;
+          font-size: 14px;
         }
         
-        .subtext {
-          display: flex;
-          align-items: center;
+        .el-collapse-item__content {
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+      }
+      
+      #template-list {
+        flex-grow: 1;
+        height: 100%;
+        margin-left: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        
+        #list {
+          width: 100%;
+          flex-grow: 1;
+          background-color: var(--white-gray);
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: var(--light-gray);
+          border-style: solid;
+          border-width: 1px;
+          overflow-y: auto;
+          overflow-x: hidden;
           
-          .color-sample {
-            width: 1em;
-            height: 1em;
-            border-color: var(--light-gray);
-            border-style: solid;
-            border-radius: 3px;
-            border-width: 1px;
+          .template {
+            position: relative;
+            height: 80px;
+            padding: 10px;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            
+            .text {
+              width: 100%;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+            
+            .subtext {
+              display: flex;
+              align-items: center;
+              
+              .color-sample {
+                width: 1em;
+                height: 1em;
+                border-color: var(--light-gray);
+                border-style: solid;
+                border-radius: 3px;
+                border-width: 1px;
+                box-sizing: border-box;
+              }
+            }
+            
+            .cover {
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              top: 0;
+              left: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              background-color: var(--white);
+              opacity: 0;
+              transition: 0.2s;
+              
+              .action {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                font-size: 12px;
+                width: 32px;
+                margin-left: 10px;
+                margin-right: 10px;
+                transition: 0.2s;
+                
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: var(--main-color);
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
+                }
+              }
+              
+              &:hover {
+                opacity: 1;
+              }
+            }
+          }
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
           }
         }
         
-        .cover {
-          position: absolute;
+        #empty-container {
           width: 100%;
-          height: 100%;
-          top: 0;
-          left: 0;
+          flex-grow: 1;
           display: flex;
           justify-content: center;
           align-items: center;
-          background-color: var(--white);
-          opacity: 0;
-          transition: 0.2s;
+          background-color: var(--white-gray);
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: var(--light-gray);
+          border-style: solid;
+          border-width: 1px;
           
-          .action {
+          #empty {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            font-size: 12px;
-            width: 32px;
-            margin-left: 10px;
-            margin-right: 10px;
-            transition: 0.2s;
+            font-size: 14px;
             
             svg {
-              font-size: 20px;
-              margin: 5px;
-            }
-            
-            &:hover {
-              color: var(--main-color);
-            }
-            
-            &:active {
-              filter: brightness(0.9);
+              font-size: 40px;
+              margin: 14px;
             }
           }
-          
-          &:hover {
-            opacity: 1;
-          }
-        }
-      }
-      
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: var(--transparent);
-        
-        &:hover {
-          background-color: var(--white-gray);
-        }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: var(--light-gray);
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: var(--gray);
         }
       }
     }
     
-    #empty-container {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: var(--white-gray);
-      box-sizing: border-box;
-      border-radius: 6px;
-      border-color: var(--light-gray);
-      border-style: solid;
-      border-width: 1px;
-      
-      #empty {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        
-        svg {
-          font-size: 40px;
-          margin: 14px;
-        }
-      }
-    }
-  }
-  
-  #control {
-    width: 40%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    
-    .el-collapse-item__header {
-      height: 30px;
-      font-size: 14px;
-    }
-    
-    .el-collapse-item__content {
-      padding-top: 10px;
-      padding-bottom: 10px;
+    #save {
+      margin-top: 10px;
     }
   }
 }

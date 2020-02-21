@@ -126,7 +126,7 @@
         type="primary"
         trigger="click"
         class="bar-button interactable"
-        @click="hide"
+        @click="minimize"
         @command="(command) => {command()}">
         最小化
         <el-dropdown-menu slot="dropdown">
@@ -171,7 +171,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -378,6 +378,10 @@ export default {
     justify-content: space-between;
     align-items: center;
     
+    .control {
+      width: 70%;
+    }
+    
     &:first-child {
       margin-top: 0;
     }
@@ -408,6 +412,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -420,6 +425,28 @@ export default {
     
     &:last-child {
       margin-right: 0;
+    }
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    .el-select .el-input {
+      width: 80px;
     }
   }
   
@@ -436,8 +463,10 @@ export default {
     height: 28px;
   }
   
-  .el-input .el-select {
-    width: 80px;
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 28px;
   }
   
   #crop {
@@ -601,24 +630,6 @@ export default {
     
     .side {
       width: calc(50% - 10px);
-      
-      .control {
-        width: 70%;
-      }
-      
-      #ratio-container {
-        display: flex;
-        justify-content: space-between;
-        
-        .el-select {
-          flex-grow: 1;
-        }
-        
-        #ratio {
-          width: calc(50% - 5px);
-          margin-left: 10px;
-        }
-      }
     }
   }
 }

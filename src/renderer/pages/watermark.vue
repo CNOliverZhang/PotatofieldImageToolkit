@@ -38,8 +38,8 @@
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content" v-if="this.fileList.length == 0">
-        <div id="controller">
+      <div id="multiple" class="tab-content">
+        <div class="wrapper" v-if="this.fileList.length == 0">
           <div class="row">
             <el-switch
               v-model="childDirectoryIncluded"
@@ -50,50 +50,48 @@
               <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
-          <div class="row">
-            <el-button
-              @click="handleFolder"
-              type="primary"
-              size="mini"
-              class="interactable bar-button">扫描文件夹</el-button>
-          </div>
-        </div>
-        <div id="file-list" class="row interactable">
-          <div id="empty">
-            <i class="far fa-folder-open"></i>
-            <div>未导入图片</div>
-          </div>
-        </div>
-      </div>
-      <div id="multiple" class="tab-content" v-else>
-        <div id="file-list" class="interactable">
-          <div
-            v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
-            :key="file.fullpath"
-            class="file"
-            @click="preview(index + (fileListPage - 1) * 100)">
-            <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-            <div class="path">{{ file.filepath }}</div>
-            <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
-              <i class="fas fa-trash-alt delete"></i>
+          <el-button
+            @click="handleFolder"
+            type="primary"
+            size="mini"
+            class="interactable">扫描文件夹</el-button>
+          <div id="file-list" class="row">
+            <div id="empty">
+              <i class="far fa-folder-open"></i>
+              <div>未导入图片</div>
             </div>
           </div>
         </div>
-        <div class="row">
-          <el-pagination
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="100"
-            :total="this.fileList.length"
-            :current-page="fileListPage"
-            :hide-on-single-page="true"
-            @current-change="fileListPageChange">
-          </el-pagination>
-          <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
-          <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入水印编辑器</el-button>
+        <div class="wrapper" v-else>
+          <div id="file-list" class="interactable">
+            <div
+              v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+              :key="file.fullpath"
+              class="file"
+              @click="preview(index + (fileListPage - 1) * 100)">
+              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+              <div class="path">{{ file.filepath }}</div>
+              <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
+                <i class="fas fa-trash-alt delete"></i>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <el-pagination
+              class="interactable"
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="100"
+              :total="this.fileList.length"
+              :current-page="fileListPage"
+              :hide-on-single-page="true"
+              @current-change="fileListPageChange">
+            </el-pagination>
+            <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入水印编辑器</el-button>
+          </div>
         </div>
       </div>
     </el-tab-pane>
@@ -159,9 +157,9 @@
           <div class="text">图片加水印工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -195,7 +193,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -388,7 +386,7 @@ export default {
             title: '水印编辑器',
             path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
             modal: true,
-            height: 720,
+            height: 800,
             width: 1000
           })
           ipcRenderer.on('modal-window-closed', () => {
@@ -411,7 +409,7 @@ export default {
           title: '水印模板编辑器',
           path: '#/watermark/template?index=' + String(index),
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -567,7 +565,7 @@ export default {
           title: '水印模板编辑器',
           path: '#/watermark/template?index=-1',
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -701,21 +699,20 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .tab-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+      }
+    }
   }
   
   .row {
@@ -743,6 +740,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -758,6 +756,24 @@ export default {
     &:last-child {
       margin-right: 0;
     }
+  }
+  
+  .wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
     
   #single {
@@ -891,14 +907,9 @@ export default {
   #multiple {
     flex-direction: column;
     
-    #controller {
-      width: 100%;
-      flex-shrink: 0;
-    }
-    
     .el-pagination {
       padding: 0;
-      margin-right: 10px;
+      margin-right: 5px;
       
       li {
         min-width: 24px;
@@ -1039,7 +1050,7 @@ export default {
       flex-wrap: wrap;
       
       .template-container {
-        width: calc(100%/3);
+        width: calc(100% / 3);
         height: 50%;
         box-sizing: border-box;
         padding: 10px;

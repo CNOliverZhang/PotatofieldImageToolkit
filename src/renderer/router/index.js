@@ -12,9 +12,9 @@ export default new Router({
       component: require('@/pages/index').default
     },
     {
-      path: '/about',
-      name: 'about',
-      component: require('@/pages/about').default
+      path: '/settings',
+      name: 'settings',
+      component: require('@/pages/settings').default
     },
     {
       path: '/watermark',

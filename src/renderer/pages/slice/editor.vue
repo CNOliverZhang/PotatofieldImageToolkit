@@ -42,15 +42,15 @@
           <div class="row control">
             <el-select v-model="row" @change="preview" size="mini" class="grid-count interactable">
               <el-option
-                v-for="number in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
-                :key="number"
-                :label="number + ' 行'" :value="number"/>
+                v-for="(object, index) in Array.from({ length: 9 })"
+                :key="index"
+                :label="(index + 1) + ' 行'" :value="index + 1"/>
             </el-select>
             <el-select v-model="column" @change="preview" size="mini" class="grid-count interactable">
               <el-option
-                v-for="number in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
-                :key="number"
-                :label="number + ' 列'" :value="number"/>
+                v-for="(object, index) in Array.from({ length: 9 })"
+                :key="index"
+                :label="(index + 1) + ' 列'" :value="index + 1"/>
             </el-select>
           </div>
         </div>
@@ -94,7 +94,7 @@
         type="primary"
         trigger="click"
         class="bar-button interactable"
-        @click="hide"
+        @click="minimize"
         @command="(command) => {command()}">
         最小化
         <el-dropdown-menu slot="dropdown">
@@ -134,7 +134,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -548,6 +548,10 @@ export default {
     justify-content: space-between;
     align-items: center;
     
+    .control {
+      width: 70%;
+    }
+    
     &:first-child {
       margin-top: 0;
     }
@@ -578,6 +582,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -593,6 +598,17 @@ export default {
     }
   }
   
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   .el-button-group {
     display: flex;
     
@@ -606,13 +622,15 @@ export default {
     height: 28px;
   }
   
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 28px;
+  }
+  
   .el-switch {
     display: flex;
     justify-content: flex-end;
-  }
-  
-  .el-input .el-select {
-    width: 80px;
   }
   
   #crop {
@@ -750,10 +768,6 @@ export default {
     
     .side {
       width: calc(50% - 10px);
-      
-      .control {
-        width: 70%;
-      }
       
       .grid-count {
         margin-left: 5px;

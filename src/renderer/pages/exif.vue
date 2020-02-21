@@ -115,9 +115,9 @@
           <div class="text">EXIF 读取工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -142,7 +142,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -404,22 +404,22 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .tab-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
   }
   
   .row {
@@ -447,6 +447,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;

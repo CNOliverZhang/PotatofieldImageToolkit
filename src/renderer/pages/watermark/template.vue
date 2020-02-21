@@ -1,11 +1,18 @@
 <template>
   <div id="watermark-template">
-    <div id="preview">
+    <div id="left">
       <div
-        id="sample"
+        id="sample-container"
         :style="{
-          'background-color': background
+          'background-color': background == 'var(--black-gray)' ? 'var(--white-gray)' : 'var(--black-gray)'
         }">
+        <div
+          id="sample"
+          :style="{
+            'background-color': background,
+            'width': sampleWidth + 'px',
+            'height': sampleHeight + 'px'
+          }"></div>
         <div
           id="watermark-container"
           :style="{
@@ -39,22 +46,40 @@
                 v-for="(char, index) in line"
                 :key="index"
                 :style="{
-                  'margin-left': index == 0 ? 0 : letterSpacing / 5 + 'em'
+                  'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
                 }">{{ char }}</span>
             </div>
           </div>
         </div>
       </div>
-      <div class="row interactable">
-        <div class="text">参照背景颜色</div>
-        <el-select v-model="background" placeholder="请选择" size="mini">
-          <el-option label="深色" value="var(--black-gray)"/>
-          <el-option label="浅色" value="var(--white-gray)"/>
-        </el-select>
+      <div id="sample-controller">
+        <div class="row">
+          <div class="subtitle">图像参照设置</div>
+        </div>
+        <div class="control-row interactable">
+          <div class="text">参照长宽比</div>
+          <el-slider
+            v-model="ratio"
+            class="control"
+            :min="0.5"
+            :max="2"
+            :step="0.01"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row interactable">
+          <div class="text">参照背景颜色</div>
+          <el-select v-model="background" placeholder="请选择" size="mini" class="control">
+            <el-option label="深色" value="var(--black-gray)"/>
+            <el-option label="浅色" value="var(--white-gray)"/>
+          </el-select>
+        </div>
       </div>
     </div>
-    <div id="control" class="interactable">
+    <div id="right" class="interactable">
       <div>
+        <div class="row">
+          <div class="subtitle">水印设置</div>
+        </div>
         <el-collapse value="content" accordion>
           <el-collapse-item title="水印内容" name="content">
             <el-input
@@ -67,7 +92,7 @@
           <el-collapse-item title="水印文字样式" name="style">
             <div class="control-row">
               <div class="text">水印字体</div>
-              <el-select v-model="font" placeholder="请选择" size="mini">
+              <el-select v-model="font" placeholder="请选择" size="mini" class="control">
                 <el-option
                   v-for="(font, index) in this.$store.state.fonts.fontList"
                   :key="index"
@@ -153,7 +178,7 @@
           <el-collapse-item title="水印文字位置" name="position">
             <div class="control-row">
               <div class="text">水印位置基准</div>
-              <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
+              <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
                 <el-option label="中央" value="center"/>
                 <el-option label="左上角" value="left-top"/>
                 <el-option label="右上角" value="right-top"/>
@@ -208,7 +233,7 @@
           <el-collapse-item title="水印文字排版" name="typesetting">
             <div class="control-row">
               <div class="text">水印文字方向</div>
-              <el-select v-model="writingMode" placeholder="请选择" size="mini">
+              <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
                 <el-option label="水平" value="horizontal-tb"/>
                 <el-option label="垂直从右至左" value="vertical-rl"/>
                 <el-option label="垂直从左至右" value="vertical-lr"/>
@@ -216,7 +241,7 @@
             </div>
             <div class="control-row">
               <div class="text">多行水印对齐方式</div>
-              <el-select v-model="textAlign" placeholder="请选择" size="mini">
+              <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
                 <el-option label="居中对齐" value="center"/>
                 <el-option label="行首对齐" value="left"/>
                 <el-option label="行尾对其" value="right"/>
@@ -249,6 +274,9 @@
       </div>
       <div>
         <div class="row">
+          <div class="subtitle">模板名称设置</div>
+        </div>
+        <div class="row">
           <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
         </div>
         <div class="row">
@@ -258,7 +286,7 @@
             type="primary"
             trigger="click"
             class="bar-button interactable"
-            @click="hide"
+            @click="minimize"
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
@@ -306,6 +334,7 @@ export default {
       sampleHeight: 0,
       watermarkWidth: 0,
       watermarkHeight: 0,
+      ratio: 1,
       background: 'var(--black-gray)',
       templateTitle: ''
     }
@@ -399,10 +428,28 @@ export default {
       this.$nextTick(() => {
         this.initWatermarkSize()
       })
+    },
+    ratio(value) {
+      let sampleContainer = document.getElementById('sample-container')
+      let style = window.getComputedStyle(sampleContainer)
+      let width = style.getPropertyValue('width').slice(0, -2)
+      let height = style.getPropertyValue('height').slice(0, -2)
+      if ((width / height) > value) {
+        this.sampleWidth = height * value
+        this.sampleHeight = height
+      } else {
+        this.sampleWidth = width
+        this.sampleHeight = width / value
+      }
+      this.sizeBaseX = this.sampleWidth / 100
+      this.sizeBaseY = this.sampleHeight / 100
+      this.$nextTick(() => {
+        this.initWatermarkSize()
+      })
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -695,14 +742,13 @@ export default {
     }
   },
   mounted() {
-    let sample = document.getElementById('sample')
-    let style = window.getComputedStyle(sample)
+    let sampleContainer = document.getElementById('sample-container')
+    let style = window.getComputedStyle(sampleContainer)
     let width = style.getPropertyValue('width').slice(0, -2)
-    let height = style.getPropertyValue('height').slice(0, -2)
     this.sampleWidth = width
-    this.sampleHeight = height
+    this.sampleHeight = width
     this.sizeBaseX = width / 100
-    this.sizeBaseY = height / 100
+    this.sizeBaseY = width / 100
     if (this.$route.query.index != -1) {
       let template = this.$store.state.watermark.templates[this.$route.query.index]
       this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
@@ -781,7 +827,7 @@ export default {
     align-items: center;
     
     .control {
-      width: 60%;
+      width: 70%;
     }
     
     &:first-child {
@@ -814,6 +860,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -842,17 +889,21 @@ export default {
     height: 28px;
   }
   
-  #preview {
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 28px;
+  }
+  
+  #left {
     width: calc(50% - 10px);
     height: 100%;
     display: flex;
     flex-direction: column;
     
-    #sample {
+    #sample-container {
       width: 100%;
       flex-grow: 1;
-      background-size: 50px 50px;
-      background-position: 0 0, 25px 25px;
       border-radius: 6px;
       display: flex;
       justify-content: center;
@@ -860,23 +911,31 @@ export default {
       overflow: hidden;
       position: relative;
       
+      #sample {
+        position: absolute;
+      }
+      
       #watermark-container {
         position: absolute;
         overflow: hidden;
         white-space: nowrap;
+        
+        #watermark {
+          position: absolute;
+          width: fit-content;
+          height: fit-content;
+          box-sizing: border-box;
+          line-height: 1em;
+        }
       }
-      
-      #watermark {
-        position: absolute;
-        width: fit-content;
-        height: fit-content;
-        box-sizing: border-box;
-        line-height: 1em;
-      }
+    }
+    
+    #sample-controller {
+      margin-top: 10px;
     }
   }
   
-  #control {
+  #right {
     width: calc(50% - 10px);
     height: 100%;
     display: flex;
@@ -894,10 +953,8 @@ export default {
     }
     
     .el-textarea__inner {
-      font-family: var(--main-font)
-    }
+      font-family: var(--main-font);
       
-    textarea {
       &::-webkit-scrollbar {
         width: 10px;
       }

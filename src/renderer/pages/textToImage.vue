@@ -4,7 +4,7 @@
       <span slot="label" class="interactable"><i class="fas fa-keyboard"></i> 输入内容</span>
       <div id="editor" class="tab-content">
         <div id="preview" class="interactable" v-html="content"></div>
-        <div id="controller" class="interactable">
+        <div id="editor-panel" class="interactable">
           <ckeditor :editor="editor.editor" :config="editor.config" v-model="content"></ckeditor>
           <div class="row">
             <el-button type="primary" size="mini" @click="clear" class="bar-button interactable">清空内容</el-button>
@@ -83,9 +83,9 @@
           <div class="text">富文本制图工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -133,7 +133,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -162,7 +162,7 @@ export default {
               title: '样式编辑器',
               path: '#/textToImage/editor',
               modal: true,
-              height: 720,
+              height: 800,
               width: 1000
             })
             ipcRenderer.on('modal-window-closed', () => {
@@ -182,7 +182,7 @@ export default {
           title: '样式模板编辑器',
           path: '#/textToImage/template?index=' + String(index),
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -331,7 +331,7 @@ export default {
           title: '样式模板编辑器',
           path: '#/textToImage/template?index=-1',
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -465,21 +465,21 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .tab-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
   }
   
   .row {
@@ -503,6 +503,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -659,7 +660,7 @@ export default {
       }
     }
     
-    #controller {
+    #editor-panel {
       width: calc(50% - 5px);
       height: 100%;
       display: flex;

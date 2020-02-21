@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, nativeImage, Menu, Tray, screen } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import '../renderer/store'
 
@@ -12,13 +12,17 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = path.join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
+const devWindowHeight = 1080
 const windows = new Set()
 const windowTitles = new Set()
-let mainWindow
-let updateTargetWindow
 const baseURL = process.env.NODE_ENV === 'development'
   ? `http://localhost:9080`
   : `file://${__dirname}/index.html`
+
+let mainWindow
+let updateTargetWindow
+let tray
+let zoomFactor
 
 autoUpdater.autoDownload = false
 autoUpdater.setFeedURL("https://imagetoolkit.potatofield.cn/download/")
@@ -30,22 +34,13 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 function createWindow(args) {
-  let x, y = 0
-  let currentWindow = BrowserWindow.getFocusedWindow()
-  if (currentWindow) {
-    let [ currentWindowX, currentWindowY ] = currentWindow.getPosition()
-    x = currentWindowX + 30
-    y = currentWindowY + 30
-  }
   let newWindow = new BrowserWindow({
     title: args.title,
-    x: x,
-    y: y,
-    height: args.height ? args.height : 500,
-    width: args.width ? args.width : 800,
+    height: args.height ? Math.round(args.height * zoomFactor) : Math.round(500 * zoomFactor),
+    width: args.width ? Math.round(args.width * zoomFactor) : Math.round(800 * zoomFactor),
     frame: false,
     fullscreenable: false,
-    resizable: true,
+    resizable: false,
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
@@ -65,6 +60,7 @@ function createWindow(args) {
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
+    newWindow.webContents.setZoomFactor(zoomFactor)
   })
   
   newWindow.on('close', (event) => {
@@ -82,8 +78,35 @@ function createWindow(args) {
   return newWindow
 }
 
+function openWindow(event, args) {
+  if (windowTitles.has(args.title)) {
+    windows.forEach((window) => {
+      if (window.webContents.browserWindowOptions.title == args.title) {
+        if (window.isMinimized()) {
+          window.restore()
+        }
+        window.focus()
+      }
+    })
+  } else {
+    let targetArgs = {
+      title: args.title,
+      path: args.path,
+    }
+    if (args.modal) {
+      targetArgs.parent = BrowserWindow.fromWebContents(event.sender)
+      targetArgs.modal = true
+    }
+    if (args.width) {
+      targetArgs.width = args.width
+      targetArgs.height = args.height
+    }
+    createWindow(targetArgs)
+  }
+}
+
 process.on('uncaughtException', () => {
-  updateTargetWindow.webContents.send('error')
+  updateTargetWindow.send('error')
 })
 
 if (!app.requestSingleInstanceLock()) {
@@ -91,9 +114,147 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on('ready', () => {
+  zoomFactor = screen.getPrimaryDisplay().workAreaSize.height / devWindowHeight * screen.getPrimaryDisplay().scaleFactor
   mainWindow = createWindow({
     title: '洋芋田图像工具箱',
     path: '#/'
+  })
+  let icon = nativeImage.createFromPath(path.join(__static, 'images/icon.ico'))
+  let menu = Menu.buildFromTemplate([
+    {
+      label: '打开主界面',
+      click: () => {
+        mainWindow.show()
+      }
+    },
+    {
+      label: '打开工具',
+      submenu: [
+        {
+          label: '图片加水印工具',
+          click: () => {
+            openWindow({
+              title: '图片加水印工具',
+              path: '#/watermark'
+            })
+          }
+        },
+        {
+          label: '长图拼接工具',
+          click: () => {
+            openWindow({
+              title: '长图拼接工具',
+              path: '#/splicer'
+            })
+          }
+        },
+        {
+          label: '图片裁剪工具',
+          click: () => {
+            openWindow({
+              title: '图片裁剪工具',
+              path: '#/cropper'
+            })
+          }
+        },
+        {
+          label: '图片分割工具',
+          click: () => {
+            openWindow({
+              title: '图片分割工具',
+              path: '#/slice'
+            })
+          }
+        },
+        {
+          label: '富文本制图工具',
+          click: () => {
+            openWindow({
+              title: '富文本制图工具',
+              path: '#/textToImage'
+            })
+          }
+        },
+        {
+          label: '尺寸调整工具',
+          click: () => {
+            openWindow({
+              title: '尺寸调整工具',
+              path: '#/resizer'
+            })
+          }
+        },
+        {
+          label: 'JPEG 压缩工具',
+          click: () => {
+            openWindow({
+              title: 'JPEG 压缩工具',
+              path: '#/compress'
+            })
+          }
+        },
+        {
+          label: 'EXIF 读取工具',
+          click: () => {
+            openWindow({
+              title: 'EXIF 读取工具',
+              path: '#/exif'
+            })
+          }
+        },
+        {
+          label: '色彩提取工具',
+          click: () => {
+            openWindow({
+              title: '色彩提取工具',
+              path: '#/palette'
+            })
+          }
+        },
+        {
+          label: '字体管理工具',
+          click: () => {
+            openWindow({
+              title: '字体管理工具',
+              path: '#/fonts'
+            })
+          }
+        }
+      ]
+    },
+    {
+      label: '设置',
+      click: () => {
+        openWindow({
+          title: '设置',
+          path: '#/settings'
+        })
+      }
+    },
+    {
+      label: '退出',
+      click: () => {
+        if (windows.size != 1) {
+          if (mainWindow.isMinimized()) {
+            mainWindow.restore()
+          }
+          mainWindow.show()
+          mainWindow.webContents.send('exit')
+        } else {
+          app.exit()
+        }
+      }
+    }
+  ])
+  tray = new Tray(icon)
+  tray.setContextMenu(menu)
+  tray.setToolTip('洋芋田图像工具箱')
+  tray.on('click', () => {
+    if (mainWindow.isVisible()) {
+      mainWindow.hide()
+    } else {
+      mainWindow.show()
+    }
   })
 })
 
@@ -132,6 +293,11 @@ ipcMain.on('update-now', () => {
   autoUpdater.quitAndInstall(true, true)
 })
 
+ipcMain.on('hide', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
+  currentWindow.hide()
+})
+
 ipcMain.on('show', (event) => {
   let currentWindow = BrowserWindow.fromWebContents(event.sender)
   if (currentWindow.isMinimized()) {
@@ -140,13 +306,13 @@ ipcMain.on('show', (event) => {
   currentWindow.show()
 })
 
-ipcMain.on('minimize', () => {
-  let currentWindow = BrowserWindow.getFocusedWindow()
+ipcMain.on('minimize', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
   currentWindow.minimize()
 })
 
-ipcMain.on('close', () => {
-  let currentWindow = BrowserWindow.getFocusedWindow()
+ipcMain.on('close', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
   if (currentWindow.webContents.browserWindowOptions.parent) {
     let parent = currentWindow.webContents.browserWindowOptions.parent
     currentWindow.destroy()
@@ -188,30 +354,7 @@ ipcMain.on('relaunch', () => {
 })
 
 ipcMain.on('open', (event, args) => {
-  if (windowTitles.has(args.title)) {
-    windows.forEach((window) => {
-      if (window.webContents.browserWindowOptions.title == args.title) {
-        if (window.isMinimized()) {
-          window.restore()
-        }
-        window.focus()
-      }
-    })
-  } else {
-    let targetArgs = {
-      title: args.title,
-      path: args.path,
-    }
-    if (args.modal) {
-      targetArgs.parent = BrowserWindow.getFocusedWindow()
-      targetArgs.modal = true
-    }
-    if (args.width) {
-      targetArgs.width = args.width
-      targetArgs.height = args.height
-    }
-    createWindow(targetArgs)
-  }
+  openWindow(event, args)
 })
 
 ipcMain.on('version', (event) => {
@@ -236,21 +379,21 @@ ipcMain.on('select-folder', (event) => {
 })
 
 autoUpdater.on('update-available', (info) => {
-  updateTargetWindow.webContents.send('update-available', info)
+  updateTargetWindow.send('update-available', info)
 })
 
 autoUpdater.on('update-not-available', () => {
-  updateTargetWindow.webContents.send('update-not-available')
+  updateTargetWindow.send('update-not-available')
 })
 
 autoUpdater.on('download-progress', (progress) => {
-  updateTargetWindow.webContents.send('update-download-progress', progress.percent)
+  updateTargetWindow.send('update-download-progress', progress.percent)
 })
 
 autoUpdater.on('update-downloaded', () => {
-  updateTargetWindow.webContents.send('update-downloaded')
+  updateTargetWindow.send('update-downloaded')
 })
 
 autoUpdater.on('error', () => {
-  updateTargetWindow.webContents.send('error')
+  updateTargetWindow.send('error')
 })

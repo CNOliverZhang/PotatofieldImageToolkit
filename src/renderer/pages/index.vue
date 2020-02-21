@@ -2,19 +2,23 @@
   <div id="index">
     <div id="title-bar">
       <img id="logo" src="static/images/logo.png"/>
-      <div class="title">洋芋田图像工具箱</div>
+      <div id="title" class="title">洋芋田图像工具箱</div>
       <div id="title-bar-space"></div>
-      <div class="control-button interactable" @click="open('/about', '关于')">
-        <span class="fa fa-question-circle"></span>
-        <div>关于</div>
+      <div class="control-button interactable" @click="open('/settings', '设置')">
+        <span class="fa fa-tools"></span>
+        <div>设置</div>
+      </div>
+      <div class="control-button interactable" @click="minimize">
+        <span class="fa fa-angle-double-down"></span>
+        <div>最小化</div>
       </div>
       <div class="control-button interactable" @click="hide">
-        <span class="fa fa-angle-double-down"></span>
+        <span class="fa fa-compress-alt"></span>
         <div>隐藏</div>
       </div>
       <div class="control-button interactable" @click="exit">
         <span class="fa fa-sign-out-alt"></span>
-        <div>退出</div>
+        <div>退出程序</div>
       </div>
     </div>
     <div id="cards-holder" class="interactable">
@@ -92,8 +96,11 @@ import { ipcRenderer } from 'electron'
 export default {
   name: 'index',
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
+    },
+    hide() {
+      ipcRenderer.send('hide')
     },
     exit() {
       if (ipcRenderer.sendSync('index-only')) {
@@ -130,6 +137,9 @@ export default {
     document.getElementById('scroll').addEventListener('mousewheel', (event) => {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
+    })
+    ipcRenderer.on('exit', () => {
+      this.exit()
     })
     ipcRenderer.send('check-for-update')
     ipcRenderer.once('update-available', (event, info) => {
@@ -232,7 +242,7 @@ export default {
       object-fit: contain;
     }
     
-    .title {
+    #title {
       margin-left: 20px;
     }
     
@@ -247,7 +257,7 @@ export default {
       align-items: center;
       cursor: pointer;
       font-size: 12px;
-      width: 32px;
+      width: 4em;
       margin-left: 10px;
       margin-right: 10px;
       transition: 0.2s;

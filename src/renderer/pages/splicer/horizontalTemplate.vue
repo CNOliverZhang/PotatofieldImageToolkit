@@ -8,7 +8,7 @@
           'background-color': backgroundColor
         }">
         <div
-          v-for="(color, index) in ['--black-gray', '--dark-gray', '--gray', '--light-gray']"
+          v-for="(object, index) in Array.from({ length: sampleCount })"
           :key="index"
           class="sample-container">
           <div
@@ -16,17 +16,45 @@
             :style="{
               'margin-left': index == 0 ? 0 : spacing + 'px',
               'border-radius': borderRadius + 'px',
-              'background-color': 'var(' + color + ')'
+              'background-color': sampleColor,
+              'color': sampleColor == 'var(--black-gray)' ? 'var(--white-gray)' : 'var(--black-gray)'
             }">
-            <div class="subtitle">样例图片</div>
+            <div class="subtitle">参照图片</div>
           </div>
         </div>
       </div>
     </div>
     <div id="control" class="interactable">
       <div id="left">
+        <div>
+          <div class="row">
+            <div class="subtitle">参照图片设置</div>
+          </div>
+          <div class="control-row">
+            <div class="text">参照图片数量</div>
+            <el-select v-model="sampleCount" size="mini" class="control">
+              <el-option
+                v-for="(object, index) in Array.from({ length: 10 })"
+                :key="index"
+                :label="(index + 1) + ' 张'"
+                :value="index + 1"/>
+            </el-select>
+          </div>
+          <div class="control-row">
+            <div class="text">参照图片颜色</div>
+            <el-select v-model="sampleColor" size="mini" class="control">
+              <el-option label="深色" value="var(--black-gray)"/>
+              <el-option label="浅色" value="var(--white-gray)"/>
+            </el-select>
+          </div>
+        </div>
         <div class="row">
           <el-button type="primary" size="mini" @click="switchDirection" class="bar-button">切换拼接方向</el-button>
+        </div>
+      </div>
+      <div id="right">
+        <div class="row">
+          <div class="subtitle">长图拼接样式设置</div>
         </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
@@ -65,8 +93,9 @@
             :show-input="true"
             input-size="mini"></el-slider>
         </div>
-      </div>
-      <div id="right">
+        <div class="row">
+          <div class="subtitle">模板名称设置</div>
+        </div>
         <el-input v-model="templateTitle" placeholder="请输入模板标题" size="mini"></el-input>
         <div class="row">
           <el-dropdown
@@ -75,7 +104,7 @@
             type="primary"
             trigger="click"
             class="bar-button interactable"
-            @click="hide"
+            @click="minimize"
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
@@ -103,11 +132,13 @@ export default {
       spacing: 0,
       borderRadius: 0,
       backgroundColor: '#FFFFFF',
+      sampleCount: 5,
+      sampleColor: 'var(--black-gray)',
       templateTitle: ''
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -371,8 +402,6 @@ export default {
 
 <style lang="scss">  
 .el-color-picker__panel {
-  -webkit-app-region: no-drag;
-  
   button {
     font-family: var(--main-font);
   }
@@ -413,7 +442,7 @@ export default {
     align-items: center;
     
     .control {
-      width: 60%;
+      width: 70%;
     }
     
     &:first-child {
@@ -446,6 +475,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -471,6 +501,12 @@ export default {
   
   .el-button--primary:not(.el-dropdown__caret-button) {
     padding: 0;
+    height: 28px;
+  }
+  
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
     height: 28px;
   }
     
@@ -504,7 +540,6 @@ export default {
           display: flex;
           justify-content: center;
           align-items: center;
-          color: var(--white);
         }
       }
     }
@@ -540,14 +575,14 @@ export default {
     
     #left {
       width: calc(50% - 10px);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     
     #right {
       width: calc(50% - 10px);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
     }
   }
 }

@@ -100,9 +100,9 @@
           <div class="text">长图拼接工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -131,7 +131,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -259,7 +259,7 @@ export default {
             title: '长图拼接编辑器',
             path: '#/splicer/editor',
             modal: true,
-            height: 720,
+            height: 800,
             width: 1000
           })
           ipcRenderer.on('modal-window-closed', () => {
@@ -279,7 +279,7 @@ export default {
           title: '长图拼接模板编辑器',
           path: '#/splicer/template?index=' + String(index),
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -428,7 +428,7 @@ export default {
           title: '长图拼接模板编辑器',
           path: '#/splicer/template?index=-1',
           modal: true,
-          height: 600,
+          height: 800,
           width: 1000
         })
         ipcRenderer.on('modal-window-closed', () => {
@@ -562,21 +562,21 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .tab-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
   }
   
   .row {
@@ -600,6 +600,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;

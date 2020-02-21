@@ -1,5 +1,5 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="about">
+  <el-tabs type="card" tab-position="left" id="settings">
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-code"></i> 版权信息</span>
       <div id="info" class="tab-content">
@@ -143,9 +143,9 @@
           <div class="text">关于</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -164,7 +164,7 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'about',
+  name: 'settings',
   data () {
     return {
       resources: [
@@ -237,7 +237,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -453,7 +453,7 @@ export default {
 </script>
 
 <style lang="scss">
-#about {
+#settings {
   width: 100%;
   height: 100%;
   
@@ -617,6 +617,24 @@ export default {
   .subtext {
     margin-top: 5px;
     margin-bottom: 5px;
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   #info {      

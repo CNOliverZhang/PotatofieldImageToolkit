@@ -1,6 +1,6 @@
 <template>
   <div id="watermark-editor">
-    <div id="preview">
+    <div id="left">
       <div id="sample-container">
         <div id="sample"></div>
         <div
@@ -36,7 +36,7 @@
                 v-for="(char, index) in line"
                 :key="index"
                 :style="{
-                  'margin-left': index == 0 ? 0 : letterSpacing / 5 + 'em'
+                  'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
                 }">{{ char }}</span>
             </div>
           </div>
@@ -106,7 +106,7 @@
         </div>
       </div>
     </div>
-    <div id="control" class="interactable">
+    <div id="right" class="interactable">
       <div>
         <div class="row">
           <div class="subtitle">水印设置</div>
@@ -123,7 +123,7 @@
           <el-collapse-item title="水印文字样式" name="style">
             <div class="control-row">
               <div class="text">水印字体</div>
-              <el-select v-model="font" placeholder="请选择" size="mini">
+              <el-select v-model="font" placeholder="请选择" size="mini" class="control">
                 <el-option
                   v-for="(font, index) in this.$store.state.fonts.fontList"
                   :key="index"
@@ -209,7 +209,7 @@
           <el-collapse-item title="水印文字位置" name="position">
             <div class="control-row">
               <div class="text">水印位置基准</div>
-              <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini">
+              <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
                 <el-option label="中央" value="center"/>
                 <el-option label="左上角" value="left-top"/>
                 <el-option label="右上角" value="right-top"/>
@@ -264,7 +264,7 @@
           <el-collapse-item title="水印文字排版" name="typesetting">
             <div class="control-row">
               <div class="text">水印文字方向</div>
-              <el-select v-model="writingMode" placeholder="请选择" size="mini">
+              <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
                 <el-option label="水平" value="horizontal-tb"/>
                 <el-option label="垂直从右至左" value="vertical-rl"/>
                 <el-option label="垂直从左至右" value="vertical-lr"/>
@@ -272,7 +272,7 @@
             </div>
             <div class="control-row">
               <div class="text">多行水印对齐方式</div>
-              <el-select v-model="textAlign" placeholder="请选择" size="mini">
+              <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
                 <el-option label="居中对齐" value="center"/>
                 <el-option label="行首对齐" value="left"/>
                 <el-option label="行尾对其" value="right"/>
@@ -361,7 +361,7 @@
             type="primary"
             trigger="click"
             class="bar-button interactable"
-            @click="hide"
+            @click="minimize"
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
@@ -519,7 +519,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -1182,9 +1182,7 @@ export default {
 </script>
 
 <style lang="scss">  
-.el-color-picker__panel {
-  -webkit-app-region: no-drag;
-  
+.el-color-dropdown {
   button {
     font-family: var(--main-font);
   }
@@ -1224,18 +1222,8 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .el-switch {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    .el-radio-group {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
     .control {
-      width: 60%;
+      width: 70%;
     }
     
     &:first-child {
@@ -1268,6 +1256,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -1283,6 +1272,34 @@ export default {
     }
   }
   
+  .el-switch {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .el-radio-group {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
   .el-button-group {
     display: flex;
     
@@ -1296,7 +1313,13 @@ export default {
     height: 28px;
   }
   
-  #preview {
+  .el-button--primary.el-dropdown__caret-button {
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 28px;
+  }
+  
+  #left {
     width: calc(50% - 10px);
     height: 100%;
     display: flex;
@@ -1348,6 +1371,26 @@ export default {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        
+        .el-pagination {
+          flex-grow: 1;
+          text-align: center;
+          padding: 0;
+          
+          li {
+            min-width: 24px;
+            height: 28px;
+            line-height: 28px;
+            
+            &:first-child {
+              margin-left: 0;
+            }
+            
+            &:last-child {
+              margin-right: 0;
+            }
+          }
+        }
         
         #list {
           width: 100%;
@@ -1421,26 +1464,6 @@ export default {
             
             &:hover {
               background-color: var(--gray);
-            }
-          }
-        }
-        
-        .el-pagination {
-          flex-grow: 1;
-          text-align: center;
-          padding: 0;
-          
-          li {
-            min-width: 24px;
-            height: 28px;
-            line-height: 28px;
-            
-            &:first-child {
-              margin-left: 0;
-            }
-            
-            &:last-child {
-              margin-right: 0;
             }
           }
         }
@@ -1585,7 +1608,7 @@ export default {
     }
   }
   
-  #control {
+  #right {
     width: calc(50% - 10px);
     height: 100%;
     display: flex;
@@ -1603,10 +1626,8 @@ export default {
     }
     
     .el-textarea__inner {
-      font-family: var(--main-font)
-    }
+      font-family: var(--main-font);
       
-    textarea {
       &::-webkit-scrollbar {
         width: 10px;
       }

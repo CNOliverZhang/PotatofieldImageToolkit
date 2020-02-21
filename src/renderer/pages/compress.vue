@@ -75,8 +75,8 @@
     </el-tab-pane>
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-folder-open"></i> 选择文件夹</span>
-      <div id="multiple" class="tab-content" v-if="this.fileList.length == 0">
-        <div class="controller">
+      <div id="multiple" class="tab-content">
+        <div class="wrapper" v-if="this.fileList.length == 0">
           <div class="row">
             <el-switch
               v-model="childDirectoryIncluded"
@@ -87,92 +87,90 @@
               <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
             </el-input>
           </div>
-          <div class="row">
-            <el-button
-              @click="handleFolder"
-              type="primary"
-              size="mini"
-              class="interactable bar-button">扫描文件夹</el-button>
-          </div>
-        </div>
-        <div id="file-list" class="row interactable">
-          <div id="empty">
-            <i class="far fa-folder-open"></i>
-            <div>未导入图片</div>
-          </div>
-        </div>
-      </div>
-      <div id="multiple" class="tab-content" v-else>
-        <div id="file-list" class="interactable">
-          <div
-            v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
-            :key="file.fullpath"
-            class="file"
-            @click="preview(index + (fileListPage - 1) * 100)">
-            <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-            <div class="path">{{ file.filepath }}</div>
-            <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
-              <i class="fas fa-trash-alt delete"></i>
+          <el-button
+            @click="handleFolder"
+            type="primary"
+            size="mini"
+            class="interactable">扫描文件夹</el-button>
+          <div id="file-list" class="row">
+            <div id="empty">
+              <i class="far fa-folder-open"></i>
+              <div>未导入图片</div>
             </div>
           </div>
         </div>
-        <div class="row">
-          <el-pagination
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="100"
-            :total="this.fileList.length"
-            :current-page="fileListPage"
-            :hide-on-single-page="true"
-            @current-change="fileListPageChange">
-          </el-pagination>
-          <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
-        </div>
-        <div class="controller">
-          <div class="control-row">
-            <div class="text">图像质量</div>
-            <el-slider
-              v-model="quality"
-              class="control interactable"
-              :min="1"
-              :max="100"
-              :step="1"
-              :show-input="true"
-              input-size="mini"></el-slider>
-          </div>
-          <div class="control-row">
-            <div class="text">存储位置</div>
-            <el-switch
-              v-model="customDistDirectory"
-              active-color="var(--main-color)"
-              inactive-color="var(--main-color)"
-              active-text="自定义路径"
-              inactive-text="保存在原路径"
-              class="control interactable"></el-switch>
-          </div>
-          <div v-if="customDistDirectory" class="control-row">
-            <div class="text">自定义存储位置</div>
-            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
-              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-            </el-input>
-          </div>
-          <div v-if="customDistDirectory && childDirectoryIncluded" class="control-row interactable">
-            <div class="text">目录结构</div>
-            <el-switch
-              v-model="keepDirectoryStructure"
-              active-text="保持目录结构"
-              inactive-text="不保持目录结构"
-              class="control"></el-switch>
-          </div>
-          <div class="control-row">
-            <div class="text">文件名后缀</div>
-            <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+        <div class="wrapper" v-else>
+          <div id="file-list" class="interactable">
+            <div
+              v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+              :key="file.fullpath"
+              class="file"
+              @click="preview(index + (fileListPage - 1) * 100)">
+              <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+              <div class="path">{{ file.filepath }}</div>
+              <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
+                <i class="fas fa-trash-alt delete"></i>
+              </div>
+            </div>
           </div>
           <div class="row">
-            <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
+            <el-pagination
+              class="interactable"
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="100"
+              :total="this.fileList.length"
+              :current-page="fileListPage"
+              :hide-on-single-page="true"
+              @current-change="fileListPageChange">
+            </el-pagination>
+            <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
+          </div>
+          <div>
+            <div class="control-row">
+              <div class="text">图像质量</div>
+              <el-slider
+                v-model="quality"
+                class="control interactable"
+                :min="1"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">存储位置</div>
+              <el-switch
+                v-model="customDistDirectory"
+                active-color="var(--main-color)"
+                inactive-color="var(--main-color)"
+                active-text="自定义路径"
+                inactive-text="保存在原路径"
+                class="control interactable"></el-switch>
+            </div>
+            <div v-if="customDistDirectory" class="control-row">
+              <div class="text">自定义存储位置</div>
+              <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control interactable">
+                <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+              </el-input>
+            </div>
+            <div v-if="customDistDirectory && childDirectoryIncluded" class="control-row interactable">
+              <div class="text">目录结构</div>
+              <el-switch
+                v-model="keepDirectoryStructure"
+                active-text="保持目录结构"
+                inactive-text="不保持目录结构"
+                class="control"></el-switch>
+            </div>
+            <div class="control-row">
+              <div class="text">文件名后缀</div>
+              <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+            </div>
+            <div class="row">
+              <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -184,9 +182,9 @@
           <div class="text">JPEG 压缩工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="hide">
+          <div class="control-button interactable" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
-            <div>隐藏</div>
+            <div>最小化</div>
           </div>
           <div class="control-button interactable" @click="close">
             <span class="fas fa-sign-out-alt"></span>
@@ -225,7 +223,7 @@ export default {
     }
   },
   methods: {
-    hide() {
+    minimize() {
       ipcRenderer.send('minimize')
     },
     close() {
@@ -716,22 +714,21 @@ export default {
   
   .el-tabs__content {
     height: 100%;
-  }
-  
-  .el-tab-pane {
-    width: 100%;
-    height: 100%;
-  }
-  
-  .tab-content {
-    width: 100%;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+    
+    .el-tab-pane {
+      width: 100%;
+      height: 100%;
+      
+      .tab-content {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+    }
   }
   
   .control-row {
@@ -746,18 +743,8 @@ export default {
     justify-content: space-between;
     align-items: center;
     
-    .el-switch {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
-    .el-radio-group {
-      display: flex;
-      justify-content: flex-end;
-    }
-    
     .control {
-      width: 60%;
+      width: 70%;
     }
     
     &:first-child {
@@ -794,6 +781,7 @@ export default {
   
   .bar-button {
     width: 0;
+    height: 28px;
     flex-grow: 1;
     box-sizing: border-box;
     border: none;
@@ -812,17 +800,47 @@ export default {
   }
   
   .controller {
+    margin-top: 10px;
+  }
+  
+  .wrapper {
     width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .el-input-group {
+    display: flex;
+  }
+  
+  .el-input-group__prepend {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-input-group__append {
+    width: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .el-switch {
+    display: flex;
+    justify-content: flex-end;
   }
     
   #single {
+    
     #upload {
       width: 100%;
       height: 0;
       flex-grow: 1;
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
       
       #upload-dragger {
         width: 100%;
@@ -952,31 +970,6 @@ export default {
   
   #multiple {
     
-    .el-pagination {
-      padding: 0;
-      margin-right: 10px;
-      
-      li {
-        min-width: 24px;
-        height: 28px;
-        line-height: 28px;
-      }
-      
-      .btn-prev {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-left: 0;
-      }
-      
-      .btn-next {
-        width: 24px;
-        height: 28px;
-        line-height: 28px;
-        margin-right: 0;
-      }
-    }
-    
     #file-list {
       width: 100%;
       height: 0;
@@ -1081,6 +1074,31 @@ export default {
         &:hover {
           background-color: var(--gray);
         }
+      }
+    }
+    
+    .el-pagination {
+      padding: 0;
+      margin-right: 5px;
+      
+      li {
+        min-width: 24px;
+        height: 28px;
+        line-height: 28px;
+      }
+      
+      .btn-prev {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-left: 0;
+      }
+      
+      .btn-next {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-right: 0;
       }
     }
   }
