@@ -129,7 +129,7 @@
             class="interactable">扫描文件夹</el-button>
           <div id="file-list" class="row">
             <div id="empty">
-              <i class="far fa-folder-open"></i>
+              <i class="fas fa-folder-open"></i>
               <div>未导入图片</div>
             </div>
           </div>

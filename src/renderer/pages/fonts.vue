@@ -3,9 +3,8 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-font"></i> 本地字体</span>
       <div class="tab-content">
-        <div class="container">
+        <div class="container" v-if="localFontsChinese && localChineseFonts.length != 0">
           <div
-            v-if="localFontsChinese"
             v-for="font in localChineseFonts.slice(localFontListPage * 4 - 4, localFontListPage * 4)"
             :key="font.fontFamily"
             class="card-container">
@@ -43,8 +42,9 @@
               </div>
             </el-card>
           </div>
+        </div>
+        <div class="container" v-if="!localFontsChinese && localEnglishFonts.length != 0">
           <div
-            v-if="!localFontsChinese"
             v-for="font in localEnglishFonts.slice(localFontListPage * 4 - 4, localFontListPage * 4)"
             :key="font.fontFamily"
             class="card-container">
@@ -82,9 +82,11 @@
               </div>
             </el-card>
           </div>
-          <div v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)" class="empty-container">
+        </div>
+        <div class="container" v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)">
+          <div  class="empty-container">
             <div class="empty">
-              <i class="far fa-folder-open"></i>
+              <i class="fas fa-folder-open"></i>
               <div>尚无符合要求的字体</div>
             </div>
           </div>
@@ -128,9 +130,8 @@
     <el-tab-pane>
       <span slot="label" class="interactable"><i class="fas fa-globe"></i> 在线字体</span>
       <div class="tab-content">
-        <div class="container">
+        <div class="container" v-if="onlineFontsChinese && onlineChineseFonts.length != 0">
           <div
-            v-if="onlineFontsChinese"
             v-for="font in onlineChineseFonts.slice(onlineFontListPage * 4 - 4, onlineFontListPage * 4)"
             :key="font.fontFamily"
             class="card-container">
@@ -160,8 +161,9 @@
               </div>
             </el-card>
           </div>
+        </div>
+        <div class="container" v-if="!onlineFontsChinese && onlineEnglishFonts.length != 0">
           <div
-            v-if="!onlineFontsChinese"
             v-for="font in onlineEnglishFonts.slice(onlineFontListPage * 4 - 4, onlineFontListPage * 4)"
             :key="font.fontFamily"
             class="card-container">
@@ -191,9 +193,11 @@
               </div>
             </el-card>
           </div>
-          <div v-if="onlineFonts.length == 0" class="empty-container">
+        </div>
+        <div class="container" v-if="onlineFonts.length == 0">
+          <div class="empty-container">
             <div class="empty">
-              <i class="far fa-folder-open"></i>
+              <i class="fas fa-folder-open"></i>
               <div>未获取到字体</div>
             </div>
           </div>

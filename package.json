@@ -1,10 +1,10 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
-  "license": null,
+  "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
     "build": "node .electron-vue/build.js && electron-builder",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新图片分割工具。\n长图拼接工具支持横向拼接。\n支持高分辨率显示器缩放。\n修复已知问题。"
+      "releaseNotes": "支持自定义界面缩放比例。\n更新消息中心。\n修复已知问题。"
     },
     "publish": [
       {
@@ -55,7 +55,7 @@
       "icon": "build/icons/icon.ico",
       "target": [
         "nsis",
-        "portable "
+        "portable"
       ]
     }
   },

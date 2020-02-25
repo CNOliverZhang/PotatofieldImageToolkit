@@ -53,7 +53,7 @@
         </div>
         <div v-else id="empty-container">
           <div id="empty">
-            <i class="far fa-folder-open"></i>
+            <i class="fas fa-folder-open"></i>
             <div>尚无已保存的模板</div>
           </div>
         </div>
@@ -165,9 +165,8 @@ export default {
               height: 800,
               width: 1000
             })
-            ipcRenderer.on('modal-window-closed', () => {
+            ipcRenderer.once('modal-window-closed', () => {
               dialog.close()
-              ipcRenderer.removeAllListeners('modal-window-closed')
             })
           })
         })
@@ -185,10 +184,9 @@ export default {
           height: 800,
           width: 1000
         })
-        ipcRenderer.on('modal-window-closed', () => {
+        ipcRenderer.once('modal-window-closed', () => {
           this.clear()
           dialog.close()
-          ipcRenderer.removeAllListeners('modal-window-closed')
         })
       })
     },
@@ -334,10 +332,9 @@ export default {
           height: 800,
           width: 1000
         })
-        ipcRenderer.on('modal-window-closed', () => {
+        ipcRenderer.once('modal-window-closed', () => {
           this.clear()
           dialog.close()
-          ipcRenderer.removeAllListeners('modal-window-closed')
         })
       })
     }

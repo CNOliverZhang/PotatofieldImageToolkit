@@ -136,11 +136,32 @@
         </div>
       </div>
     </el-tab-pane>
+    <el-tab-pane>
+      <span slot="label" class="interactable"><i class="fas fa-wrench"></i> 个性化设置</span>
+      <div id="custom" class="tab-content">
+        <div class="row">
+          <div class="subtitle">设置缩放比例</div>
+        </div>
+        <div class="control-row">
+          <div class="text">您可以自定义界面的缩放比例以匹配您计算机显示器的尺寸和分辨率。</div>
+        </div>
+        <div id="scale" class="row">
+          <el-select v-model="scale" size="mini" class="scale interactable">
+            <el-option label="50%" :value="0.5"/>
+            <el-option label="75%" :value="0.75"/>
+            <el-option label="100%" :value="1.0"/>
+            <el-option label="125%" :value="1.25"/>
+            <el-option label="150%" :value="1.5"/>
+          </el-select>
+          <el-button type="primary" size="mini" @click="setScale" class="scale interactable">保存设置</el-button>
+        </div>
+      </div>
+    </el-tab-pane>
     <el-tab-pane disabled>
       <span slot="label" id="sidebar">
         <div id="tool-info">
-          <i id="tool-logo" class="fas fa-question-circle"></i>
-          <div class="text">关于</div>
+          <i id="tool-logo" class="fas fa-tools"></i>
+          <div class="text">设置</div>
         </div>
         <div id="control-button-holder">
           <div class="control-button interactable" @click="minimize">
@@ -233,7 +254,8 @@ export default {
       updateChecked: false,
       update: null,
       distDirectory: '',
-      filename: ''
+      filename: '',
+      scale: 1.0
     }
   },
   methods: {
@@ -252,14 +274,6 @@ export default {
         text: '正在检查更新',
         showConfirm: false
       }).then((dialog) => {
-        ipcRenderer.once('error', () => {
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '检查更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
-            showConfirm: true
-          })
-        })
         ipcRenderer.once('update-not-available', () => {
           dialog.close()
           this.updateChecked = true
@@ -270,16 +284,23 @@ export default {
           this.update = {
             version: info.version,
             releaseNotes: info.releaseNotes.split('\n'),
-            releaseDate: info.releaseDate.slice(0, 4) + "年"
-            + info.releaseDate.slice(5, 7) + "月"
-            + info.releaseDate.slice(8, 10) + "日"
+            releaseDate: info.releaseDate.slice(0, 4) + " 年 "
+            + info.releaseDate.slice(5, 7) + " 月 "
+            + info.releaseDate.slice(8, 10) + " 日"
           }
+        })
+        ipcRenderer.once('error', () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '检查更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
+            showConfirm: true
+          })
         })
       })
     },
     confirmUpdate() {
       ipcRenderer.send('download-update')
-      ipcRenderer.removeAllListeners(['error'])
       this.$dialog({
         title: '正在下载更新',
         content: this.$createElement('el-progress', {
@@ -294,15 +315,6 @@ export default {
         }),
         showConfirm: false
       }).then((dialog) => {
-        ipcRenderer.once('error', () => {
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '检查或下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
-            content: null,
-            showConfirm: true
-          })
-        })
         ipcRenderer.on('update-download-progress', (event, progress) => {
           dialog.change({
             content: this.$createElement('el-progress', {
@@ -329,6 +341,19 @@ export default {
                 showConfirm: false
               })
             }
+          }).then(() => {
+            ipcRenderer.removeAllListeners('update-download-progress')
+          })
+        })
+        ipcRenderer.once('error', () => {
+          dialog.change({
+            type: 'error',
+            title: '出现错误',
+            text: '下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
+            content: null,
+            showConfirm: true
+          }).then(() => {
+            ipcRenderer.removeAllListeners('update-download-progress')
           })
         })
       })
@@ -444,10 +469,22 @@ export default {
           }
         })
       }
+    },
+    setScale() {
+      this.$dialog({
+        title: '操作确认',
+        text: '更改缩放比例后本程序将重启，确定执行操作吗？',
+        showCancel: true,
+        confirmFunction: () => {
+          this.$store.dispatch('settings/setScale', this.scale)
+          ipcRenderer.send('relaunch')
+        }
+      })
     }
   },
   mounted() {
     this.version = ipcRenderer.sendSync('version')
+    this.scale = this.$store.state.settings.scale
   }
 }
 </script>
@@ -688,6 +725,7 @@ export default {
   }
   
   #templates {
+    
     .export {
       margin-left: 5px;
       margin-right: 5px;
@@ -698,6 +736,26 @@ export default {
       
       &:last-child {
         margin-right: 0;
+      }
+    }
+  }
+  
+  #custom {
+    
+    #scale {
+      width: fit-content;
+      
+      .scale {
+        margin-left: 5px;
+        margin-right: 5px;
+        
+        &:first-child {
+          margin-left: 0;
+        }
+        
+        &:last-child {
+          margin-right: 0;
+        }
       }
     }
   }

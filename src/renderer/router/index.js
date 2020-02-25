@@ -12,6 +12,11 @@ export default new Router({
       component: require('@/pages/index').default
     },
     {
+      path: '/messages',
+      name: 'messages',
+      component: require('@/pages/messages').default
+    },
+    {
       path: '/settings',
       name: 'settings',
       component: require('@/pages/settings').default
@@ -57,6 +62,16 @@ export default new Router({
       component: require('@/pages/splicer/horizontalTemplate').default
     },
     {
+      path: '/cropper',
+      name: 'cropper',
+      component: require('@/pages/cropper').default
+    },
+    {
+      path: '/cropper/editor',
+      name: 'cropperEditor',
+      component: require('@/pages/cropper/editor').default
+    },
+    {
       path: '/slice',
       name: 'slice',
       component: require('@/pages/slice').default
@@ -87,14 +102,9 @@ export default new Router({
       component: require('@/pages/resizer').default
     },
     {
-      path: '/cropper',
-      name: 'cropper',
-      component: require('@/pages/cropper').default
-    },
-    {
-      path: '/cropper/editor',
-      name: 'cropperEditor',
-      component: require('@/pages/cropper/editor').default
+      path: '/compress',
+      name: 'compress',
+      component: require('@/pages/compress').default
     },
     {
       path: '/exif',
@@ -102,19 +112,14 @@ export default new Router({
       component: require('@/pages/exif').default
     },
     {
-      path: '/fonts',
-      name: 'fonts',
-      component: require('@/pages/fonts').default
-    },
-    {
       path: '/palette',
       name: 'palette',
       component: require('@/pages/palette').default
     },
     {
-      path: '/compress',
-      name: 'compress',
-      component: require('@/pages/compress').default
+      path: '/fonts',
+      name: 'fonts',
+      component: require('@/pages/fonts').default
     },
     {
       path: '*',

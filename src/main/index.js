@@ -23,6 +23,7 @@ let mainWindow
 let updateTargetWindow
 let tray
 let zoomFactor
+let scale = 1.0
 
 autoUpdater.autoDownload = false
 autoUpdater.setFeedURL("https://imagetoolkit.potatofield.cn/download/")
@@ -36,8 +37,6 @@ if (process.env.NODE_ENV === 'development') {
 function createWindow(args) {
   let newWindow = new BrowserWindow({
     title: args.title,
-    height: args.height ? Math.round(args.height * zoomFactor) : Math.round(500 * zoomFactor),
-    width: args.width ? Math.round(args.width * zoomFactor) : Math.round(800 * zoomFactor),
     frame: false,
     fullscreenable: false,
     resizable: false,
@@ -60,7 +59,12 @@ function createWindow(args) {
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
-    newWindow.webContents.setZoomFactor(zoomFactor)
+    newWindow.setBounds({
+      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(500 * zoomFactor * scale),
+      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(800 * zoomFactor * scale)
+    })
+    newWindow.webContents.setZoomFactor(zoomFactor * scale)
+    newWindow.center()
   })
   
   newWindow.on('close', (event) => {
@@ -78,7 +82,7 @@ function createWindow(args) {
   return newWindow
 }
 
-function openWindow(event, args) {
+function openWindow(args) {
   if (windowTitles.has(args.title)) {
     windows.forEach((window) => {
       if (window.webContents.browserWindowOptions.title == args.title) {
@@ -94,7 +98,7 @@ function openWindow(event, args) {
       path: args.path,
     }
     if (args.modal) {
-      targetArgs.parent = BrowserWindow.fromWebContents(event.sender)
+      targetArgs.parent = args.parent
       targetArgs.modal = true
     }
     if (args.width) {
@@ -114,7 +118,7 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on('ready', () => {
-  zoomFactor = screen.getPrimaryDisplay().workAreaSize.height / devWindowHeight * screen.getPrimaryDisplay().scaleFactor
+  zoomFactor = screen.getPrimaryDisplay().workAreaSize.height / devWindowHeight * scale
   mainWindow = createWindow({
     title: '洋芋田图像工具箱',
     path: '#/'
@@ -282,7 +286,9 @@ app.on('activate', (event, hasVisibleWindows) => {
 
 ipcMain.on('check-for-update', (event) => {
   updateTargetWindow = event.sender
-  autoUpdater.checkForUpdates()
+  setTimeout(() => {
+    autoUpdater.checkForUpdates()
+  }, 100)
 })
 
 ipcMain.on('download-update', () => {
@@ -291,6 +297,10 @@ ipcMain.on('download-update', () => {
 
 ipcMain.on('update-now', () => {
   autoUpdater.quitAndInstall(true, true)
+})
+
+ipcMain.on('scale', (event, arg) => {
+  scale = arg
 })
 
 ipcMain.on('hide', (event) => {
@@ -354,7 +364,10 @@ ipcMain.on('relaunch', () => {
 })
 
 ipcMain.on('open', (event, args) => {
-  openWindow(event, args)
+  if (args.modal) {
+    args.parent = BrowserWindow.fromWebContents(event.sender)
+  }
+  openWindow(args)
 })
 
 ipcMain.on('version', (event) => {

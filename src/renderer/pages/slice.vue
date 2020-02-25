@@ -206,10 +206,9 @@ export default {
             height: 800,
             width: 1000
           })
-          ipcRenderer.on('modal-window-closed', () => {
+          ipcRenderer.once('modal-window-closed', () => {
             this.clear()
             dialog.close()
-            ipcRenderer.removeAllListeners('modal-window-closed')
           })
         })
       })

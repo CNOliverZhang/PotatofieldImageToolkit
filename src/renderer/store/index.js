@@ -25,6 +25,9 @@ export default new Vuex.Store({
           fonts: {
             fontsUpdated: state.fonts.fontsUpdated,
             fontList: state.fonts.fontList
+          },
+          messages: {
+            messages: state.messages.messages
           }
         }
       }

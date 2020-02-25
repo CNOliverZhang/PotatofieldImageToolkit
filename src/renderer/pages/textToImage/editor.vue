@@ -560,7 +560,7 @@
           </div>
           <div v-else id="empty-container">
             <div id="empty">
-              <i class="far fa-folder-open"></i>
+              <i class="fas fa-folder-open"></i>
               <div>尚无已保存的模板</div>
             </div>
           </div>

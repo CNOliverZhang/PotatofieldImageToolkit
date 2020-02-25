@@ -4,6 +4,10 @@
       <img id="logo" src="static/images/logo.png"/>
       <div id="title" class="title">洋芋田图像工具箱</div>
       <div id="title-bar-space"></div>
+      <div class="control-button interactable" @click="open('/messages', '消息中心')">
+        <span class="fa fa-envelope"></span>
+        <div>消息中心</div>
+      </div>
       <div class="control-button interactable" @click="open('/settings', '设置')">
         <span class="fa fa-tools"></span>
         <div>设置</div>
@@ -127,9 +131,16 @@ export default {
         path: '#' + path
       })
     },
-    showDeveloping() {
-      this.$dialog({
-        text: '功能正在开发中。'
+    checkMessage() {
+      this.$http.get('https://imagetoolkit.potatofield.cn/messages/latest').then((res) => {
+        let message = res.data
+        if (this.$store.state.messages.messageList.indexOf(message.id) == -1) {
+          this.$dialog({
+            title: message.title,
+            text: message.text
+          })
+          this.$store.dispatch('messages/markRead', message.id)
+        }
       })
     }
   },
@@ -141,7 +152,11 @@ export default {
     ipcRenderer.on('exit', () => {
       this.exit()
     })
+    ipcRenderer.send('scale', this.$store.state.settings.scale)
     ipcRenderer.send('check-for-update')
+    ipcRenderer.once('update-not-available', () => {
+      this.checkMessage()
+    })
     ipcRenderer.once('update-available', (event, info) => {
       this.$dialog({
         title: '发现新版本',
@@ -176,7 +191,6 @@ export default {
             showConfirm: false
           }).then((dialog) => {
             ipcRenderer.on('update-download-progress', (event, progress) => {
-              console.log(progress)
               dialog.change({
                 content: this.$createElement('el-progress', {
                   'props': {
@@ -202,6 +216,8 @@ export default {
                     showConfirm: false
                   })
                 }
+              }).then(() => {
+                ipcRenderer.removeAllListeners('update-download-progress')
               })
             })
             ipcRenderer.once('error', () => {
@@ -214,6 +230,8 @@ export default {
                 confirmFunction: () => {
                   dialog.close()
                 }
+              }).then(() => {
+                ipcRenderer.removeAllListeners('update-download-progress')
               })
             })
           })
@@ -258,8 +276,8 @@ export default {
       cursor: pointer;
       font-size: 12px;
       width: 4em;
-      margin-left: 10px;
-      margin-right: 10px;
+      margin-left: 5px;
+      margin-right: 5px;
       transition: 0.2s;
       
       svg {
