@@ -8,7 +8,7 @@ export default {
         fontFamily: 'NotoSansSCThin',
         verbose: '思源黑体',
         weight: '极细',
-        language: '中英文',
+        language: '中文',
         src: 'static/fonts/NotoSansSC-Thin.otf',
         image: 'static/fonts/思源黑体（极细）.png',
         builtin: true
@@ -30,6 +30,9 @@ export default {
     },
     FONTLIST_DELETE (state, index) {
       state.fontList.splice(index, 1)
+    },
+    FONTLIST_ASSIGN (state, fontList) {
+      state.fontList = fontList
     }
   },
   actions: {
@@ -60,6 +63,12 @@ export default {
     fontListDelete (context, index) {
       return new Promise((resolve, reject) => {
         context.commit('FONTLIST_DELETE', index)
+        resolve()
+      })
+    },
+    fontListAssign (context, fontList) {
+      return new Promise((resolve, reject) => {
+        context.commit('FONTLIST_ASSIGN', fontList)
         resolve()
       })
     }

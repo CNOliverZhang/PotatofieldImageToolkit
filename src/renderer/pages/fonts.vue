@@ -23,7 +23,7 @@
                   <span class="fa fa-cog"></span>
                   <div>当前默认字体</div>
                 </div>
-                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
+                <div v-if="!font.isDefault" class="action active interactable" @click="setDefaultFont(font.fontFamily)">
                   <span class="fa fa-cog"></span>
                   <div>设为默认字体</div>
                 </div>
@@ -63,7 +63,7 @@
                   <span class="fa fa-cog"></span>
                   <div>当前默认字体</div>
                 </div>
-                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
+                <div v-if="!font.isDefault" class="action active interactable" @click="setDefaultFont(font.fontFamily)">
                   <span class="fa fa-cog"></span>
                   <div>设为默认字体</div>
                 </div>
@@ -150,7 +150,7 @@
                   <span class="fa fa-check"></span>
                   <div>已下载字体</div>
                 </div>
-                <div v-else class="action active interactable" @click="downloadFont(font)">
+                <div v-if="!font.downloaded" class="action active interactable" @click="downloadFont(font)">
                   <span class="fa fa-download"></span>
                   <div>下载字体</div>
                 </div>
@@ -182,7 +182,7 @@
                   <span class="fa fa-check"></span>
                   <div>已下载字体</div>
                 </div>
-                <div v-else class="action active interactable" @click="downloadFont(font)">
+                <div v-if="!font.downloaded" class="action active interactable" @click="downloadFont(font)">
                   <span class="fa fa-download"></span>
                   <div>下载字体</div>
                 </div>
@@ -438,8 +438,8 @@ export default {
             })
           }).then((res) => {
             fontFile = new Uint8Array(res.data)
-            let fontFilename = font.src.split('/').pop()
-            let imageFilename = font.image.split('/').pop()
+            let fontFilename = decodeURI(font.src.split('/').pop())
+            let imageFilename = decodeURI(font.image.split('/').pop())
             try {
               let directory = path.join(this.fontsPath, font.verbose)
               CreateDirectory(directory)
@@ -479,6 +479,18 @@ export default {
     }
   },
   mounted() {
+    let fontList = this.$store.state.fonts.fontList.slice()
+    fontList = fontList.map((font) => {
+      if (font.language == '中英文') {
+        font.language = '中文'
+      }
+      if (font.weight) {
+        font.style = font.weight
+        delete font.weight
+      }
+      return font
+    })
+    this.$store.dispatch('fonts/fontListAssign', fontList)
     this.fontsPath = path.join(ipcRenderer.sendSync('app-data-path'), 'fonts')
     this.$dialog({
       title: '正在获取字体',
@@ -493,6 +505,10 @@ export default {
           showConfirm: true
         })
       }).then((res) => {
+        res.data.forEach((font) => {
+          font.fontFamily = font.font_family
+          delete font.font_family
+        })
         this.onlineFonts = res.data
         dialog.close()
       })
