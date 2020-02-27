@@ -26,7 +26,7 @@ let zoomFactor
 let scale = 1.0
 
 autoUpdater.autoDownload = false
-autoUpdater.setFeedURL("https://imagetoolkit.potatofield.cn/download/")
+autoUpdater.setFeedURL("https://files.potatofield.cn/ImageToolkit/Packages")
 
 if (process.env.NODE_ENV === 'development') {
   autoUpdater.updateConfigPath = path.join(__dirname, '../../dev-app-update.yml')
