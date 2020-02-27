@@ -120,8 +120,8 @@
             v-model="localFontsChinese"
             active-color="var(--main-color)"
             inactive-color="var(--main-color)"
-            active-text="中英文字体"
-            inactive-text="纯英文字体"
+            active-text="中文字体"
+            inactive-text="英文字体"
             @change="switchLanguage"
             class="interactable"></el-switch>
         </div>
@@ -231,8 +231,8 @@
             v-model="onlineFontsChinese"
             active-color="var(--main-color)"
             inactive-color="var(--main-color)"
-            active-text="中英文字体"
-            inactive-text="纯英文字体"
+            active-text="中文字体"
+            inactive-text="英文字体"
             @change="switchLanguage"
             class="interactable"></el-switch>
         </div>
@@ -294,7 +294,7 @@ export default {
         font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
         return font
       }).filter((font) => {
-        return font.language == '中英文'
+        return font.language == '中文'
       })
     },
     localEnglishFonts() {
@@ -312,7 +312,7 @@ export default {
         font.downloaded = this.localFonts.has(font.fontFamily)
         return font
       }).filter((font) => {
-        return font.language == '中英文'
+        return font.language == '中文'
       })
     },
     onlineEnglishFonts() {
