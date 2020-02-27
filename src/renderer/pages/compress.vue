@@ -429,21 +429,7 @@ export default {
                 text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = this.fileList[index]
-                let distExt
-                if (this.mimeType == '保持原格式') {
-                  distExt = imageInfo.ext
-                } else if (this.mimeType == 'JPEG') {
-                  distExt = 'jpg'
-                } else {
-                  distExt = 'png'
-                }
-                let mimeType
-                if (distExt == 'png') {
-                  mimeType = 'png'
-                } else {
-                  mimeType = 'jpeg'
-                }
-                let distFilename = imageInfo.filename + this.append + '.' + distExt
+                let distFilename = imageInfo.filename + this.append + '.jpg'
                 let distPath
                 if (this.customDistDirectory) {
                   if (this.keepDirectoryStructure) {

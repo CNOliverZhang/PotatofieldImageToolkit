@@ -57,6 +57,13 @@ function createWindow(args) {
     })
   }
 
+  newWindow.on('restore', () => {
+    newWindow.setBounds({
+      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(500 * zoomFactor * scale),
+      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(800 * zoomFactor * scale)
+    })
+  })
+
   newWindow.once('ready-to-show', () => {
     newWindow.show()
     newWindow.setBounds({

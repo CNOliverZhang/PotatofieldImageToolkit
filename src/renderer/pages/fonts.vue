@@ -15,7 +15,7 @@
                   <div class="text">名称：{{ font.verbose }}</div>
                 </div>
                 <div class="row">
-                  <div class="text">字形：{{ font.weight }}</div>
+                  <div class="text">字形：{{ font.style }}</div>
                 </div>
               </div>
               <div class="row actions">
@@ -55,7 +55,7 @@
                   <div class="text">名称：{{ font.verbose }}</div>
                 </div>
                 <div class="row">
-                  <div class="text">字形：{{ font.weight }}</div>
+                  <div class="text">字形：{{ font.style }}</div>
                 </div>
               </div>
               <div class="row actions">
@@ -142,7 +142,7 @@
                   <div class="text">名称：{{ font.verbose }}</div>
                 </div>
                 <div class="row">
-                  <div class="text">字形：{{ font.weight }}</div>
+                  <div class="text">字形：{{ font.style }}</div>
                 </div>
               </div>
               <div class="row actions">
@@ -174,7 +174,7 @@
                   <div class="text">名称：{{ font.verbose }}</div>
                 </div>
                 <div class="row">
-                  <div class="text">字形：{{ font.weight }}</div>
+                  <div class="text">字形：{{ font.style }}</div>
                 </div>
               </div>
               <div class="row actions">
@@ -448,7 +448,7 @@ export default {
               this.$store.dispatch('fonts/fontListPush', {
                 fontFamily: font.fontFamily,
                 verbose: font.verbose,
-                weight: font.weight,
+                style: font.style,
                 language: font.language,
                 src: path.join(directory, fontFilename).split(path.sep).join('/'),
                 image: path.join(directory, imageFilename).split(path.sep).join('/'),
@@ -485,7 +485,7 @@ export default {
       text: '正在向服务器请求在线字体数据，请稍候。',
       showConfirm: false
     }).then((dialog) => {
-      this.$http.get('https://imagetoolkit.potatofield.cn/fonts').catch((error) => {
+      this.$http.get('https://fonts.potatofield.cn/fonts').catch((error) => {
         dialog.change({
           type: 'error',
           title: '出现错误',

@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,12 +22,12 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "支持自定义界面缩放比例。\n更新消息中心。\n修复已知问题。"
+      "releaseNotes": "请务必更新此版本以继续使用字体管理工具。\n修改自动更新及在线字体 API 地址。\n修复已知问题。"
     },
     "publish": [
       {
         "provider": "generic",
-        "url": "https://imagetoolkit.potatofield.cn/download/"
+        "url": "https://files.potatofield.cn/ImageToolkit/Packages/"
       }
     ],
     "directories": {
