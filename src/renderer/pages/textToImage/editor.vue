@@ -48,7 +48,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily
@@ -127,7 +127,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily
@@ -206,7 +206,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily
@@ -285,7 +285,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily
@@ -370,7 +370,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily
@@ -477,7 +477,7 @@
                   <el-option
                     v-for="(font, index) in this.$store.state.fonts.fontList"
                     :key="index"
-                    :label="font.verbose + '（' + font.weight + '）'"
+                    :label="font.verbose + '（' + font.style + '）'"
                     :value="font.fontFamily"
                     :style="{
                       'font-family': font.fontFamily

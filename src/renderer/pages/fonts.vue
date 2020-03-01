@@ -486,7 +486,7 @@ export default {
       }
       if (font.weight) {
         font.style = font.weight
-        delete font.weight
+        font.weight = undefined
       }
       return font
     })
@@ -507,7 +507,7 @@ export default {
       }).then((res) => {
         res.data.forEach((font) => {
           font.fontFamily = font.font_family
-          delete font.font_family
+          font.font_family = undefined
         })
         this.onlineFonts = res.data
         dialog.close()

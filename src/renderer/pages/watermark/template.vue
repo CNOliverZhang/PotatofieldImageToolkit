@@ -96,7 +96,7 @@
                 <el-option
                   v-for="(font, index) in this.$store.state.fonts.fontList"
                   :key="index"
-                  :label="font.verbose + '（' + font.weight + '）'"
+                  :label="font.verbose + '（' + font.style + '）'"
                   :value="font.fontFamily"
                   :style="{
                     'font-family': font.fontFamily
@@ -742,13 +742,6 @@ export default {
     }
   },
   mounted() {
-    let sampleContainer = document.getElementById('sample-container')
-    let style = window.getComputedStyle(sampleContainer)
-    let width = style.getPropertyValue('width').slice(0, -2)
-    this.sampleWidth = width
-    this.sampleHeight = width
-    this.sizeBaseX = width / 100
-    this.sizeBaseY = width / 100
     if (this.$route.query.index != -1) {
       let template = this.$store.state.watermark.templates[this.$route.query.index]
       this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
@@ -770,13 +763,31 @@ export default {
       this.textShadowY = template.textShadowY !== undefined ? template.textShadowY : this.textShadowY
       this.textShadowBlur = template.textShadowBlur !== undefined ? template.textShadowBlur : this.textShadowBlur
       this.textShadowColor = template.textShadowColor !== undefined ? template.textShadowColor : this.textShadowColor
-      this.$nextTick(() => {
-        this.$dialog({
-          text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。',
-          confirmFunction: () => {
-            this.initWatermarkSize()
-          }
+      this.$dialog({
+        text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
+      }).then(() => {
+        let sampleContainer = document.getElementById('sample-container')
+        let style = window.getComputedStyle(sampleContainer)
+        let width = style.getPropertyValue('width').slice(0, -2)
+        this.sampleWidth = width
+        this.sampleHeight = width
+        this.sizeBaseX = width / 100
+        this.sizeBaseY = width / 100
+        this.$nextTick(() => {
+          this.initWatermarkSize()
         })
+      })
+    } else {
+      this.$nextTick(() => {
+        setTimeout(() => {
+          let sampleContainer = document.getElementById('sample-container')
+          let style = window.getComputedStyle(sampleContainer)
+          let width = style.getPropertyValue('width').slice(0, -2)
+          this.sampleWidth = width
+          this.sampleHeight = width
+          this.sizeBaseX = width / 100
+          this.sizeBaseY = width / 100
+        }, 100)
       })
     }
   }

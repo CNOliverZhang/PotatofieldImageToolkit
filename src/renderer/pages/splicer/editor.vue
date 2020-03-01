@@ -111,7 +111,7 @@
         </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
-          <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
+          <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
         </div>
         <div class="control-row">
           <div class="text">外框宽度</div>
@@ -158,7 +158,10 @@
         <div class="control-row">
           <div class="text">文件名</div>
           <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
-            <template slot="append">.jpg</template>
+            <el-select v-model="mimeType" size="mini" slot="append">
+              <el-option label=".jpg" value="jpeg"/>
+              <el-option label=".png" value="png"/>
+            </el-select>
           </el-input>
         </div>
       </div>
@@ -198,9 +201,10 @@ export default {
       padding: 0,
       spacing: 0,
       borderRadius: 0,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: 'rgba(255, 255, 255, 1)',
       distDirectory: '',
       filename: '',
+      mimeType: 'jpeg',
       templateTitle: '',
       imagesChanged: false,
       errorList: []
@@ -414,7 +418,8 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let fullname = this.filename + '.jpg'
+          let ext = this.mimeType == 'png' ? '.png' : '.jpg'
+          let fullname = this.filename + ext
           let distFullpath = path.join(this.distDirectory, fullname)
           let images = document.getElementsByClassName('image')
           let maxWidth = 0
@@ -438,7 +443,7 @@ export default {
             allowTaint: true,
             imageTimeout: 0
           }).then(canvas => {
-            let url = canvas.toDataURL('image/jpeg', 1).replace(/^data:image\/\w+;base64,/, "")
+            let url = canvas.toDataURL('image/' + this.mimeType, 1).replace(/^data:image\/\w+;base64,/, "")
             let buffer = new Buffer.from(url, 'base64')
             fs.writeFile(distFullpath, buffer, (error) => {
               if (error) {
@@ -733,6 +738,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .el-select .el-input {
+      width: 80px;
+    }
   }
   
   .el-button-group {

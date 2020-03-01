@@ -15,7 +15,7 @@ export default {
       style.appendChild(document.createTextNode(`
         @font-face {
             font-family: ${font.fontFamily};
-            src: url(${font.src})
+            src: url("${font.src}");
         }
       `))
     })

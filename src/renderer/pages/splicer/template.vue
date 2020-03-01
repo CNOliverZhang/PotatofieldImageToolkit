@@ -56,7 +56,7 @@
         </div>
         <div class="control-row">
           <div class="text">边框颜色</div>
-          <el-color-picker v-model="backgroundColor" size="mini"></el-color-picker>
+          <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
         </div>
         <div class="control-row">
           <div class="text">外框宽度</div>
@@ -129,7 +129,7 @@ export default {
       padding: 0,
       spacing: 0,
       borderRadius: 0,
-      backgroundColor: '#FFFFFF',
+      backgroundColor: 'rgba(255, 255, 255, 1)',
       sampleCount: 5,
       sampleColor: 'var(--black-gray)',
       templateTitle: ''

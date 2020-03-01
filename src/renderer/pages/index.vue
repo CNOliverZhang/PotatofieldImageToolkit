@@ -117,6 +117,7 @@ export default {
           showCancel: true,
           confirmFunction: () => {
             this.$store.dispatch('watermark/fileListEmpty')
+            this.$store.dispatch('slice/fileListEmpty')
             this.$store.dispatch('splicer/fileListEmpty')
             this.$store.dispatch('textToImage/contentReset')
             this.$store.dispatch('cropper/fileListEmpty')

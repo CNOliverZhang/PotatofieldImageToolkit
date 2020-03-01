@@ -7,7 +7,7 @@ export default {
       {
         fontFamily: 'NotoSansSCThin',
         verbose: '思源黑体',
-        weight: '极细',
+        style: '极细',
         language: '中文',
         src: 'static/fonts/NotoSansSC-Thin.otf',
         image: 'static/fonts/思源黑体（极细）.png',

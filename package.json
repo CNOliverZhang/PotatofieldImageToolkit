@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "请务必更新此版本以继续使用字体管理工具。\n修改自动更新及在线字体 API 地址。\n修复已知问题。"
+      "releaseNotes": "长图拼接工具支持输出 PNG 格式图片。\n完善针对旧版本产生的本地数据的兼容性。\n修复已知问题。"
     },
     "publish": [
       {
