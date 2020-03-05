@@ -20,6 +20,7 @@ library.add(fab)
 dom.watch()
 
 Vue.component('v-clamp', VClamp)
+Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.use(CKEditor)
 Vue.use(ElementUI)

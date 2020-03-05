@@ -19,7 +19,7 @@
               </div>
               <div class="row actions">
                 <div class="action active" @click="showMessage(message)">
-                  <span class="fa fa-envelope-open"></span>
+                  <span class="fa fa-envelope"></span>
                   <div>阅读消息</div>
                 </div>
                 <div class="action">
@@ -44,7 +44,19 @@
                 </div>
               </div>
               <div class="row actions">
-                <div class="action active" @click="showMessage(message)">
+                <div
+                  class="action active"
+                  key="newMessage"
+                  v-if="$store.state.messages.messageList.indexOf(message.id) == -1"
+                  @click="showMessage(message)">
+                  <span class="fa fa-envelope"></span>
+                  <div>阅读消息</div>
+                </div>
+                <div
+                  class="action active"
+                  key="oldMessage"
+                  v-else
+                  @click="showMessage(message)">
                   <span class="fa fa-envelope-open"></span>
                   <div>阅读消息</div>
                 </div>
@@ -58,7 +70,7 @@
         <div class="container" v-if="(onlyUnread && unreadMessages.length == 0) || (!onlyUnread && messages.length == 0)">
           <div  class="empty-container">
             <div class="empty">
-              <i class="fas fa-envelope-open"></i>
+              <i class="fas fa-envelope"></i>
               <div>没有未读消息</div>
             </div>
           </div>

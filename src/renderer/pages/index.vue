@@ -5,7 +5,14 @@
       <div id="title" class="title">洋芋田图像工具箱</div>
       <div id="title-bar-space"></div>
       <div class="control-button interactable" @click="open('/messages', '消息中心')">
-        <span class="fa fa-envelope"></span>
+        <div key="hasUnreadMessage" v-if="unreadMessages > 0">
+          <el-badge :value="unreadMessages">
+            <span class="fa fa-envelope"></span>
+          </el-badge>
+        </div>
+        <div key="noNnreadMessage" v-else>
+          <span class="fa fa-envelope"></span>
+        </div>
         <div>消息中心</div>
       </div>
       <div class="control-button interactable" @click="open('/settings', '设置')">
@@ -99,6 +106,11 @@ import { ipcRenderer } from 'electron'
 
 export default {
   name: 'index',
+  data() {
+    return {
+      totalMessages: 0,
+    }
+  },
   methods: {
     minimize() {
       ipcRenderer.send('minimize')
@@ -145,10 +157,18 @@ export default {
       })
     }
   },
+  computed: {
+    unreadMessages() {
+      return this.totalMessages - this.$store.state.messages.messageList.length
+    }
+  },
   mounted() {
     document.getElementById('scroll').addEventListener('mousewheel', (event) => {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
+    })
+    this.$http.get('https://imagetoolkit.potatofield.cn/messages').then((res) => {
+      this.totalMessages = res.data.length
     })
     ipcRenderer.on('exit', () => {
       this.exit()
@@ -236,6 +256,9 @@ export default {
               })
             })
           })
+        },
+        cancelFunction: () => {
+          this.checkMessage()
         }
       })
     })

@@ -23,7 +23,7 @@
                   <span class="fa fa-cog"></span>
                   <div>当前默认字体</div>
                 </div>
-                <div v-if="!font.isDefault" class="action active interactable" @click="setDefaultFont(font.fontFamily)">
+                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
                   <span class="fa fa-cog"></span>
                   <div>设为默认字体</div>
                 </div>
@@ -63,7 +63,7 @@
                   <span class="fa fa-cog"></span>
                   <div>当前默认字体</div>
                 </div>
-                <div v-if="!font.isDefault" class="action active interactable" @click="setDefaultFont(font.fontFamily)">
+                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
                   <span class="fa fa-cog"></span>
                   <div>设为默认字体</div>
                 </div>
@@ -146,15 +146,19 @@
                 </div>
               </div>
               <div class="row actions">
-                <div v-if="font.downloaded" class="action interactable">
+                <div v-if="font.downloaded" key="downloaded" class="action interactable">
                   <span class="fa fa-check"></span>
                   <div>已下载字体</div>
                 </div>
-                <div v-if="!font.downloaded" class="action active interactable" @click="downloadFont(font)">
+                <div v-else key="download" class="action active interactable" @click="downloadFont(font)">
                   <span class="fa fa-download"></span>
                   <div>下载字体</div>
                 </div>
-                <div class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
+                <div v-if="font.downloaded" key="install" class="action active interactable" @click="installFont(font.fontFamily)">
+                  <span class="fa fa-desktop"></span>
+                  <div>安装到操作系统</div>
+                </div>
+                <div v-else key="explorer" class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
                   <span class="fab fa-chrome"></span>
                   <div>用浏览器下载</div>
                 </div>
@@ -178,15 +182,19 @@
                 </div>
               </div>
               <div class="row actions">
-                <div v-if="font.downloaded" class="action interactable">
+                <div v-if="font.downloaded" key="downloaded" class="action interactable">
                   <span class="fa fa-check"></span>
                   <div>已下载字体</div>
                 </div>
-                <div v-if="!font.downloaded" class="action active interactable" @click="downloadFont(font)">
+                <div v-else key="download" class="action active interactable" @click="downloadFont(font)">
                   <span class="fa fa-download"></span>
                   <div>下载字体</div>
                 </div>
-                <div class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
+                <div v-if="font.downloaded" key="install" class="action active interactable" @click="installFont(font.fontFamily)">
+                  <span class="fa fa-desktop"></span>
+                  <div>安装到操作系统</div>
+                </div>
+                <div v-else key="explorer" class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
                   <span class="fab fa-chrome"></span>
                   <div>用浏览器下载</div>
                 </div>
@@ -473,6 +481,14 @@ export default {
           })
         })
       })
+    },
+    installFont(fontFamily) {
+      for (let i = 0; i < this.$store.state.fonts.fontList.length; i++) {
+        if (this.$store.state.fonts.fontList[i].fontFamily == fontFamily) {
+          shell.openItem(this.$store.state.fonts.fontList[i].src)
+          return
+        }
+      }
     },
     downloadFontUsingExplorer(url) {
       shell.openExternal(url)

@@ -18,7 +18,7 @@
         </div>
         <div class="control-row">
           <div class="text">Copyright © 2020 张志毅</div>
-          <div class="text link interactable" @click="open('mailto:cnoliverzhang@gmail.com')">联系开发者</div>
+          <div class="text link interactable" @click="copyEmail">联系开发者</div>
         </div>
         <div class="row">
           <div class="subtitle">开源协议</div>
@@ -179,7 +179,7 @@
 </template>
 
 <script>
-import { ipcRenderer, shell } from 'electron'
+import { ipcRenderer, shell, clipboard } from 'electron'
 
 const path = require('path')
 const fs = require('fs')
@@ -267,6 +267,14 @@ export default {
     },
     open(url) {
       shell.openExternal(url)
+    },
+    copyEmail() {
+      clipboard.writeText('cnoliverzhang@gmail.com')
+      this.$dialog({
+        type: 'success',
+        title: '已复制邮箱',
+        text: '已成功将开发者的邮箱地址复制到剪贴板，您现在可以通过电子邮件联系开发者。'
+      })
     },
     checkForUpdate() {
       ipcRenderer.send('check-for-update')
