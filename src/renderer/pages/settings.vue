@@ -155,6 +155,20 @@
           </el-select>
           <el-button type="primary" size="mini" @click="setScale" class="scale interactable">保存设置</el-button>
         </div>
+        <div class="row">
+          <div class="subtitle">开机启动选项</div>
+        </div>
+        <div class="control-row">
+          <div class="text">您可以选择本软件是否随您的计算机开机启动。</div>
+        </div>
+        <div class="control-row">
+          <el-switch
+            @change="switchOpenAtLogin"
+            v-model="openAtLogin"
+            active-text="开机启动"
+            inactive-text="开机不启动"
+            class="interactable"></el-switch>
+        </div>
       </div>
     </el-tab-pane>
     <el-tab-pane disabled>
@@ -255,7 +269,8 @@ export default {
       update: null,
       distDirectory: '',
       filename: '',
-      scale: 1.0
+      scale: 1.0,
+      openAtLogin: false
     }
   },
   methods: {
@@ -488,11 +503,20 @@ export default {
           ipcRenderer.send('relaunch')
         }
       })
+    },
+    switchOpenAtLogin(value) {
+      ipcRenderer.send('open-at-login', value)
+      this.$dialog({
+        type: 'success',
+        title: '设置成功',
+        text: '已' + (value ? '设置' : '取消') + '开机启动。'
+      })
     }
   },
   mounted() {
     this.version = ipcRenderer.sendSync('version')
     this.scale = this.$store.state.settings.scale
+    this.openAtLogin = ipcRenderer.sendSync('auto-open-status')
   }
 }
 </script>

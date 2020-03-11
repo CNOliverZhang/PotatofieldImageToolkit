@@ -246,9 +246,6 @@ app.on('ready', () => {
       label: '退出',
       click: () => {
         if (windows.size != 1) {
-          if (mainWindow.isMinimized()) {
-            mainWindow.restore()
-          }
           mainWindow.show()
           mainWindow.webContents.send('exit')
         } else {
@@ -270,10 +267,7 @@ app.on('ready', () => {
 })
 
 app.on('second-instance', (event) => {
-  if (mainWindow.isMinimized()) {
-    mainWindow.restore()
-  }
-  mainWindow.focus()
+  mainWindow.show()
 })
 
 app.on('window-all-closed', () => {
@@ -308,6 +302,16 @@ ipcMain.on('update-now', () => {
 
 ipcMain.on('scale', (event, arg) => {
   scale = arg
+})
+
+ipcMain.on('auto-open-status', (event) => {
+  event.returnValue = app.getLoginItemSettings().openAtLogin
+})
+
+ipcMain.on('open-at-login', (event, arg) => {
+  app.setLoginItemSettings({
+    openAtLogin: arg
+  })
 })
 
 ipcMain.on('hide', (event) => {
