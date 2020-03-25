@@ -77,6 +77,12 @@
             <div class="title">JPEG 压缩工具</div>
           </el-card>
         </div>
+        <div class="container" @click="open('/convert', '格式转换工具')">
+          <el-card class="card">
+            <span class="fas fa-sync-alt icon"></span>
+            <div class="title">格式转换工具</div>
+          </el-card>
+        </div>
         <div class="container" @click="open('/exif', 'EXIF 读取工具')">
           <el-card class="card">
             <span class="fas fa-camera icon"></span>

@@ -103,7 +103,8 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+      let formats = new Set(['jpg', 'jpeg', 'png'])
+      if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,

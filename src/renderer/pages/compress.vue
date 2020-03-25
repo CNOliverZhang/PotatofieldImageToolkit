@@ -213,7 +213,7 @@ export default {
       fileSet: new Set(),
       fileListPage: 1,
       errorList: [],
-      quality: 100,
+      quality: 90,
       append: '_compressed',
       srcDirectory: '',
       distDirectory: '',
@@ -235,7 +235,7 @@ export default {
       this.fileSet = new Set()
       this.fileListPage = 1
       this.errorList = []
-      this.quality = 100
+      this.quality = 90
       this.append = '_compressed'
       this.srcDirectory = ''
       this.distDirectory = ''
@@ -258,7 +258,8 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      if (['jpg', 'jpeg'].indexOf(ext) != -1 && !this.fileSet.has(file.raw.path)) {
+      let formats = new Set(['jpg', 'jpeg'])
+      if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
           filepath: filepath,
@@ -280,11 +281,10 @@ export default {
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
         }).then((dialog) => {
-          let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded)
-          this.fileList = result.fileList.filter((file) => {
-            return file.ext != 'png'
-          })
-          this.fileSet = new Set(this.fileList)
+          let formats = new Set(['jpeg', 'jpg'])
+          let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
+          this.fileList = result.fileList
+          this.fileSet = new Set(result.fileList)
           this.errorList = result.errorList
           dialog.change({
             type: 'success',

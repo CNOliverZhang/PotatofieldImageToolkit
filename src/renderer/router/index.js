@@ -107,6 +107,11 @@ export default new Router({
       component: require('@/pages/compress').default
     },
     {
+      path: '/convert',
+      name: 'convert',
+      component: require('@/pages/convert').default
+    },
+    {
       path: '/exif',
       name: 'exif',
       component: require('@/pages/exif').default

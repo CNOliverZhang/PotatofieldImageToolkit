@@ -124,7 +124,7 @@ export default {
       column: 3,
       row: 3,
       keepSquare: true,
-      quality: 100,
+      quality: 90,
       distDirectory: ''
     }
   },

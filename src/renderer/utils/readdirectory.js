@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-export default function ReadDirectory(srcDirectory, childDirectoryIncluded) {
+export default function ReadDirectory(srcDirectory, childDirectoryIncluded, formats = new Set(['jpg', 'jpeg', 'png'])) {
   let fileList = []
   let errorList = []
   if (childDirectoryIncluded) {
@@ -18,7 +18,7 @@ export default function ReadDirectory(srcDirectory, childDirectoryIncluded) {
             let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
             filename = filename.substring(0, filename.lastIndexOf("."))
             let filepath = directory
-            if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
+            if (formats.has(ext)) {
               fileList.push({
                 fullpath: fullpath,
                 filepath: filepath,
@@ -45,7 +45,7 @@ export default function ReadDirectory(srcDirectory, childDirectoryIncluded) {
           let ext = filename.substring(filename.lastIndexOf(".") + 1, filename.length).toLowerCase()
           filename = filename.substring(0, filename.lastIndexOf("."))
           let filepath = srcDirectory
-          if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
+          if (formats.has(ext)) {
             fileList.push({
               fullpath: fullpath,
               filepath: filepath,

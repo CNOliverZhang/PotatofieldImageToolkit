@@ -390,7 +390,7 @@ export default {
   name: 'watermarkEditor',
   data () {
     return  {
-      quality: 100,
+      quality: 90,
       customDistDirectory: false,
       distDirectory: '',
       srcDirectory: this.$route.query.srcDirectory,

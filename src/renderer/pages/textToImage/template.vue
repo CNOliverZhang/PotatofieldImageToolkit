@@ -57,6 +57,12 @@
             <img src="static/sample/compress.png" />
             <figcaption>JPEG 压缩工具</figcaption>
           </figure>
+          <h3>格式转换工具</h3>
+          <p>将图片文件转换为其他格式，支持 JPEG 文件和 PNG 文件以及 WEBP 文件之间的相互转化。</p>
+          <figure>
+            <img src="static/sample/convert.png" />
+            <figcaption>格式转换工具</figcaption>
+          </figure>
           <h3>EXIF 读取工具</h3>
           <p>从 JPEG 文件中读取 EXIF 信息，支持相机制造商、型号等设备信息和曝光补偿、镜头焦距、光圈、快门、感光度等曝光参数。</p>
           <figure>

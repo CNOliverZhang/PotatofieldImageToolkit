@@ -159,7 +159,7 @@ export default {
       rotate: 0,
       width: 0,
       height: 0,
-      quality: 100,
+      quality: 90,
       distDirectory: '',
       append: '_cropped',
       mimeType: 'jpeg'

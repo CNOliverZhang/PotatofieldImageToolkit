@@ -79,6 +79,12 @@ npm run build
 ![预览图](https://files.potatofield.cn/ImageToolkit/Tools/Images/compress.png)
 
 对 JPEG 文件进行压缩，减小文件体积。支持自定义输出质量。
+
+### 格式转换工具
+
+![预览图](https://files.potatofield.cn/ImageToolkit/Tools/Images/convert.png)
+
+将图片文件转换为其他格式，支持 JPEG 文件和 PNG 文件以及 WEBP 文件之间的相互转化。
  
 ### EXIF读取工具
 

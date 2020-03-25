@@ -173,7 +173,8 @@ export default {
       }).then((dialog) => {
         let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
         let filename = file.name.substring(0, file.name.lastIndexOf("."))
-        if (['jpg', 'jpeg', 'png'].indexOf(ext) != -1) {
+        let formats = new Set(['jpg', 'jpeg', 'png'])
+        if (formats.has(ext)) {
           this.image = file.raw.path
           let image = document.createElement('img')
           image.src = this.image
