@@ -28,6 +28,15 @@
           <div class="subtitle">裁剪设置</div>
         </div>
         <div class="control-row">
+          <div class="text">裁剪区域限位</div>
+          <el-switch
+            v-model="allowOutOfImage"
+            active-text="允许超出图片"
+            inactive-text="不允许超出图片"
+            @change="init(imageIndex)"
+            class="control interactable"></el-switch>
+        </div>
+        <div class="control-row">
           <div class="text">裁剪模式</div>
           <el-select v-model="mode" @change="changeMode" size="mini" class="control interactable">
             <el-option label="自由裁剪" value="free"/>
@@ -109,13 +118,17 @@
           </el-input>
         </div>
         <div class="control-row">
-          <div class="text">文件名后缀及格式</div>
-          <el-input size="mini" v-model="append" class="control interactable" placeholder="请输入文件名后缀">
-            <el-select v-model="mimeType" size="mini" slot="append">
-              <el-option label=".jpg" value="jpeg"/>
-              <el-option label=".png" value="png"/>
-            </el-select>
-          </el-input>
+          <div class="text">保存的图片格式</div>
+          <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+            <el-radio-button label="JPEG"></el-radio-button>
+            <el-radio-button label="WEBP"></el-radio-button>
+            <el-radio-button label="PNG"></el-radio-button>
+            <el-radio-button label="保持原格式"></el-radio-button>
+          </el-radio-group>
+        </div>
+        <div class="control-row">
+          <div class="text">文件名后缀</div>
+          <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
         </div>
       </div>
     </div>
@@ -154,6 +167,7 @@ export default {
     return {
       imageIndex: 0,
       cropper: null,
+      allowOutOfImage: false,
       mode: 'free',
       ratio: '',
       rotate: 0,
@@ -162,7 +176,7 @@ export default {
       quality: 90,
       distDirectory: '',
       append: '_cropped',
-      mimeType: 'jpeg'
+      mimeType: '保持原格式'
     }
   },
   watch: {
@@ -248,7 +262,7 @@ export default {
             }
             let vm = this
             let cropper = new Cropper(image, {
-              viewMode: 2,
+              viewMode: vm.allowOutOfImage ? 0 : 2,
               dragMode: 'move',
               autoCropArea: 0.5,
               toggleDragModeOnDblclick: false,
@@ -291,13 +305,29 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let ext = this.mimeType == 'png' ? '.png' : '.jpg'
+          let distExt
+          if (this.mimeType == '保持原格式') {
+            distExt = imageInfo.ext
+          } else if (this.mimeType == 'JPEG') {
+            distExt = 'jpg'
+          } else if (this.mimeType == 'WEBP') {
+            distExt = 'webp'
+          } else {
+            distExt = 'png'
+          }
+          let mimeType
+          if (distExt == 'jpg') {
+            mimeType = 'jpeg'
+          } else {
+            mimeType = distExt
+          }
+          let ext = this.mimeType == 'JPEG' ? '.jpg' : ('.' + distExt)
           let filename = this.$store.state.cropper.fileList[this.imageIndex].filename + this.append + ext
           let distFullpath = path.join(this.distDirectory, filename)
           let canvas = this.cropper.getCroppedCanvas({
             imageSmoothingQuality: 'high'
           })
-          let url = canvas.toDataURL('image/' + this.mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
+          let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
           let buffer = new Buffer.from(url, 'base64')
           fs.writeFile(distFullpath, buffer, (error) => {
             if (error) {
@@ -425,6 +455,20 @@ export default {
     
     &:last-child {
       margin-right: 0;
+    }
+  }
+
+  .el-switch {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .el-radio-group {
+    display: flex;
+    justify-content: flex-end;
+    
+    .el-radio-button__inner {
+      height: 28px;
     }
   }
   

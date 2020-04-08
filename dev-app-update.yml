@@ -1,3 +1,3 @@
 provider: generic
-url: 'https://imagetoolkit.potatofield.cn/download/'
+url: 'https://files.potatofield.cn/ImageToolkit/Packages/'
 updaterCacheDirName: potatofield-image-toolkit-updater

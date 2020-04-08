@@ -150,6 +150,17 @@
           <div class="subtitle">保存设置</div>
         </div>
         <div class="control-row">
+          <div class="text">图像质量</div>
+          <el-slider
+            v-model="quality"
+            class="control"
+            :min="1"
+            :max="100"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row">
           <div class="text">存储位置</div>
           <el-input disabled size="mini" v-model="distDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
@@ -160,6 +171,7 @@
           <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
             <el-select v-model="mimeType" size="mini" slot="append">
               <el-option label=".jpg" value="jpeg"/>
+              <el-option label=".webp" value="webp"/>
               <el-option label=".png" value="png"/>
             </el-select>
           </el-input>
@@ -202,6 +214,7 @@ export default {
       spacing: 0,
       borderRadius: 0,
       backgroundColor: 'rgba(255, 255, 255, 1)',
+      quality: 90,
       distDirectory: '',
       filename: '',
       mimeType: 'jpeg',
@@ -418,7 +431,7 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let ext = this.mimeType == 'png' ? '.png' : '.jpg'
+          let ext = this.mimeType == 'jpeg' ? '.jpg' : ('.' + this.mimeType)
           let fullname = this.filename + ext
           let distFullpath = path.join(this.distDirectory, fullname)
           let images = document.getElementsByClassName('image')
@@ -443,7 +456,7 @@ export default {
             allowTaint: true,
             imageTimeout: 0
           }).then(canvas => {
-            let url = canvas.toDataURL('image/' + this.mimeType, 1).replace(/^data:image\/\w+;base64,/, "")
+            let url = canvas.toDataURL('image/' + this.mimeType, this.quality).replace(/^data:image\/\w+;base64,/, "")
             let buffer = new Buffer.from(url, 'base64')
             fs.writeFile(distFullpath, buffer, (error) => {
               if (error) {

@@ -51,8 +51,8 @@
             <img src="static/sample/resizer.png" />
             <figcaption>尺寸调整工具</figcaption>
           </figure>
-          <h3>JPEG 压缩工具</h3>
-          <p>对 JPEG 文件进行压缩，减小文件体积。支持自定义输出质量。</p>
+          <h3>图片压缩工具</h3>
+          <p>对 JPEG 和 WEBP 格式文件进行压缩，减小文件体积。支持自定义输出质量。</p>
           <figure>
             <img src="static/sample/compress.png" />
             <figcaption>JPEG 压缩工具</figcaption>

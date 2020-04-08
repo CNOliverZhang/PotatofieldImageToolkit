@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 
-export default function ReadDirectory(srcDirectory, childDirectoryIncluded, formats = new Set(['jpg', 'jpeg', 'png'])) {
+export default function ReadDirectory(srcDirectory, childDirectoryIncluded, formats = new Set(['jpg', 'jpeg', 'webp', 'png'])) {
   let fileList = []
   let errorList = []
   if (childDirectoryIncluded) {

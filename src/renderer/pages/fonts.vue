@@ -513,7 +513,7 @@ export default {
       text: '正在向服务器请求在线字体数据，请稍候。',
       showConfirm: false
     }).then((dialog) => {
-      this.$http.get('https://fonts.potatofield.cn/fonts').catch((error) => {
+      this.$http.get('https://api.potatofield.cn/fonts').catch((error) => {
         dialog.change({
           type: 'error',
           title: '出现错误',

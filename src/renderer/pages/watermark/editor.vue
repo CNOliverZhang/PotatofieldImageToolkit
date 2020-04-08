@@ -344,15 +344,16 @@
         </div>
         <div class="control-row">
           <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" class="control">
-            <el-radio label="JPEG"></el-radio>
-            <el-radio label="PNG"></el-radio>
-            <el-radio label="保持原格式"></el-radio>
+          <el-radio-group v-model="mimeType" size="mini" class="control">
+            <el-radio-button label="JPEG"></el-radio-button>
+            <el-radio-button label="WEBP"></el-radio-button>
+            <el-radio-button label="PNG"></el-radio-button>
+            <el-radio-button label="保持原格式"></el-radio-button>
           </el-radio-group>
         </div>
         <div class="control-row">
           <div class="text">文件名后缀</div>
-          <el-input size="mini" v-model="append" maxlength="12" class="control"></el-input>
+          <el-input size="mini" v-model="append" maxlength="30" class="control"></el-input>
         </div>
         <div class="row">
           <el-dropdown
@@ -395,7 +396,7 @@ export default {
       distDirectory: '',
       srcDirectory: this.$route.query.srcDirectory,
       keepDirectoryStructure: false,
-      mimeType: 'JPEG',
+      mimeType: '保持原格式',
       append: '_watermarked',
       fileListPage: 1,
       imageIndex: -1,
@@ -860,14 +861,16 @@ export default {
             distExt = imageInfo.ext
           } else if (this.mimeType == 'JPEG') {
             distExt = 'jpg'
+          } else if (this.mimeType == 'WEBP') {
+            distExt = 'webp'
           } else {
             distExt = 'png'
           }
           let mimeType
-          if (distExt == 'png') {
-            mimeType = 'png'
-          } else {
+          if (distExt == 'jpg') {
             mimeType = 'jpeg'
+          } else {
+            mimeType = distExt
           }
           let distFilename = imageInfo.filename + this.append + '.' + distExt
           let distPath
@@ -983,14 +986,16 @@ export default {
                   distExt = imageInfo.ext
                 } else if (this.mimeType == 'JPEG') {
                   distExt = 'jpg'
+                } else if (this.mimeType == 'WEBP') {
+                  distExt = 'webp'
                 } else {
                   distExt = 'png'
                 }
                 let mimeType
-                if (distExt == 'png') {
-                  mimeType = 'png'
-                } else {
+                if (distExt == 'jpg') {
                   mimeType = 'jpeg'
+                } else {
+                  mimeType = distExt
                 }
                 let distFilename = imageInfo.filename + this.append + '.' + distExt
                 let distPath
@@ -1280,6 +1285,10 @@ export default {
   .el-radio-group {
     display: flex;
     justify-content: flex-end;
+
+    .el-radio-button__inner {
+      height: 28px;
+    }
   }
   
   .el-input-group {

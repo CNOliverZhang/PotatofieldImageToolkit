@@ -64,8 +64,16 @@
             </el-input>
           </div>
           <div class="control-row">
+            <div class="text">保存的图片格式</div>
+            <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+              <el-radio-button label="JPEG"></el-radio-button>
+              <el-radio-button label="WEBP"></el-radio-button>
+              <el-radio-button label="保持原格式"></el-radio-button>
+            </el-radio-group>
+          </div>
+          <div class="control-row">
             <div class="text">文件名后缀</div>
-            <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+            <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
           </div>
           <div class="row">
             <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
@@ -166,7 +174,7 @@
             </div>
             <div class="control-row">
               <div class="text">文件名后缀</div>
-              <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+              <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
             </div>
             <div class="row">
               <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
@@ -179,7 +187,7 @@
       <span slot="label" id="sidebar">
         <div id="tool-info">
           <i id="tool-logo" class="fas fa-compress-arrows-alt"></i>
-          <div class="text">JPEG 压缩工具</div>
+          <div class="text">图片压缩工具</div>
         </div>
         <div id="control-button-holder">
           <div class="control-button interactable" @click="minimize">
@@ -214,6 +222,7 @@ export default {
       fileListPage: 1,
       errorList: [],
       quality: 90,
+      mimeType: '保持原格式',
       append: '_compressed',
       srcDirectory: '',
       distDirectory: '',
@@ -258,7 +267,7 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      let formats = new Set(['jpg', 'jpeg'])
+      let formats = new Set(['jpg', 'jpeg', 'webp'])
       if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
@@ -281,7 +290,7 @@ export default {
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
         }).then((dialog) => {
-          let formats = new Set(['jpeg', 'jpg'])
+          let formats = new Set(['jpeg', 'jpg', 'webp'])
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
           this.fileList = result.fileList
           this.fileSet = new Set(result.fileList)
@@ -429,7 +438,21 @@ export default {
                 text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = this.fileList[index]
-                let distFilename = imageInfo.filename + this.append + '.jpg'
+                let distExt
+                if (this.mimeType == '保持原格式') {
+                  distExt = imageInfo.ext
+                } else if (this.mimeType == 'JPEG') {
+                  distExt = 'jpg'
+                } else {
+                  distExt = 'webp'
+                }
+                let mimeType
+                if (distExt == 'jpg') {
+                  mimeType = 'jpeg'
+                } else {
+                  mimeType = distExt
+                }
+                let distFilename = imageInfo.filename + this.append + '.' + distExt
                 let distPath
                 if (this.customDistDirectory) {
                   if (this.keepDirectoryStructure) {
@@ -483,7 +506,7 @@ export default {
                     context.rotate(rotation * Math.PI / 180)
                     context.drawImage(image, x, y, image.width, image.height)
                     context.rotate(-rotation * Math.PI / 180)
-                    let url = canvas.toDataURL('image/jpeg', this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
+                    let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
                     let buffer = new Buffer.from(url, 'base64')
                     CreateDirectory(distPath)
                     fs.writeFile(distFullpath, buffer, (error) => {
@@ -545,7 +568,7 @@ export default {
                   this.clear()
                 }
               }).then(() => {
-                let notification = new Notification('JPEG 压缩工具', {
+                let notification = new Notification('图片压缩工具', {
                   body: '队列中的图片已处理完成。',
                   icon: path.join(__static, 'images/icon.ico')
                 })
@@ -817,6 +840,15 @@ export default {
   .el-switch {
     display: flex;
     justify-content: flex-end;
+  }
+
+  .el-radio-group {
+    display: flex;
+    justify-content: flex-end;
+
+    .el-radio-button__inner {
+      height: 28px;
+    }
   }
     
   #single {

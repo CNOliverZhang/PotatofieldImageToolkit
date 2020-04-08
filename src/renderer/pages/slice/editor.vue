@@ -10,7 +10,9 @@
             class="grid"
             :style="{
               'width': 'calc(100% / ' + column + ')',
-              'height': 'calc(100% / ' + row + ')'
+              'height': 'calc(100% / ' + row + ')',
+              'border-color': coverColor == 'dark' ? 'var(--black-gray)' : 'var(--white-gray)',
+              'background-color': coverColor == 'dark' ? 'var(--transparent-black-cover)' : 'var(--transparent-white-cover)'
             }"></div>
         </div>
       </div>
@@ -63,6 +65,13 @@
             @change="preview"
             class="control interactable"></el-switch>
         </div>
+        <div class="control-row">
+          <div class="text">预览区域颜色</div>
+          <el-select v-model="coverColor" placeholder="请选择" size="mini" class="control interactable">
+            <el-option label="深色" value="dark"/>
+            <el-option label="浅色" value="light"/>
+          </el-select>
+        </div>
       </div>
       <div class="side">
         <div class="row">
@@ -84,6 +93,15 @@
           <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
+        </div>
+        <div class="control-row">
+          <div class="text">保存的图片格式</div>
+          <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+            <el-radio-button label="JPEG"></el-radio-button>
+            <el-radio-button label="WEBP"></el-radio-button>
+            <el-radio-button label="PNG"></el-radio-button>
+            <el-radio-button label="保持原格式"></el-radio-button>
+          </el-radio-group>
         </div>
       </div>
     </div>
@@ -124,8 +142,10 @@ export default {
       column: 3,
       row: 3,
       keepSquare: true,
+      coverColor: 'dark',
       quality: 90,
-      distDirectory: ''
+      distDirectory: '',
+      mimeType: '保持原格式'
     }
   },
   watch: {
@@ -292,6 +312,22 @@ export default {
           } else {
             canvas = document.getElementById('image')
           }
+          let distExt
+          if (this.mimeType == '保持原格式') {
+            distExt = imageInfo.ext
+          } else if (this.mimeType == 'JPEG') {
+            distExt = 'jpg'
+          } else if (this.mimeType == 'WEBP') {
+            distExt = 'webp'
+          } else {
+            distExt = 'png'
+          }
+          let mimeType
+          if (distExt == 'jpg') {
+            mimeType = 'jpeg'
+          } else {
+            mimeType = distExt
+          }
           for (let row = 0; row < this.row; row++) {
             for (let column = 0; column < this.column; column++) {
               let grid = document.createElement('canvas')
@@ -299,11 +335,12 @@ export default {
               grid.height = canvas.height / this.row
               let context = grid.getContext('2d')
               context.drawImage(canvas, -grid.width * column, -grid.height * row)
-              let url = grid.toDataURL('image/jpeg', this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
+              let url = grid.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
               let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[this.imageIndex].filename)
               CreateDirectory(distDirectory)
-              let filename = this.$store.state.slice.fileList[this.imageIndex].filename + '_' + (row + 1) + (column + 1) + '.jpg'
+              let filename = this.$store.state.slice.fileList[this.imageIndex].filename
+              filename = filename + '_' + (row + 1) + '_' + (column + 1) + '.' + distExt
               let distFullpath = path.join(distDirectory, filename)
               fs.writeFileSync(distFullpath, buffer)
             }
@@ -418,6 +455,22 @@ export default {
                       } else {
                         newCanvas = document.getElementById('image')
                       }
+                      let distExt
+                      if (this.mimeType == '保持原格式') {
+                        distExt = imageInfo.ext
+                      } else if (this.mimeType == 'JPEG') {
+                        distExt = 'jpg'
+                      } else if (this.mimeType == 'WEBP') {
+                        distExt = 'webp'
+                      } else {
+                        distExt = 'png'
+                      }
+                      let mimeType
+                      if (distExt == 'jpg') {
+                        mimeType = 'jpeg'
+                      } else {
+                        mimeType = distExt
+                      }
                       for (let row = 0; row < this.row; row++) {
                         for (let column = 0; column < this.column; column++) {
                           let grid = document.createElement('canvas')
@@ -425,11 +478,12 @@ export default {
                           grid.height = newCanvas.height / this.row
                           let context = grid.getContext('2d')
                           context.drawImage(newCanvas, -grid.width * column, -grid.height * row)
-                          let url = grid.toDataURL('image/jpeg', this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
+                          let url = grid.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
                           let buffer = new Buffer.from(url, 'base64')
                           let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[index].filename)
                           CreateDirectory(distDirectory)
-                          let filename = this.$store.state.slice.fileList[index].filename + '_' + (row + 1) + (column + 1) + '.jpg'
+                          let filename = this.$store.state.slice.fileList[index].filename
+                          filename = filename + '_' + (row + 1) + '_' +(column + 1) + '.' + distExt
                           let distFullpath = path.join(distDirectory, filename)
                           fs.writeFile(distFullpath, buffer, (error) => {
                             if (error) {
@@ -597,6 +651,15 @@ export default {
       margin-right: 0;
     }
   }
+
+  .el-radio-group {
+    display: flex;
+    justify-content: flex-end;
+    
+    .el-radio-button__inner {
+      height: 28px;
+    }
+  }
   
   .el-input-group {
     display: flex;
@@ -666,9 +729,7 @@ export default {
         .grid {
           border-width: 1px;
           border-style: solid;
-          border-color: var(--white-gray);
           box-sizing: border-box;
-          background-color: var(--transparent-black-cover)
         }
       }
     }

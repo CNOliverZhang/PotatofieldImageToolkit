@@ -105,7 +105,11 @@
             <div class="control-row">
               <div class="text">文件名</div>
               <el-input size="mini" v-model="filename" class="control interactable" placeholder="请输入文件名">
-                <template slot="append">.jpg</template>
+                <el-select v-model="mimeType" size="mini" slot="append">
+                  <el-option label=".jpg" value="jpeg"/>
+                  <el-option label=".webp" value="webp"/>
+                  <el-option label=".png" value="png"/>
+                </el-select>
               </el-input>
             </div>
             <div class="row">
@@ -154,7 +158,8 @@ export default {
       chosenColor: 0,
       withOriginalImage: false,
       distDirectory: '',
-      filename: ''
+      filename: '',
+      mimeType: 'jpeg'
     }
   },
   methods: {
@@ -173,7 +178,7 @@ export default {
       }).then((dialog) => {
         let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
         let filename = file.name.substring(0, file.name.lastIndexOf("."))
-        let formats = new Set(['jpg', 'jpeg', 'png'])
+        let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
         if (formats.has(ext)) {
           this.image = file.raw.path
           let image = document.createElement('img')
@@ -315,7 +320,8 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let fullname = this.filename + '.jpg'
+          let ext = this.mimeType == 'jpeg' ? '.jpg' : ('.' + this.mimeType)
+          let fullname = this.filename + ext
           let distFullpath = path.join(this.distDirectory, fullname)
           let palette = document.getElementById('palette-image')
           let width = window.getComputedStyle(palette).getPropertyValue('width').slice(0, -2)
@@ -617,6 +623,10 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .el-select .el-input {
+      width: 80px;
+    }
   }
   
   .el-switch {

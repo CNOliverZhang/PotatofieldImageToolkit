@@ -71,10 +71,10 @@
             <div class="title">尺寸调整工具</div>
           </el-card>
         </div>
-        <div class="container" @click="open('/compress', 'JPEG 压缩工具')">
+        <div class="container" @click="open('/compress', '图片压缩工具')">
           <el-card class="card">
             <span class="fas fa-compress-arrows-alt icon"></span>
-            <div class="title">JPEG 压缩工具</div>
+            <div class="title">图片压缩工具</div>
           </el-card>
         </div>
         <div class="container" @click="open('/convert', '格式转换工具')">
@@ -151,7 +151,7 @@ export default {
       })
     },
     checkMessage() {
-      this.$http.get('https://imagetoolkit.potatofield.cn/messages/latest').then((res) => {
+      this.$http.get('https://api.potatofield.cn/imagetoolkit/messages/latest').then((res) => {
         let message = res.data
         if (this.$store.state.messages.messageList.indexOf(message.id) == -1) {
           this.$dialog({
@@ -173,7 +173,7 @@ export default {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
     })
-    this.$http.get('https://imagetoolkit.potatofield.cn/messages').then((res) => {
+    this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
       this.totalMessages = res.data.length
     })
     ipcRenderer.on('exit', () => {

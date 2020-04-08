@@ -92,15 +92,16 @@
           </div>
           <div class="control-row">
             <div class="text">保存的图片格式</div>
-            <el-radio-group v-model="mimeType" class="control interactable">
-              <el-radio label="JPEG"></el-radio>
-              <el-radio label="PNG"></el-radio>
-              <el-radio label="保持原格式"></el-radio>
+            <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+              <el-radio-button label="JPEG"></el-radio-button>
+              <el-radio-button label="WEBP"></el-radio-button>
+              <el-radio-button label="PNG"></el-radio-button>
+              <el-radio-button label="保持原格式"></el-radio-button>
             </el-radio-group>
           </div>
           <div class="control-row">
             <div class="text">文件名后缀</div>
-            <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+            <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
           </div>
           <div class="row">
             <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
@@ -228,15 +229,16 @@
             </div>
             <div class="control-row">
               <div class="text">保存的图片格式</div>
-              <el-radio-group v-model="mimeType" class="control interactable">
-                <el-radio label="JPEG"></el-radio>
-                <el-radio label="PNG"></el-radio>
-                <el-radio label="保持原格式"></el-radio>
+              <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+                <el-radio-button label="JPEG"></el-radio-button>
+                <el-radio-button label="WEBP"></el-radio-button>
+                <el-radio-button label="PNG"></el-radio-button>
+                <el-radio-button label="保持原格式"></el-radio-button>
               </el-radio-group>
             </div>
             <div class="control-row">
               <div class="text">文件名后缀</div>
-              <el-input size="mini" v-model="append" maxlength="12" class="control interactable"></el-input>
+              <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
             </div>
             <div class="row">
               <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
@@ -287,7 +289,7 @@ export default {
       percentage: 100,
       length: 0,
       quality: 90,
-      mimeType: 'JPEG',
+      mimeType: '保持原格式',
       append: '_resized',
       srcDirectory: '',
       distDirectory: '',
@@ -313,7 +315,7 @@ export default {
       this.percentage = 100
       this.length = 0
       this.quality = 90
-      this.mimeType = 'JPEG'
+      this.mimeType = '保持原格式'
       this.append = '_resized'
       this.srcDirectory = ''
       this.distDirectory = ''
@@ -336,7 +338,7 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      let formats = new Set(['jpg', 'jpeg', 'png'])
+      let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
       if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
@@ -359,7 +361,7 @@ export default {
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
         }).then((dialog) => {
-          let formats = new Set(['jpg', 'jpeg', 'png'])
+          let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
           this.fileList = result.fileList
           this.fileSet = new Set(result.fileList)
@@ -512,14 +514,16 @@ export default {
                   distExt = imageInfo.ext
                 } else if (this.mimeType == 'JPEG') {
                   distExt = 'jpg'
+                } else if (this.mimeType == 'WEBP') {
+                  distExt = 'webp'
                 } else {
                   distExt = 'png'
                 }
                 let mimeType
-                if (distExt == 'png') {
-                  mimeType = 'png'
-                } else {
+                if (distExt == 'jpg') {
                   mimeType = 'jpeg'
+                } else {
+                  mimeType = distExt
                 }
                 let distFilename = imageInfo.filename + this.append + '.' + distExt
                 let distPath
@@ -932,6 +936,10 @@ export default {
   .el-radio-group {
     display: flex;
     justify-content: flex-end;
+
+    .el-radio-button__inner {
+      height: 28px;
+    }
   }
     
   #single {

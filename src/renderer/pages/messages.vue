@@ -179,7 +179,7 @@ export default {
       text: '正在向服务器请求消息列表，请稍候。',
       showConfirm: false
     }).then((dialog) => {
-      this.$http.get('https://imagetoolkit.potatofield.cn/messages').catch((error) => {
+      this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').catch((error) => {
         dialog.change({
           type: 'error',
           title: '出现错误',

@@ -223,7 +223,7 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      let formats = new Set(['jpg', 'jpeg', 'png'])
+      let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
       if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
@@ -246,7 +246,7 @@ export default {
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
         }).then((dialog) => {
-          let formats = new Set(['jpg', 'jpeg', 'png'])
+          let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
           this.fileList = result.fileList
           this.fileSet = new Set(result.fileList)
