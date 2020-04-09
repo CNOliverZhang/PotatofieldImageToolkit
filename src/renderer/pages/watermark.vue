@@ -107,7 +107,7 @@
               <div class="row">
                 <div class="subtitle">{{ template.title }}</div>
               </div>
-              <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
+              <v-clamp autoresize :max-lines="2" class="text">{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
               <div class="row actions">
                 <div class="action interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
@@ -177,6 +177,7 @@ import EXIF from 'exif-js'
 import ReadDirectory from '../utils/ReadDirectory'
 
 const path = require('path')
+const fs = require('fs')
 
 export default {
   name: 'watermark',
@@ -444,6 +445,8 @@ export default {
               }
             }
           }
+          let template = this.$store.state.watermark.templates[index]
+          fs.unlinkSync(template.image)
           this.$store.dispatch('watermark/templateDelete', index)
         }
       })

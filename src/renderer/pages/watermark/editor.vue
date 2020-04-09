@@ -40,6 +40,20 @@
                 }">{{ char }}</span>
             </div>
           </div>
+          <img
+            v-if="image != ''"
+            id="watermark-image"
+            @load="initImageSize"
+            :src="image"
+            :style="{
+              'width': imageSize * sizeBaseX + 'px',
+              'left': (imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'center' || imagePosition == 'top' || imagePosition == 'bottom') ? imageX + 'px' : null,
+              'right': (imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right') ? imageX + 'px' : null,
+              'top': (imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top' || imagePosition == 'center' || imagePosition == 'left' || imagePosition == 'right') ? imageY + 'px' : null,
+              'bottom': (imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom') ? imageY + 'px' : null,
+              'opacity': imageOpacity,
+              'transform': 'rotate(' + imageRotation + 'deg)'
+            }"/>
         </div>
       </div>
       <div id="lists">
@@ -94,7 +108,7 @@
                 </div>
               </div>
               <div class="text">{{ template.title }}</div>
-              <v-clamp :max-lines="2" class="subtext">内容：{{ template.text }}</v-clamp>
+              <v-clamp :max-lines="2" class="subtext">内容：{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
             </div>
           </div>
           <div v-else id="empty-container">
@@ -112,17 +126,17 @@
           <div class="subtitle">水印设置</div>
         </div>
         <el-collapse value="content" accordion>
-          <el-collapse-item title="水印内容" name="content">
+          <el-collapse-item title="水印文本内容" name="content">
             <el-input
               :rows="5"
               v-model="text"
               type="textarea"
               resize="none"
-              placeholder="请输入水印内容"></el-input>
+              placeholder="请输入水印文本内容"></el-input>
           </el-collapse-item>
-          <el-collapse-item title="水印文字样式" name="style">
+          <el-collapse-item title="水印文本样式" name="style">
             <div class="control-row">
-              <div class="text">水印字体</div>
+              <div class="text">文本字体</div>
               <el-select v-model="font" placeholder="请选择" size="mini" class="control">
                 <el-option
                   v-for="(font, index) in this.$store.state.fonts.fontList"
@@ -135,7 +149,7 @@
               </el-select>
             </div>
             <div class="control-row">
-              <div class="text">水印字体大小</div>
+              <div class="text">文本字体大小</div>
               <el-slider
                 v-model="relativeFontSize"
                 class="control"
@@ -146,13 +160,13 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印字体颜色</div>
+              <div class="text">文本字体颜色</div>
               <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印背景" name="background">
+          <el-collapse-item title="水印文本背景" name="background">
             <div class="control-row">
-              <div class="text">水印背景尺寸</div>
+              <div class="text">文本背景尺寸</div>
               <el-slider
                 v-model="backgroundSize"
                 class="control"
@@ -163,13 +177,13 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印背景颜色</div>
+              <div class="text">文本背景颜色</div>
               <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印阴影" name="shadow">
+          <el-collapse-item title="水印文本阴影" name="shadow">
             <div class="control-row">
-              <div class="text">水印阴影水平位置</div>
+              <div class="text">文本阴影水平位置</div>
               <el-slider
                 v-model="textShadowX"
                 class="control"
@@ -180,7 +194,7 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印阴影垂直位置</div>
+              <div class="text">文本阴影垂直位置</div>
               <el-slider
                 v-model="textShadowY"
                 class="control"
@@ -191,7 +205,7 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印阴影模糊</div>
+              <div class="text">文本阴影模糊</div>
               <el-slider
                 v-model="textShadowBlur"
                 class="control"
@@ -202,13 +216,13 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印阴影颜色</div>
+              <div class="text">文本阴影颜色</div>
               <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印文字位置" name="position">
+          <el-collapse-item title="水印文本位置" name="position">
             <div class="control-row">
-              <div class="text">水印位置基准</div>
+              <div class="text">文本位置基准</div>
               <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
                 <el-option label="中央" value="center"/>
                 <el-option label="左上角" value="left-top"/>
@@ -224,8 +238,8 @@
             <div
               v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
               class="control-row">
-              <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">水印与左边缘的距离</div>
-              <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">水印与右边缘的距离</div>
+              <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">文本与左边缘的距离</div>
+              <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
               <el-slider
                 v-model="offsetX"
                 class="control"
@@ -238,8 +252,8 @@
             <div
               v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
               class="control-row">
-              <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">水印与上边缘的距离</div>
-              <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">水印与下边缘的距离</div>
+              <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
+              <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
               <el-slider
                 v-model="offsetY"
                 class="control"
@@ -250,7 +264,7 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印旋转角度</div>
+              <div class="text">文本旋转角度</div>
               <el-slider
                 v-model="rotation"
                 class="control"
@@ -261,9 +275,9 @@
                 input-size="mini"></el-slider>
             </div>
           </el-collapse-item>
-          <el-collapse-item title="水印文字排版" name="typesetting">
+          <el-collapse-item title="水印文本排版" name="typesetting">
             <div class="control-row">
-              <div class="text">水印文字方向</div>
+              <div class="text">文本排版方向</div>
               <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
                 <el-option label="水平" value="horizontal-tb"/>
                 <el-option label="垂直从右至左" value="vertical-rl"/>
@@ -271,7 +285,7 @@
               </el-select>
             </div>
             <div class="control-row">
-              <div class="text">多行水印对齐方式</div>
+              <div class="text">多行文本对齐方式</div>
               <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
                 <el-option label="居中对齐" value="center"/>
                 <el-option label="行首对齐" value="left"/>
@@ -279,7 +293,7 @@
               </el-select>
             </div>
             <div class="control-row">
-              <div class="text">多行水印行距</div>
+              <div class="text">多行文本行距</div>
               <el-slider
                 v-model="lineHeight"
                 class="control"
@@ -290,12 +304,114 @@
                 input-size="mini"></el-slider>
             </div>
             <div class="control-row">
-              <div class="text">水印文字间距</div>
+              <div class="text">文本字间距</div>
               <el-slider
                 v-model="letterSpacing"
                 class="control"
                 :min="0"
                 :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印图片选择" name="image">
+            <div id="image-container">
+              <el-upload
+                id="upload-dragger"
+                action=""
+                drag
+                :auto-upload="false"
+                :on-change="selectImage"
+                :show-file-list="false"
+                :class="this.image != '' ? 'half' : ''">
+                <i class="fas fa-image"></i>
+                <div class="el-upload__text">拖拽或点击选择图片</div>
+              </el-upload>
+              <div v-if="this.image != ''" id="image">
+                <div id="image-preview-container">
+                  <img :src="this.image" id="image-preview">
+                </div>
+                <div class="row">
+                  <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
+                </div>
+              </div>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印图片样式" name="image-style">
+            <div class="control-row">
+              <div class="text">图片尺寸</div>
+              <el-slider
+                v-model="imageSize"
+                class="control"
+                :min="1"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">图片不透明度</div>
+              <el-slider
+                v-model="imageOpacity"
+                class="control"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+          </el-collapse-item>
+          <el-collapse-item title="水印图片位置" name="image-position">
+            <div class="control-row">
+              <div class="text">图片位置基准</div>
+              <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="control">
+                <el-option label="中央" value="center"/>
+                <el-option label="左上角" value="left-top"/>
+                <el-option label="右上角" value="right-top"/>
+                <el-option label="左下角" value="left-bottom"/>
+                <el-option label="右下角" value="right-bottom"/>
+                <el-option label="上方" value="top"/>
+                <el-option label="下方" value="bottom"/>
+                <el-option label="左侧" value="left"/>
+                <el-option label="右侧" value="right"/>
+              </el-select>
+            </div>
+            <div
+              v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
+              class="control-row">
+              <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
+              <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
+              <el-slider
+                v-model="imageOffsetX"
+                class="control"
+                :min="0"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div
+              v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
+              class="control-row">
+              <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
+              <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
+              <el-slider
+                v-model="imageOffsetY"
+                class="control"
+                :min="0"
+                :max="100"
+                :step="1"
+                :show-input="true"
+                input-size="mini"></el-slider>
+            </div>
+            <div class="control-row">
+              <div class="text">图片旋转角度</div>
+              <el-slider
+                v-model="imageRotation"
+                class="control"
+                :min="-180"
+                :max="180"
                 :step="1"
                 :show-input="true"
                 input-size="mini"></el-slider>
@@ -399,7 +515,7 @@ export default {
       mimeType: '保持原格式',
       append: '_watermarked',
       fileListPage: 1,
-      imageIndex: -1,
+      fileIndex: -1,
       text: '',
       writingMode: 'horizontal-tb',
       textAlign: 'center',
@@ -418,12 +534,21 @@ export default {
       textShadowY: 0,
       textShadowBlur: 0,
       textShadowColor: 'rgba(255, 255, 255, 0)',
+      image: '',
+      imageSize: 30,
+      imagePosition: 'center',
+      imageOffsetX: 0,
+      imageOffsetY: 0,
+      imageRotation: 0,
+      imageOpacity: 1,
       sizeBaseX: 0,
       sizeBaseY: 0,
       sampleWidth: 0,
       sampleHeight: 0,
       watermarkWidth: 0,
       watermarkHeight: 0,
+      imageWidth: 0,
+      imageHeight: 0,
       templateTitle: '',
       errorList: []
     }
@@ -446,6 +571,22 @@ export default {
       } else {
         let ratio = 1 - this.watermarkHeight / this.sampleHeight
         return this.offsetY * this.sizeBaseY * (ratio)
+      }
+    },
+    imageX() {
+      if (this.imagePosition == 'top' || this.imagePosition == 'bottom' || this.imagePosition == 'center') {
+        return ((this.sampleWidth - this.imageWidth) / 2)
+      } else {
+        let ratio = 1 - this.imageWidth / this.sampleWidth
+        return this.imageOffsetX * this.sizeBaseX * (ratio)
+      }
+    },
+    imageY() {
+      if (this.imagePosition == 'left' || this.imagePosition == 'right' || this.imagePosition == 'center') {
+        return ((this.sampleHeight - this.imageHeight) / 2)
+      } else {
+        let ratio = 1 - this.imageHeight / this.sampleHeight
+        return this.imageOffsetY * this.sizeBaseY * (ratio)
       }
     },
     textShadow() {
@@ -478,11 +619,6 @@ export default {
         this.initWatermarkSize()
       })
     },
-    rotation() {
-      this.$nextTick(() => {
-        this.initWatermarkSize()
-      })
-    },
     font() {
       this.$nextTick(() => {
         this.initWatermarkSize()
@@ -493,29 +629,14 @@ export default {
         this.initWatermarkSize()
       })
     },
-    backgroundSize() {
+    image() {
       this.$nextTick(() => {
-        this.initWatermarkSize()
+        this.initImageSize()
       })
     },
-    backgroundColor() {
+    imageSize() {
       this.$nextTick(() => {
-        this.initWatermarkSize()
-      })
-    },
-    textShadowX() {
-      this.$nextTick(() => {
-        this.initWatermarkSize()
-      })
-    },
-    textShadowY() {
-      this.$nextTick(() => {
-        this.initWatermarkSize()
-      })
-    },
-    textShadowBlur() {
-      this.$nextTick(() => {
-        this.initWatermarkSize()
+        this.initImageSize()
       })
     }
   },
@@ -541,10 +662,10 @@ export default {
           }
         }
         this.$store.dispatch('watermark/fileListDelete', index).then(() => {
-          if (this.imageIndex > index) {
-            this.imageIndex -= 1
-          } else if (this.imageIndex == index) {
-            this.preview(this.imageIndex)
+          if (this.fileIndex > index) {
+            this.fileIndex -= 1
+          } else if (this.fileIndex == index) {
+            this.preview(this.fileIndex)
           }
         })
       } else {
@@ -558,6 +679,13 @@ export default {
       this.watermarkWidth = watermarkWidth
       this.watermarkHeight = watermarkHeight
     },
+    initImageSize() {
+      let imageStyle = window.getComputedStyle(document.getElementById('watermark-image'))
+      let imageWidth = imageStyle.getPropertyValue('width').slice(0, -2)
+      let imageHeight = imageStyle.getPropertyValue('height').slice(0, -2)
+      this.imageWidth = imageWidth
+      this.imageHeight = imageHeight
+    },
     preview(index) {
       this.$dialog({
         title: '正在载入图像',
@@ -565,12 +693,12 @@ export default {
         showConfirm: false
       }).then((dialog) => {
         if (index >= this.$store.state.watermark.fileList.length) {
-          this.imageIndex = this.$store.state.watermark.fileList.length - 1
+          this.fileIndex = this.$store.state.watermark.fileList.length - 1
         } else {
-          this.imageIndex = index
+          this.fileIndex = index
         }
         let image = document.createElement('img')
-        image.src = this.$store.state.watermark.fileList[this.imageIndex].fullpath
+        image.src = this.$store.state.watermark.fileList[this.fileIndex].fullpath
         image.onerror = () => {
           if (this.$store.state.watermark.fileList.length == 1) {
             dialog.change({
@@ -646,7 +774,12 @@ export default {
             this.sizeBaseY = sampleHeight / 100
             dialog.close()
             this.$nextTick(() => {
-              this.initWatermarkSize()
+              if (this.text != '') {
+                this.initWatermarkSize()
+              }
+              if (this.image != '') {
+                this.initImageSize()
+              }
             })
           })
         }
@@ -655,6 +788,32 @@ export default {
     changePosition() {
       this.offsetX = 0
       this.offsetY = 0
+    },
+    changeImagePosition() {
+      this.imageOffsetX = 0
+      this.imageOffsetY = 0
+    },
+    selectImage(file) {
+      let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
+      let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
+      if (file.size > 1024 * 1024 * 10) {
+        this.$dialog({
+          type: 'error',
+          title: '图片文件过大',
+          text: '您选择的图片过大，无法作为水印添加。请选择文件大小在 10MB 以下的图片。'
+        })
+      } else if (!formats.has(ext)) {
+        this.$dialog({
+          type: 'error',
+          title: '不支持该文件格式',
+          text: '您选择的文件格式不受支持，无法作为水印添加。请选择常见格式的图片文件。'
+        })
+      } else {
+        this.image = file.raw.path
+      }
+    },
+    clearImage() {
+      this.image = ''
     },
     selectSaveFolder() {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
@@ -679,30 +838,52 @@ export default {
       this.textShadowY = template.textShadowY !== undefined ? template.textShadowY : this.textShadowY
       this.textShadowBlur = template.textShadowBlur !== undefined ? template.textShadowBlur : this.textShadowBlur
       this.textShadowColor = template.textShadowColor !== undefined ? template.textShadowColor : this.textShadowColor
+      this.image = template.image !== undefined ? template.image : this.image
+      this.imageSize = template.imageSize !== undefined ? template.imageSize : this.imageSize
+      this.imagePosition = template.imagePosition !== undefined ? template.imagePosition : this.imagePosition
+      this.imageOffsetX = template.imageOffsetX !== undefined ? template.imageOffsetX : this.imageOffsetX
+      this.imageOffsetY = template.imageOffsetY !== undefined ? template.imageOffsetY : this.imageOffsetY
+      this.imageRotation = template.imageRotation !== undefined ? template.imageRotation : this.imageRotation
+      this.imageOpacity = template.imageOpacity !== undefined ? template.imageOpacity : this.imageOpacity
       this.$dialog({
         type: 'success',
         title: '成功',
         text: '已成功应用模板。'
       }).then(() => {
-        this.initWatermarkSize()
-      })
-    },
-    deleteTemplate(index) {
-      this.$dialog({
-        type: 'warning',
-        title: '操作确认',
-        text: '确定要删除这个模板吗？',
-        showCancel: true,
-        confirmFunction: () => {
-          this.$store.dispatch('watermark/templateDelete', index)
+        if (this.text != '') {
+          this.initWatermarkSize()
+        }
+        if (this.image != '') {
+          this.initImageSize()
         }
       })
     },
-    saveAsTemplate() {
-      if (this.text.length == 0) {
+    deleteTemplate(index) {
+      let template = this.$store.state.watermark.templates[index]
+      if (this.image == template.image && this.image != '') {
+        this.$dialog({
+          type: 'error',
+          title: '删除失败',
+          text: '您不能删除正在使用的模板！'
+        })
+      } else {
         this.$dialog({
           type: 'warning',
-          text: '请您输入水印文字！'
+          title: '操作确认',
+          text: '确定要删除这个模板吗？',
+          showCancel: true,
+          confirmFunction: () => {
+            fs.unlinkSync(template.image)
+            this.$store.dispatch('watermark/templateDelete', index)
+          }
+        })
+      }
+    },
+    saveAsTemplate() {
+      if (this.text.length == 0 && this.image == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '请您输入水印文本！'
         })
       } else {
         let template =  {
@@ -725,6 +906,13 @@ export default {
           textShadowY: this.textShadowY,
           textShadowBlur: this.textShadowBlur,
           textShadowColor: this.textShadowColor,
+          image: this.image,
+          imageSize: this.imageSize,
+          imagePosition: this.imagePosition,
+          imageOffsetX: this.imageOffsetX,
+          imageOffsetY: this.imageOffsetY,
+          imageRotation: this.imageRotation,
+          imageOpacity: this.imageOpacity
         }
         let checkName = (title) => {
           if (title == '') {
@@ -809,6 +997,17 @@ export default {
               }
             }
             template.title = title
+            if (this.image != '') {
+              let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
+              let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
+              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+              let fullpath = path.join(imagepath, filename)
+              if (!fs.existsSync(imagepath)) {
+                CreateDirectory(imagepath)
+              }
+              fs.writeFileSync(fullpath, fs.readFileSync(this.image))
+              template.image = fullpath
+            }
             this.$store.dispatch('watermark/templatePush', template)
             this.$dialog({
               type: 'success',
@@ -855,7 +1054,7 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let imageInfo = this.$store.state.watermark.fileList[this.imageIndex]
+          let imageInfo = this.$store.state.watermark.fileList[this.fileIndex]
           let distExt
           if (this.mimeType == '保持原格式') {
             distExt = imageInfo.ext
@@ -895,7 +1094,8 @@ export default {
           html2canvas(document.getElementById('watermark-container'), {
             canvas: canvas,
             scale: scale,
-            backgroundColor: null
+            backgroundColor: null,
+            useCORS: true
           }).then(canvas => {
             let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
             let buffer = new Buffer.from(url, 'base64')
@@ -923,8 +1123,8 @@ export default {
                           }
                         }
                       }
-                      this.$store.dispatch('watermark/fileListDelete', this.imageIndex).then(() => {
-                        this.preview(this.imageIndex)
+                      this.$store.dispatch('watermark/fileListDelete', this.fileIndex).then(() => {
+                        this.preview(this.fileIndex)
                       })
                     }
                   })
@@ -944,10 +1144,10 @@ export default {
           })
         })
       }
-      if (this.text.length == 0) {
+      if (this.text.length == 0 && this.image == '') {
         this.$dialog({
           type: 'warning',
-          text: '请您输入水印文字！'
+          text: '请您输入水印文字或选择水印图片！'
         })
       } else if (this.customDistDirectory && this.distDirectory === '') {
         this.$dialog({
@@ -1066,7 +1266,12 @@ export default {
                     this.sizeBaseY = sampleHeight / 100
                     let scale = width / sampleWidth
                     this.$nextTick(() => {
-                      this.initWatermarkSize()
+                      if (this.text != '') {
+                        this.initWatermarkSize()
+                      }
+                      if (this.image != '') {
+                        this.initImageSize()
+                      }
                       this.$nextTick(() => {
                         // 匹配模糊半径，等待 html2canvas 作者更新
                         let shadow = watermark.style['text-shadow'].split(' ')
@@ -1077,6 +1282,7 @@ export default {
                           canvas: canvas,
                           scale: scale,
                           backgroundColor: null,
+                          useCORS: true
                         }).then((canvas) => {
                           let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
                           let buffer = new Buffer.from(url, 'base64')
@@ -1155,10 +1361,10 @@ export default {
           })
         })
       }
-      if (this.text.length == 0) {
+      if (this.text.length == 0 && this.image == '') {
         this.$dialog({
           type: 'warning',
-          text: '请您输入水印文字！'
+          text: '请您输入水印文字或选择水印图片！'
         })
       } else if (this.customDistDirectory && this.distDirectory === '') {
         this.$dialog({
@@ -1362,6 +1568,10 @@ export default {
           height: fit-content;
           box-sizing: border-box;
           line-height: 1em;
+        }
+
+        #watermark-image {
+          position: absolute;
         }
       }
     }
@@ -1623,6 +1833,79 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+
+    #image-container {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      height: 150px;
+
+      #upload-dragger {
+        width: 100%;
+        height: 100%;
+        transition: 0.5s;
+        
+        &.half {
+          width: calc(50% - 5px);
+        }
+        
+        .el-upload {
+          width: 100%;
+          height: 100%;
+          
+          .el-upload-dragger {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark-gray);
+            border-color: var(--light-gray);
+            transition: 0.2s;
+            
+            svg {
+              font-size: 40px;
+              margin: 14px;
+            }
+            
+            &:hover {
+              color: var(--main-color);
+              border-color: var(--main-color);
+              
+              .el-upload__text {
+                color: var(--main-color);
+              }
+            }
+          }
+        }
+      }
+
+      #image {
+        width: calc(50% - 5px);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        #image-preview-container {
+          width: 100%;
+          height: 0;
+          flex-grow: 1;
+          background-color: var(--black-gray);
+          border-radius: 6px;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          #image-preview {
+            max-width: 100%;
+            max-height: 100%;
+          }
+        }
+      }
+    }
     
     .el-collapse-item__header {
       height: 30px;

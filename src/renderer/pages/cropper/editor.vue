@@ -2,7 +2,7 @@
   <div id="cropper-editor">
     <div id="crop">
       <div id="image-container" class="interactable">
-        <img :src="this.$store.state.cropper.fileList[imageIndex].fullpath" id="image">
+        <img :src="this.$store.state.cropper.fileList[fileIndex].fullpath" id="image">
       </div>
       <div id="file-list">
         <div class="row">
@@ -33,7 +33,7 @@
             v-model="allowOutOfImage"
             active-text="允许超出图片"
             inactive-text="不允许超出图片"
-            @change="init(imageIndex)"
+            @change="init(fileIndex)"
             class="control interactable"></el-switch>
         </div>
         <div class="control-row">
@@ -146,7 +146,7 @@
           <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-button type="primary" size="mini" @click="init(imageIndex)" class="bar-button interactable">重置</el-button>
+      <el-button type="primary" size="mini" @click="init(fileIndex)" class="bar-button interactable">重置</el-button>
       <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
     </div>
   </div>
@@ -165,7 +165,7 @@ export default {
   name: 'cropperEditor',
   data() {
     return {
-      imageIndex: 0,
+      fileIndex: 0,
       cropper: null,
       allowOutOfImage: false,
       mode: 'free',
@@ -196,10 +196,10 @@ export default {
     handleDelete(index) {
       if (this.$store.state.cropper.fileList.length > 1) {
         this.$store.dispatch('cropper/fileListDelete', index).then(() => {
-          if (this.imageIndex > index) {
-            this.imageIndex -= 1
-          } else if (this.imageIndex == index) {
-            this.init(this.imageIndex)
+          if (this.fileIndex > index) {
+            this.fileIndex -= 1
+          } else if (this.fileIndex == index) {
+            this.init(this.fileIndex)
           }
         })
       } else {
@@ -214,12 +214,12 @@ export default {
         showConfirm: false
       }).then((dialog) => {
         if (index >= this.$store.state.cropper.fileList.length) {
-          this.imageIndex = this.$store.state.cropper.fileList.length - 1
+          this.fileIndex = this.$store.state.cropper.fileList.length - 1
         } else {
-          this.imageIndex = index
+          this.fileIndex = index
         }
         let img = document.createElement('img')
-        img.src = this.$store.state.cropper.fileList[this.imageIndex].fullpath
+        img.src = this.$store.state.cropper.fileList[this.fileIndex].fullpath
         img.onerror = () => {
           if (this.$store.state.cropper.fileList.length == 1) {
             dialog.change({
@@ -322,7 +322,7 @@ export default {
             mimeType = distExt
           }
           let ext = this.mimeType == 'JPEG' ? '.jpg' : ('.' + distExt)
-          let filename = this.$store.state.cropper.fileList[this.imageIndex].filename + this.append + ext
+          let filename = this.$store.state.cropper.fileList[this.fileIndex].filename + this.append + ext
           let distFullpath = path.join(this.distDirectory, filename)
           let canvas = this.cropper.getCroppedCanvas({
             imageSmoothingQuality: 'high'
@@ -345,8 +345,8 @@ export default {
                   text: '处理完成，裁剪后的图片已保存到目标文件夹。',
                   showConfirm: true,
                   confirmFunction: () => {
-                    this.$store.dispatch('cropper/fileListDelete', this.imageIndex).then(() => {
-                      this.init(this.imageIndex)
+                    this.$store.dispatch('cropper/fileListDelete', this.fileIndex).then(() => {
+                      this.init(this.fileIndex)
                     })
                   }
                 })

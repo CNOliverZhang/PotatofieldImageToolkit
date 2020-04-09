@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "提供对 WEBP 格式的全面支持。\n图片裁剪工具不限制裁剪区域。\n修复已知问题。"
+      "releaseNotes": "图片加水印工具支持使用图片作为水印。\n修复已知问题。"
     },
     "publish": [
       {

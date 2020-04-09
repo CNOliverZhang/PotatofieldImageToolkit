@@ -2,7 +2,7 @@
   <div id="slice-editor">
     <div id="crop">
       <div id="image-container">
-        <img :src="this.$store.state.slice.fileList[imageIndex].fullpath" id="image">
+        <img :src="this.$store.state.slice.fileList[fileIndex].fullpath" id="image">
         <div id="grids">
           <div
             v-for="number in Array.from({ length: row * column })"
@@ -138,7 +138,7 @@ export default {
   data() {
     return {
       errorList: [],
-      imageIndex: 0,
+      fileIndex: 0,
       column: 3,
       row: 3,
       keepSquare: true,
@@ -165,10 +165,10 @@ export default {
     handleDelete(index) {
       if (this.$store.state.slice.fileList.length > 1) {
         this.$store.dispatch('slice/fileListDelete', index).then(() => {
-          if (this.imageIndex > index) {
-            this.imageIndex -= 1
-          } else if (this.imageIndex == index) {
-            this.init(this.imageIndex)
+          if (this.fileIndex > index) {
+            this.fileIndex -= 1
+          } else if (this.fileIndex == index) {
+            this.init(this.fileIndex)
           }
         })
       } else {
@@ -201,12 +201,12 @@ export default {
         showConfirm: false
       }).then((dialog) => {
         if (index >= this.$store.state.slice.fileList.length) {
-          this.imageIndex = this.$store.state.slice.fileList.length - 1
+          this.fileIndex = this.$store.state.slice.fileList.length - 1
         } else {
-          this.imageIndex = index
+          this.fileIndex = index
         }
         let img = document.createElement('img')
-        img.src = this.$store.state.slice.fileList[this.imageIndex].fullpath
+        img.src = this.$store.state.slice.fileList[this.fileIndex].fullpath
         img.onerror = () => {
           if (this.$store.state.slice.fileList.length == 1) {
             dialog.change({
@@ -337,9 +337,9 @@ export default {
               context.drawImage(canvas, -grid.width * column, -grid.height * row)
               let url = grid.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
-              let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[this.imageIndex].filename)
+              let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[this.fileIndex].filename)
               CreateDirectory(distDirectory)
-              let filename = this.$store.state.slice.fileList[this.imageIndex].filename
+              let filename = this.$store.state.slice.fileList[this.fileIndex].filename
               filename = filename + '_' + (row + 1) + '_' + (column + 1) + '.' + distExt
               let distFullpath = path.join(distDirectory, filename)
               fs.writeFileSync(distFullpath, buffer)
@@ -352,8 +352,8 @@ export default {
               text: '处理完成，裁剪后的图片已保存到目标文件夹。',
               showConfirm: true,
               confirmFunction: () => {
-                this.$store.dispatch('slice/fileListDelete', this.imageIndex).then(() => {
-                  this.init(this.imageIndex)
+                this.$store.dispatch('slice/fileListDelete', this.fileIndex).then(() => {
+                  this.init(this.fileIndex)
                 })
               }
             })
