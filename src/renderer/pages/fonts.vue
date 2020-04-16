@@ -495,18 +495,6 @@ export default {
     }
   },
   mounted() {
-    let fontList = this.$store.state.fonts.fontList.slice()
-    fontList = fontList.map((font) => {
-      if (font.language == '中英文') {
-        font.language = '中文'
-      }
-      if (font.weight) {
-        font.style = font.weight
-        font.weight = undefined
-      }
-      return font
-    })
-    this.$store.dispatch('fonts/fontListAssign', fontList)
     this.fontsPath = path.join(ipcRenderer.sendSync('app-data-path'), 'fonts')
     this.$dialog({
       title: '正在获取字体',
