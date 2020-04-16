@@ -873,7 +873,9 @@ export default {
           text: '确定要删除这个模板吗？',
           showCancel: true,
           confirmFunction: () => {
-            fs.unlinkSync(template.image)
+            if (template.image) {
+              fs.unlinkSync(template.image)
+            }
             this.$store.dispatch('watermark/templateDelete', index)
           }
         })

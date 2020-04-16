@@ -446,7 +446,9 @@ export default {
             }
           }
           let template = this.$store.state.watermark.templates[index]
-          fs.unlinkSync(template.image)
+          if (template.image) {
+            fs.unlinkSync(template.image)
+          }
           this.$store.dispatch('watermark/templateDelete', index)
         }
       })
