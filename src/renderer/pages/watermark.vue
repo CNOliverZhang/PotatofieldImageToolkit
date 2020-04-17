@@ -175,6 +175,7 @@
 import { ipcRenderer, clipboard } from 'electron'
 import EXIF from 'exif-js'
 import ReadDirectory from '../utils/ReadDirectory'
+import CreateDirectory from '../utils/CreateDirectory'
 
 const path = require('path')
 const fs = require('fs')
@@ -421,14 +422,26 @@ export default {
       })
     },
     shareTemplate(index) {
-      clipboard.writeText(btoa(encodeURI(JSON.stringify({
-        type: 'watermarkTemplate',
-        content: this.$store.state.watermark.templates[index]
-      }))))
       this.$dialog({
-        type: 'success',
-        title: '成功',
-        text: '已成功将水印模板复制到剪贴板。'
+        title: '正在处理',
+        text: '即将完成，请稍候。',
+        showConfirm: false
+      }).then((dialog) => {
+        let template = JSON.parse(JSON.stringify(this.$store.state.watermark.templates[index]))
+        if (template.image) {
+          template.imageData = fs.readFileSync(template.image).toString('base64')
+          template.image = path.basename(template.image)
+        }
+        clipboard.writeText(btoa(encodeURI(JSON.stringify({
+          type: 'watermarkTemplate',
+          content: template
+        }))))
+        dialog.change({
+          type: 'success',
+          title: '成功',
+          text: '已成功将水印模板复制到剪贴板。',
+          showConfirm: true
+        })
       })
     },
     deleteTemplate(index) {
@@ -543,6 +556,17 @@ export default {
                 }
               }
               template.title = title
+              if (template.image) {
+                let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+                if (!fs.existsSync(imagepath)) {
+                  CreateDirectory(imagepath)
+                }
+                let fullpath = path.join(imagepath, template.image)
+                let buffer = new Buffer.from(template.imageData, 'base64')
+                fs.writeFileSync(fullpath, buffer)
+                template.image = fullpath
+                delete template.imageData
+              }
               this.$store.dispatch('watermark/templatePush', template)
               this.$dialog({
                 type: 'success',

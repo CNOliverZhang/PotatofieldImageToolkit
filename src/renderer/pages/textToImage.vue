@@ -208,6 +208,13 @@ export default {
         text: '确定要删除这个模板吗？',
         showCancel: true,
         confirmFunction: () => {
+          if (this.templateListPage != 1) {
+            if (this.templateListPage == Math.ceil(this.$store.state.textToImage.templates.length / 6)) {
+              if (this.$store.state.textToImage.templates.length % 6 == 1) {
+                this.templateListPage -= 1
+              }
+            }
+          }
           this.$store.dispatch('textToImage/templateDelete', index)
         }
       })

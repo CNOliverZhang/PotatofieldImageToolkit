@@ -296,8 +296,7 @@ export default {
       return fonts
     },
     localChineseFonts() {
-      return this.$store.state.fonts.fontList.map((font, index) => {
-        font = JSON.parse(JSON.stringify(font))
+      return this.$store.state.fonts.fontList.slice().map((font, index) => {
         font.originalIndex = index
         font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
         return font
@@ -306,8 +305,7 @@ export default {
       })
     },
     localEnglishFonts() {
-      return this.$store.state.fonts.fontList.map((font, index) => {
-        font = JSON.parse(JSON.stringify(font))
+      return this.$store.state.fonts.fontList.slice().map((font, index) => {
         font.originalIndex = index
         font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
         return font
@@ -511,7 +509,7 @@ export default {
       }).then((res) => {
         res.data.forEach((font) => {
           font.fontFamily = font.font_family
-          font.font_family = undefined
+          delete font.font_family
         })
         this.onlineFonts = res.data
         dialog.close()

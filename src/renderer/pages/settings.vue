@@ -194,6 +194,7 @@
 
 <script>
 import { ipcRenderer, shell, clipboard } from 'electron'
+import CreateDirectory from '../utils/CreateDirectory'
 
 const path = require('path')
 const fs = require('fs')
@@ -405,7 +406,13 @@ export default {
             type: 'PotatofieldImageToolkitTemplatesBackup',
             version: this.version,
             templates: {
-              watermarkTemplates: this.$store.state.watermark.templates,
+              watermarkTemplates: this.$store.state.watermark.templates.slice().map(template => {
+                if (template.image) {
+                  template.imageData = fs.readFileSync(template.image).toString('base64')
+                  template.image = path.basename(template.image)
+                }
+                return template
+              }),
               splicerTemplates: this.$store.state.splicer.templates,
               textToImageTemplates: this.$store.state.textToImage.templates
             }
@@ -441,9 +448,26 @@ export default {
         text: '这将删除您已保存的所有模板且不可恢复，确定执行操作吗？',
         showCancel: true,
         confirmFunction: () => {
-          this.$store.dispatch('watermark/templatesEmpty')
-          this.$store.dispatch('splicer/templatesEmpty')
-          this.$store.dispatch('textToImage/templatesEmpty')
+          this.$dialog({
+            title: '正在处理',
+            text: '即将完成，请稍候。',
+            showConfirm: false
+          }).then((dialog) => {
+            this.$store.state.watermark.templates.map(template => {
+              if (template.image) {
+                fs.unlinkSync(template.image)
+              }
+            })
+            this.$store.dispatch('watermark/templatesEmpty')
+            this.$store.dispatch('splicer/templatesEmpty')
+            this.$store.dispatch('textToImage/templatesEmpty')
+            dialog.change({
+              type: 'success',
+              title: '成功',
+              text: '已删除您保存的所有模板。',
+              showConfirm: true
+            })
+          })
         }
       })
     },
@@ -467,7 +491,21 @@ export default {
               throw 'error'
             } else {
               if (backup.templates.watermarkTemplates) {
-                this.$store.dispatch('watermark/templatesAssign', backup.templates.watermarkTemplates)
+                let watermarkTemplates = backup.templates.watermarkTemplates.map(template => {
+                  if (template.image) {
+                    let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+                    if (!fs.existsSync(imagepath)) {
+                      CreateDirectory(imagepath)
+                    }
+                    let fullpath = path.join(imagepath, template.image)
+                    let buffer = new Buffer.from(template.imageData, 'base64')
+                    fs.writeFileSync(fullpath, buffer)
+                    template.image = fullpath
+                    delete template.imageData
+                  }
+                  return template
+                })
+                this.$store.dispatch('watermark/templatesAssign', watermarkTemplates)
               }
               if (backup.templates.splicerTemplates) {
                 this.$store.dispatch('splicer/templatesAssign', backup.templates.splicerTemplates)

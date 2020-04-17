@@ -314,7 +314,7 @@ export default {
           }
           let distExt
           if (this.mimeType == '保持原格式') {
-            distExt = imageInfo.ext
+            distExt = this.$store.state.slice.fileList[this.fileIndex].ext
           } else if (this.mimeType == 'JPEG') {
             distExt = 'jpg'
           } else if (this.mimeType == 'WEBP') {

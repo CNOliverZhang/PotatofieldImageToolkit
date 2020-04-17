@@ -236,7 +236,7 @@ export default {
       this.$router.replace('/splicer/editor')
     },
     moveUp(index) {
-      let fileList = this.$store.state.splicer.fileList
+      let fileList = this.$store.state.splicer.fileList.slice()
       let image = fileList[index - 1]
       fileList[index - 1] = fileList[index]
       fileList[index] = image
@@ -244,7 +244,7 @@ export default {
       this.imagesChanged = true
     },
     moveDown(index) {
-      let fileList = this.$store.state.splicer.fileList
+      let fileList = this.$store.state.splicer.fileList.slice()
       let image = fileList[index + 1]
       fileList[index + 1] = fileList[index]
       fileList[index] = image
