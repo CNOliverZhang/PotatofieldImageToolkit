@@ -631,7 +631,7 @@
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+              <el-dropdown-item :command="exit">退出编辑器</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button interactable">保存</el-button>

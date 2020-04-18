@@ -700,10 +700,10 @@ export default {
   }
   
   #colors {
-    width: calc(50% - 10px);
+    width: calc(50% - 5px);
     height: 100%;
     flex-shrink: 0;
-    margin-left: 20px;
+    margin-left: 10px;
     overflow-x: hidden;
     overflow-y: auto;
     display: flex;

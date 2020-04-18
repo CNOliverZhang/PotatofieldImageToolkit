@@ -529,7 +529,7 @@ export default {
     flex-direction: row;
     
     #preview {
-      width: calc(50% - 10px);
+      width: calc(50% - 5px);
       height: 100%;
       background-color: var(--black-gray);
       box-sizing: border-box;

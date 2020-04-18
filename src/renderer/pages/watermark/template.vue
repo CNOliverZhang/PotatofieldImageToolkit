@@ -286,24 +286,25 @@
           </el-collapse-item>
           <el-collapse-item title="水印图片选择" name="image">
             <div id="image-container">
-              <el-upload
-                id="upload-dragger"
-                action=""
-                drag
-                :auto-upload="false"
-                :on-change="selectImage"
-                :show-file-list="false"
-                :class="this.image != '' ? 'half' : ''">
-                <i class="fas fa-image"></i>
-                <div class="el-upload__text">拖拽或点击选择图片</div>
-              </el-upload>
-              <div v-if="this.image != ''" id="image">
-                <div id="image-preview-container">
-                  <img :src="this.image" id="image-preview">
-                </div>
-                <div class="row">
+              <div id="upload-container" :class="image != '' ? 'half' : ''">
+                <el-upload
+                  id="upload-dragger"
+                  action=""
+                  drag
+                  :auto-upload="false"
+                  :on-change="selectImage"
+                  :show-file-list="false">
+                  <div v-if="image == ''">
+                    <i class="fas fa-stamp"></i>
+                  </div>
+                  <div class="el-upload__text">拖拽或点击选择图片</div>
+                </el-upload>
+                <div v-if="image != ''" class="row">
                   <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
                 </div>
+              </div>
+              <div v-if="image != ''" id="image-preview-container">
+                <img :src="image" id="image-preview">
               </div>
             </div>
           </el-collapse-item>
@@ -406,7 +407,7 @@
             @command="(command) => {command()}">
             最小化
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
+              <el-dropdown-item :command="exit">退出编辑器</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
           <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button">保存</el-button>
@@ -1182,71 +1183,70 @@ export default {
       display: flex;
       justify-content: space-between;
       width: 100%;
-      height: 150px;
+      height: 120px;
 
-      #upload-dragger {
+      #upload-container {
         width: 100%;
         height: 100%;
         transition: 0.5s;
+        display: flex;
+        flex-direction: column;
         
         &.half {
           width: calc(50% - 5px);
         }
-        
-        .el-upload {
+
+        #upload-dragger {
           width: 100%;
-          height: 100%;
+          height: 0;
+          flex-grow: 1;
           
-          .el-upload-dragger {
+          .el-upload {
             width: 100%;
             height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: var(--dark-gray);
-            border-color: var(--light-gray);
-            transition: 0.2s;
             
-            svg {
-              font-size: 40px;
-              margin: 14px;
-            }
-            
-            &:hover {
-              color: var(--main-color);
-              border-color: var(--main-color);
+            .el-upload-dragger {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              color: var(--dark-gray);
+              border-color: var(--light-gray);
+              transition: 0.2s;
               
-              .el-upload__text {
+              svg {
+                font-size: 40px;
+                margin: 14px;
+              }
+              
+              &:hover {
                 color: var(--main-color);
+                border-color: var(--main-color);
+                
+                .el-upload__text {
+                  color: var(--main-color);
+                }
               }
             }
           }
         }
       }
 
-      #image {
+      #image-preview-container {
         width: calc(50% - 5px);
         height: 100%;
+        background-color: var(--black-gray);
+        border-radius: 6px;
+        overflow: hidden;
         display: flex;
-        flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
+        align-items: center;
 
-        #image-preview-container {
-          width: 100%;
-          height: 0;
-          flex-grow: 1;
-          background-color: var(--black-gray);
-          border-radius: 6px;
-          overflow: hidden;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-
-          #image-preview {
-            max-width: 100%;
-            max-height: 100%;
-          }
+        #image-preview {
+          max-width: 100%;
+          max-height: 100%;
         }
       }
     }
