@@ -173,6 +173,20 @@ export default {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
     })
+    //兼容性代码开始
+    let fontList = this.$store.state.fonts.fontList.slice()
+    fontList = fontList.map((font) => {
+      if (font.language == '中英文') {
+        font.language = '中文'
+      }
+      if (font.weight) {
+        font.style = font.weight
+        font.weight = undefined
+      }
+      return font
+    })
+    this.$store.dispatch('fonts/fontListAssign', fontList)
+    //兼容性代码结束
     this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
       this.totalMessages = res.data.length
     })
