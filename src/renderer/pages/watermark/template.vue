@@ -546,11 +546,6 @@ export default {
         this.initWatermarkSize()
       })
     },
-    image() {
-      this.$nextTick(() => {
-        this.initImageSize()
-      })
-    },
     imageSize() {
       this.$nextTick(() => {
         this.initImageSize()
@@ -757,24 +752,28 @@ export default {
                     })
                   }
                 })
-                returncrea
+                return
               }
             }
             template.title = title
-            if (this.originalImage != '' && this.originalImage != this.image) {
-              fs.unlinkSync(this.originalImage)
-            }
-            if (this.image != '') {
-              let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
-              let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
-              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
-              let fullpath = path.join(imagepath, filename)
-              if (!fs.existsSync(imagepath)) {
-                CreateDirectory(imagepath)
+            if (this.originalImage != this.image) {
+              if (this.originalImage != '') {
+                fs.unlinkSync(this.originalImage)
+                this.originalImage = ''
               }
-              fs.writeFileSync(fullpath, fs.readFileSync(this.image))
-              template.image = fullpath
-              this.originalImage = fullpath
+              if (this.image != '') {
+                let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
+                let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
+                let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+                let fullpath = path.join(imagepath, filename)
+                if (!fs.existsSync(imagepath)) {
+                  CreateDirectory(imagepath)
+                }
+                fs.writeFileSync(fullpath, fs.readFileSync(this.image))
+                template.image = fullpath
+                this.originalImage = fullpath
+                this.image = fullpath
+              }
             }
             this.$store.dispatch('watermark/templateReplace', {
               index: this.index,
@@ -915,6 +914,7 @@ export default {
               fs.writeFileSync(fullpath, fs.readFileSync(this.image))
               template.image = fullpath
               this.originalImage = fullpath
+              this.image = fullpath
             }
             this.$store.dispatch('watermark/templatePush', template)
             this.$dialog({
@@ -982,7 +982,10 @@ export default {
       this.imageOpacity = template.imageOpacity !== undefined ? template.imageOpacity : this.imageOpacity
       this.$dialog({
         text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
-      }).then(() => {
+      })
+    }
+    this.$nextTick(() => {
+      setTimeout(() => {
         let sampleContainer = document.getElementById('sample-container')
         let style = window.getComputedStyle(sampleContainer)
         let width = style.getPropertyValue('width').slice(0, -2)
@@ -994,24 +997,9 @@ export default {
           if (this.text != '') {
             this.initWatermarkSize()
           }
-          if (this.image != '') {
-            this.initImageSize()
-          }
         })
-      })
-    } else {
-      this.$nextTick(() => {
-        setTimeout(() => {
-          let sampleContainer = document.getElementById('sample-container')
-          let style = window.getComputedStyle(sampleContainer)
-          let width = style.getPropertyValue('width').slice(0, -2)
-          this.sampleWidth = width
-          this.sampleHeight = width
-          this.sizeBaseX = width / 100
-          this.sizeBaseY = width / 100
-        }, 100)
-      })
-    }
+      }, 200)
+    })
   }
 }
 </script>

@@ -27,7 +27,7 @@ function showDialog(args) {
     dialogDom.$once('mounted', () => {
       setTimeout(() => {
         resolve(dialogDom)
-      }, 100)
+      }, 200)
     })
     dialogDom.$on('minimize', () => {
       this.minimize()

@@ -628,11 +628,6 @@ export default {
         this.initWatermarkSize()
       })
     },
-    image() {
-      this.$nextTick(() => {
-        this.initImageSize()
-      })
-    },
     imageSize() {
       this.$nextTick(() => {
         this.initImageSize()
@@ -852,9 +847,6 @@ export default {
         if (this.text != '') {
           this.initWatermarkSize()
         }
-        if (this.image != '') {
-          this.initImageSize()
-        }
       })
     },
     deleteTemplate(index) {
@@ -1008,6 +1000,7 @@ export default {
               }
               fs.writeFileSync(fullpath, fs.readFileSync(this.image))
               template.image = fullpath
+              this.image = fullpath
             }
             this.$store.dispatch('watermark/templatePush', template)
             this.$dialog({

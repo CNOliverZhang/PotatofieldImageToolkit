@@ -289,7 +289,7 @@ ipcMain.on('check-for-update', (event) => {
   updateTargetWindow = event.sender
   setTimeout(() => {
     autoUpdater.checkForUpdates()
-  }, 100)
+  }, 200)
 })
 
 ipcMain.on('download-update', () => {
