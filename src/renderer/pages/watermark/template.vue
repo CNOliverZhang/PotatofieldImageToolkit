@@ -997,6 +997,9 @@ export default {
           if (this.text != '') {
             this.initWatermarkSize()
           }
+          if (this.image) {
+            this.initImageSize()
+          }
         })
       }, 200)
     })
