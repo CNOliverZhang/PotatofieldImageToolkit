@@ -147,14 +147,14 @@
         </div>
         <div id="scale" class="row">
           <el-select v-model="scale" size="mini" class="scale interactable">
-            <el-option label="50%" :value="0.25"/>
+            <el-option label="25%" :value="0.25"/>
             <el-option label="50%" :value="0.5"/>
             <el-option label="75%" :value="0.75"/>
             <el-option label="100%" :value="1.0"/>
             <el-option label="125%" :value="1.25"/>
             <el-option label="150%" :value="1.5"/>
-            <el-option label="50%" :value="1.75"/>
-            <el-option label="50%" :value="2.0"/>
+            <el-option label="175%" :value="1.75"/>
+            <el-option label="200%" :value="2.0"/>
           </el-select>
           <el-button type="primary" size="mini" @click="setScale" class="scale interactable">保存设置</el-button>
         </div>
