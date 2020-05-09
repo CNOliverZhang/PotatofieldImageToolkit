@@ -422,6 +422,7 @@
 <script>
 import { ipcRenderer } from 'electron'
 import ReadDirectory from '../../utils/ReadDirectory'
+import CreateDirectory from '../../utils/CreateDirectory'
 
 const path = require('path')
 const fs = require('fs')
@@ -758,7 +759,9 @@ export default {
             template.title = title
             if (this.originalImage != this.image) {
               if (this.originalImage != '') {
-                fs.unlinkSync(this.originalImage)
+                try {
+                  fs.unlinkSync(this.originalImage)
+                } catch (error) {}
                 this.originalImage = ''
               }
               if (this.image != '') {
@@ -942,7 +945,9 @@ export default {
         showCancel: true,
         confirmFunction: () => {
           if (this.originalImage) {
-            fs.unlinkSync(this.originalImage)
+            try {
+              fs.unlinkSync(this.originalImage)
+            } catch (error) {}
           }
           this.$store.dispatch('watermark/templateDelete', this.index)
           this.close()

@@ -865,7 +865,9 @@ export default {
           showCancel: true,
           confirmFunction: () => {
             if (template.image) {
-              fs.unlinkSync(template.image)
+              try {
+                fs.unlinkSync(template.image)
+              } catch (error) {}
             }
             this.$store.dispatch('watermark/templateDelete', index)
           }
