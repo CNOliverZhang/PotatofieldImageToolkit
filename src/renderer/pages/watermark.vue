@@ -563,7 +563,9 @@ export default {
                 if (!fs.existsSync(imagepath)) {
                   CreateDirectory(imagepath)
                 }
-                let fullpath = path.join(imagepath, template.image)
+                let ext = template.image.substring(template.image.lastIndexOf(".") + 1, template.image.length).toLowerCase()
+                let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
+                let fullpath = path.join(imagepath, filename)
                 let buffer = new Buffer.from(template.imageData, 'base64')
                 fs.writeFileSync(fullpath, buffer)
                 template.image = fullpath
