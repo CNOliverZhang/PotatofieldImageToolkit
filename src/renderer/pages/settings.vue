@@ -147,7 +147,6 @@
         </div>
         <div id="scale" class="row">
           <el-select v-model="scale" size="mini" class="scale interactable">
-            <el-option label="25%" :value="0.25"/>
             <el-option label="50%" :value="0.5"/>
             <el-option label="75%" :value="0.75"/>
             <el-option label="100%" :value="1.0"/>

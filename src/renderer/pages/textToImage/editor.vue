@@ -571,6 +571,17 @@
           <div class="subtitle">保存设置</div>
         </div>
         <div class="control-row">
+          <div class="text">输出宽度</div>
+          <el-slider
+            v-model="outputWidth"
+            class="control interactable"
+            :min="500"
+            :max="3000"
+            :step="1"
+            :show-input="true"
+            input-size="mini"></el-slider>
+        </div>
+        <div class="control-row">
           <div class="text">存储位置</div>
           <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
@@ -670,6 +681,7 @@ export default {
       imageLabelColor: 'rgba(192, 196, 204, 1)',
       blockquoteMargin: 0.5,
       blockquoteBorderColor: 'rgba(220, 223, 230, 1)',
+      outputWidth: 1500,
       distDirectory: '',
       filename: '',
       mimeType: 'jpeg',
@@ -1106,7 +1118,7 @@ export default {
           let preview = document.getElementById('preview')
           let width = window.getComputedStyle(preview).getPropertyValue('width').slice(0, -2)
           let height = window.getComputedStyle(preview).getPropertyValue('height').slice(0, -2)
-          let scale = Math.min((1500 / width), (16000 / height))
+          let scale = Math.min((this.outputWidth / width), (16000 / height))
           let canvas = document.createElement('canvas')
           canvas.width = width * scale
           canvas.height = height * scale
@@ -1128,10 +1140,14 @@ export default {
                   showConfirm: true
                 })
               } else {
+                let text = '处理完成，制作完成的图片已保存到目标文件夹。即将退出编辑器。'
+                if ((this.outputWidth / width) > (16000 / height)) {
+                  text = '处理完成，制作完成的图片已保存到目标文件夹。因为富文本内容过长，生成的图片尺寸超出限制，已将其缩小到系统允许的最大尺寸。即将退出编辑器。'
+                }
                 dialog.change({
                   type: 'success',
                   title: '成功',
-                  text: '处理完成，制作完成的图片已保存到目标文件夹。即将退出编辑器。',
+                  text: text,
                   showConfirm: true,
                   confirmFunction: () => {
                     this.close()
