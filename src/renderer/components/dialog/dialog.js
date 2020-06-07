@@ -29,9 +29,6 @@ function showDialog(args) {
         resolve(dialogDom)
       }, 200)
     })
-    dialogDom.$on('minimize', () => {
-      this.minimize()
-    })
     dialogDom.$mount()
     document.body.appendChild(dialogDom.$el)
   })

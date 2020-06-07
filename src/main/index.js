@@ -39,10 +39,13 @@ function createWindow(args) {
     title: args.title,
     frame: false,
     fullscreenable: false,
-    resizable: false,
+    resizable: true,
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
+    minimizable: false,
+    maximizable: false,
+    transparent: args.transparent,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true
@@ -59,16 +62,16 @@ function createWindow(args) {
 
   newWindow.on('restore', () => {
     newWindow.setBounds({
-      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(500 * zoomFactor * scale),
-      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(800 * zoomFactor * scale)
+      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale),
+      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale)
     })
   })
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
     newWindow.setBounds({
-      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(500 * zoomFactor * scale),
-      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(800 * zoomFactor * scale)
+      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale),
+      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale)
     })
     newWindow.webContents.setZoomFactor(zoomFactor * scale)
     newWindow.center()
@@ -128,7 +131,10 @@ app.on('ready', () => {
   zoomFactor = screen.getPrimaryDisplay().workAreaSize.height / devWindowHeight * scale
   mainWindow = createWindow({
     title: '洋芋田图像工具箱',
-    path: '#/'
+    path: '#/',
+    width: 800,
+    height: 500,
+    transparent: true
   })
   let icon = nativeImage.createFromPath(path.join(__static, 'images/icon.ico'))
   let menu = Menu.buildFromTemplate([
@@ -330,6 +336,20 @@ ipcMain.on('show', (event) => {
 ipcMain.on('minimize', (event) => {
   let currentWindow = BrowserWindow.fromWebContents(event.sender)
   currentWindow.minimize()
+})
+
+ipcMain.on('unmaximize', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
+  currentWindow.unmaximize()
+})
+
+ipcMain.on('change-maximize-status', (event) => {
+  let currentWindow = BrowserWindow.fromWebContents(event.sender)
+  if (currentWindow.isMaximized()) {
+    currentWindow.unmaximize()
+  } else {
+    currentWindow.maximize()
+  }
 })
 
 ipcMain.on('close', (event) => {

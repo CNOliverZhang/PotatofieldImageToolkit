@@ -29,6 +29,8 @@ export default {
 :root {
   --main-font: "NotoSansSCThin";
   --main-color: #2196F3;
+  --success-green: #67C23A;
+  --notice-yellow: #E6A23C;
   --warning-red: #F56C6C;
   --black-gray: #303133;
   --dark-gray: #606266;
@@ -45,7 +47,6 @@ body {
   margin: 0;
   font-family: var(--main-font);
   cursor: default;
-  -webkit-app-region: drag;
   user-select: none;
   color: var(--dark-gray);
 }
@@ -53,10 +54,6 @@ body {
 #app {
   width: 100vw;
   height: 100vh;
-}
-
-.interactable {
-  -webkit-app-region: no-drag;
 }
 
 .title {

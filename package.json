@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "修复了某些情况下删除包含图片的水印模板导致其他水印模板失效的问题。"
+      "releaseNotes": "富文本制图工具支持自定义输出图片宽度。\n修复了屏幕缩放比例过小时界面显示异常的问题。"
     },
     "publish": [
       {
