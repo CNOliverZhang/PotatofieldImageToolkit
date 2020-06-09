@@ -1,270 +1,257 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="fonts">
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-font"></i> 本地字体</span>
-      <div class="tab-content">
-        <div class="container" v-if="localFontsChinese && localChineseFonts.length != 0">
-          <div
-            v-for="font in localChineseFonts.slice(localFontListPage * 4 - 4, localFontListPage * 4)"
-            :key="font.fontFamily"
-            class="card-container">
-            <el-card class="card interactable">
-              <div>
-                <img :src="font.image" class="font-preview">
-                <div class="row">
-                  <div class="text">名称：{{ font.verbose }}</div>
-                </div>
-                <div class="row">
-                  <div class="text">字形：{{ font.style }}</div>
-                </div>
-              </div>
-              <div class="row actions">
-                <div v-if="font.isDefault" class="action interactable">
-                  <span class="fa fa-cog"></span>
-                  <div>当前默认字体</div>
-                </div>
-                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
-                  <span class="fa fa-cog"></span>
-                  <div>设为默认字体</div>
-                </div>
-                <div v-if="font.builtin" class="action interactable">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>内置字体无法删除</div>
-                </div>
-                <div v-if="font.isDefault && !font.builtin" class="action interactable">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>默认字体无法删除</div>
-                </div>
-                <div v-if="!font.isDefault && !font.builtin" class="action active interactable" @click="deleteFont(font.originalIndex)">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>删除本地字体</div>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </div>
-        <div class="container" v-if="!localFontsChinese && localEnglishFonts.length != 0">
-          <div
-            v-for="font in localEnglishFonts.slice(localFontListPage * 4 - 4, localFontListPage * 4)"
-            :key="font.fontFamily"
-            class="card-container">
-            <el-card class="card interactable">
-              <div>
-                <img :src="font.image" class="font-preview">
-                <div class="row">
-                  <div class="text">名称：{{ font.verbose }}</div>
-                </div>
-                <div class="row">
-                  <div class="text">字形：{{ font.style }}</div>
-                </div>
-              </div>
-              <div class="row actions">
-                <div v-if="font.isDefault" class="action interactable">
-                  <span class="fa fa-cog"></span>
-                  <div>当前默认字体</div>
-                </div>
-                <div v-else class="action active interactable" @click="setDefaultFont(font.fontFamily)">
-                  <span class="fa fa-cog"></span>
-                  <div>设为默认字体</div>
-                </div>
-                <div v-if="font.builtin" class="action interactable">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>内置字体无法删除</div>
-                </div>
-                <div v-if="font.isDefault && !font.builtin" class="action interactable">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>默认字体无法删除</div>
-                </div>
-                <div v-if="!font.isDefault && !font.builtin" class="action active interactable" @click="deleteFont(font.originalIndex)">
-                  <span class="fa fa-trash-alt"></span>
-                  <div>删除本地字体</div>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </div>
-        <div class="container" v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)">
-          <div  class="empty-container">
-            <div class="empty">
-              <i class="fas fa-folder-open"></i>
-              <div>尚无符合要求的字体</div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <el-pagination
-            v-if="localFontsChinese"
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="4"
-            :total="localChineseFonts.length"
-            :current-page="localFontListPage"
-            @current-change="localFontListPageChange">
-          </el-pagination>
-          <el-pagination
-            v-else
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="4"
-            :total="localEnglishFonts.length"
-            :current-page="localFontListPage"
-            @current-change="localFontListPageChange">
-          </el-pagination>
-          <el-switch
-            v-model="localFontsChinese"
-            active-color="var(--main-color)"
-            inactive-color="var(--main-color)"
-            active-text="中文字体"
-            inactive-text="英文字体"
-            @change="switchLanguage"
-            class="interactable"></el-switch>
-        </div>
+  <div id="fonts">
+    <div id="header">
+      <div id="title">字体管理工具</div>
+      <div id="minimize" class="control-button" @click="minimize">
+        <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-    </el-tab-pane>
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-globe"></i> 在线字体</span>
-      <div class="tab-content">
-        <div class="container" v-if="onlineFontsChinese && onlineChineseFonts.length != 0">
-          <div
-            v-for="font in onlineChineseFonts.slice(onlineFontListPage * 4 - 4, onlineFontListPage * 4)"
-            :key="font.fontFamily"
-            class="card-container">
-            <el-card class="card interactable">
-              <div>
-                <img :src="font.image" class="font-preview">
-                <div class="row">
-                  <div class="text">名称：{{ font.verbose }}</div>
+      <div id="close" class="control-button" @click="close">
+        <object data="static/images/close.svg" type="image/svg+xml"></object>
+      </div>
+    </div>
+    <el-tabs type="card" tab-position="top" id="content">
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-font"></i> 本地字体</span>
+        <div class="tab-content">
+          <div class="container" v-if="localFontsChinese && localChineseFonts.length != 0">
+            <div
+              v-for="font in localChineseFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
+              :key="font.fontFamily"
+              class="card-container">
+              <el-card class="card">
+                <div>
+                  <img :src="font.image" class="font-preview">
+                  <div class="row">
+                    <div class="text">名称：{{ font.verbose }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="text">字形：{{ font.style }}</div>
+                  </div>
                 </div>
-                <div class="row">
-                  <div class="text">字形：{{ font.style }}</div>
+                <div class="row actions">
+                  <div v-if="font.isDefault" class="action">
+                    <span class="fa fa-cog"></span>
+                    <div>当前默认字体</div>
+                  </div>
+                  <div v-else class="action active" @click="setDefaultFont(font.fontFamily)">
+                    <span class="fa fa-cog"></span>
+                    <div>设为默认字体</div>
+                  </div>
+                  <div v-if="font.builtin" class="action">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>内置字体无法删除</div>
+                  </div>
+                  <div v-if="font.isDefault && !font.builtin" class="action">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>默认字体无法删除</div>
+                  </div>
+                  <div v-if="!font.isDefault && !font.builtin" class="action active" @click="deleteFont(font.originalIndex)">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>删除本地字体</div>
+                  </div>
                 </div>
-              </div>
-              <div class="row actions">
-                <div v-if="font.downloaded" key="downloaded" class="action interactable">
-                  <span class="fa fa-check"></span>
-                  <div>已下载字体</div>
-                </div>
-                <div v-else key="download" class="action active interactable" @click="downloadFont(font)">
-                  <span class="fa fa-download"></span>
-                  <div>下载字体</div>
-                </div>
-                <div v-if="font.downloaded" key="install" class="action active interactable" @click="installFont(font.fontFamily)">
-                  <span class="fa fa-desktop"></span>
-                  <div>安装到操作系统</div>
-                </div>
-                <div v-else key="explorer" class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
-                  <span class="fab fa-chrome"></span>
-                  <div>用浏览器下载</div>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </div>
-        <div class="container" v-if="!onlineFontsChinese && onlineEnglishFonts.length != 0">
-          <div
-            v-for="font in onlineEnglishFonts.slice(onlineFontListPage * 4 - 4, onlineFontListPage * 4)"
-            :key="font.fontFamily"
-            class="card-container">
-            <el-card class="card interactable">
-              <div>
-                <img :src="font.image" class="font-preview">
-                <div class="row">
-                  <div class="text">名称：{{ font.verbose }}</div>
-                </div>
-                <div class="row">
-                  <div class="text">字形：{{ font.style }}</div>
-                </div>
-              </div>
-              <div class="row actions">
-                <div v-if="font.downloaded" key="downloaded" class="action interactable">
-                  <span class="fa fa-check"></span>
-                  <div>已下载字体</div>
-                </div>
-                <div v-else key="download" class="action active interactable" @click="downloadFont(font)">
-                  <span class="fa fa-download"></span>
-                  <div>下载字体</div>
-                </div>
-                <div v-if="font.downloaded" key="install" class="action active interactable" @click="installFont(font.fontFamily)">
-                  <span class="fa fa-desktop"></span>
-                  <div>安装到操作系统</div>
-                </div>
-                <div v-else key="explorer" class="action active interactable" @click="downloadFontUsingExplorer(font.src)">
-                  <span class="fab fa-chrome"></span>
-                  <div>用浏览器下载</div>
-                </div>
-              </div>
-            </el-card>
-          </div>
-        </div>
-        <div class="container" v-if="onlineFonts.length == 0">
-          <div class="empty-container">
-            <div class="empty">
-              <i class="fas fa-folder-open"></i>
-              <div>未获取到字体</div>
+              </el-card>
             </div>
           </div>
-        </div>
-        <div class="row">
-          <el-pagination
-            v-if="onlineFontsChinese"
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="4"
-            :total="onlineChineseFonts.length"
-            :current-page="onlineFontListPage"
-            @current-change="onlineFontListPageChange">
-          </el-pagination>
-          <el-pagination
-            v-else
-            class="interactable"
-            small
-            background
-            layout="prev, pager, next"
-            :pager-count="5"
-            :page-size="4"
-            :total="onlineEnglishFonts.length"
-            :current-page="onlineFontListPage"
-            @current-change="onlineFontListPageChange">
+          <div class="container" v-if="!localFontsChinese && localEnglishFonts.length != 0">
+            <div
+              v-for="font in localEnglishFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
+              :key="font.fontFamily"
+              class="card-container">
+              <el-card class="card">
+                <div>
+                  <img :src="font.image" class="font-preview">
+                  <div class="row">
+                    <div class="text">名称：{{ font.verbose }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="text">字形：{{ font.style }}</div>
+                  </div>
+                </div>
+                <div class="row actions">
+                  <div v-if="font.isDefault" class="action">
+                    <span class="fa fa-cog"></span>
+                    <div>当前默认字体</div>
+                  </div>
+                  <div v-else class="action active" @click="setDefaultFont(font.fontFamily)">
+                    <span class="fa fa-cog"></span>
+                    <div>设为默认字体</div>
+                  </div>
+                  <div v-if="font.builtin" class="action">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>内置字体无法删除</div>
+                  </div>
+                  <div v-if="font.isDefault && !font.builtin" class="action">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>默认字体无法删除</div>
+                  </div>
+                  <div v-if="!font.isDefault && !font.builtin" class="action active" @click="deleteFont(font.originalIndex)">
+                    <span class="fa fa-trash-alt"></span>
+                    <div>删除本地字体</div>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </div>
+          <div class="container" v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)">
+            <div  class="empty-container">
+              <div class="empty">
+                <i class="fas fa-folder-open"></i>
+                <div>尚无符合要求的字体</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <el-pagination
+              v-if="localFontsChinese"
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="6"
+              :total="localChineseFonts.length"
+              :current-page="localFontListPage"
+              @current-change="localFontListPageChange">
             </el-pagination>
-          <el-switch
-            v-model="onlineFontsChinese"
-            active-color="var(--main-color)"
-            inactive-color="var(--main-color)"
-            active-text="中文字体"
-            inactive-text="英文字体"
-            @change="switchLanguage"
-            class="interactable"></el-switch>
-        </div>
-      </div>
-    </el-tab-pane>
-    <el-tab-pane disabled>
-      <span slot="label" id="sidebar">
-        <div id="tool-info">
-          <i id="tool-logo" class="fas fa-font"></i>
-          <div class="text">字体管理工具</div>
-        </div>
-        <div id="control-button-holder">
-          <div class="control-button interactable" @click="minimize">
-            <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
-          </div>
-          <div class="control-button interactable" @click="close">
-            <span class="fas fa-sign-out-alt"></span>
-            <div>退出</div>
+            <el-pagination
+              v-else
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="6"
+              :total="localEnglishFonts.length"
+              :current-page="localFontListPage"
+              @current-change="localFontListPageChange">
+            </el-pagination>
+            <el-switch
+              v-model="localFontsChinese"
+              active-color="var(--main-color)"
+              inactive-color="var(--main-color)"
+              active-text="中文字体"
+              inactive-text="英文字体"
+              @change="switchLanguage"></el-switch>
           </div>
         </div>
-      </span>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-globe"></i> 在线字体</span>
+        <div class="tab-content">
+          <div class="container" v-if="onlineFontsChinese && onlineChineseFonts.length != 0">
+            <div
+              v-for="font in onlineChineseFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
+              :key="font.fontFamily"
+              class="card-container">
+              <el-card class="card">
+                <div>
+                  <img :src="font.image" class="font-preview">
+                  <div class="row">
+                    <div class="text">名称：{{ font.verbose }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="text">字形：{{ font.style }}</div>
+                  </div>
+                </div>
+                <div class="row actions">
+                  <div v-if="font.downloaded" key="downloaded" class="action">
+                    <span class="fa fa-check"></span>
+                    <div>已下载字体</div>
+                  </div>
+                  <div v-else key="download" class="action active" @click="downloadFont(font)">
+                    <span class="fa fa-download"></span>
+                    <div>下载字体</div>
+                  </div>
+                  <div v-if="font.downloaded" key="install" class="action active" @click="installFont(font.fontFamily)">
+                    <span class="fa fa-desktop"></span>
+                    <div>安装到操作系统</div>
+                  </div>
+                  <div v-else key="explorer" class="action active" @click="downloadFontUsingExplorer(font.src)">
+                    <span class="fab fa-chrome"></span>
+                    <div>用浏览器下载</div>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </div>
+          <div class="container" v-if="!onlineFontsChinese && onlineEnglishFonts.length != 0">
+            <div
+              v-for="font in onlineEnglishFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
+              :key="font.fontFamily"
+              class="card-container">
+              <el-card class="card">
+                <div>
+                  <img :src="font.image" class="font-preview">
+                  <div class="row">
+                    <div class="text">名称：{{ font.verbose }}</div>
+                  </div>
+                  <div class="row">
+                    <div class="text">字形：{{ font.style }}</div>
+                  </div>
+                </div>
+                <div class="row actions">
+                  <div v-if="font.downloaded" key="downloaded" class="action">
+                    <span class="fa fa-check"></span>
+                    <div>已下载字体</div>
+                  </div>
+                  <div v-else key="download" class="action active" @click="downloadFont(font)">
+                    <span class="fa fa-download"></span>
+                    <div>下载字体</div>
+                  </div>
+                  <div v-if="font.downloaded" key="install" class="action active" @click="installFont(font.fontFamily)">
+                    <span class="fa fa-desktop"></span>
+                    <div>安装到操作系统</div>
+                  </div>
+                  <div v-else key="explorer" class="action active" @click="downloadFontUsingExplorer(font.src)">
+                    <span class="fab fa-chrome"></span>
+                    <div>用浏览器下载</div>
+                  </div>
+                </div>
+              </el-card>
+            </div>
+          </div>
+          <div class="container" v-if="onlineFonts.length == 0">
+            <div class="empty-container">
+              <div class="empty">
+                <i class="fas fa-folder-open"></i>
+                <div>未获取到字体</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <el-pagination
+              v-if="onlineFontsChinese"
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="6"
+              :total="onlineChineseFonts.length"
+              :current-page="onlineFontListPage"
+              @current-change="onlineFontListPageChange">
+            </el-pagination>
+            <el-pagination
+              v-else
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="6"
+              :total="onlineEnglishFonts.length"
+              :current-page="onlineFontListPage"
+              @current-change="onlineFontListPageChange">
+              </el-pagination>
+            <el-switch
+              v-model="onlineFontsChinese"
+              active-color="var(--main-color)"
+              inactive-color="var(--main-color)"
+              active-text="中文字体"
+              inactive-text="英文字体"
+              @change="switchLanguage"></el-switch>
+          </div>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 
 <script>
@@ -370,13 +357,13 @@ export default {
             fs.unlinkSync(this.$store.state.fonts.fontList[index].image)
             fs.rmdirSync(path.join(this.fontsPath, this.$store.state.fonts.fontList[index].verbose))
             if (this.localFontListPage != 1) {
-              if (this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localChineseFonts.length / 4))) {
-                if (this.localChineseFonts.length % 4 == 1) {
+              if (this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localChineseFonts.length / 6))) {
+                if (this.localChineseFonts.length % 6 == 1) {
                   this.localFontListPage -= 1
                 }
               }
-              if (!this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localEnglishFonts.length / 4))) {
-                if (this.localEnglishFonts.length % 4 == 1) {
+              if (!this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localEnglishFonts.length / 6))) {
+                if (this.localEnglishFonts.length % 6 == 1) {
                   this.localFontListPage -= 1
                 }
               }
@@ -523,86 +510,250 @@ export default {
 #fonts {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   
   button {
     font-family: var(--main-font);
   }
   
-  .el-tabs__header {
-    margin-right: 0;
-    
-    .el-tabs__nav-scroll {
-      background-color: var(--dark-gray);
-      
-      .el-tabs__nav {
-        border: 0;
+  #header {
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    flex-basis: 40px;
+    background-color: var(--dark-gray);
+    display: flex;
+    align-items: center;
+    z-index: 3000;
+    -webkit-app-region: drag;
+
+    #title {
+      color: var(--white);
+      font-size: 16px;
+      flex-grow: 1;
+    }
+
+    .control-button {
+      -webkit-app-region: no-drag;
+      width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      margin-right: 5px;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      object {
+        width: 50%;
+        color: var(--white);
+      }
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 100%;
         height: 100%;
-        display: flex;
-        flex-direction: column;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        transition: 0.2s;
+      }
+
+      &:hover::after {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    #minimize {
+      background-color: var(--success-green);
+    }
+
+    #close {
+      background-color: var(--warning-red);
+    }
+  }
+
+  #content {
+    height: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    
+    .el-tabs__header {
+      margin: 0;
+      
+      .el-tabs__nav-scroll {
+        background-color: var(--main-color);
         
-        .el-tabs__item {
-          width: 150px;
-          height: 50px;
-          line-height: 50px;
-          color: var(--light-gray);
-          text-align: center;
+        .el-tabs__nav {
           border: 0;
-          transition: 0.2s;
           
-          #sidebar {
-            width: 100%;
+          .el-tabs__item {
+            width: 150px;
+            height: 50px;
+            line-height: 50px;
+            color: var(--light-gray);
+            text-align: center;
+            border: 0;
+            transition: 0.2s;
             
-            @keyframes shine {
-              0% {
-                color: var(--light-gray)
-              }
-              25% {
-                color: var(--light-gray)
-              }
-              50% {
-                color: var(--main-color)
-              }
-              75% {
-                color: var(--light-gray)
-              }
-              100% {
-                color: var(--light-gray)
-              }
+            &.is-active {
+              background-color: var(--white);
+              color: var(--main-color);
+              cursor: default;
             }
             
-            #tool-info {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              animation: shine 5s infinite;
-              
-              #tool-logo {
-                font-size: 60px;
-                margin: 20px;
-              }
+            &:not(.is-active) {
+              color: var(--white);
+              position: relative;
             }
             
-            #control-button-holder {
+            &:not(.is-active)::after {
+              content: '';
+              position: absolute;
               width: 100%;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 20px;
-              box-sizing: border-box;
+              height: 100%;
+              left: 0;
+              top: 0;
+              transition: 0.2s;
+            }
+
+            &:not(.is-active):hover::after {
+              background-color: rgba(0, 0, 0, 0.1);
+            }
+          }
+        }
+      }
+    }
+    
+    .el-tabs__content {
+      flex-grow: 1;
+      
+      .el-tab-pane {
+        width: 100%;
+        height: 100%;
+        
+        .tab-content {
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+      }
+    }
+  
+    .row {
+      width: 100%;
+      flex-shrink: 0;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      
+      .el-switch {
+        display: flex;
+        justify-content: flex-end;
+      }
+      
+      &:first-child {
+        margin-top: 0;
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    .bar-button {
+      width: 0;
+      height: 28px;
+      flex-grow: 1;
+      box-sizing: border-box;
+      border: none;
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: 5px;
+      margin-right: 5px;
+      
+      &:first-child {
+        margin-left: 0;
+      }
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+    
+    .container {
+      width: 100%;
+      height: 0;
+      flex-grow: 1;
+      display: flex;
+      flex-wrap: wrap;
+      
+      .card-container {
+        width: calc(100% / 3);
+        height: 50%;
+        box-sizing: border-box;
+        padding: 10px;
+        
+        .card {
+          width: 100%;
+          height: 100%;
+          color: var(--dark-gray);
+          
+          .el-card__body {
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            
+            .font-preview {
+              width: 100%;
+            }
+            
+            .actions {
+              width: 100%;
+              flex-grow: 1;
+              align-items: flex-end;
               
-              .control-button {
+              .action {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                color: var(--gray);
                 font-size: 12px;
-                line-height: initial;
-                cursor: pointer;
                 transition: 0.2s;
                 
                 svg {
-                  font-size: 20px;
-                  margin: 5px;
+                  font-size: 14px;
+                  margin-right: 5px;
                 }
+              }
+              
+              .active {
+                color: var(--dark-gray);
+                cursor: pointer;
                 
                 &:hover {
-                  color: var(--white);
+                  color: var(--main-color);
                 }
                 
                 &:active {
@@ -612,207 +763,57 @@ export default {
             }
           }
           
-          &.is-active {
-            background-color: var(--white);
-            color: var(--main-color);
-            cursor: default;
-          }
-          
-          &.is-disabled {
-            flex-grow: 1;
-            padding: 0;
-            display: flex;
-            align-items: flex-end;
-          }
-          
-          &:hover:not(.is-disabled):not(.is-active) {
-            color: var(--white);
-          }
-          
-          &:active:not(.is-disabled):not(.is-active) {
-            filter: brightness(0.9);
+          &:hover {
+            transform: scale(1.05);
           }
         }
       }
     }
-  }
-  
-  .el-tabs__content {
-    height: 100%;
     
-    .el-tab-pane {
+    .empty-container {
       width: 100%;
-      height: 100%;
-      
-      .tab-content {
-        width: 100%;
-        height: 100%;
-        padding: 20px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-    }
-  }
-  
-  .row {
-    width: 100%;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .el-switch {
+      flex-grow: 1;
       display: flex;
-      justify-content: flex-end;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .bar-button {
-    width: 0;
-    height: 28px;
-    flex-grow: 1;
-    box-sizing: border-box;
-    border: none;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: 5px;
-    margin-right: 5px;
-    
-    &:first-child {
-      margin-left: 0;
-    }
-    
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-  
-  .container {
-    width: 100%;
-    height: 0;
-    flex-grow: 1;
-    display: flex;
-    flex-wrap: wrap;
-    
-    .card-container {
-      width: 50%;
-      height: 50%;
-      box-sizing: border-box;
-      padding: 10px;
-      
-      .card {
-        width: 100%;
-        height: 100%;
-        color: var(--dark-gray);
-        
-        .el-card__body {
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
-          display: flex;
-          flex-direction: column;
-          
-          .font-preview {
-            width: 100%;
-          }
-          
-          .actions {
-            width: 100%;
-            flex-grow: 1;
-            align-items: flex-end;
-            
-            .action {
-              width: 100%;
-              display: flex;
-              align-items: center;
-              color: var(--gray);
-              font-size: 12px;
-              transition: 0.2s;
-              
-              svg {
-                font-size: 14px;
-                margin-right: 5px;
-              }
-            }
-            
-            .active {
-              color: var(--dark-gray);
-              cursor: pointer;
-              
-              &:hover {
-                color: var(--main-color);
-              }
-              
-              &:active {
-                filter: brightness(0.9);
-              }
-            }
-          }
-        }
-        
-        &:hover {
-          transform: scale(1.05);
-        }
-      }
-    }
-  }
-  
-  .empty-container {
-    width: 100%;
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    
-    .empty {
-      display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-size: 14px;
       
-      svg {
-        font-size: 40px;
-        margin: 14px;
+      .empty {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        
+        svg {
+          font-size: 40px;
+          margin: 14px;
+        }
       }
     }
-  }
-  
-  .el-pagination {
-    padding: 0;
-    margin-right: 10px;
     
-    li {
-      min-width: 24px;
-      height: 28px;
-      line-height: 28px;
-    }
-    
-    .btn-prev {
-      width: 24px;
-      height: 28px;
-      line-height: 28px;
-      margin-left: 0;
-    }
-    
-    .btn-next {
-      width: 24px;
-      height: 28px;
-      line-height: 28px;
-      margin-right: 0;
+    .el-pagination {
+      padding: 0;
+      margin-right: 10px;
+      
+      li {
+        min-width: 24px;
+        height: 28px;
+        line-height: 28px;
+      }
+      
+      .btn-prev {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-left: 0;
+      }
+      
+      .btn-next {
+        width: 24px;
+        height: 28px;
+        line-height: 28px;
+        margin-right: 0;
+      }
     }
   }
 }

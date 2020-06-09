@@ -3,7 +3,7 @@
     <div id="left">
       <div
         id="preview-container"
-        class="interactable"
+       
         :style="{
           'background-color': backgroundColor
         }">
@@ -17,7 +17,7 @@
         </div>
       </div>
     </div>
-    <div id="right" class="interactable">
+    <div id="right">
       <div id="control">
         <div id="settings">
           <div class="row">
@@ -532,17 +532,17 @@
           <div class="row">
             <div class="subtitle">已保存的模板</div>
           </div>
-          <div v-if="this.$store.state.textToImage.templates.length != 0" id="list" class="interactable">
+          <div v-if="this.$store.state.textToImage.templates.length != 0" id="list">
             <div
               v-for="(template, index) in this.$store.state.textToImage.templates"
               :key="template.title"
               class="template">
               <div class="cover">
-                <div class="action interactable" @click="applyTemplate(index)">
+                <div class="action" @click="applyTemplate(index)">
                   <span class="fa fa-check-circle"></span>
                   <div>应用</div>
                 </div>
-                <div class="action interactable" @click="deleteTemplate(index)">
+                <div class="action" @click="deleteTemplate(index)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -574,7 +574,7 @@
           <div class="text">输出宽度</div>
           <el-slider
             v-model="outputWidth"
-            class="control interactable"
+            class="control"
             :min="500"
             :max="3000"
             :step="1"
@@ -583,13 +583,13 @@
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
+          <el-input disabled size="mini" v-model="distDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="control-row">
           <div class="text">文件名</div>
-          <el-input size="mini" v-model="filename" class="control interactable" placeholder="请输入文件名">
+          <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
             <el-select v-model="mimeType" size="mini" slot="append">
               <el-option label=".jpg" value="jpeg"/>
               <el-option label=".webp" value="webp"/>
@@ -603,7 +603,7 @@
             split-button
             type="primary"
             trigger="click"
-            class="bar-button interactable"
+            class="bar-button"
             @click="minimize"
             @command="(command) => {command()}">
             最小化

@@ -1,132 +1,124 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="exif">
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
-      <div class="tab-content">
-        <div id="image-container">
-          <div id="image-wrapper" v-if="image != ''">
-            <img id="image" :src="image" />
-          </div>
-          <el-upload
-            id="upload"
-            drag
-            action=""
-            class="interactable"
-            :auto-upload="false"
-            :on-change="handleFile"
-            :show-file-list="false">
-            <i class="fas fa-image"></i>
-            <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
-          </el-upload>
-        </div>
-        <div id="info" class="interactable" v-if="info != null">
-          <div class="row">
-            <div class="text">
-              作者：{{ info.artist ? info.artist : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              相机制造商：{{ info.make ? info.make : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              相机型号：{{ info.model ? info.model : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              拍摄时间：{{ info.time ? info.time : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              曝光补偿：{{ info.exposureBias ? info.exposureBias : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              曝光模式：{{ info.exposureMode ? info.exposureMode : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              曝光程序：{{ info.exposureProgram ? info.exposureProgram : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              快门速度：{{ info.shutterSpeed ? info.shutterSpeed : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              光圈值：{{ info.apertureValue ? info.apertureValue : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              感光度：{{ info.iso ? info.iso : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              镜头焦距：{{ info.focalLength ? info.focalLength : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              等效 35mm 画幅焦距：{{ info.equivalenceFocalLength ? info.equivalenceFocalLength : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              文件横向尺寸：{{ info.width ? info.width : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              文件纵向尺寸：{{ info.height ? info.height : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              图像宽度：{{ info.rotatedWidth ? info.rotatedWidth : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              图像高度：{{ info.rotatedHeight ? info.rotatedHeight : '无信息' }}
-            </div>
-          </div>
-          <div class="row">
-            <div class="text">
-              软件：{{ info.software ? info.software : '无信息' }}
-            </div>
-          </div>
-        </div>
+  <div id="exif">
+    <div id="header">
+      <div id="title">EXIF 读取工具</div>
+      <div id="minimize" class="control-button" @click="minimize">
+        <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-    </el-tab-pane>
-    <el-tab-pane disabled>
-      <span slot="label" id="sidebar">
-        <div id="tool-info">
-          <i id="tool-logo" class="fas fa-camera"></i>
-          <div class="text">EXIF 读取工具</div>
-        </div>
-        <div id="control-button-holder">
-          <div class="control-button interactable" @click="minimize">
-            <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+      <div id="close" class="control-button" @click="close">
+        <object data="static/images/close.svg" type="image/svg+xml"></object>
+      </div>
+    </div>
+    <el-tabs type="card" tab-position="top" id="content">
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-image"></i> 导入图片</span>
+        <div class="tab-content">
+          <div id="image-container">
+            <div id="image-wrapper" v-if="image != ''">
+              <img id="image" :src="image" />
+            </div>
+            <el-upload
+              id="upload"
+              drag
+              action=""
+              :auto-upload="false"
+              :on-change="handleFile"
+              :show-file-list="false">
+              <i class="fas fa-image"></i>
+              <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
+            </el-upload>
           </div>
-          <div class="control-button interactable" @click="close">
-            <span class="fas fa-sign-out-alt"></span>
-            <div>退出</div>
+          <div id="info" v-if="info != null">
+            <div class="row">
+              <div class="text">
+                作者：{{ info.artist ? info.artist : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                相机制造商：{{ info.make ? info.make : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                相机型号：{{ info.model ? info.model : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                拍摄时间：{{ info.time ? info.time : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                曝光补偿：{{ info.exposureBias ? info.exposureBias : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                曝光模式：{{ info.exposureMode ? info.exposureMode : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                曝光程序：{{ info.exposureProgram ? info.exposureProgram : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                快门速度：{{ info.shutterSpeed ? info.shutterSpeed : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                光圈值：{{ info.apertureValue ? info.apertureValue : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                感光度：{{ info.iso ? info.iso : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                镜头焦距：{{ info.focalLength ? info.focalLength : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                等效 35mm 画幅焦距：{{ info.equivalenceFocalLength ? info.equivalenceFocalLength : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                文件横向尺寸：{{ info.width ? info.width : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                文件纵向尺寸：{{ info.height ? info.height : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                图像宽度：{{ info.rotatedWidth ? info.rotatedWidth : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                图像高度：{{ info.rotatedHeight ? info.rotatedHeight : '无信息' }}
+              </div>
+            </div>
+            <div class="row">
+              <div class="text">
+                软件：{{ info.software ? info.software : '无信息' }}
+              </div>
+            </div>
           </div>
         </div>
-      </span>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 
 <script>
@@ -289,284 +281,296 @@ export default {
 #exif {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   
   button {
     font-family: var(--main-font);
   }
   
-  .el-tabs__header {
-    margin-right: 0;
-    
-    .el-tabs__nav-scroll {
-      background-color: var(--dark-gray);
-      
-      .el-tabs__nav {
-        border: 0;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        
-        .el-tabs__item {
-          width: 150px;
-          height: 50px;
-          line-height: 50px;
-          color: var(--light-gray);
-          text-align: center;
-          border: 0;
-          transition: 0.2s;
-          
-          #sidebar {
-            width: 100%;
-            
-            @keyframes shine {
-              0% {
-                color: var(--light-gray)
-              }
-              25% {
-                color: var(--light-gray)
-              }
-              50% {
-                color: var(--main-color)
-              }
-              75% {
-                color: var(--light-gray)
-              }
-              100% {
-                color: var(--light-gray)
-              }
-            }
-            
-            #tool-info {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              animation: shine 5s infinite;
-              
-              #tool-logo {
-                font-size: 60px;
-                margin: 20px;
-              }
-            }
-            
-            #control-button-holder {
-              width: 100%;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 20px;
-              box-sizing: border-box;
-              
-              .control-button {
-                font-size: 12px;
-                line-height: initial;
-                cursor: pointer;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 20px;
-                  margin: 5px;
-                }
-                
-                &:hover {
-                  color: var(--white);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
-              }
-            }
-          }
-          
-          &.is-active {
-            background-color: var(--white);
-            color: var(--main-color);
-            cursor: default;
-          }
-          
-          &.is-disabled {
-            flex-grow: 1;
-            padding: 0;
-            display: flex;
-            align-items: flex-end;
-          }
-          
-          &:hover:not(.is-disabled):not(.is-active) {
-            color: var(--white);
-          }
-          
-          &:active:not(.is-disabled):not(.is-active) {
-            filter: brightness(0.9);
-          }
-        }
-      }
-    }
-  }
-  
-  .el-tabs__content {
-    height: 100%;
-    
-    .el-tab-pane {
-      width: 100%;
-      height: 100%;
-      
-      .tab-content {
-        width: 100%;
-        height: 100%;
-        padding: 20px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-  }
-  
-  .row {
-    width: 100%;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .control {
-      width: 60%;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .bar-button {
-    width: 0;
-    height: 28px;
-    flex-grow: 1;
+  #header {
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
-    border: none;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: 5px;
-    margin-right: 5px;
-    
-    &:first-child {
-      margin-left: 0;
-    }
-    
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-    
-  #image-container {
-    flex-grow: 1;
-    height: 100%;
+    flex-basis: 40px;
+    background-color: var(--dark-gray);
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: 0.5s;
-    
-    #image-wrapper {
-      width: 100%;
-      height: calc(50% - 5px);
-      margin-bottom: 10px;
-      background-color: var(--black-gray);
-      border-radius: 6px;
+    align-items: center;
+    z-index: 3000;
+    -webkit-app-region: drag;
+
+    #title {
+      color: var(--white);
+      font-size: 16px;
+      flex-grow: 1;
+    }
+
+    .control-button {
+      -webkit-app-region: no-drag;
+      width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      margin-right: 5px;
+      border-radius: 10px;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      
-      #image {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
+
+      object {
+        width: 50%;
+        color: var(--white);
       }
-    }
-    
-    #upload {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      justify-content: space-between;
-      transition: 0.5s;
-      
-      .el-upload {
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
         width: 100%;
         height: 100%;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        transition: 0.2s;
+      }
+
+      &:hover::after {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    #minimize {
+      background-color: var(--success-green);
+    }
+
+    #close {
+      background-color: var(--warning-red);
+    }
+  }
+
+  #content {
+    height: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    
+    .el-tabs__header {
+      margin: 0;
+      
+      .el-tabs__nav-scroll {
+        background-color: var(--main-color);
         
-        .el-upload-dragger {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          border-color: var(--light-gray);
-          transition: 0.2s;
+        .el-tabs__nav {
+          border: 0;
           
-          svg {
-            font-size: 40px;
-            margin: 14px;
-          }
-          
-          &:hover {
-            color: var(--main-color);
-            border-color: var(--main-color);
+          .el-tabs__item {
+            width: 150px;
+            height: 50px;
+            line-height: 50px;
+            color: var(--light-gray);
+            text-align: center;
+            border: 0;
+            transition: 0.2s;
             
-            .el-upload__text {
+            &.is-active {
+              background-color: var(--white);
               color: var(--main-color);
+              cursor: default;
+            }
+            
+            &:not(.is-active) {
+              color: var(--white);
+              position: relative;
+            }
+            
+            &:not(.is-active)::after {
+              content: '';
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              left: 0;
+              top: 0;
+              transition: 0.2s;
+            }
+
+            &:not(.is-active):hover::after {
+              background-color: rgba(0, 0, 0, 0.1);
             }
           }
         }
       }
     }
-  }
-  
-  #info {
-    width: calc(50% - 5px);
-    height: 100%;
-    flex-shrink: 0;
-    margin-left: 10px;
-    background-color: var(--black-gray);
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 6px;
-    overflow-x: hidden;
-    overflow-y: scroll;
     
-    .text {
-      color: var(--white);
-    }
-    
-    &::-webkit-scrollbar {
-      width: 10px;
-    }
-        
-    &::-webkit-scrollbar-track {
-      border-radius: 5px;
-      background-color: var(--white-gray);
+    .el-tabs__content {
+      flex-grow: 1;
       
-      &:hover {
-        background-color: var(--light-gray);
+      .el-tab-pane {
+        width: 100%;
+        height: 100%;
+        
+        .tab-content {
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: space-between;
+        }
+      }
+    }
+  
+    .row {
+      width: 100%;
+      flex-shrink: 0;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      
+      .control {
+        width: 60%;
+      }
+      
+      &:first-child {
+        margin-top: 0;
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
       }
     }
     
-    &::-webkit-scrollbar-thumb {
-      border-radius: 5px;
-      background-color: var(--gray);
-      transition: 0.2s;
+    .bar-button {
+      width: 0;
+      height: 28px;
+      flex-grow: 1;
+      box-sizing: border-box;
+      border: none;
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: 5px;
+      margin-right: 5px;
       
-      &:hover {
-        background-color: var(--dark-gray);
+      &:first-child {
+        margin-left: 0;
+      }
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+      
+    #image-container {
+      flex-grow: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: 0.5s;
+      
+      #image-wrapper {
+        width: 100%;
+        height: calc(50% - 5px);
+        margin-bottom: 10px;
+        background-color: var(--black-gray);
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        
+        #image {
+          max-width: 100%;
+          max-height: 100%;
+          display: block;
+        }
+      }
+      
+      #upload {
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        justify-content: space-between;
+        transition: 0.5s;
+        
+        .el-upload {
+          width: 100%;
+          height: 100%;
+          
+          .el-upload-dragger {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-color: var(--light-gray);
+            transition: 0.2s;
+            
+            svg {
+              font-size: 40px;
+              margin: 14px;
+            }
+            
+            &:hover {
+              color: var(--main-color);
+              border-color: var(--main-color);
+              
+              .el-upload__text {
+                color: var(--main-color);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    #info {
+      width: calc(50% - 5px);
+      height: 100%;
+      flex-shrink: 0;
+      margin-left: 10px;
+      background-color: var(--black-gray);
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 6px;
+      overflow-x: hidden;
+      overflow-y: scroll;
+      
+      .text {
+        color: var(--white);
+      }
+      
+      &::-webkit-scrollbar {
+        width: 10px;
+      }
+          
+      &::-webkit-scrollbar-track {
+        border-radius: 5px;
+        background-color: var(--white-gray);
+        
+        &:hover {
+          background-color: var(--light-gray);
+        }
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        border-radius: 5px;
+        background-color: var(--gray);
+        transition: 0.2s;
+        
+        &:hover {
+          background-color: var(--dark-gray);
+        }
       }
     }
   }

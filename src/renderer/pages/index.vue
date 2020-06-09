@@ -5,7 +5,7 @@
         <img id="logo" src="static/images/logo.png"/>
         <div id="title" class="title">洋芋田图像工具箱</div>
         <div id="title-bar-space"></div>
-        <div class="control-button interactable" @click="open('/messages', '消息中心')">
+        <div class="control-button" @click="open('/messages', '消息中心')">
           <div key="hasUnreadMessage" v-if="unreadMessages > 0">
             <el-badge :value="unreadMessages">
               <span class="fa fa-envelope"></span>
@@ -16,24 +16,24 @@
           </div>
           <div>消息中心</div>
         </div>
-        <div class="control-button interactable" @click="open('/settings', '设置')">
+        <div class="control-button" @click="open('/settings', '设置')">
           <span class="fa fa-tools"></span>
           <div>设置</div>
         </div>
-        <div class="control-button interactable" @click="minimize">
+        <div class="control-button" @click="minimize">
           <span class="fa fa-angle-double-down"></span>
           <div>最小化</div>
         </div>
-        <div class="control-button interactable" @click="hide">
+        <div class="control-button" @click="hide">
           <span class="fa fa-compress-alt"></span>
           <div>隐藏</div>
         </div>
-        <div class="control-button interactable" @click="exit">
+        <div class="control-button" @click="exit">
           <span class="fa fa-sign-out-alt"></span>
           <div>退出程序</div>
         </div>
       </div>
-      <div id="cards-holder" class="interactable">
+      <div id="cards-holder">
         <div id="scroll">
           <div class="space">&nbsp;</div>
           <div class="container" @click="open('/watermark', '图片加水印工具')">
@@ -175,20 +175,6 @@ export default {
       document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
       event.preventDefault()
     })
-    //兼容性代码开始
-    let fontList = this.$store.state.fonts.fontList.slice()
-    fontList = fontList.map((font) => {
-      if (font.language == '中英文') {
-        font.language = '中文'
-      }
-      if (font.weight) {
-        font.style = font.weight
-        font.weight = undefined
-      }
-      return font
-    })
-    this.$store.dispatch('fonts/fontListAssign', fontList)
-    //兼容性代码结束
     this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
       this.totalMessages = res.data.length
     })
@@ -289,10 +275,6 @@ export default {
 </script>
 
 <style lang="scss">
-.interactable {
-  -webkit-app-region: no-drag;
-}
-
 #index {
   width: 100%;
   height: 100%;
@@ -340,6 +322,7 @@ export default {
         margin-left: 3px;
         margin-right: 3px;
         transition: 0.2s;
+        -webkit-app-region: no-drag;
         
         svg {
           font-size: 20px;
@@ -360,6 +343,7 @@ export default {
       width: 100%;
       margin-top: 50px;
       position: relative;
+      -webkit-app-region: no-drag;
       
       #scroll {
         overflow-y: hidden;

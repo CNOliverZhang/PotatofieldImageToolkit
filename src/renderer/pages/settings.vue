@@ -11,7 +11,7 @@
     </div>
     <el-tabs type="card" tab-position="top" id="content">
       <el-tab-pane>
-        <span slot="label" class="interactable"><i class="fas fa-code"></i> 版权信息</span>
+        <span slot="label"><i class="fas fa-code"></i> 版权信息</span>
         <div id="info" class="tab-content">
           <div class="row">
             <div id="intro">
@@ -21,21 +21,21 @@
                 <div class="text">一个专为摄影师设计的图像工具箱</div>
               </div>
             </div>
-            <div class="text link interactable" @click="open('https://imagetoolkit.potatofield.cn')">访问网站</div>
+            <div class="text link" @click="open('https://imagetoolkit.potatofield.cn')">访问网站</div>
           </div>
           <div class="row">
             <div class="subtitle">开发者信息</div>
           </div>
           <div class="control-row">
             <div class="text">Copyright © 2020 张志毅</div>
-            <div class="text link interactable" @click="copyEmail">联系开发者</div>
+            <div class="text link" @click="copyEmail">联系开发者</div>
           </div>
           <div class="row">
             <div class="subtitle">开源协议</div>
           </div>
           <div class="control-row">
             <div class="text">本程序遵循 MIT 开源许可协议发行，相关资源及源码已托管在 Github ，您可以<span
-              class="link interactable"
+              class="link"
               @click="open('https://github.com/CNOliverZhang/PotatofieldImageToolkit/')">点此访问</span>。
           </div>
           </div>
@@ -49,7 +49,6 @@
             <el-button
               v-for="(resource) in resources"
               :key="resource.title"
-              class="interactable"
               size="mini"
               type="primary"
               @click="open(resource.url)">{{ resource.title }}
@@ -58,7 +57,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane>
-        <span slot="label" class="interactable"><i class="fas fa-sync-alt"></i> 版本更新</span>
+        <span slot="label"><i class="fas fa-sync-alt"></i> 版本更新</span>
         <div id="update" class="tab-content">
           <div class="row">
             <div class="subtitle">当前版本</div>
@@ -84,7 +83,7 @@
                 <div class="text">发布日期：{{ update.releaseDate }}</div>
               </div>
               <div class="row">
-                <el-button type="primary" size="mini" @click="confirmUpdate" class="interactable">现在更新</el-button>
+                <el-button type="primary" size="mini" @click="confirmUpdate">现在更新</el-button>
               </div>
             </div>
             <div v-else>
@@ -98,13 +97,13 @@
               <div class="text">尚未获取更新信息，请点击下方按钮检查最新版本。</div>
             </div>
             <div class="row">
-              <el-button type="primary" size="mini" @click="checkForUpdate" class="interactable">检查更新</el-button>
+              <el-button type="primary" size="mini" @click="checkForUpdate">检查更新</el-button>
             </div>
           </div>
         </div>
       </el-tab-pane>
       <el-tab-pane>
-        <span slot="label" class="interactable"><i class="fas fa-cog"></i> 模板管理</span>
+        <span slot="label"><i class="fas fa-cog"></i> 模板管理</span>
         <div id="templates" class="tab-content">
           <div class="row">
             <div class="subtitle">导出模板备份</div>
@@ -113,13 +112,13 @@
             <div class="text">您可以将所有工具的模板导出为备份文件，请先选择目标文件夹并输入文件名。</div>
           </div>
           <div class="row">
-            <el-input disabled size="mini" v-model="distDirectory" class="export interactable">
+            <el-input disabled size="mini" v-model="distDirectory" class="export">
               <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
             </el-input>
-            <el-input size="mini" v-model="filename" class="export interactable" placeholder="请输入文件名">
+            <el-input size="mini" v-model="filename" class="export" placeholder="请输入文件名">
               <template slot="append">.pfitbak</template>
             </el-input>
-            <el-button type="primary" size="mini" @click="exportTemplates" class="export interactable">导出备份</el-button>
+            <el-button type="primary" size="mini" @click="exportTemplates" class="export">导出备份</el-button>
           </div>
           <div class="row">
             <div class="subtitle">导入模板</div>
@@ -129,7 +128,7 @@
           </div>
           <el-upload
             action=""
-            class="interactable"
+           
             :auto-upload="false"
             :on-change="importTemplates"
             :show-file-list="false">
@@ -142,12 +141,12 @@
             <div class="text">这将删除您已保存的所有模板且不可恢复，请务必谨慎操作。</div>
           </div>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clearTemplates" class="interactable">清空模板</el-button>
+            <el-button type="primary" size="mini" @click="clearTemplates">清空模板</el-button>
           </div>
         </div>
       </el-tab-pane>
       <el-tab-pane>
-        <span slot="label" class="interactable"><i class="fas fa-wrench"></i> 个性化设置</span>
+        <span slot="label"><i class="fas fa-wrench"></i> 个性化设置</span>
         <div id="custom" class="tab-content">
           <div class="row">
             <div class="subtitle">设置缩放比例</div>
@@ -156,7 +155,7 @@
             <div class="text">您可以自定义界面的缩放比例以匹配您计算机显示器的尺寸和分辨率。</div>
           </div>
           <div id="scale" class="row">
-            <el-select v-model="scale" size="mini" class="scale interactable">
+            <el-select v-model="scale" size="mini" class="scale">
               <el-option label="50%" :value="0.5"/>
               <el-option label="75%" :value="0.75"/>
               <el-option label="100%" :value="1.0"/>
@@ -165,7 +164,7 @@
               <el-option label="175%" :value="1.75"/>
               <el-option label="200%" :value="2.0"/>
             </el-select>
-            <el-button type="primary" size="mini" @click="setScale" class="scale interactable">保存设置</el-button>
+            <el-button type="primary" size="mini" @click="setScale" class="scale">保存设置</el-button>
           </div>
           <div class="row">
             <div class="subtitle">开机启动选项</div>
@@ -178,8 +177,7 @@
               @change="switchOpenAtLogin"
               v-model="openAtLogin"
               active-text="开机启动"
-              inactive-text="开机不启动"
-              class="interactable"></el-switch>
+              inactive-text="开机不启动"></el-switch>
           </div>
         </div>
       </el-tab-pane>

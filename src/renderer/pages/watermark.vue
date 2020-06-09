@@ -87,7 +87,6 @@
             </div>
             <div class="row">
               <el-pagination
-               
                 small
                 background
                 layout="prev, pager, next"
@@ -143,7 +142,6 @@
           <div class="row">
             <el-pagination
               v-if="this.$store.state.watermark.templates.length > 6"
-             
               small
               background
               layout="prev, pager, next"

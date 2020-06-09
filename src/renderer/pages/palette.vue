@@ -1,143 +1,135 @@
 <template>
-  <el-tabs type="card" tab-position="left" id="palette">
-    <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
-      <div class="tab-content">
-        <div id="image-container">
-          <div id="image-wrapper" v-if="image != ''">
-            <img id="image" :src="image" />
-          </div>
-          <el-upload
-            id="upload"
-            drag
-            action=""
-            class="interactable"
-            :auto-upload="false"
-            :on-change="handleFile"
-            :show-file-list="false">
-            <i class="fas fa-image"></i>
-            <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
-          </el-upload>
-        </div>
-        <div id="colors" v-if="colors != null">
-          <div class="controller">
-            <div class="row">
-              <div class="subtitle">图片的主色调</div>
-            </div>
-            <div class="row">
-              <div class="color-preview" :style="{
-                'background-color': colors.mainColor.hex
-              }"></div>
-              <div class="color-codes">
-                <div class="row">
-                  <div class="color-code">RGB：({{ colors.mainColor.rgb.r }}, {{ colors.mainColor.rgb.g }}, {{ colors.mainColor.rgb.b }})</div>
-                  <div
-                    class="color-code-copy interactable"
-                    @click="copyColorCode('(' + colors.mainColor.rgb.r + ', ' + colors.mainColor.rgb.g + ', ' + colors.mainColor.rgb.b + ')')">复制 RGB 代码</div>
-                </div>
-                <div class="row">
-                  <div class="color-code">HEX：{{ colors.mainColor.hex }}</div>
-                  <div class="color-code-copy interactable" @click="copyColorCode(colors.mainColor.hex)">复制十六进制代码</div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="subtitle">从图片提取的色盘</div>
-            </div>
-            <div id="palette-colors" class="row">
-              <div v-for="(color, index) in colors.palette" :key="index">
-                <div
-                  class="color-preview interactable"
-                  :style="{
-                    'background-color': color.hex,
-                    'border-color': index == chosenColor ? 'var(--main-color)' : '',
-                    'border-width': index == chosenColor ? '3px' : ''
-                  }"
-                  @click="chooseColor(index)"></div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="color-preview" :style="{
-                'background-color': colors.palette[chosenColor].hex
-              }"></div>
-              <div class="color-codes">
-                <div class="row">
-                  <div class="color-code">RGB：({{ colors.palette[chosenColor].rgb.r }}, {{ colors.palette[chosenColor].rgb.g }}, {{ colors.palette[chosenColor].rgb.b }})</div>
-                  <div class="color-code-copy interactable"
-                    @click="copyColorCode('(' + colors.palette[chosenColor].rgb.r + ', ' + colors.palette[chosenColor].rgb.g + ', ' + colors.palette[chosenColor].rgb.b + ')')">复制 RGB 代码</div>
-                </div>
-                <div class="row">
-                  <div class="color-code">HEX：{{ colors.palette[chosenColor].hex }}</div>
-                  <div class="color-code-copy interactable" @click="copyColorCode(colors.palette[chosenColor].hex)">复制十六进制代码</div>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="subtitle">导出色盘为图片</div>
-            </div>
-          </div>
-          <div id="palette-image">
-            <div
-              v-for="(color, index) in colors.palette"
-              :key="index"
-              class="color"
-              :style="{
-                'background-color': color.hex
-              }"></div>
-          </div>
-          <div class="controller">
-            <div class="control-row">
-              <div class="text">导出选项</div>
-              <el-switch
-                v-model="withOriginalImage"
-                active-color="var(--main-color)"
-                inactive-color="var(--main-color)"
-                active-text="与原图拼接"
-                inactive-text="单独导出"
-                class="control interactable"></el-switch>
-            </div>
-            <div class="control-row">
-              <div class="text">存储位置</div>
-              <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
-                <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-              </el-input>
-            </div>
-            <div class="control-row">
-              <div class="text">文件名</div>
-              <el-input size="mini" v-model="filename" class="control interactable" placeholder="请输入文件名">
-                <el-select v-model="mimeType" size="mini" slot="append">
-                  <el-option label=".jpg" value="jpeg"/>
-                  <el-option label=".webp" value="webp"/>
-                  <el-option label=".png" value="png"/>
-                </el-select>
-              </el-input>
-            </div>
-            <div class="row">
-              <el-button type="primary" size="mini" @click="save" class="bar-button interactable">导出</el-button>
-            </div>
-          </div>
-        </div>
+  <div id="palette">
+    <div id="header">
+      <div id="title">色彩提取工具</div>
+      <div id="minimize" class="control-button" @click="minimize">
+        <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-    </el-tab-pane>
-    <el-tab-pane disabled>
-      <span slot="label" id="sidebar">
-        <div id="tool-info">
-          <i id="tool-logo" class="fas fa-palette"></i>
-          <div class="text">色彩提取工具</div>
-        </div>
-        <div id="control-button-holder">
-          <div class="control-button interactable" @click="minimize">
-            <i class="fas fa-angle-double-down"></i>
-            <div>最小化</div>
+      <div id="close" class="control-button" @click="close">
+        <object data="static/images/close.svg" type="image/svg+xml"></object>
+      </div>
+    </div>
+    <el-tabs type="card" tab-position="top" id="content">
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-image"></i> 导入图片</span>
+        <div class="tab-content">
+          <div id="image-container">
+            <div id="image-wrapper" v-if="image != ''">
+              <img id="image" :src="image" />
+            </div>
+            <el-upload
+              id="upload"
+              drag
+              action=""
+              :auto-upload="false"
+              :on-change="handleFile"
+              :show-file-list="false">
+              <i class="fas fa-image"></i>
+              <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
+            </el-upload>
           </div>
-          <div class="control-button interactable" @click="close">
-            <span class="fas fa-sign-out-alt"></span>
-            <div>退出</div>
+          <div id="colors" v-if="colors != null">
+            <div class="controller">
+              <div class="row">
+                <div class="subtitle">图片的主色调</div>
+              </div>
+              <div class="row">
+                <div class="color-preview" :style="{
+                  'background-color': colors.mainColor.hex
+                }"></div>
+                <div class="color-codes">
+                  <div class="row">
+                    <div class="color-code">RGB：({{ colors.mainColor.rgb.r }}, {{ colors.mainColor.rgb.g }}, {{ colors.mainColor.rgb.b }})</div>
+                    <div
+                      class="color-code-copy"
+                      @click="copyColorCode('(' + colors.mainColor.rgb.r + ', ' + colors.mainColor.rgb.g + ', ' + colors.mainColor.rgb.b + ')')">复制 RGB 代码</div>
+                  </div>
+                  <div class="row">
+                    <div class="color-code">HEX：{{ colors.mainColor.hex }}</div>
+                    <div class="color-code-copy" @click="copyColorCode(colors.mainColor.hex)">复制十六进制代码</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="subtitle">从图片提取的色盘</div>
+              </div>
+              <div id="palette-colors" class="row">
+                <div v-for="(color, index) in colors.palette" :key="index">
+                  <div
+                    class="color-preview"
+                    :style="{
+                      'background-color': color.hex,
+                      'border-color': index == chosenColor ? 'var(--main-color)' : '',
+                      'border-width': index == chosenColor ? '3px' : ''
+                    }"
+                    @click="chooseColor(index)"></div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="color-preview" :style="{
+                  'background-color': colors.palette[chosenColor].hex
+                }"></div>
+                <div class="color-codes">
+                  <div class="row">
+                    <div class="color-code">RGB：({{ colors.palette[chosenColor].rgb.r }}, {{ colors.palette[chosenColor].rgb.g }}, {{ colors.palette[chosenColor].rgb.b }})</div>
+                    <div class="color-code-copy"
+                      @click="copyColorCode('(' + colors.palette[chosenColor].rgb.r + ', ' + colors.palette[chosenColor].rgb.g + ', ' + colors.palette[chosenColor].rgb.b + ')')">复制 RGB 代码</div>
+                  </div>
+                  <div class="row">
+                    <div class="color-code">HEX：{{ colors.palette[chosenColor].hex }}</div>
+                    <div class="color-code-copy" @click="copyColorCode(colors.palette[chosenColor].hex)">复制十六进制代码</div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="subtitle">导出色盘为图片</div>
+              </div>
+            </div>
+            <div id="palette-image">
+              <div
+                v-for="(color, index) in colors.palette"
+                :key="index"
+                class="color"
+                :style="{
+                  'background-color': color.hex
+                }"></div>
+            </div>
+            <div class="controller">
+              <div class="control-row">
+                <div class="text">导出选项</div>
+                <el-switch
+                  v-model="withOriginalImage"
+                  active-color="var(--main-color)"
+                  inactive-color="var(--main-color)"
+                  active-text="与原图拼接"
+                  inactive-text="单独导出"
+                  class="control"></el-switch>
+              </div>
+              <div class="control-row">
+                <div class="text">存储位置</div>
+                <el-input disabled size="mini" v-model="distDirectory" class="control">
+                  <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+                </el-input>
+              </div>
+              <div class="control-row">
+                <div class="text">文件名</div>
+                <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
+                  <el-select v-model="mimeType" size="mini" slot="append">
+                    <el-option label=".jpg" value="jpeg"/>
+                    <el-option label=".webp" value="webp"/>
+                    <el-option label=".png" value="png"/>
+                  </el-select>
+                </el-input>
+              </div>
+              <div class="row">
+                <el-button type="primary" size="mini" @click="save" class="bar-button">导出</el-button>
+              </div>
+            </div>
           </div>
         </div>
-      </span>
-    </el-tab-pane>
-  </el-tabs>
+      </el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 
 <script>
@@ -409,339 +401,160 @@ export default {
 #palette {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
   
   button {
     font-family: var(--main-font);
   }
   
-  .el-tabs__header {
-    margin-right: 0;
-    
-    .el-tabs__nav-scroll {
-      background-color: var(--dark-gray);
-      
-      .el-tabs__nav {
-        border: 0;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        
-        .el-tabs__item {
-          width: 150px;
-          height: 50px;
-          line-height: 50px;
-          color: var(--light-gray);
-          text-align: center;
-          border: 0;
-          transition: 0.2s;
-          
-          #sidebar {
-            width: 100%;
-            
-            @keyframes shine {
-              0% {
-                color: var(--light-gray)
-              }
-              25% {
-                color: var(--light-gray)
-              }
-              50% {
-                color: var(--main-color)
-              }
-              75% {
-                color: var(--light-gray)
-              }
-              100% {
-                color: var(--light-gray)
-              }
-            }
-            
-            #tool-info {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              animation: shine 5s infinite;
-              
-              #tool-logo {
-                font-size: 60px;
-                margin: 20px;
-              }
-            }
-            
-            #control-button-holder {
-              width: 100%;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 20px;
-              box-sizing: border-box;
-              
-              .control-button {
-                font-size: 12px;
-                line-height: initial;
-                cursor: pointer;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 20px;
-                  margin: 5px;
-                }
-                
-                &:hover {
-                  color: var(--white);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
-              }
-            }
-          }
-          
-          &.is-active {
-            background-color: var(--white);
-            color: var(--main-color);
-            cursor: default;
-          }
-          
-          &.is-disabled {
-            flex-grow: 1;
-            padding: 0;
-            display: flex;
-            align-items: flex-end;
-          }
-          
-          &:hover:not(.is-disabled):not(.is-active) {
-            color: var(--white);
-          }
-          
-          &:active:not(.is-disabled):not(.is-active) {
-            filter: brightness(0.9);
-          }
-        }
-      }
-    }
-  }
-  
-  .el-tabs__content {
-    height: 100%;
-    
-    .el-tab-pane {
-      width: 100%;
-      height: 100%;
-      
-      .tab-content {
-        width: 100%;
-        height: 100%;
-        padding: 20px;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-      }
-    }
-  }
-  
-  .row {
-    width: 100%;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .control-row {
-    width: 100%;
-    height: 28px;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .control {
-      width: 70%;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .bar-button {
-    width: 0;
-    height: 28px;
-    flex-grow: 1;
+  #header {
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
-    border: none;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: 5px;
-    margin-right: 5px;
-    
-    &:first-child {
-      margin-left: 0;
-    }
-    
-    &:last-child {
-      margin-right: 0;
-    }
-  }
-  
-  .el-input-group {
+    flex-basis: 40px;
+    background-color: var(--dark-gray);
     display: flex;
-  }
-  
-  .el-input-group__prepend {
-    width: fit-content;
-    display: flex;
-    justify-content: center;
     align-items: center;
-  }
-  
-  .el-input-group__append {
-    width: fit-content;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    z-index: 3000;
+    -webkit-app-region: drag;
 
-    .el-select .el-input {
-      width: 80px;
+    #title {
+      color: var(--white);
+      font-size: 16px;
+      flex-grow: 1;
     }
-  }
-  
-  .el-switch {
-    display: flex;
-    justify-content: flex-end;
-  }
-    
-  #image-container {
-    flex-grow: 1;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: 0.5s;
-    
-    #image-wrapper {
-      width: 100%;
-      height: calc(50% - 5px);
-      margin-bottom: 10px;
-      background-color: var(--black-gray);
-      border-radius: 6px;
+
+    .control-button {
+      -webkit-app-region: no-drag;
+      width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      margin-right: 5px;
+      border-radius: 10px;
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      
-      #image {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
+
+      object {
+        width: 50%;
+        color: var(--white);
       }
-    }
-    
-    #upload {
-      width: 100%;
-      flex-grow: 1;
-      display: flex;
-      justify-content: space-between;
-      transition: 0.5s;
-      
-      .el-upload {
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
         width: 100%;
         height: 100%;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        transition: 0.2s;
+      }
+
+      &:hover::after {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    #minimize {
+      background-color: var(--success-green);
+    }
+
+    #close {
+      background-color: var(--warning-red);
+    }
+  }
+
+  #content {
+    height: 0;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    
+    .el-tabs__header {
+      margin: 0;
+      
+      .el-tabs__nav-scroll {
+        background-color: var(--main-color);
         
-        .el-upload-dragger {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          border-color: var(--light-gray);
-          transition: 0.2s;
+        .el-tabs__nav {
+          border: 0;
           
-          svg {
-            font-size: 40px;
-            margin: 14px;
-          }
-          
-          &:hover {
-            color: var(--main-color);
-            border-color: var(--main-color);
+          .el-tabs__item {
+            width: 150px;
+            height: 50px;
+            line-height: 50px;
+            color: var(--light-gray);
+            text-align: center;
+            border: 0;
+            transition: 0.2s;
             
-            .el-upload__text {
+            &.is-active {
+              background-color: var(--white);
               color: var(--main-color);
+              cursor: default;
+            }
+            
+            &:not(.is-active) {
+              color: var(--white);
+              position: relative;
+            }
+            
+            &:not(.is-active)::after {
+              content: '';
+              position: absolute;
+              width: 100%;
+              height: 100%;
+              left: 0;
+              top: 0;
+              transition: 0.2s;
+            }
+
+            &:not(.is-active):hover::after {
+              background-color: rgba(0, 0, 0, 0.1);
             }
           }
         }
       }
     }
-  }
-  
-  #colors {
-    width: calc(50% - 5px);
-    height: 100%;
-    flex-shrink: 0;
-    margin-left: 10px;
-    overflow-x: hidden;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
     
-    .color-preview {
-      width: 40px;
-      height: 40px;
-      border-radius: 6px;
-      border-style: solid;
-      border-width: 1px;
-      border-color: var(--light-gray);
-      box-sizing: border-box;
-    }
-    
-    .color-codes {
+    .el-tabs__content {
       flex-grow: 1;
-      margin-left: 15px;
-      font-size: 14px;
       
-      .row {
-        margin-bottom: 0;
-        margin-top: 0;
-      }
-      
-      .color-code-copy {
-        cursor: pointer;
-        transition: 0.2s;
+      .el-tab-pane {
+        width: 100%;
+        height: 100%;
         
-        &:hover {
-          color: var(--main-color);
+        .tab-content {
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          box-sizing: border-box;
+          display: flex;
+          justify-content: space-between;
         }
       }
     }
-    
-    .controller {
-      margin-bottom: 10px;
+  
+    .row {
+      width: 100%;
+      flex-shrink: 0;
       margin-top: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
       
       &:first-child {
         margin-top: 0;
@@ -752,25 +565,216 @@ export default {
       }
     }
     
-    #palette-colors {
-      .color-preview {
-        width: 28px;
-        height: 28px;
-        cursor: pointer;
+    .control-row {
+      width: 100%;
+      height: 28px;
+      flex-shrink: 0;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      
+      .control {
+        width: 70%;
+      }
+      
+      &:first-child {
+        margin-top: 0;
+      }
+      
+      &:last-child {
+        margin-bottom: 0;
       }
     }
     
-    #palette-image {
-      width: 100%;
-      height: 0;
+    .bar-button {
+      width: 0;
+      height: 28px;
       flex-grow: 1;
-      display: flex;
+      box-sizing: border-box;
+      border: none;
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: 5px;
+      margin-right: 5px;
       
-      .color {
+      &:first-child {
+        margin-left: 0;
+      }
+      
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+    
+    .el-input-group {
+      display: flex;
+    }
+    
+    .el-input-group__prepend {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .el-input-group__append {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .el-select .el-input {
+        width: 80px;
+      }
+    }
+    
+    .el-switch {
+      display: flex;
+      justify-content: flex-end;
+    }
+      
+    #image-container {
+      flex-grow: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: 0.5s;
+      
+      #image-wrapper {
         width: 100%;
-        height: 100%;
+        height: calc(50% - 5px);
+        margin-bottom: 10px;
+        background-color: var(--black-gray);
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        
+        #image {
+          max-width: 100%;
+          max-height: 100%;
+          display: block;
+        }
+      }
+      
+      #upload {
+        width: 100%;
         flex-grow: 1;
-        flex-shrink: 1;
+        display: flex;
+        justify-content: space-between;
+        transition: 0.5s;
+        
+        .el-upload {
+          width: 100%;
+          height: 100%;
+          
+          .el-upload-dragger {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-color: var(--light-gray);
+            transition: 0.2s;
+            
+            svg {
+              font-size: 40px;
+              margin: 14px;
+            }
+            
+            &:hover {
+              color: var(--main-color);
+              border-color: var(--main-color);
+              
+              .el-upload__text {
+                color: var(--main-color);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    #colors {
+      width: calc(50% - 5px);
+      height: 100%;
+      flex-shrink: 0;
+      margin-left: 10px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      
+      .color-preview {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: var(--light-gray);
+        box-sizing: border-box;
+      }
+      
+      .color-codes {
+        flex-grow: 1;
+        margin-left: 15px;
+        font-size: 14px;
+        
+        .row {
+          margin-bottom: 0;
+          margin-top: 0;
+        }
+        
+        .color-code-copy {
+          cursor: pointer;
+          transition: 0.2s;
+          
+          &:hover {
+            color: var(--main-color);
+          }
+        }
+      }
+      
+      .controller {
+        margin-bottom: 10px;
+        margin-top: 10px;
+        
+        &:first-child {
+          margin-top: 0;
+        }
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+      
+      #palette-colors {
+        .color-preview {
+          width: 36px;
+          height: 36px;
+          cursor: pointer;
+        }
+      }
+      
+      #palette-image {
+        width: 100%;
+        height: 0;
+        flex-grow: 1;
+        display: flex;
+        
+        .color {
+          width: 100%;
+          height: 100%;
+          flex-grow: 1;
+          flex-shrink: 1;
+        }
       }
     }
   }

@@ -70,7 +70,7 @@
         <div class="row">
           <div class="subtitle">图像参照设置</div>
         </div>
-        <div class="control-row interactable">
+        <div class="control-row">
           <div class="text">参照长宽比</div>
           <el-slider
             v-model="ratio"
@@ -80,7 +80,7 @@
             :step="0.01"
             input-size="mini"></el-slider>
         </div>
-        <div class="control-row interactable">
+        <div class="control-row">
           <div class="text">参照背景颜色</div>
           <el-select v-model="background" placeholder="请选择" size="mini" class="control">
             <el-option label="深色" value="var(--black-gray)"/>
@@ -89,7 +89,7 @@
         </div>
       </div>
     </div>
-    <div id="right" class="interactable">
+    <div id="right">
       <div>
         <div class="row">
           <div class="subtitle">水印设置</div>
@@ -402,7 +402,7 @@
             split-button
             type="primary"
             trigger="click"
-            class="bar-button interactable"
+            class="bar-button"
             @click="minimize"
             @command="(command) => {command()}">
             最小化

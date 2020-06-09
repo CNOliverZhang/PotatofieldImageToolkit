@@ -20,7 +20,7 @@
         <div class="row">
           <div class="subtitle">待处理的文件</div>
         </div>
-        <div id="list" class="interactable">
+        <div id="list">
           <div
             v-for="(file, index) in this.$store.state.slice.fileList"
             :key="file.fullpath"
@@ -42,13 +42,13 @@
         <div class="control-row">
           <div class="text">列数和行数</div>
           <div class="row control">
-            <el-select v-model="row" @change="preview" size="mini" class="grid-count interactable">
+            <el-select v-model="row" @change="preview" size="mini" class="grid-count">
               <el-option
                 v-for="(object, index) in Array.from({ length: 9 })"
                 :key="index"
                 :label="(index + 1) + ' 行'" :value="index + 1"/>
             </el-select>
-            <el-select v-model="column" @change="preview" size="mini" class="grid-count interactable">
+            <el-select v-model="column" @change="preview" size="mini" class="grid-count">
               <el-option
                 v-for="(object, index) in Array.from({ length: 9 })"
                 :key="index"
@@ -63,11 +63,11 @@
             active-text="保持每格为正方形"
             inactive-text="不保持每格为正方形"
             @change="preview"
-            class="control interactable"></el-switch>
+            class="control"></el-switch>
         </div>
         <div class="control-row">
           <div class="text">预览区域颜色</div>
-          <el-select v-model="coverColor" placeholder="请选择" size="mini" class="control interactable">
+          <el-select v-model="coverColor" placeholder="请选择" size="mini" class="control">
             <el-option label="深色" value="dark"/>
             <el-option label="浅色" value="light"/>
           </el-select>
@@ -81,7 +81,7 @@
           <div class="text">图像质量</div>
           <el-slider
             v-model="quality"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="100"
             :step="1"
@@ -90,13 +90,13 @@
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
+          <el-input disabled size="mini" v-model="distDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="control-row">
           <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+          <el-radio-group v-model="mimeType" size="mini" class="control">
             <el-radio-button label="JPEG"></el-radio-button>
             <el-radio-button label="WEBP"></el-radio-button>
             <el-radio-button label="PNG"></el-radio-button>
@@ -111,7 +111,7 @@
         split-button
         type="primary"
         trigger="click"
-        class="bar-button interactable"
+        class="bar-button"
         @click="minimize"
         @command="(command) => {command()}">
         最小化
@@ -119,8 +119,8 @@
           <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-button type="primary" size="mini" @click="start" class="bar-button interactable">处理本张</el-button>
-      <el-button type="primary" size="mini" @click="startAll" class="bar-button interactable">批量处理</el-button>
+      <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
+      <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
     </div>
   </div>
 </template>

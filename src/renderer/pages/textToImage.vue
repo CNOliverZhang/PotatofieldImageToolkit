@@ -1,27 +1,27 @@
 <template>
   <el-tabs type="card" tab-position="left" id="textToImage">
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-keyboard"></i> 输入内容</span>
+      <span slot="label"><i class="fas fa-keyboard"></i> 输入内容</span>
       <div id="editor" class="tab-content">
-        <div id="preview" class="interactable" v-html="content"></div>
-        <div id="editor-panel" class="interactable">
+        <div id="preview" v-html="content"></div>
+        <div id="editor-panel">
           <ckeditor :editor="editor.editor" :config="editor.config" v-model="content"></ckeditor>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clear" class="bar-button interactable">清空内容</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入样式编辑器</el-button>
+            <el-button type="primary" size="mini" @click="clear" class="bar-button">清空内容</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="bar-button">进入样式编辑器</el-button>
           </div>
         </div>
       </div>
     </el-tab-pane>
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-file-alt"></i> 样式模板库</span>
+      <span slot="label"><i class="fas fa-file-alt"></i> 样式模板库</span>
       <div id="templates" class="tab-content">
         <div id="container" v-if="this.$store.state.textToImage.templates.length != 0">
           <div
             v-for="(template, index) in this.$store.state.textToImage.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
             :key="index"
             class="template-container">
-            <el-card class="card interactable">
+            <el-card class="card">
               <div class="row">
                 <div class="subtitle">{{ template.title }}</div>
               </div>
@@ -35,15 +35,15 @@
               </div>
               <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
               <div class="row actions">
-                <div class="action interactable" @click="editTemplate(index + (templateListPage - 1) * 6)">
+                <div class="action" @click="editTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-edit"></span>
                   <div>编辑</div>
                 </div>
-                <div class="action interactable" @click="shareTemplate(index + (templateListPage - 1) * 6)">
+                <div class="action" @click="shareTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-share-alt"></span>
                   <div>分享</div>
                 </div>
-                <div class="action interactable" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
+                <div class="action" @click="deleteTemplate(index + (templateListPage - 1) * 6)">
                   <span class="fa fa-trash-alt"></span>
                   <div>删除</div>
                 </div>
@@ -60,7 +60,7 @@
         <div class="row">
           <el-pagination
             v-if="this.$store.state.textToImage.templates.length > 6"
-            class="interactable"
+           
             small
             background
             layout="prev, pager, next"
@@ -71,8 +71,8 @@
             :hide-on-single-page="true"
             @current-change="templateListPageChange">
           </el-pagination>
-          <el-button type="primary" size="mini" @click="importTemplate" class="bar-button interactable">导入样式模板</el-button>
-          <el-button type="primary" size="mini" @click="createTemplate" class="bar-button interactable">创建样式模板</el-button>
+          <el-button type="primary" size="mini" @click="importTemplate" class="bar-button">导入样式模板</el-button>
+          <el-button type="primary" size="mini" @click="createTemplate" class="bar-button">创建样式模板</el-button>
         </div>
       </div>
     </el-tab-pane>
@@ -83,11 +83,11 @@
           <div class="text">富文本制图工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="minimize">
+          <div class="control-button" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
             <div>最小化</div>
           </div>
-          <div class="control-button interactable" @click="close">
+          <div class="control-button" @click="close">
             <span class="fas fa-sign-out-alt"></span>
             <div>退出</div>
           </div>

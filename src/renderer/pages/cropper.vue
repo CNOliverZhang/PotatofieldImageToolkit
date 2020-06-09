@@ -1,12 +1,12 @@
 <template>
   <el-tabs type="card" tab-position="left" id="cropper" @tab-click="clear">
     <el-tab-pane>
-      <span slot="label" class="interactable"><i class="fas fa-image"></i> 导入图片</span>
+      <span slot="label"><i class="fas fa-image"></i> 导入图片</span>
       <div class="tab-content">
         <el-upload
           id="upload-dragger"
           action=""
-          class="interactable"
+         
           drag
           multiple
           :auto-upload="false"
@@ -16,7 +16,7 @@
           <i class="fas fa-image"></i>
           <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
         </el-upload>
-        <div v-if="this.fileList.length != 0" id="file-list" class="interactable">
+        <div v-if="this.fileList.length != 0" id="file-list">
           <div id="list">
             <div
               v-for="(file, index) in this.fileList"
@@ -30,8 +30,8 @@
             </div>
           </div>
           <div class="row">
-            <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button interactable">清空列表</el-button>
-            <el-button type="primary" size="mini" @click="edit" class="bar-button interactable">进入裁剪编辑器</el-button>
+            <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button">清空列表</el-button>
+            <el-button type="primary" size="mini" @click="edit" class="bar-button">进入裁剪编辑器</el-button>
           </div>
         </div>
       </div>
@@ -43,11 +43,11 @@
           <div class="text">图片裁剪工具</div>
         </div>
         <div id="control-button-holder">
-          <div class="control-button interactable" @click="minimize">
+          <div class="control-button" @click="minimize">
             <i class="fas fa-angle-double-down"></i>
             <div>最小化</div>
           </div>
-          <div class="control-button interactable" @click="close">
+          <div class="control-button" @click="close">
             <span class="fas fa-sign-out-alt"></span>
             <div>退出</div>
           </div>

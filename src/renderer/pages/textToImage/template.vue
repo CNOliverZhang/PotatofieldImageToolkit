@@ -3,7 +3,7 @@
     <div id="left">
       <div
         id="preview-container"
-        class="interactable"
+       
         :style="{
           'background-color': backgroundColor
         }">
@@ -105,7 +105,7 @@
         </div>
       </div>
     </div>
-    <div id="right" class="interactable">
+    <div id="right">
       <div>
         <div class="row">
           <div class="subtitle">样式设置</div>
@@ -626,7 +626,7 @@
             split-button
             type="primary"
             trigger="click"
-            class="bar-button interactable"
+            class="bar-button"
             @click="minimize"
             @command="(command) => {command()}">
             最小化
@@ -634,9 +634,9 @@
               <el-dropdown-item :command="exit">退出编辑器</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
-          <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button interactable">保存</el-button>
-          <el-button type="primary" size="mini" @click="saveAsNew" class="bar-button interactable">{{ index == -1 ? '保存' : '另存'}}</el-button>
-          <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="bar-button interactable">删除</el-button>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="save" class="bar-button">保存</el-button>
+          <el-button type="primary" size="mini" @click="saveAsNew" class="bar-button">{{ index == -1 ? '保存' : '另存'}}</el-button>
+          <el-button v-if="index != -1" type="primary" size="mini" @click="deleteTemplate" class="bar-button">删除</el-button>
         </div>
       </div>
     </div>

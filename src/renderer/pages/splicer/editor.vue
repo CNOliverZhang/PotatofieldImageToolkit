@@ -1,7 +1,7 @@
 <template>
   <div id="splicer-editor">
     <div id="left">
-      <div id="sample-container" class="interactable">
+      <div id="sample-container">
         <div
           id="sample"
           :style="{
@@ -29,15 +29,15 @@
               :style="{
                 'border-radius': borderRadius + 'px'
               }">
-              <div v-if="index != 0" class="action move interactable" @click="moveUp(index)">
+              <div v-if="index != 0" class="action move" @click="moveUp(index)">
                 <span class="fa fa-arrow-up"></span>
                 <div>上移</div>
               </div>
-              <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="action move interactable" @click="moveDown(index)">
+              <div v-if="index != ($store.state.splicer.fileList.length - 1)" class="action move" @click="moveDown(index)">
                 <span class="fa fa-arrow-down"></span>
                 <div>下移</div>
               </div>
-              <div class="action interactable delete" @click="handleDelete(index)">
+              <div class="action delete" @click="handleDelete(index)">
                 <span class="fa fa-trash-alt"></span>
                 <div>删除</div>
               </div>
@@ -46,10 +46,10 @@
         </div>
       </div>
       <div class="row">
-        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
+        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button">切换拼接方向</el-button>
       </div>
     </div>
-    <div id="right" class="interactable">
+    <div id="right">
       <div id="lists">
         <div id="file-list">
           <div class="row">
@@ -183,7 +183,7 @@
           split-button
           type="primary"
           trigger="click"
-          class="bar-button interactable"
+          class="bar-button"
           @click="minimize"
           @command="(command) => {command()}">
           最小化

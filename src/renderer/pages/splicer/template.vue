@@ -1,7 +1,7 @@
 <template>
   <div id="splicer-template">
     <div id="left">
-      <div id="samples-container" class="interactable">
+      <div id="samples-container">
         <div
           id="samples"
           :style="{
@@ -26,10 +26,10 @@
         </div>
       </div>
       <div class="row">
-        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button interactable">切换拼接方向</el-button>
+        <el-button type="primary" size="mini" @click="switchDirection" class="bar-button">切换拼接方向</el-button>
       </div>
     </div>
-    <div id="right" class="interactable">
+    <div id="right">
       <div id="control">
         <div class="row">
           <div class="subtitle">参照图片设置</div>
@@ -102,7 +102,7 @@
           split-button
           type="primary"
           trigger="click"
-          class="bar-button interactable"
+          class="bar-button"
           @click="minimize"
           @command="(command) => {command()}">
           最小化

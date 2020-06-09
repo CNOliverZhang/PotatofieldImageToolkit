@@ -1,6 +1,6 @@
 <template>
   <div id="splicer-horizontal-template">
-    <div id="samples-container" class="interactable">
+    <div id="samples-container">
       <div
         id="samples"
         :style="{
@@ -24,7 +24,7 @@
         </div>
       </div>
     </div>
-    <div id="control" class="interactable">
+    <div id="control">
       <div id="left">
         <div>
           <div class="row">
@@ -103,7 +103,7 @@
             split-button
             type="primary"
             trigger="click"
-            class="bar-button interactable"
+            class="bar-button"
             @click="minimize"
             @command="(command) => {command()}">
             最小化

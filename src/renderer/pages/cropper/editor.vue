@@ -1,14 +1,14 @@
 <template>
   <div id="cropper-editor">
     <div id="crop">
-      <div id="image-container" class="interactable">
+      <div id="image-container">
         <img :src="this.$store.state.cropper.fileList[fileIndex].fullpath" id="image">
       </div>
       <div id="file-list">
         <div class="row">
           <div class="subtitle">待处理的文件</div>
         </div>
-        <div id="list" class="interactable">
+        <div id="list">
           <div
             v-for="(file, index) in this.$store.state.cropper.fileList"
             :key="file.fullpath"
@@ -34,11 +34,11 @@
             active-text="允许超出图片"
             inactive-text="不允许超出图片"
             @change="init(fileIndex)"
-            class="control interactable"></el-switch>
+            class="control"></el-switch>
         </div>
         <div class="control-row">
           <div class="text">裁剪模式</div>
-          <el-select v-model="mode" @change="changeMode" size="mini" class="control interactable">
+          <el-select v-model="mode" @change="changeMode" size="mini" class="control">
             <el-option label="自由裁剪" value="free"/>
             <el-option label="自定义比例" value="custom"/>
             <el-option label="预定义比例" value="preset"/>
@@ -50,7 +50,7 @@
             :value="Math.round(this.width) + ' * ' + Math.round(this.height)"
             size="mini"
             disabled
-            class="control interactable">
+            class="control">
           </el-input>
         </div>
         <div class="control-row" v-else>
@@ -60,7 +60,7 @@
             size="mini"
             v-model="ratio"
             placeholder="格式为“3:2”"
-            class="control interactable">
+            class="control">
             <el-button @click="setRatio" slot="append">确认</el-button>
           </el-input>
           <el-select
@@ -69,7 +69,7 @@
             @change="setRatio"
             placeholder="请选择"
             size="mini"
-            class="control interactable">
+            class="control">
             <el-option label="正方形（1:1）" value="1:1"/>
             <el-option label="常见相机横屏（3:2）" value="3:2"/>
             <el-option label="常见相机竖屏（2:3）" value="2:3"/>
@@ -88,7 +88,7 @@
           <div class="text">旋转</div>
           <el-slider
             v-model="rotate"
-            class="control interactable"
+            class="control"
             :min="0"
             :max="360"
             :step="0.1"
@@ -104,7 +104,7 @@
           <div class="text">图像质量</div>
           <el-slider
             v-model="quality"
-            class="control interactable"
+            class="control"
             :min="1"
             :max="100"
             :step="1"
@@ -113,13 +113,13 @@
         </div>
         <div class="control-row">
           <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control interactable">
+          <el-input disabled size="mini" v-model="distDirectory" class="control">
             <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
           </el-input>
         </div>
         <div class="control-row">
           <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" size="mini" class="control interactable">
+          <el-radio-group v-model="mimeType" size="mini" class="control">
             <el-radio-button label="JPEG"></el-radio-button>
             <el-radio-button label="WEBP"></el-radio-button>
             <el-radio-button label="PNG"></el-radio-button>
@@ -128,7 +128,7 @@
         </div>
         <div class="control-row">
           <div class="text">文件名后缀</div>
-          <el-input size="mini" v-model="append" maxlength="30" class="control interactable"></el-input>
+          <el-input size="mini" v-model="append" maxlength="30" class="control"></el-input>
         </div>
       </div>
     </div>
@@ -138,7 +138,7 @@
         split-button
         type="primary"
         trigger="click"
-        class="bar-button interactable"
+        class="bar-button"
         @click="minimize"
         @command="(command) => {command()}">
         最小化
@@ -146,8 +146,8 @@
           <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
-      <el-button type="primary" size="mini" @click="init(fileIndex)" class="bar-button interactable">重置</el-button>
-      <el-button type="primary" size="mini" @click="start" class="bar-button interactable">开始处理</el-button>
+      <el-button type="primary" size="mini" @click="init(fileIndex)" class="bar-button">重置</el-button>
+      <el-button type="primary" size="mini" @click="start" class="bar-button">开始处理</el-button>
     </div>
   </div>
 </template>
