@@ -673,7 +673,6 @@ export default {
             width: 150px;
             height: 50px;
             line-height: 50px;
-            color: var(--light-gray);
             text-align: center;
             border: 0;
             transition: 0.2s;

@@ -371,45 +371,15 @@ export default {
       this.templateListPage = page
     },
     edit() {
-      this.$dialog({
-        text: '请在编辑器中继续操作。',
-        showConfirm: false
-      }).then((dialog) => {
-        this.$store.dispatch('watermark/fileListAssign', this.fileList).then(() => {
-          ipcRenderer.send('open', {
-            title: '水印编辑器',
-            path: '#/watermark/editor?srcDirectory=' + this.srcDirectory,
-            modal: true,
-            height: 800,
-            width: 1000
-          })
-          ipcRenderer.once('modal-window-closed', () => {
-            this.clear()
-            dialog.close()
-          })
-        })
+      this.$store.dispatch('watermark/fileListAssign', this.fileList).then(() => {
+        this.$router.replace('/watermark/editor?srcDirectory=' + this.srcDirectory)
       })
     },
     selectSourceFolder() {
       this.srcDirectory = ipcRenderer.sendSync('select-folder')
     },
     editTemplate(index) {
-      this.$dialog({
-        text: '请在编辑器中继续操作。',
-        showConfirm: false
-      }).then((dialog) => {
-        ipcRenderer.send('open', {
-          title: '水印模板编辑器',
-          path: '#/watermark/template?index=' + String(index),
-          modal: true,
-          height: 800,
-          width: 1000
-        })
-        ipcRenderer.once('modal-window-closed', () => {
-          this.clear()
-          dialog.close()
-        })
-      })
+      this.$router.replace('/watermark/template?index=' + String(index))
     },
     shareTemplate(index) {
       this.$dialog({
@@ -580,23 +550,11 @@ export default {
       }
     },
     createTemplate() {
-      this.$dialog({
-        text: '请在编辑器中继续操作。',
-        showConfirm: false
-      }).then((dialog) => {
-        ipcRenderer.send('open', {
-          title: '水印模板编辑器',
-          path: '#/watermark/template?index=-1',
-          modal: true,
-          height: 800,
-          width: 1000
-        })
-        ipcRenderer.once('modal-window-closed', () => {
-          this.clear()
-          dialog.close()
-        })
-      })
+      this.$router.replace('/watermark/template?index=-1')
     }
+  },
+  mounted() {
+    ipcRenderer.send('unmaximize')
   }
 }
 </script>
@@ -698,7 +656,6 @@ export default {
             width: 150px;
             height: 50px;
             line-height: 50px;
-            color: var(--light-gray);
             text-align: center;
             border: 0;
             transition: 0.2s;

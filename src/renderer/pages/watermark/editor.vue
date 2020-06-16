@@ -1,7 +1,7 @@
 <template>
   <div id="watermark-editor">
     <div id="header">
-      <div id="title">图片加水印工具</div>
+      <div id="title">图片加水印工具 - 模板编辑器</div>
       <div id="minimize" class="control-button" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -14,492 +14,539 @@
     </div>
     <div id="content">
       <div id="left">
-        <div id="sample-container">
-          <div id="sample"></div>
-          <div
-            id="watermark-container"
-            :style="{
-              'width': sampleWidth + 'px',
-              'height': sampleHeight + 'px'
-            }">
-            <div
-              id="watermark"
-              :style="{
-                'left': (position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'center' || position == 'top' || position == 'bottom') ? x + 'px' : null,
-                'right': (position == 'right-top' || position == 'right-bottom' || position == 'right') ? x + 'px' : null,
-                'top': (position == 'left-top' || position == 'right-top' || position == 'top' || position == 'center' || position == 'left' || position == 'right') ? y + 'px' : null,
-                'bottom': (position == 'left-bottom' || position == 'right-bottom' || position == 'bottom') ? y + 'px' : null,
-                'color': color,
-                'font-family': font,
-                'font-size': fontSize + 'px',
-                'transform': 'rotate(' + rotation + 'deg)',
-                'writing-mode': writingMode,
-                'text-align': textAlign,
-                'padding': backgroundSize / 100 + 'em',
-                'background-color': backgroundColor,
-                'text-shadow': textShadow
-              }">
-              <div
-                v-for="(line, index) in text.split('\n')"
-                :key="index"
-                :style="{
-                  'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
-                }">
-                <span
-                  v-for="(char, index) in line"
-                  :key="index"
-                  :style="{
-                    'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
-                  }">{{ char }}</span>
-              </div>
-            </div>
-            <img
-              v-if="image != ''"
-              id="watermark-image"
-              @load="initImageSize"
-              :src="image"
-              :style="{
-                'width': imageSize * sizeBaseX + 'px',
-                'left': (imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'center' || imagePosition == 'top' || imagePosition == 'bottom') ? imageX + 'px' : null,
-                'right': (imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right') ? imageX + 'px' : null,
-                'top': (imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top' || imagePosition == 'center' || imagePosition == 'left' || imagePosition == 'right') ? imageY + 'px' : null,
-                'bottom': (imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom') ? imageY + 'px' : null,
-                'opacity': imageOpacity,
-                'transform': 'rotate(' + imageRotation + 'deg)'
-              }"/>
+        <div id="back-button-container">
+          <div id="back-button" @click="back">
+            <span slot="label"><i class="fas fa-chevron-left"></i> 返回</span>
           </div>
         </div>
-        <div id="lists">
-          <div id="file-list">
-            <div class="row">
-              <div class="subtitle">待处理的文件</div>
-            </div>
-            <div id="list">
+        <div id="sample-wrapper">
+          <div id="sample-container">
+            <div id="sample"></div>
+            <div
+              id="watermark-container"
+              :style="{
+                'width': sampleWidth + 'px',
+                'height': sampleHeight + 'px'
+              }">
               <div
-                v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
-                :key="file.fullpath"
-                class="file"
-                @click="preview(index + (fileListPage - 1) * 100)">
-                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-                <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
-                  <i class="fas fa-trash-alt delete"></i>
+                id="watermark"
+                :style="{
+                  'left': (position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'center' || position == 'top' || position == 'bottom') ? x + 'px' : null,
+                  'right': (position == 'right-top' || position == 'right-bottom' || position == 'right') ? x + 'px' : null,
+                  'top': (position == 'left-top' || position == 'right-top' || position == 'top' || position == 'center' || position == 'left' || position == 'right') ? y + 'px' : null,
+                  'bottom': (position == 'left-bottom' || position == 'right-bottom' || position == 'bottom') ? y + 'px' : null,
+                  'color': color,
+                  'font-family': font,
+                  'font-size': fontSize + 'px',
+                  'transform': 'rotate(' + rotation + 'deg)',
+                  'writing-mode': writingMode,
+                  'text-align': textAlign,
+                  'padding': backgroundSize / 100 + 'em',
+                  'background-color': backgroundColor,
+                  'text-shadow': textShadow
+                }">
+                <div
+                  v-for="(line, index) in text.split('\n')"
+                  :key="index"
+                  :style="{
+                    'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
+                  }">
+                  <span
+                    v-for="(char, index) in line"
+                    :key="index"
+                    :style="{
+                      'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
+                    }">{{ char }}</span>
                 </div>
               </div>
-            </div>
-            <div v-if="this.$store.state.watermark.fileList.length > 100" class="row">
-              <el-pagination
-                small
-                background
-                layout="pager"
-                :pager-count="5"
-                :page-size="100"
-                :total="this.$store.state.watermark.fileList.length"
-                :current-page="fileListPage"
-                :hide-on-single-page="true"
-                @current-change="pageChange">
-              </el-pagination>
-            </div>
-          </div>
-          <div id="template-list">
-            <div class="row">
-              <div class="subtitle">已保存的模板</div>
-            </div>
-            <div v-if="this.$store.state.watermark.templates.length != 0" id="list">
-              <div
-                v-for="(template, index) in this.$store.state.watermark.templates"
-                :key="template.title"
-                class="template">
-                <div class="cover">
-                  <div class="action" @click="applyTemplate(index)">
-                    <span class="fa fa-check-circle"></span>
-                    <div>应用</div>
-                  </div>
-                  <div class="action" @click="deleteTemplate(index)">
-                    <span class="fa fa-trash-alt"></span>
-                    <div>删除</div>
-                  </div>
-                </div>
-                <div class="text">{{ template.title }}</div>
-                <v-clamp :max-lines="2" class="subtext">内容：{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
-              </div>
-            </div>
-            <div v-else id="empty-container">
-              <div id="empty">
-                <i class="fas fa-folder-open"></i>
-                <div>尚无已保存的模板</div>
-              </div>
+              <img
+                v-if="image != ''"
+                id="watermark-image"
+                @load="initImageSize"
+                :src="image"
+                :style="{
+                  'width': imageSize * sizeBaseX + 'px',
+                  'left': (imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'center' || imagePosition == 'top' || imagePosition == 'bottom') ? imageX + 'px' : null,
+                  'right': (imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right') ? imageX + 'px' : null,
+                  'top': (imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top' || imagePosition == 'center' || imagePosition == 'left' || imagePosition == 'right') ? imageY + 'px' : null,
+                  'bottom': (imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom') ? imageY + 'px' : null,
+                  'opacity': imageOpacity,
+                  'transform': 'rotate(' + imageRotation + 'deg)'
+                }"/>
             </div>
           </div>
         </div>
       </div>
       <div id="right">
-        <div>
-          <div class="row">
-            <div class="subtitle">水印设置</div>
-          </div>
-          <el-collapse value="content" accordion>
-            <el-collapse-item title="水印文本内容" name="content">
-              <el-input
-                :rows="5"
-                v-model="text"
-                type="textarea"
-                resize="none"
-                placeholder="请输入水印文本内容"></el-input>
-            </el-collapse-item>
-            <el-collapse-item title="水印文本样式" name="style">
-              <div class="control-row">
-                <div class="text">文本字体</div>
-                <el-select v-model="font" placeholder="请选择" size="mini" class="control">
-                  <el-option
-                    v-for="(font, index) in this.$store.state.fonts.fontList"
-                    :key="index"
-                    :label="font.verbose + '（' + font.style + '）'"
-                    :value="font.fontFamily"
-                    :style="{
-                      'font-family': font.fontFamily
-                    }"/>
-                </el-select>
-              </div>
-              <div class="control-row">
-                <div class="text">文本字体大小</div>
-                <el-slider
-                  v-model="relativeFontSize"
-                  class="control"
-                  :min="1"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本字体颜色</div>
-                <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印文本背景" name="background">
-              <div class="control-row">
-                <div class="text">文本背景尺寸</div>
-                <el-slider
-                  v-model="backgroundSize"
-                  class="control"
-                  :min="0"
-                  :max="300"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本背景颜色</div>
-                <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印文本阴影" name="shadow">
-              <div class="control-row">
-                <div class="text">文本阴影水平位置</div>
-                <el-slider
-                  v-model="textShadowX"
-                  class="control"
-                  :min="-1"
-                  :max="1"
-                  :step="0.01"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本阴影垂直位置</div>
-                <el-slider
-                  v-model="textShadowY"
-                  class="control"
-                  :min="-1"
-                  :max="1"
-                  :step="0.01"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本阴影模糊</div>
-                <el-slider
-                  v-model="textShadowBlur"
-                  class="control"
-                  :min="0"
-                  :max="1"
-                  :step="0.01"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本阴影颜色</div>
-                <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印文本位置" name="position">
-              <div class="control-row">
-                <div class="text">文本位置基准</div>
-                <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
-                  <el-option label="中央" value="center"/>
-                  <el-option label="左上角" value="left-top"/>
-                  <el-option label="右上角" value="right-top"/>
-                  <el-option label="左下角" value="left-bottom"/>
-                  <el-option label="右下角" value="right-bottom"/>
-                  <el-option label="上方" value="top"/>
-                  <el-option label="下方" value="bottom"/>
-                  <el-option label="左侧" value="left"/>
-                  <el-option label="右侧" value="right"/>
-                </el-select>
-              </div>
-              <div
-                v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-                class="control-row">
-                <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">文本与左边缘的距离</div>
-                <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
-                <el-slider
-                  v-model="offsetX"
-                  class="control"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div
-                v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-                class="control-row">
-                <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
-                <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
-                <el-slider
-                  v-model="offsetY"
-                  class="control"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本旋转角度</div>
-                <el-slider
-                  v-model="rotation"
-                  class="control"
-                  :min="-180"
-                  :max="180"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印文本排版" name="typesetting">
-              <div class="control-row">
-                <div class="text">文本排版方向</div>
-                <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
-                  <el-option label="水平" value="horizontal-tb"/>
-                  <el-option label="垂直从右至左" value="vertical-rl"/>
-                  <el-option label="垂直从左至右" value="vertical-lr"/>
-                </el-select>
-              </div>
-              <div class="control-row">
-                <div class="text">多行文本对齐方式</div>
-                <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
-                  <el-option label="居中对齐" value="center"/>
-                  <el-option label="行首对齐" value="left"/>
-                  <el-option label="行尾对其" value="right"/>
-                </el-select>
-              </div>
-              <div class="control-row">
-                <div class="text">多行文本行距</div>
-                <el-slider
-                  v-model="lineHeight"
-                  class="control"
-                  :min="1"
-                  :max="10"
-                  :step="0.1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">文本字间距</div>
-                <el-slider
-                  v-model="letterSpacing"
-                  class="control"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印图片选择" name="image">
-              <div id="image-container">
-                <div id="upload-container" :class="image != '' ? 'half' : ''">
-                  <el-upload
-                    id="upload-dragger"
-                    action=""
-                    drag
-                    :auto-upload="false"
-                    :on-change="selectImage"
-                    :show-file-list="false">
-                    <div v-if="image == ''">
-                      <i class="fas fa-stamp"></i>
+        <el-tabs type="card" tab-position="top" id="tabs">
+          <el-tab-pane>
+            <span slot="label">设置</span>
+            <div id="config">
+              <div>
+                <div class="row">
+                  <div class="subtitle">水印设置</div>
+                </div>
+                <el-collapse value="content" accordion>
+                  <el-collapse-item title="水印文本内容" name="content">
+                    <el-input
+                      :rows="5"
+                      v-model="text"
+                      type="textarea"
+                      resize="none"
+                      placeholder="请输入水印文本内容"></el-input>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印文本样式" name="style">
+                    <div class="control-row">
+                      <div class="text">文本字体</div>
                     </div>
-                    <div class="el-upload__text">拖拽或点击选择图片</div>
-                  </el-upload>
-                  <div v-if="image != ''" class="row">
-                    <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
+                    <div class="control-row">
+                      <el-select v-model="font" placeholder="请选择" size="mini" class="control">
+                        <el-option
+                          v-for="(font, index) in this.$store.state.fonts.fontList"
+                          :key="index"
+                          :label="font.verbose + '（' + font.style + '）'"
+                          :value="font.fontFamily"
+                          :style="{
+                            'font-family': font.fontFamily
+                          }"/>
+                      </el-select>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本字体大小</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="relativeFontSize"
+                        class="control"
+                        :min="1"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本字体颜色</div>
+                    </div>
+                    <div class="control-row">
+                      <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印文本背景" name="background">
+                    <div class="control-row">
+                      <div class="text">文本背景尺寸</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="backgroundSize"
+                        class="control"
+                        :min="0"
+                        :max="300"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本背景颜色</div>
+                    </div>
+                    <div class="control-row">
+                      <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印文本阴影" name="shadow">
+                    <div class="control-row">
+                      <div class="text">文本阴影水平位置</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="textShadowX"
+                        class="control"
+                        :min="-1"
+                        :max="1"
+                        :step="0.01"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本阴影垂直位置</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="textShadowY"
+                        class="control"
+                        :min="-1"
+                        :max="1"
+                        :step="0.01"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本阴影模糊</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="textShadowBlur"
+                        class="control"
+                        :min="0"
+                        :max="1"
+                        :step="0.01"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本阴影颜色</div>
+                    </div>
+                    <div class="control-row">
+                      <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印文本位置" name="position">
+                    <div class="control-row">
+                      <div class="text">文本位置基准</div>
+                    </div>
+                    <div class="control-row">
+                      <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
+                        <el-option label="中央" value="center"/>
+                        <el-option label="左上角" value="left-top"/>
+                        <el-option label="右上角" value="right-top"/>
+                        <el-option label="左下角" value="left-bottom"/>
+                        <el-option label="右下角" value="right-bottom"/>
+                        <el-option label="上方" value="top"/>
+                        <el-option label="下方" value="bottom"/>
+                        <el-option label="左侧" value="left"/>
+                        <el-option label="右侧" value="right"/>
+                      </el-select>
+                    </div>
+                    <div
+                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
+                      class="control-row">
+                      <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">文本与左边缘的距离</div>
+                      <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
+                      <el-slider
+                        v-model="offsetX"
+                        class="control"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div
+                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
+                      class="control-row">
+                      <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
+                      <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
+                      <el-slider
+                        v-model="offsetY"
+                        class="control"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本旋转角度</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="rotation"
+                        class="control"
+                        :min="-180"
+                        :max="180"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印文本排版" name="typesetting">
+                    <div class="control-row">
+                      <div class="text">文本排版方向</div>
+                    </div>
+                    <div class="control-row">
+                      <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
+                        <el-option label="水平" value="horizontal-tb"/>
+                        <el-option label="垂直从右至左" value="vertical-rl"/>
+                        <el-option label="垂直从左至右" value="vertical-lr"/>
+                      </el-select>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">多行文本对齐方式</div>
+                    </div>
+                    <div class="control-row">
+                      <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
+                        <el-option label="居中对齐" value="center"/>
+                        <el-option label="行首对齐" value="left"/>
+                        <el-option label="行尾对其" value="right"/>
+                      </el-select>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">多行文本行距</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="lineHeight"
+                        class="control"
+                        :min="1"
+                        :max="10"
+                        :step="0.1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">文本字间距</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="letterSpacing"
+                        class="control"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印图片选择" name="image">
+                    <div id="image-container">
+                      <div id="upload-container" :class="image != '' ? 'half' : ''">
+                        <el-upload
+                          id="upload-dragger"
+                          action=""
+                          drag
+                          :auto-upload="false"
+                          :on-change="selectImage"
+                          :show-file-list="false">
+                          <div v-if="image == ''">
+                            <i class="fas fa-stamp"></i>
+                          </div>
+                          <div class="el-upload__text">拖拽或点击选择图片</div>
+                        </el-upload>
+                        <div v-if="image != ''" class="row">
+                          <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
+                        </div>
+                      </div>
+                      <div v-if="image != ''" id="image-preview-container">
+                        <img :src="image" id="image-preview">
+                      </div>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印图片样式" name="image-style">
+                    <div class="control-row">
+                      <div class="text">图片尺寸</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="imageSize"
+                        class="control"
+                        :min="1"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">图片不透明度</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="imageOpacity"
+                        class="control"
+                        :min="0"
+                        :max="1"
+                        :step="0.01"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                  </el-collapse-item>
+                  <el-collapse-item title="水印图片位置" name="image-position">
+                    <div class="control-row">
+                      <div class="text">图片位置基准</div>
+                    </div>
+                    <div class="control-row">
+                      <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="control">
+                        <el-option label="中央" value="center"/>
+                        <el-option label="左上角" value="left-top"/>
+                        <el-option label="右上角" value="right-top"/>
+                        <el-option label="左下角" value="left-bottom"/>
+                        <el-option label="右下角" value="right-bottom"/>
+                        <el-option label="上方" value="top"/>
+                        <el-option label="下方" value="bottom"/>
+                        <el-option label="左侧" value="left"/>
+                        <el-option label="右侧" value="right"/>
+                      </el-select>
+                    </div>
+                    <div
+                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
+                      class="control-row">
+                      <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
+                      <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
+                      <el-slider
+                        v-model="imageOffsetX"
+                        class="control"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div
+                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
+                      class="control-row">
+                      <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
+                      <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
+                      <el-slider
+                        v-model="imageOffsetY"
+                        class="control"
+                        :min="0"
+                        :max="100"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                    <div class="control-row">
+                      <div class="text">图片旋转角度</div>
+                    </div>
+                    <div class="control-row">
+                      <el-slider
+                        v-model="imageRotation"
+                        class="control"
+                        :min="-180"
+                        :max="180"
+                        :step="1"
+                        :show-input="true"
+                        input-size="mini"></el-slider>
+                    </div>
+                  </el-collapse-item>
+                </el-collapse>
+              </div>
+              <div id="save">
+                <div class="row">
+                  <div class="subtitle">保存设置</div>
+                </div>
+                <div class="control-row">
+                  <div class="text">图像质量</div>
+                </div>
+                <div class="control-row">
+                  <el-slider
+                    v-model="quality"
+                    :min="1"
+                    :max="100"
+                    :step="1"
+                    :show-input="true"
+                    input-size="mini"
+                    class="control"></el-slider>
+                </div>
+                <div class="control-row">
+                  <div class="text">存储位置</div>
+                </div>
+                <div class="control-row">
+                  <el-switch
+                    v-model="customDistDirectory"
+                    active-color="var(--main-color)"
+                    inactive-color="var(--main-color)"
+                    active-text="自定义路径"
+                    inactive-text="保存在原路径"
+                    class="control"></el-switch>
+                </div>
+                <div v-if="customDistDirectory" class="control-row">
+                  <div class="text">自定义存储位置</div>
+                </div>
+                <div v-if="customDistDirectory" class="control-row">
+                  <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control">
+                    <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+                  </el-input>
+                </div>
+                <div v-if="srcDirectory != '' && customDistDirectory" class="control-row">
+                  <div class="text">目录结构</div>
+                </div>
+                <div v-if="srcDirectory != '' && customDistDirectory" class="control-row">
+                  <el-switch
+                    v-model="keepDirectoryStructure"
+                    active-text="保持目录结构"
+                    inactive-text="不保持目录结构"
+                    class="control"></el-switch>
+                </div>
+                <div class="control-row">
+                  <div class="text">文件名后缀及格式</div>
+                </div>
+                <div class="control-row">
+                  <el-input size="mini" v-model="append" maxlength="30" class="control">
+                    <el-select v-model="mimeType" size="mini" slot="append">
+                      <el-option label="JPEG 格式" value="JPEG" />
+                      <el-option label="WEBP 格式" value="WEBP" />
+                      <el-option label="PNG 格式" value="PNG" />
+                      <el-option label="保持原格式" value="保持原格式" />
+                    </el-select>
+                  </el-input>
+                </div>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label">文件列表</span>
+            <div id="file-list">
+              <div id="list">
+                <div
+                  v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+                  :key="file.fullpath"
+                  class="file"
+                  @click="preview(index + (fileListPage - 1) * 100)">
+                  <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+                  <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
+                    <i class="fas fa-trash-alt delete"></i>
                   </div>
                 </div>
-                <div v-if="image != ''" id="image-preview-container">
-                  <img :src="image" id="image-preview">
+              </div>
+              <div v-if="this.$store.state.watermark.fileList.length > 100" class="row">
+                <el-pagination
+                  small
+                  background
+                  layout="pager"
+                  :pager-count="5"
+                  :page-size="100"
+                  :total="this.$store.state.watermark.fileList.length"
+                  :current-page="fileListPage"
+                  :hide-on-single-page="true"
+                  @current-change="pageChange">
+                </el-pagination>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label">模板列表</span>
+            <div id="template-list">
+              <div v-if="this.$store.state.watermark.templates.length != 0" id="list">
+                <div
+                  v-for="(template, index) in this.$store.state.watermark.templates"
+                  :key="template.title"
+                  class="template">
+                  <div class="cover">
+                    <div class="action" @click="applyTemplate(index)">
+                      <span class="fa fa-check-circle"></span>
+                      <div>应用</div>
+                    </div>
+                    <div class="action" @click="deleteTemplate(index)">
+                      <span class="fa fa-trash-alt"></span>
+                      <div>删除</div>
+                    </div>
+                  </div>
+                  <div class="text">{{ template.title }}</div>
+                  <v-clamp :max-lines="2" class="subtext">内容：{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
                 </div>
               </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印图片样式" name="image-style">
-              <div class="control-row">
-                <div class="text">图片尺寸</div>
-                <el-slider
-                  v-model="imageSize"
-                  class="control"
-                  :min="1"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
+              <div v-else id="empty-container">
+                <div id="empty">
+                  <i class="fas fa-folder-open"></i>
+                  <div>尚无已保存的模板</div>
+                </div>
               </div>
-              <div class="control-row">
-                <div class="text">图片不透明度</div>
-                <el-slider
-                  v-model="imageOpacity"
-                  class="control"
-                  :min="0"
-                  :max="1"
-                  :step="0.01"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-            </el-collapse-item>
-            <el-collapse-item title="水印图片位置" name="image-position">
-              <div class="control-row">
-                <div class="text">图片位置基准</div>
-                <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="control">
-                  <el-option label="中央" value="center"/>
-                  <el-option label="左上角" value="left-top"/>
-                  <el-option label="右上角" value="right-top"/>
-                  <el-option label="左下角" value="left-bottom"/>
-                  <el-option label="右下角" value="right-bottom"/>
-                  <el-option label="上方" value="top"/>
-                  <el-option label="下方" value="bottom"/>
-                  <el-option label="左侧" value="left"/>
-                  <el-option label="右侧" value="right"/>
-                </el-select>
-              </div>
-              <div
-                v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
-                class="control-row">
-                <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
-                <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
-                <el-slider
-                  v-model="imageOffsetX"
-                  class="control"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div
-                v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
-                class="control-row">
-                <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
-                <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
-                <el-slider
-                  v-model="imageOffsetY"
-                  class="control"
-                  :min="0"
-                  :max="100"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-              <div class="control-row">
-                <div class="text">图片旋转角度</div>
-                <el-slider
-                  v-model="imageRotation"
-                  class="control"
-                  :min="-180"
-                  :max="180"
-                  :step="1"
-                  :show-input="true"
-                  input-size="mini"></el-slider>
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-        </div>
-        <div id="save">
-          <div class="row">
-            <div class="subtitle">保存设置</div>
-          </div>
-          <div class="control-row">
-            <div class="text">图像质量</div>
-            <el-slider
-              v-model="quality"
-              class="control"
-              :min="1"
-              :max="100"
-              :step="1"
-              :show-input="true"
-              input-size="mini"></el-slider>
-          </div>
-          <div class="control-row">
-            <div class="text">存储位置</div>
-            <el-switch
-              v-model="customDistDirectory"
-              active-color="var(--main-color)"
-              inactive-color="var(--main-color)"
-              active-text="自定义路径"
-              inactive-text="保存在原路径"
-              class="control"></el-switch>
-          </div>
-          <div v-if="customDistDirectory" class="control-row">
-            <div class="text">自定义存储位置</div>
-            <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control">
-              <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-            </el-input>
-          </div>
-          <div v-if="srcDirectory != '' && customDistDirectory" class="control-row">
-            <div class="text">目录结构</div>
-            <el-switch
-              v-model="keepDirectoryStructure"
-              active-text="保持目录结构"
-              inactive-text="不保持目录结构"
-              class="control"></el-switch>
-          </div>
-          <div class="control-row">
-            <div class="text">文件名后缀及格式</div>
-            <el-input size="mini" v-model="append" maxlength="30" class="control">
-              <el-select v-model="mimeType" size="mini" slot="append">
-                <el-option label="JPEG 格式" value="JPEG" />
-                <el-option label="WEBP 格式" value="WEBP" />
-                <el-option label="PNG 格式" value="PNG" />
-                <el-option label="保持原格式" value="保持原格式" />
-              </el-select>
-            </el-input>
-          </div>
-          <div class="row">
-            <el-dropdown
-              size="mini"
-              split-button
-              type="primary"
-              trigger="click"
-              class="bar-button"
-              @click="minimize"
-              @command="(command) => {command()}">
-              最小化
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-            <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
-            <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
-            <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
-          </div>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+        <div id="actions">
+          <el-button type="primary" size="mini" @click="saveAsTemplate" class="bar-button">保存模板</el-button>
+          <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
+          <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
         </div>
       </div>
     </div>
@@ -654,10 +701,16 @@ export default {
     maximize() {
       ipcRenderer.send('change-maximize-status')
     },
+    back() {
+      this.$store.dispatch('watermark/fileListEmpty').then(() => {
+        this.$router.replace('/watermark')
+      })
+    },
     close() {
-      this.$store.dispatch('watermark/fileListEmpty')
-      ipcRenderer.send('close')
-      this.$destroy()
+      this.$store.dispatch('watermark/fileListEmpty').then(() => {
+        ipcRenderer.send('close')
+        this.$destroy()
+      })
     },
     pageChange(page) {
       this.fileListPage = page
@@ -1411,10 +1464,6 @@ export default {
   }
 }
 
-.el-popper {
-  -webkit-app-region: no-drag;
-}
-
 #watermark-editor {
   width: 100%;
   height: 100%;
@@ -1503,7 +1552,6 @@ export default {
   #content {
     height: 0;
     flex-grow: 1;
-    padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: row;
@@ -1524,7 +1572,7 @@ export default {
     align-items: center;
     
     .control {
-      width: 70%;
+      width: 100%;
     }
     
     &:first-child {
@@ -1573,36 +1621,22 @@ export default {
     }
   }
   
-  .el-switch {
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  .el-radio-group {
-    display: flex;
-    justify-content: flex-end;
-
-    .el-radio-button__inner {
-      height: 28px;
-    }
-  }
-  
   .el-input-group {
     display: flex;
-  }
   
-  .el-input-group__prepend {
-    width: fit-content;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .el-input-group__append {
-    width: fit-content;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    .el-input-group__prepend {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .el-input-group__append {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
   
   .el-button-group {
@@ -1625,57 +1659,246 @@ export default {
   }
   
   #left {
-    width: calc(50% - 10px);
+    flex-grow: 1;
     height: 100%;
     display: flex;
     flex-direction: column;
-    
-    #sample-container {
+
+    #back-button-container {
       width: 100%;
-      height: 300px;
-      flex-shrink: 0;
-      background-color: var(--black-gray);
-      border-radius: 6px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      position: relative;
-        
-      #sample {
-        max-width: 100%;
-        max-height: 100%;
-      }
-      
-      #watermark-container {
-        position: absolute;
-        overflow: hidden;
-        white-space: nowrap;
-        
-        #watermark {
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      background-color: var(--main-color);
+
+      #back-button {
+        width: 100px;
+        height: 50px;
+        position: relative;
+        line-height: 50px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--white);
+        cursor: pointer;
+
+        &::after {
+          content: '';
           position: absolute;
-          width: fit-content;
-          height: fit-content;
-          box-sizing: border-box;
-          line-height: 1em;
+          width: 100%;
+          height: 100%;
+          left: 0;
+          top: 0;
+          transition: 0.2s;
         }
 
-        #watermark-image {
-          position: absolute;
+        &:hover::after {
+          background-color: rgba(0, 0, 0, 0.1);
         }
       }
     }
-    
-    #lists {
+
+    #sample-wrapper {
       width: 100%;
       height: 0;
       flex-grow: 1;
-      margin-top: 10px;
+      padding-left: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+    
+      #sample-container {
+        width: 100%;
+        height: 100%;
+        flex-shrink: 0;
+        background-color: var(--black-gray);
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+          
+        #sample {
+          max-width: 100%;
+          max-height: 100%;
+        }
+        
+        #watermark-container {
+          position: absolute;
+          overflow: hidden;
+          white-space: nowrap;
+          
+          #watermark {
+            position: absolute;
+            width: fit-content;
+            height: fit-content;
+            box-sizing: border-box;
+            line-height: 1em;
+          }
+
+          #watermark-image {
+            position: absolute;
+          }
+        }
+      }
+    }
+  }
+
+  #right {
+    width: 300px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    #tabs {
+      height: 0;
+      flex-grow: 1;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      
+      overflow-y: auto;
+
+      #config {
+        width: 100%;
+        height: 100%;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        #image-container {
+          display: flex;
+          justify-content: space-between;
+          width: 100%;
+          height: 120px;
+
+          #upload-container {
+            width: 100%;
+            height: 100%;
+            transition: 0.5s;
+            display: flex;
+            flex-direction: column;
+            
+            &.half {
+              width: calc(50% - 5px);
+            }
+
+            #upload-dragger {
+              width: 100%;
+              height: 0;
+              flex-grow: 1;
+              
+              .el-upload {
+                width: 100%;
+                height: 100%;
+                
+                .el-upload-dragger {
+                  width: 100%;
+                  height: 100%;
+                  display: flex;
+                  flex-direction: column;
+                  justify-content: center;
+                  align-items: center;
+                  color: var(--dark-gray);
+                  border-color: var(--light-gray);
+                  transition: 0.2s;
+                  
+                  svg {
+                    font-size: 40px;
+                    margin: 14px;
+                  }
+                  
+                  &:hover {
+                    color: var(--main-color);
+                    border-color: var(--main-color);
+                    
+                    .el-upload__text {
+                      color: var(--main-color);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          #image-preview-container {
+            width: calc(50% - 5px);
+            height: 100%;
+            background-color: var(--black-gray);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            #image-preview {
+              max-width: 100%;
+              max-height: 100%;
+            }
+          }
+        }
+
+        #save {
+          margin-top: 10px;
+        }
+
+        .el-collapse-item__header {
+          height: 30px;
+          font-size: 14px;
+        }
+        
+        .el-collapse-item__content {
+          padding-top: 10px;
+          padding-bottom: 10px;
+
+          .el-slider__runway {
+            margin-left: 8px;
+
+            .el-slider__button {
+              width: 8px;
+              height: 8px;
+            }
+          }
+        }
+        
+        .el-textarea__inner {
+          font-family: var(--main-font);
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
+          }
+        }
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+      }
+
       #file-list {
-        width: calc(50% - 5px);
+        width: 100%;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -1777,9 +2000,9 @@ export default {
           }
         }
       }
-      
+
       #template-list {
-        width: calc(50% - 5px);
+        width: 100%;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -1914,132 +2137,102 @@ export default {
           }
         }
       }
-    }
-  }
-  
-  #right {
-    width: calc(50% - 10px);
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow-y: auto;
 
-    &::-webkit-scrollbar {
-      display: none;
-    }
-
-    #image-container {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      height: 120px;
-
-      #upload-container {
-        width: 100%;
-        height: 100%;
-        transition: 0.5s;
-        display: flex;
-        flex-direction: column;
+      .el-tabs__header {
+        margin: 0;
         
-        &.half {
-          width: calc(50% - 5px);
-        }
-
-        #upload-dragger {
-          width: 100%;
-          height: 0;
-          flex-grow: 1;
+        .el-tabs__nav-scroll {
+          background-color: var(--main-color);
           
-          .el-upload {
-            width: 100%;
-            height: 100%;
+          .el-tabs__nav {
+            border: 0;
             
-            .el-upload-dragger {
-              width: 100%;
-              height: 100%;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-              align-items: center;
-              color: var(--dark-gray);
-              border-color: var(--light-gray);
+            .el-tabs__item {
+              width: 100px;
+              height: 50px;
+              line-height: 50px;
+              text-align: center;
+              border: 0;
               transition: 0.2s;
               
-              svg {
-                font-size: 40px;
-                margin: 14px;
+              &.is-active {
+                background-color: var(--white);
+                color: var(--main-color);
+                cursor: default;
               }
               
-              &:hover {
-                color: var(--main-color);
-                border-color: var(--main-color);
-                
-                .el-upload__text {
-                  color: var(--main-color);
-                }
+              &:not(.is-active) {
+                color: var(--white);
+                position: relative;
+              }
+              
+              &:not(.is-active)::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                transition: 0.2s;
+              }
+
+              &:not(.is-active):hover::after {
+                background-color: rgba(0, 0, 0, 0.1);
               }
             }
           }
         }
       }
+      
+      .el-tabs__content {
+        flex-grow: 1;
+        
+        .el-tab-pane {
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          position: relative;
 
-      #image-preview-container {
-        width: calc(50% - 5px);
-        height: 100%;
-        background-color: var(--black-gray);
-        border-radius: 6px;
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+          &::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+            z-index: 2000;
+          }
 
-        #image-preview {
-          max-width: 100%;
-          max-height: 100%;
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-image: linear-gradient(0deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+            z-index: 2000;
+          }
         }
       }
-    }
 
-    #save {
-      margin-top: 10px;
-    }
-    
-    .el-collapse-item__header {
-      height: 30px;
-      font-size: 14px;
-    }
-    
-    .el-collapse-item__content {
-      padding-top: 10px;
-      padding-bottom: 10px;
-    }
-    
-    .el-textarea__inner {
-      font-family: var(--main-font);
-      
       &::-webkit-scrollbar {
-        width: 10px;
+        display: none;
       }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: var(--transparent);
-        
-        &:hover {
-          background-color: var(--white-gray);
-        }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: var(--light-gray);
-        transition: 0.2s;
-        
-        &:hover {
-          background-color: var(--gray);
-        }
-      }
+    }
+
+    #actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
     }
   }
 }
