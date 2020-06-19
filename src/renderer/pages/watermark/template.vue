@@ -1,7 +1,7 @@
 <template>
   <div id="watermark-template">
     <div id="header">
-      <div id="title">图片加水印工具 - 编辑器</div>
+      <div id="title">图片加水印工具 - 模板编辑器</div>
       <div id="minimize" class="control-button" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -160,8 +160,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本字体颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -181,8 +179,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本背景颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -228,8 +224,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本阴影颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -350,10 +344,14 @@
                           :auto-upload="false"
                           :on-change="selectImage"
                           :show-file-list="false">
-                          <div v-if="image == ''">
+                          <div v-if="image == ''" key="hasImage">
                             <i class="fas fa-stamp"></i>
+                            <div class="el-upload__text">拖拽或点击选择图片</div>
                           </div>
-                          <div class="el-upload__text">拖拽或点击选择图片</div>
+                          <div v-else key="noImage">
+                            <div class="el-upload__text">拖拽或点击</div>
+                            <div class="el-upload__text">选择图片</div>
+                          </div>
                         </el-upload>
                         <div v-if="image != ''" class="row">
                           <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
@@ -1230,43 +1228,6 @@ export default {
     &:last-child {
       margin-right: 0;
     }
-  }
-  
-  .el-input-group {
-    display: flex;
-  
-    .el-input-group__prepend {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .el-input-group__append {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-  
-  .el-button-group {
-    display: flex;
-    
-    button:not(.el-dropdown__caret-button) {
-      width: 100%
-    }
-  }
-  
-  .el-button--primary:not(.el-dropdown__caret-button) {
-    padding: 0;
-    height: 28px;
-  }
-  
-  .el-button--primary.el-dropdown__caret-button {
-    padding-top: 0;
-    padding-bottom: 0;
-    height: 28px;
   }
   
   #left {

@@ -128,7 +128,6 @@
           </div>
           <el-upload
             action=""
-           
             :auto-upload="false"
             :on-change="importTemplates"
             :show-file-list="false">
@@ -178,6 +177,21 @@
               v-model="openAtLogin"
               active-text="开机启动"
               inactive-text="开机不启动"></el-switch>
+          </div>
+          <div class="row">
+            <div class="subtitle">首页样式设置</div>
+          </div>
+          <div class="control-row">
+            <div class="text">您可以选择首页各工具采用大图标横向滚动排列或小图标平铺排列的样式。</div>
+          </div>
+          <div class="control-row">
+            <el-switch
+              @change="switchHomeIconStyle"
+              v-model="smallHomeIcon"
+              active-color="var(--main-color)"
+              inactive-color="var(--main-color)"
+              active-text="小图标平铺排列"
+              inactive-text="大图标横向滚动"></el-switch>
           </div>
         </div>
       </el-tab-pane>
@@ -263,8 +277,9 @@ export default {
       update: null,
       distDirectory: '',
       filename: '',
-      scale: 1.0,
-      openAtLogin: false
+      scale: this.$store.state.settings.scale,
+      openAtLogin: false,
+      smallHomeIcon: this.$store.state.settings.smallHomeIcon
     }
   },
   methods: {
@@ -546,11 +561,13 @@ export default {
         title: '设置成功',
         text: '已' + (value ? '设置' : '取消') + '开机启动。'
       })
+    },
+    switchHomeIconStyle(value) {
+      this.$store.dispatch('settings/changeHomeIconStyle')
     }
   },
   mounted() {
     this.version = ipcRenderer.sendSync('version')
-    this.scale = this.$store.state.settings.scale
     this.openAtLogin = ipcRenderer.sendSync('auto-open-status')
   }
 }

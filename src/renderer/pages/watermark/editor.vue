@@ -1,7 +1,7 @@
 <template>
   <div id="watermark-editor">
     <div id="header">
-      <div id="title">图片加水印工具 - 模板编辑器</div>
+      <div id="title">图片加水印工具 - 编辑器</div>
       <div id="minimize" class="control-button" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -126,8 +126,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本字体颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="color" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -147,8 +145,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本背景颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="backgroundColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -194,8 +190,6 @@
                     </div>
                     <div class="control-row">
                       <div class="text">文本阴影颜色</div>
-                    </div>
-                    <div class="control-row">
                       <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
@@ -316,10 +310,14 @@
                           :auto-upload="false"
                           :on-change="selectImage"
                           :show-file-list="false">
-                          <div v-if="image == ''">
+                          <div v-if="image == ''" key="hasImage">
                             <i class="fas fa-stamp"></i>
+                            <div class="el-upload__text">拖拽或点击选择图片</div>
                           </div>
-                          <div class="el-upload__text">拖拽或点击选择图片</div>
+                          <div v-else key="noImage">
+                            <div class="el-upload__text">拖拽或点击</div>
+                            <div class="el-upload__text">选择图片</div>
+                          </div>
                         </el-upload>
                         <div v-if="image != ''" class="row">
                           <el-button type="primary" size="mini" @click="clearImage" class="bar-button">清除图片</el-button>
@@ -467,17 +465,21 @@
                     class="control"></el-switch>
                 </div>
                 <div class="control-row">
-                  <div class="text">文件名后缀及格式</div>
+                  <div class="text">保存的图片格式</div>
                 </div>
                 <div class="control-row">
-                  <el-input size="mini" v-model="append" maxlength="30" class="control">
-                    <el-select v-model="mimeType" size="mini" slot="append">
-                      <el-option label="JPEG 格式" value="JPEG" />
-                      <el-option label="WEBP 格式" value="WEBP" />
-                      <el-option label="PNG 格式" value="PNG" />
-                      <el-option label="保持原格式" value="保持原格式" />
-                    </el-select>
-                  </el-input>
+                  <el-radio-group v-model="mimeType" size="mini" class="control">
+                    <el-radio-button label="JPEG"></el-radio-button>
+                    <el-radio-button label="WEBP"></el-radio-button>
+                    <el-radio-button label="PNG"></el-radio-button>
+                    <el-radio-button label="保持原格式"></el-radio-button>
+                  </el-radio-group>
+                </div>
+                <div class="control-row">
+                  <div class="text">文件名后缀</div>
+                </div>
+                <div class="control-row">
+                  <el-input size="mini" v-model="append" maxlength="30" class="control"></el-input>
                 </div>
               </div>
             </div>
@@ -732,7 +734,7 @@ export default {
           }
         })
       } else {
-        this.close()
+        this.back()
       }
     },
     initWatermarkSize() {
@@ -767,10 +769,10 @@ export default {
             dialog.change({
               type: 'error',
               title: '出现错误',
-              text: '图像文件读取错误，生成预览失败。即将退出编辑器。',
+              text: '图像文件读取错误，生成预览失败。即将返回。',
               showConfirm: true,
               confirmFunction: () => {
-                this.close()
+                this.back()
               }
             })
           } else {
@@ -1197,10 +1199,10 @@ export default {
                   dialog.change({
                     type: 'success',
                     title: '成功',
-                    text: '处理完成，添加水印后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
+                    text: '处理完成，添加水印后的图片已保存到目标文件夹。',
                     showConfirm: true,
                     confirmFunction: () => {
-                      this.close()
+                      this.back()
                     }
                   })
                 }
@@ -1377,10 +1379,10 @@ export default {
               dialog.change({
                 type: 'success',
                 title: '成功',
-                text: '全部图片处理完成，即将退出编辑器。',
+                text: '全部图片处理完成。',
                 showConfirm: true,
                 confirmFunction: () => {
-                  this.close()
+                  this.back()
                 }
               }).then(() => {
                 let notification = new Notification('图片加水印工具', {
@@ -1395,7 +1397,7 @@ export default {
               dialog.change({
                 type: 'warning',
                 title: '完成',
-                text: '队列中的图片已处理完成，但下列图片处理失败。即将退出编辑器。',
+                text: '队列中的图片已处理完成，但下列图片处理失败。',
                 content: this.$createElement('div', null, this.errorList.map((filename) => {
                   return this.$createElement('p', {
                     style: {
@@ -1411,7 +1413,7 @@ export default {
                 })),
                 showConfirm: true,
                 confirmFunction: () => {
-                  this.close()
+                  this.back()
                 }
               }).then(() => {
                 let notification = new Notification('图片加水印工具', {
@@ -1630,32 +1632,17 @@ export default {
       justify-content: center;
       align-items: center;
     }
-    
-    .el-input-group__append {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
   }
-  
-  .el-button-group {
+
+  .el-radio-button__inner {
     display: flex;
-    
-    button:not(.el-dropdown__caret-button) {
-      width: 100%
-    }
-  }
-  
-  .el-button--primary:not(.el-dropdown__caret-button) {
-    padding: 0;
+    justify-content: center;
+    align-items: center;
     height: 28px;
-  }
-  
-  .el-button--primary.el-dropdown__caret-button {
     padding-top: 0;
     padding-bottom: 0;
-    height: 28px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
   
   #left {
@@ -1854,15 +1841,6 @@ export default {
         .el-collapse-item__content {
           padding-top: 10px;
           padding-bottom: 10px;
-
-          .el-slider__runway {
-            margin-left: 8px;
-
-            .el-slider__button {
-              width: 8px;
-              height: 8px;
-            }
-          }
         }
         
         .el-textarea__inner {
@@ -1889,6 +1867,15 @@ export default {
             &:hover {
               background-color: var(--gray);
             }
+          }
+        }
+
+        .el-slider__runway {
+          margin-left: 8px;
+
+          .el-slider__button {
+            width: 8px;
+            height: 8px;
           }
         }
 
@@ -1966,7 +1953,7 @@ export default {
             }
             
             .delete {
-              color: var(--white-gray);
+              color: var(--light-gray);
               cursor: pointer;
               transition: 0.2s;
               

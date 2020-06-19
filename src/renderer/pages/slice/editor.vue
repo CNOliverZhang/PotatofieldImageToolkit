@@ -1,126 +1,154 @@
 <template>
   <div id="slice-editor">
-    <div id="crop">
-      <div id="image-container">
-        <img :src="this.$store.state.slice.fileList[fileIndex].fullpath" id="image">
-        <div id="grids">
-          <div
-            v-for="number in Array.from({ length: row * column })"
-            :key="number"
-            class="grid"
-            :style="{
-              'width': 'calc(100% / ' + column + ')',
-              'height': 'calc(100% / ' + row + ')',
-              'border-color': coverColor == 'dark' ? 'var(--black-gray)' : 'var(--white-gray)',
-              'background-color': coverColor == 'dark' ? 'var(--transparent-black-cover)' : 'var(--transparent-white-cover)'
-            }"></div>
-        </div>
+    <div id="header">
+      <div id="title">图片分割工具 - 编辑器</div>
+      <div id="minimize" class="control-button" @click="minimize">
+        <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="file-list">
-        <div class="row">
-          <div class="subtitle">待处理的文件</div>
+      <div id="maximize" class="control-button" @click="maximize">
+        <object data="static/images/maximize.svg" type="image/svg+xml"></object>
+      </div>
+      <div id="close" class="control-button" @click="close">
+        <object data="static/images/close.svg" type="image/svg+xml"></object>
+      </div>
+    </div>
+    <div id="content">
+      <div id="left">
+        <div id="back-button-container">
+          <div id="back-button" @click="back">
+            <span slot="label"><i class="fas fa-chevron-left"></i> 返回</span>
+          </div>
         </div>
-        <div id="list">
-          <div
-            v-for="(file, index) in this.$store.state.slice.fileList"
-            :key="file.fullpath"
-            class="file"
-            @click="init(index)">
-            <div class="filename">{{ file.filename + '.' + file.ext }}</div>
-            <div @click.stop="handleDelete(index)">
-              <i class="fas fa-trash-alt delete"></i>
+        <div id="image-wrapper">
+          <div id="image-container">
+            <img :src="this.$store.state.slice.fileList[fileIndex].fullpath" id="image">
+            <div id="grids">
+              <div
+                v-for="number in Array.from({ length: row * column })"
+                :key="number"
+                class="grid"
+                :style="{
+                  'width': 'calc(100% / ' + column + ')',
+                  'height': 'calc(100% / ' + row + ')',
+                  'border-color': coverColor == 'dark' ? 'var(--black-gray)' : 'var(--white-gray)',
+                  'background-color': coverColor == 'dark' ? 'var(--transparent-black-cover)' : 'var(--transparent-white-cover)'
+                }"></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div id="controller">
-      <div class="side">
-        <div class="row">
-          <div class="subtitle">裁剪设置</div>
-        </div>
-        <div class="control-row">
-          <div class="text">列数和行数</div>
-          <div class="row control">
-            <el-select v-model="row" @change="preview" size="mini" class="grid-count">
-              <el-option
-                v-for="(object, index) in Array.from({ length: 9 })"
-                :key="index"
-                :label="(index + 1) + ' 行'" :value="index + 1"/>
-            </el-select>
-            <el-select v-model="column" @change="preview" size="mini" class="grid-count">
-              <el-option
-                v-for="(object, index) in Array.from({ length: 9 })"
-                :key="index"
-                :label="(index + 1) + ' 列'" :value="index + 1"/>
-            </el-select>
-          </div>
-        </div>
-        <div class="control-row">
-          <div class="text">分割模式</div>
-          <el-switch
-            v-model="keepSquare"
-            active-text="保持每格为正方形"
-            inactive-text="不保持每格为正方形"
-            @change="preview"
-            class="control"></el-switch>
-        </div>
-        <div class="control-row">
-          <div class="text">预览区域颜色</div>
-          <el-select v-model="coverColor" placeholder="请选择" size="mini" class="control">
-            <el-option label="深色" value="dark"/>
-            <el-option label="浅色" value="light"/>
-          </el-select>
+      <div id="right">
+        <el-tabs type="card" tab-position="top" id="tabs">
+          <el-tab-pane>
+            <span slot="label">设置</span>
+            <div id="config">
+              <div>
+                <div class="row">
+                  <div class="subtitle">分割设置</div>
+                </div>
+                <div class="control-row">
+                  <div class="text">列数和行数</div>
+                </div>
+                <div class="control-row">
+                  <el-select v-model="row" @change="preview" size="mini" class="grid-count">
+                    <el-option
+                      v-for="(object, index) in Array.from({ length: 9 })"
+                      :key="index"
+                      :label="(index + 1) + ' 行'" :value="index + 1"/>
+                  </el-select>
+                  <el-select v-model="column" @change="preview" size="mini" class="grid-count">
+                    <el-option
+                      v-for="(object, index) in Array.from({ length: 9 })"
+                      :key="index"
+                      :label="(index + 1) + ' 列'" :value="index + 1"/>
+                  </el-select>
+                </div>
+                <div class="control-row">
+                  <div class="text">分割模式</div>
+                </div>
+                <div class="control-row">
+                  <el-switch
+                    v-model="keepSquare"
+                    active-text="保持每格方形"
+                    inactive-text="保持无裁切"
+                    @change="preview"
+                    class="control"></el-switch>
+                </div>
+                <div class="control-row">
+                  <div class="text">预览区域颜色</div>
+                </div>
+                <div class="control-row">
+                  <el-select v-model="coverColor" placeholder="请选择" size="mini" class="control">
+                    <el-option label="深色" value="dark"/>
+                    <el-option label="浅色" value="light"/>
+                  </el-select>
+                </div>
+              </div>
+              <div id="save">
+                <div class="row">
+                  <div class="subtitle">保存设置</div>
+                </div>
+                <div class="control-row">
+                  <div class="text">图像质量</div>
+                </div>
+                <div class="control-row">
+                  <el-slider
+                    v-model="quality"
+                    class="control"
+                    :min="1"
+                    :max="100"
+                    :step="1"
+                    :show-input="true"
+                    input-size="mini"></el-slider>
+                </div>
+                <div class="control-row">
+                  <div class="text">存储位置</div>
+                </div>
+                <div class="control-row">
+                  <el-input disabled size="mini" v-model="distDirectory" class="control">
+                    <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+                  </el-input>
+                </div>
+                <div class="control-row">
+                  <div class="text">保存的图片格式</div>
+                </div>
+                <div class="control-row">
+                  <el-radio-group v-model="mimeType" size="mini" class="control">
+                    <el-radio-button label="JPEG"></el-radio-button>
+                    <el-radio-button label="WEBP"></el-radio-button>
+                    <el-radio-button label="PNG"></el-radio-button>
+                    <el-radio-button label="保持原格式"></el-radio-button>
+                  </el-radio-group>
+                </div>
+              </div>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane>
+            <span slot="label">文件列表</span>
+            <div id="file-list">
+              <div class="row">
+                <div class="subtitle">待处理的文件</div>
+              </div>
+              <div id="list">
+                <div
+                  v-for="(file, index) in this.$store.state.slice.fileList"
+                  :key="file.fullpath"
+                  class="file"
+                  @click="init(index)">
+                  <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+                  <div @click.stop="handleDelete(index)">
+                    <i class="fas fa-trash-alt delete"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+        <div id="actions">
+          <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
+          <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
         </div>
       </div>
-      <div class="side">
-        <div class="row">
-          <div class="subtitle">保存设置</div>
-        </div>
-        <div class="control-row">
-          <div class="text">图像质量</div>
-          <el-slider
-            v-model="quality"
-            class="control"
-            :min="1"
-            :max="100"
-            :step="1"
-            :show-input="true"
-            input-size="mini"></el-slider>
-        </div>
-        <div class="control-row">
-          <div class="text">存储位置</div>
-          <el-input disabled size="mini" v-model="distDirectory" class="control">
-            <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-          </el-input>
-        </div>
-        <div class="control-row">
-          <div class="text">保存的图片格式</div>
-          <el-radio-group v-model="mimeType" size="mini" class="control">
-            <el-radio-button label="JPEG"></el-radio-button>
-            <el-radio-button label="WEBP"></el-radio-button>
-            <el-radio-button label="PNG"></el-radio-button>
-            <el-radio-button label="保持原格式"></el-radio-button>
-          </el-radio-group>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <el-dropdown
-        size="mini"
-        split-button
-        type="primary"
-        trigger="click"
-        class="bar-button"
-        @click="minimize"
-        @command="(command) => {command()}">
-        最小化
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item :command="close">退出编辑器</el-dropdown-item>
-        </el-dropdown-menu>
-      </el-dropdown>
-      <el-button type="primary" size="mini" @click="start" class="bar-button">处理本张</el-button>
-      <el-button type="primary" size="mini" @click="startAll" class="bar-button">批量处理</el-button>
     </div>
   </div>
 </template>
@@ -157,6 +185,19 @@ export default {
     minimize() {
       ipcRenderer.send('minimize')
     },
+    maximize() {
+      ipcRenderer.send('change-maximize-status')
+      setTimeout(() => {
+        this.$nextTick(() => {
+          this.preview()
+        })
+      }, 200)
+    },
+    back() {
+      this.$store.dispatch('slice/fileListEmpty').then(() => {
+        this.$router.replace('/slice')
+      })
+    },
     close() {
       this.$store.dispatch('slice/fileListEmpty')
       ipcRenderer.send('close')
@@ -172,7 +213,7 @@ export default {
           }
         })
       } else {
-        this.close()
+        this.back()
       }
     },
     preview() {
@@ -212,10 +253,10 @@ export default {
             dialog.change({
               type: 'error',
               title: '出现错误',
-              text: '图像文件读取错误，生成预览失败。即将退出编辑器。',
+              text: '图像文件读取错误，生成预览失败。即将返回。',
               showConfirm: true,
               confirmFunction: () => {
-                this.close()
+                this.back()
               }
             })
           } else {
@@ -361,10 +402,10 @@ export default {
             dialog.change({
               type: 'success',
               title: '成功',
-              text: '处理完成，裁剪后的图片已保存到目标文件夹。列表中的图片已全部处理完成，即将退出编辑器。',
+              text: '处理完成，裁剪后的图片已保存到目标文件夹，列表中的图片已全部处理完成。',
               showConfirm: true,
               confirmFunction: () => {
-                this.close()
+                this.back()
               }
             })
           }
@@ -510,10 +551,10 @@ export default {
               dialog.change({
                 type: 'success',
                 title: '成功',
-                text: '全部图片处理完成，即将退出编辑器。',
+                text: '全部图片处理完成。',
                 showConfirm: true,
                 confirmFunction: () => {
-                  this.close()
+                  this.back()
                 }
               }).then(() => {
                 let notification = new Notification('图片分割工具', {
@@ -528,7 +569,7 @@ export default {
               dialog.change({
                 type: 'warning',
                 title: '完成',
-                text: '队列中的图片已处理完成，但下列图片处理失败。即将退出编辑器。',
+                text: '队列中的图片已处理完成，但下列图片处理失败。',
                 content: this.$createElement('div', null, this.errorList.map((filename) => {
                   return this.$createElement('p', {
                     style: {
@@ -544,7 +585,7 @@ export default {
                 })),
                 showConfirm: true,
                 confirmFunction: () => {
-                  this.close()
+                  this.back()
                 }
               }).then(() => {
                 let notification = new Notification('图片分割工具', {
@@ -575,12 +616,8 @@ export default {
 #slice-editor {
   width: 100%;
   height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
   
   button {
     font-family: var(--main-font);
@@ -588,6 +625,88 @@ export default {
   
   input {
     font-family: var(--main-font);
+  }
+  
+  #header {
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    flex-basis: 40px;
+    background-color: var(--dark-gray);
+    display: flex;
+    align-items: center;
+    z-index: 3000;
+    -webkit-app-region: drag;
+
+    #title {
+      color: var(--white);
+      font-size: 16px;
+      flex-grow: 1;
+    }
+
+    .control-button {
+      -webkit-app-region: no-drag;
+      width: 20px;
+      height: 20px;
+      margin-left: 5px;
+      margin-right: 5px;
+      border-radius: 10px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      object {
+        width: 50%;
+        color: var(--white);
+      }
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        top: 0;
+        border-radius: 50%;
+        transition: 0.2s;
+      }
+
+      &:hover::after {
+        background-color: rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    #minimize {
+      background-color: var(--success-green);
+    }
+
+    #maximize {
+      background-color: var(--notice-yellow);
+    }
+
+    #close {
+      background-color: var(--warning-red);
+    }
+  }
+
+  #content {
+    height: 0;
+    width: 100%;
+    flex-grow: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .control-row {
@@ -603,7 +722,7 @@ export default {
     align-items: center;
     
     .control {
-      width: 70%;
+      width: 100%;
     }
     
     &:first-child {
@@ -651,197 +770,367 @@ export default {
       margin-right: 0;
     }
   }
-
-  .el-radio-group {
-    display: flex;
-    justify-content: flex-end;
-    
-    .el-radio-button__inner {
-      height: 28px;
-    }
-  }
   
   .el-input-group {
     display: flex;
-  }
   
-  .el-input-group__prepend {
-    width: fit-content;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .el-button-group {
-    display: flex;
-    
-    button:not(.el-dropdown__caret-button) {
-      width: 100%
-    }
-  }
-  
-  .el-button--primary:not(.el-dropdown__caret-button) {
-    padding: 0;
-    height: 28px;
-  }
-  
-  .el-button--primary.el-dropdown__caret-button {
-    padding-top: 0;
-    padding-bottom: 0;
-    height: 28px;
-  }
-  
-  .el-switch {
-    display: flex;
-    justify-content: flex-end;
-  }
-  
-  #crop {
-    width: 100%;
-    height: 0;
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    
-    #image-container {
-      flex-grow: 1;
-      height: 100%;
-      position: relative;
-      margin-right: 20px;
-      background-color: var(--black-gray);
-      border-radius: 6px;
+    .el-input-group__prepend {
+      width: fit-content;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
-      
-      #image {
-        max-width: 100%;
-        max-height: 100%;
-        display: block;
-      }
-      
-      #grids {
-        position: absolute;
-        display: flex;
-        flex-wrap: wrap;
-        
-        .grid {
-          border-width: 1px;
-          border-style: solid;
-          box-sizing: border-box;
+    }
+  }
+
+  .el-radio-button__inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 28px;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  #left {
+    width: 0;
+    height: 100%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+
+    #back-button-container {
+      width: 100%;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      background-color: var(--main-color);
+
+      #back-button {
+        width: 100px;
+        height: 50px;
+        position: relative;
+        line-height: 50px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--white);
+        cursor: pointer;
+
+        &::after {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          left: 0;
+          top: 0;
+          transition: 0.2s;
+        }
+
+        &:hover::after {
+          background-color: rgba(0, 0, 0, 0.1);
         }
       }
     }
-    
-    #file-list {
-      width: 25%;
-      height: 100%;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      
-      #list {
-        width: 100%;
-        height: 0;
+
+    #image-wrapper {
+      width: 100%;
+      height: 0;
+      flex-grow: 1;
+      padding-left: 20px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      box-sizing: border-box;
+
+      #image-container {
         flex-grow: 1;
-        background-color: var(--white-gray);
-        box-sizing: border-box;
+        height: 100%;
+        position: relative;
+        background-color: var(--black-gray);
         border-radius: 6px;
-        border-color: var(--light-gray);
-        border-style: solid;
-        border-width: 1px;
-        overflow-y: auto;
-        overflow-x: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
         
-        .file {
-          height: 28px;
-          width: 100%;
-          line-height: 24px;
-          font-size: 12px;
-          padding-left: 5px;
-          padding-right: 5px;
-          box-sizing: border-box;
-          background-color: var(--white);
-          border-bottom-color: var(--light-gray);
-          border-bottom-style: solid;
-          border-bottom-width: 1px;
+        #image {
+          max-width: 100%;
+          max-height: 100%;
+          display: block;
+        }
+        
+        #grids {
+          position: absolute;
           display: flex;
-          justify-content: space-between;
-          align-items: center;
-          transition: 0.2s;
+          flex-wrap: wrap;
           
-          &:hover {
-            background-color: var(--white-gray);
-          }
-          
-          .filename {
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            flex-grow: 1;
-            padding-right: 10px;
-          }
-          
-          .delete {
-            color: var(--white-gray);
-            cursor: pointer;
-            transition: 0.2s;
-            
-            &:hover {
-              color: var(--warning-red);
-            }
-          }
-        }
-        
-        &::-webkit-scrollbar {
-          width: 10px;
-        }
-            
-        &::-webkit-scrollbar-track {
-          border-radius: 5px;
-          background-color: var(--transparent);
-          
-          &:hover {
-            background-color: var(--white-gray);
-          }
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          border-radius: 5px;
-          background-color: var(--light-gray);
-          transition: 0.2s;
-          
-          &:hover {
-            background-color: var(--gray);
+          .grid {
+            border-width: 1px;
+            border-style: solid;
+            box-sizing: border-box;
           }
         }
       }
     }
   }
-  
-  #controller {
-    width: 100%;
-    margin-top: 10px;
+
+  #right {
+    width: 300px;
+    height: 100%;
     display: flex;
-    justify-content: space-between;
-    
-    .side {
-      width: calc(50% - 10px);
-      
-      .grid-count {
-        margin-left: 5px;
-        margin-right: 5px;
-        
-        &:first-child {
-          margin-left: 0;
+    flex-direction: column;
+
+    #tabs {
+      height: 0;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+
+      #config {
+        width: 100%;
+        height: 100%;
+        margin-top: -10px;
+        margin-bottom: -10px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        #save {
+          margin-top: 10px;
         }
-        
-        &:last-child {
-          margin-right: 0;
+
+        .grid-count {
+          width: calc(50% - 5px);
+        }
+
+        .el-slider__runway {
+          margin-left: 8px;
+
+          .el-slider__button {
+            width: 8px;
+            height: 8px;
+          }
+        }
+
+        &::-webkit-scrollbar {
+          display: none;
         }
       }
+
+      #file-list {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        
+        #list {
+          width: 100%;
+          flex-grow: 1;
+          background-color: var(--white-gray);
+          box-sizing: border-box;
+          border-radius: 6px;
+          border-color: var(--light-gray);
+          border-style: solid;
+          border-width: 1px;
+          overflow-y: auto;
+          overflow-x: hidden;
+          
+          .file {
+            height: 28px;
+            width: 100%;
+            line-height: 24px;
+            font-size: 12px;
+            padding-left: 5px;
+            padding-right: 5px;
+            box-sizing: border-box;
+            background-color: var(--white);
+            border-bottom-color: var(--light-gray);
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+            
+            .filename {
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              flex-grow: 1;
+              padding-right: 10px;
+            }
+            
+            .delete {
+              color: var(--light-gray);
+              cursor: pointer;
+              transition: 0.2s;
+              margin-right: 5px;
+              margin-left: 5px;
+              
+              &:hover {
+                color: var(--warning-red);
+              }
+              
+              &:first-index {
+                margin-left: 0;
+              }
+              
+              &:last-index {
+                margin-right: 0;
+              }
+            }
+            
+            .move {
+              color: var(--light-gray);
+              cursor: pointer;
+              transition: 0.2s;
+              margin-right: 5px;
+              margin-left: 5px;
+              
+              &:hover {
+                color: var(--main-color);
+              }
+              
+              &:first-index {
+                margin-left: 0;
+              }
+              
+              &:last-index {
+                margin-right: 0;
+              }
+            }
+          }
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
+          }
+        }
+      }
+
+      .el-tabs__header {
+        margin: 0;
+        
+        .el-tabs__nav-scroll {
+          background-color: var(--main-color);
+          
+          .el-tabs__nav {
+            border: 0;
+            
+            .el-tabs__item {
+              width: 100px;
+              height: 50px;
+              line-height: 50px;
+              text-align: center;
+              border: 0;
+              transition: 0.2s;
+              
+              &.is-active {
+                background-color: var(--white);
+                color: var(--main-color);
+                cursor: default;
+              }
+              
+              &:not(.is-active) {
+                color: var(--white);
+                position: relative;
+              }
+              
+              &:not(.is-active)::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                left: 0;
+                top: 0;
+                transition: 0.2s;
+              }
+
+              &:not(.is-active):hover::after {
+                background-color: rgba(0, 0, 0, 0.1);
+              }
+            }
+          }
+        }
+      }
+      
+      .el-tabs__content {
+        flex-grow: 1;
+        
+        .el-tab-pane {
+          width: 100%;
+          height: 100%;
+          padding: 20px;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+
+          &::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-image: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+            z-index: 2000;
+          }
+
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background-image: linear-gradient(0deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+            z-index: 2000;
+          }
+        }
+      }
+
+      &::-webkit-scrollbar {
+        display: none;
+      }
+    }
+
+    #actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      padding-left: 20px;
+      padding-right: 20px;
+      box-sizing: border-box;
     }
   }
 }

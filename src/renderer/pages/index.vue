@@ -33,7 +33,77 @@
           <div>退出程序</div>
         </div>
       </div>
-      <div id="cards-holder">
+      <div id="small-cards-holder" key="small" v-if="this.$store.state.settings.smallHomeIcon">
+        <div id="wrapper">
+          <div class="container" @click="open('/watermark', '图片加水印工具')">
+            <el-card class="card">
+              <i class="fas fa-feather-alt icon"></i>
+              <div class="title">图片加水印</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/splicer', '长图拼接工具')">
+            <el-card class="card">
+              <i class="fas fa-images icon"></i>
+              <div class="title">长图拼接</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/cropper', '图片裁剪工具')">
+            <el-card class="card">
+              <span class="fas fa-crop-alt icon"></span>
+              <div class="title">图片裁剪</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/slice', '图片分割工具')">
+            <el-card class="card">
+              <i class="fas fa-th icon"></i>
+              <div class="title">图片分割</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/textToImage', '富文本制图工具')">
+            <el-card class="card">
+              <span class="fas fa-file-alt icon"></span>
+              <div class="title">富文本制图</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/resizer', '尺寸调整工具')">
+            <el-card class="card">
+              <span class="fas fa-compress icon"></span>
+              <div class="title">尺寸调整</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/compress', '图片压缩工具')">
+            <el-card class="card">
+              <span class="fas fa-compress-arrows-alt icon"></span>
+              <div class="title">图片压缩</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/convert', '格式转换工具')">
+            <el-card class="card">
+              <span class="fas fa-sync-alt icon"></span>
+              <div class="title">格式转换</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/exif', 'EXIF 读取工具')">
+            <el-card class="card">
+              <span class="fas fa-camera icon"></span>
+              <div class="title">EXIF 读取</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/palette', '色彩提取工具')">
+            <el-card class="card">
+              <span class="fas fa-palette icon"></span>
+              <div class="title">色彩提取</div>
+            </el-card>
+          </div>
+          <div class="container" @click="open('/fonts', '字体管理工具')">
+            <el-card class="card">
+              <span class="fas fa-font icon"></span>
+              <div class="title">字体管理</div>
+            </el-card>
+          </div>
+        </div>
+      </div>
+      <div id="big-cards-holder" key="big" v-else>
         <div id="scroll">
           <div class="space">&nbsp;</div>
           <div class="container" @click="open('/watermark', '图片加水印工具')">
@@ -170,11 +240,17 @@ export default {
       return this.totalMessages - this.$store.state.messages.messageList.length
     }
   },
+  updated() {
+    if (document.getElementById('scroll')) {
+      document.getElementById('scroll').addEventListener('mousewheel', (event) => {
+        if (document.getElementById('scroll')) {
+            document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
+            event.preventDefault()
+        }
+      })
+    }
+  },
   mounted() {
-    document.getElementById('scroll').addEventListener('mousewheel', (event) => {
-      document.getElementById('scroll').scrollLeft -= event.wheelDelta / 5
-      event.preventDefault()
-    })
     this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
       this.totalMessages = res.data.length
     })
@@ -339,7 +415,63 @@ export default {
       }
     }
     
-    #cards-holder {
+    #small-cards-holder {
+      width: 100%;
+      margin-top: 50px;
+      -webkit-app-region: no-drag;
+
+      #wrapper {
+        display: flex;
+        flex-wrap: wrap;
+
+        .container {
+          width: calc(100% / 6);
+          padding: 5px;
+          box-sizing: border-box;
+
+          .card {
+            width: 100%;
+            height: 120px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--dark-gray);
+            text-align: center;
+            
+            .icon {
+              font-size: 40px;
+            }
+            
+            .title {
+              font-size: 12px;
+              margin-top: 10px;
+            }
+            
+            &:hover {
+              transform: scale(1.05);
+              color: var(--main-color);
+            }
+            
+            &:active {
+              filter: brightness(0.9);
+            }
+          }
+
+          .el-card {
+            border-radius: 12px;
+
+            .el-card__body {
+              padding: 0;
+            }
+          }
+        }
+      }
+    }
+
+    #big-cards-holder {
       width: 100%;
       margin-top: 50px;
       position: relative;
@@ -363,7 +495,6 @@ export default {
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
             cursor: pointer;
             font-size: 14px;
             color: var(--dark-gray);
@@ -394,6 +525,10 @@ export default {
             &:last-child {
               margin-right: 0;
             }
+          }
+
+          .el-card {
+            border-radius: 12px;
           }
         }
         

@@ -52,16 +52,6 @@ export default new Router({
       component: require('@/pages/splicer/template').default
     },
     {
-      path: '/splicer/horizontalEditor',
-      name: 'splicerHorizontalEditor',
-      component: require('@/pages/splicer/horizontalEditor').default
-    },
-    {
-      path: '/splicer/horizontalTemplate',
-      name: 'splicerHorizontalTemplate',
-      component: require('@/pages/splicer/horizontalTemplate').default
-    },
-    {
       path: '/cropper',
       name: 'cropper',
       component: require('@/pages/cropper').default
