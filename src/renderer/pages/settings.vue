@@ -270,6 +270,10 @@ export default {
         {
           title: 'Color Thief',
           url: 'https://github.com/lokesh/color-thief'
+        },
+        {
+          title: 'Crypto-JS',
+          url: 'https://github.com/brix/crypto-js'
         }
       ],
       version: null,
@@ -563,7 +567,7 @@ export default {
       })
     },
     switchHomeIconStyle(value) {
-      this.$store.dispatch('settings/changeHomeIconStyle')
+      this.$store.dispatch('settings/changeHomeIconStyle', value)
     }
   },
   mounted() {
@@ -589,7 +593,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -771,6 +775,7 @@ export default {
     }
     
     #info {      
+      
       #intro {
         display: flex;
         flex-direction: row;

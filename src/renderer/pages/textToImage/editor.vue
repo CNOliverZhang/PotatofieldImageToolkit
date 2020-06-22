@@ -978,9 +978,10 @@ export default {
       })
     },
     close() {
-      this.$store.dispatch('textToImage/contentReset')
-      ipcRenderer.send('close')
-      this.$destroy()
+      this.$store.dispatch('textToImage/contentReset').then(() => {
+        ipcRenderer.send('close')
+        this.$destroy()
+      })
     },
     selectSaveFolder() {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
@@ -1300,16 +1301,6 @@ export default {
 </script>
 
 <style lang="scss">  
-.el-color-dropdown {
-  button {
-    font-family: var(--main-font);
-  }
-}
-
-.el-popper {
-  -webkit-app-region: no-drag;
-}
-
 #text-to-image-editor {
   width: 100%;
   height: 100%;
@@ -1329,7 +1320,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -1536,6 +1527,9 @@ export default {
       #preview-container {
         width: 100%;
         height: 100%;
+        border-color: var(--light-gray);
+        border-style: solid;
+        border-width: 1px;
         border-radius: 6px;
         box-sizing: border-box;
         overflow-x: hidden;

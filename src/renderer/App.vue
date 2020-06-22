@@ -42,6 +42,7 @@ export default {
   --transparent: rgba(255, 255, 255, 0);
   --transparent-black-cover: rgba(0, 0, 0, 0.3);
   --transparent-white-cover: rgba(255, 255, 255, 0.3);
+  --card-shadow: rgba(0, 0, 0, 0.1);
 }
 
 body {

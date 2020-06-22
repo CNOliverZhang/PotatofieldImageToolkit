@@ -28,90 +28,92 @@
               <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
             </el-upload>
           </div>
-          <div id="info" v-if="info != null">
-            <div class="row">
-              <div class="text">
-                作者：{{ info.artist ? info.artist : '无信息' }}
+          <div id="info-wrapper" v-if="info != null">
+            <div id="info">
+              <div class="row">
+                <div class="text">
+                  作者：{{ info.artist ? info.artist : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                相机制造商：{{ info.make ? info.make : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  相机制造商：{{ info.make ? info.make : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                相机型号：{{ info.model ? info.model : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  相机型号：{{ info.model ? info.model : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                拍摄时间：{{ info.time ? info.time : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  拍摄时间：{{ info.time ? info.time : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                曝光补偿：{{ info.exposureBias ? info.exposureBias : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  曝光补偿：{{ info.exposureBias ? info.exposureBias : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                曝光模式：{{ info.exposureMode ? info.exposureMode : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  曝光模式：{{ info.exposureMode ? info.exposureMode : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                曝光程序：{{ info.exposureProgram ? info.exposureProgram : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  曝光程序：{{ info.exposureProgram ? info.exposureProgram : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                快门速度：{{ info.shutterSpeed ? info.shutterSpeed : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  快门速度：{{ info.shutterSpeed ? info.shutterSpeed : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                光圈值：{{ info.apertureValue ? info.apertureValue : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  光圈值：{{ info.apertureValue ? info.apertureValue : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                感光度：{{ info.iso ? info.iso : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  感光度：{{ info.iso ? info.iso : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                镜头焦距：{{ info.focalLength ? info.focalLength : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  镜头焦距：{{ info.focalLength ? info.focalLength : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                等效 35mm 画幅焦距：{{ info.equivalenceFocalLength ? info.equivalenceFocalLength : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  等效 35mm 画幅焦距：{{ info.equivalenceFocalLength ? info.equivalenceFocalLength : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                文件横向尺寸：{{ info.width ? info.width : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  文件横向尺寸：{{ info.width ? info.width : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                文件纵向尺寸：{{ info.height ? info.height : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  文件纵向尺寸：{{ info.height ? info.height : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                图像宽度：{{ info.rotatedWidth ? info.rotatedWidth : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  图像宽度：{{ info.rotatedWidth ? info.rotatedWidth : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                图像高度：{{ info.rotatedHeight ? info.rotatedHeight : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  图像高度：{{ info.rotatedHeight ? info.rotatedHeight : '无信息' }}
+                </div>
               </div>
-            </div>
-            <div class="row">
-              <div class="text">
-                软件：{{ info.software ? info.software : '无信息' }}
+              <div class="row">
+                <div class="text">
+                  软件：{{ info.software ? info.software : '无信息' }}
+                </div>
               </div>
             </div>
           </div>
@@ -171,7 +173,7 @@ export default {
                 dialog.change({
                   type: 'error',
                   title: '未读取到信息',
-                  text: '由照相机拍摄的 JPEG 文件才具有 EXIF 信息。',
+                  text: '该 JPEG 文件未包含 EXIF 信息。',
                   showConfirm: true
                 })
                 this.image = ''
@@ -293,7 +295,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -435,10 +437,6 @@ export default {
       justify-content: space-between;
       align-items: center;
       
-      .control {
-        width: 60%;
-      }
-      
       &:first-child {
         margin-top: 0;
       }
@@ -469,8 +467,9 @@ export default {
     }
       
     #image-container {
-      flex-grow: 1;
+      width: 0;
       height: 100%;
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -491,6 +490,7 @@ export default {
           max-width: 100%;
           max-height: 100%;
           display: block;
+          box-shadow: 0 0 10px var(--black);
         }
       }
       
@@ -532,43 +532,48 @@ export default {
         }
       }
     }
-    
-    #info {
-      width: calc(50% - 5px);
+
+    #info-wrapper {
+      width: 0;
       height: 100%;
-      flex-shrink: 0;
-      margin-left: 10px;
-      background-color: var(--black-gray);
-      padding: 10px;
-      box-sizing: border-box;
-      border-radius: 6px;
-      overflow-x: hidden;
-      overflow-y: scroll;
-      
-      .text {
-        color: var(--white);
-      }
-      
-      &::-webkit-scrollbar {
-        width: 10px;
-      }
-          
-      &::-webkit-scrollbar-track {
-        border-radius: 5px;
-        background-color: var(--white-gray);
+      flex-grow: 1;
+      margin-left: 20px;
+    
+      #info {
+        width: 100%;
+        height: 100%;
+        background-color: var(--black-gray);
+        padding: 10px;
+        box-sizing: border-box;
+        border-radius: 6px;
+        overflow-x: hidden;
+        overflow-y: scroll;
         
-        &:hover {
-          background-color: var(--light-gray);
+        .text {
+          color: var(--white);
         }
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        border-radius: 5px;
-        background-color: var(--gray);
-        transition: 0.2s;
         
-        &:hover {
-          background-color: var(--dark-gray);
+        &::-webkit-scrollbar {
+          width: 10px;
+        }
+            
+        &::-webkit-scrollbar-track {
+          border-radius: 5px;
+          background-color: var(--white-gray);
+          
+          &:hover {
+            background-color: var(--light-gray);
+          }
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          border-radius: 5px;
+          background-color: var(--gray);
+          transition: 0.2s;
+          
+          &:hover {
+            background-color: var(--dark-gray);
+          }
         }
       }
     }

@@ -1460,12 +1460,6 @@ export default {
 </script>
 
 <style lang="scss">  
-.el-color-dropdown {
-  button {
-    font-family: var(--main-font);
-  }
-}
-
 #watermark-editor {
   width: 100%;
   height: 100%;
@@ -1485,7 +1479,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -1696,8 +1690,8 @@ export default {
       #sample-container {
         width: 100%;
         height: 100%;
-        flex-shrink: 0;
         background-color: var(--black-gray);
+        box-sizing: border-box;
         border-radius: 6px;
         display: flex;
         justify-content: center;
@@ -1708,6 +1702,7 @@ export default {
         #sample {
           max-width: 100%;
           max-height: 100%;
+          box-shadow: 0 0 10px var(--black);
         }
         
         #watermark-container {

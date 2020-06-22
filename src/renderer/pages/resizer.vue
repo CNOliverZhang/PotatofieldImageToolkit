@@ -44,7 +44,7 @@
               </div>
             </div>
           </div>
-          <div v-if="this.fileList.length != 0" class="controller">
+          <div v-if="this.fileList.length != 0" id="controller">
             <div class="control-row">
               <div class="text">目标尺寸参考基准</div>
               <el-radio-group v-model="standard" class="control">
@@ -159,7 +159,6 @@
             </div>
             <div class="row">
               <el-pagination
-               
                 small
                 background
                 layout="prev, pager, next"
@@ -701,7 +700,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -846,7 +845,7 @@ export default {
       align-items: center;
       
       .control {
-        width: 60%;
+        width: 70%;
       }
       
       &:first-child {
@@ -867,7 +866,7 @@ export default {
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
-      
+
       .control {
         width: 60%;
       }
@@ -901,10 +900,6 @@ export default {
       }
     }
     
-    .controller {
-      margin-top: 10px;
-    }
-    
     .wrapper {
       width: 100%;
       height: 100%;
@@ -914,20 +909,20 @@ export default {
     
     .el-input-group {
       display: flex;
-    }
     
-    .el-input-group__prepend {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .el-input-group__append {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      .el-input-group__prepend {
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      .el-input-group__append {
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     }
     
     .el-switch {
@@ -940,8 +935,20 @@ export default {
       justify-content: flex-end;
 
       .el-radio-button__inner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         height: 28px;
+        padding-top: 0;
+        padding-bottom: 0;
+        padding-left: 8px;
+        padding-right: 8px;
       }
+    }
+
+    .el-slider__button {
+      width: 8px;
+      height: 8px;
     }
       
     #single {
@@ -960,7 +967,7 @@ export default {
           transition: 0.5s;
           
           &.half {
-            width: calc(50% - 5px);
+            width: calc(50% - 10px);
           }
           
           .el-upload {
@@ -995,7 +1002,7 @@ export default {
         }
         
         #file-list {
-          width: calc(50% - 5px);
+          width: calc(50% - 10px);
           height: 100%;
           display: flex;
           flex-direction: column;
@@ -1078,35 +1085,14 @@ export default {
           }
         }
       }
+
+      #controller {
+        margin-top: 10px;
+      }
     }
     
     #multiple {
-      
-      .el-pagination {
-        padding: 0;
-        margin-right: 10px;
-        
-        li {
-          min-width: 24px;
-          height: 28px;
-          line-height: 28px;
-        }
-        
-        .btn-prev {
-          width: 24px;
-          height: 28px;
-          line-height: 28px;
-          margin-left: 0;
-        }
-        
-        .btn-next {
-          width: 24px;
-          height: 28px;
-          line-height: 28px;
-          margin-right: 0;
-        }
-      }
-      
+
       #file-list {
         width: 100%;
         height: 0;
@@ -1211,6 +1197,31 @@ export default {
           &:hover {
             background-color: var(--gray);
           }
+        }
+      }
+      
+      .el-pagination {
+        padding: 0;
+        margin-right: 10px;
+        
+        li {
+          min-width: 24px;
+          height: 28px;
+          line-height: 28px;
+        }
+        
+        .btn-prev {
+          width: 24px;
+          height: 28px;
+          line-height: 28px;
+          margin-left: 0;
+        }
+        
+        .btn-next {
+          width: 24px;
+          height: 28px;
+          line-height: 28px;
+          margin-right: 0;
         }
       }
     }

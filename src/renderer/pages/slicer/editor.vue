@@ -1,5 +1,5 @@
 <template>
-  <div id="slice-editor">
+  <div id="slicer-editor">
     <div id="header">
       <div id="title">图片分割工具 - 编辑器</div>
       <div id="minimize" class="control-button" @click="minimize">
@@ -21,7 +21,7 @@
         </div>
         <div id="image-wrapper">
           <div id="image-container">
-            <img :src="this.$store.state.slice.fileList[fileIndex].fullpath" id="image">
+            <img :src="this.$store.state.slicer.fileList[fileIndex].fullpath" id="image">
             <div id="grids">
               <div
                 v-for="number in Array.from({ length: row * column })"
@@ -131,7 +131,7 @@
               </div>
               <div id="list">
                 <div
-                  v-for="(file, index) in this.$store.state.slice.fileList"
+                  v-for="(file, index) in this.$store.state.slicer.fileList"
                   :key="file.fullpath"
                   class="file"
                   @click="init(index)">
@@ -162,7 +162,7 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'sliceEditor',
+  name: 'slicerEditor',
   data() {
     return {
       errorList: [],
@@ -194,18 +194,19 @@ export default {
       }, 200)
     },
     back() {
-      this.$store.dispatch('slice/fileListEmpty').then(() => {
-        this.$router.replace('/slice')
+      this.$store.dispatch('slicer/fileListEmpty').then(() => {
+        this.$router.replace('/slicer')
       })
     },
     close() {
-      this.$store.dispatch('slice/fileListEmpty')
-      ipcRenderer.send('close')
-      this.$destroy()
+      this.$store.dispatch('slicer/fileListEmpty').then(() => {
+        ipcRenderer.send('close')
+        this.$destroy()
+      })
     },
     handleDelete(index) {
-      if (this.$store.state.slice.fileList.length > 1) {
-        this.$store.dispatch('slice/fileListDelete', index).then(() => {
+      if (this.$store.state.slicer.fileList.length > 1) {
+        this.$store.dispatch('slicer/fileListDelete', index).then(() => {
           if (this.fileIndex > index) {
             this.fileIndex -= 1
           } else if (this.fileIndex == index) {
@@ -241,15 +242,15 @@ export default {
         text: '即将完成，请稍后。',
         showConfirm: false
       }).then((dialog) => {
-        if (index >= this.$store.state.slice.fileList.length) {
-          this.fileIndex = this.$store.state.slice.fileList.length - 1
+        if (index >= this.$store.state.slicer.fileList.length) {
+          this.fileIndex = this.$store.state.slicer.fileList.length - 1
         } else {
           this.fileIndex = index
         }
         let img = document.createElement('img')
-        img.src = this.$store.state.slice.fileList[this.fileIndex].fullpath
+        img.src = this.$store.state.slicer.fileList[this.fileIndex].fullpath
         img.onerror = () => {
-          if (this.$store.state.slice.fileList.length == 1) {
+          if (this.$store.state.slicer.fileList.length == 1) {
             dialog.change({
               type: 'error',
               title: '出现错误',
@@ -260,7 +261,7 @@ export default {
               }
             })
           } else {
-            this.$store.dispatch('slice/fileListDelete', index)
+            this.$store.dispatch('slicer/fileListDelete', index)
             dialog.change({
               type: 'error',
               title: '出现错误',
@@ -355,7 +356,7 @@ export default {
           }
           let distExt
           if (this.mimeType == '保持原格式') {
-            distExt = this.$store.state.slice.fileList[this.fileIndex].ext
+            distExt = this.$store.state.slicer.fileList[this.fileIndex].ext
           } else if (this.mimeType == 'JPEG') {
             distExt = 'jpg'
           } else if (this.mimeType == 'WEBP') {
@@ -378,22 +379,22 @@ export default {
               context.drawImage(canvas, -grid.width * column, -grid.height * row)
               let url = grid.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
               let buffer = new Buffer.from(url, 'base64')
-              let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[this.fileIndex].filename)
+              let distDirectory = path.join(this.distDirectory, this.$store.state.slicer.fileList[this.fileIndex].filename)
               CreateDirectory(distDirectory)
-              let filename = this.$store.state.slice.fileList[this.fileIndex].filename
+              let filename = this.$store.state.slicer.fileList[this.fileIndex].filename
               filename = filename + '_' + (row + 1) + '_' + (column + 1) + '.' + distExt
               let distFullpath = path.join(distDirectory, filename)
               fs.writeFileSync(distFullpath, buffer)
             }
           }
-          if (this.$store.state.slice.fileList.length > 1) {
+          if (this.$store.state.slicer.fileList.length > 1) {
             dialog.change({
               type: 'success',
               title: '成功',
               text: '处理完成，裁剪后的图片已保存到目标文件夹。',
               showConfirm: true,
               confirmFunction: () => {
-                this.$store.dispatch('slice/fileListDelete', this.fileIndex).then(() => {
+                this.$store.dispatch('slicer/fileListDelete', this.fileIndex).then(() => {
                   this.init(this.fileIndex)
                 })
               }
@@ -427,7 +428,7 @@ export default {
           let handleSingle = (file, index) => {
             return new Promise((resolve, reject) => {
               dialog.change({
-                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.slice.fileList.length) + ' 张。'
+                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.slicer.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = file
                 let img = document.createElement('img')
@@ -521,9 +522,9 @@ export default {
                           context.drawImage(newCanvas, -grid.width * column, -grid.height * row)
                           let url = grid.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
                           let buffer = new Buffer.from(url, 'base64')
-                          let distDirectory = path.join(this.distDirectory, this.$store.state.slice.fileList[index].filename)
+                          let distDirectory = path.join(this.distDirectory, this.$store.state.slicer.fileList[index].filename)
                           CreateDirectory(distDirectory)
-                          let filename = this.$store.state.slice.fileList[index].filename
+                          let filename = this.$store.state.slicer.fileList[index].filename
                           filename = filename + '_' + (row + 1) + '_' +(column + 1) + '.' + distExt
                           let distFullpath = path.join(distDirectory, filename)
                           fs.writeFile(distFullpath, buffer, (error) => {
@@ -541,7 +542,7 @@ export default {
             })
           }
           let progress = Promise.resolve()
-          this.$store.state.slice.fileList.forEach((file, index) => {
+          this.$store.state.slicer.fileList.forEach((file, index) => {
             progress = progress.then(() => {
               return handleSingle(file, index)
             })
@@ -609,11 +610,7 @@ export default {
 </script>
 
 <style lang="scss">
-.el-popper {
-  -webkit-app-region: no-drag;
-}
-
-#slice-editor {
+#slicer-editor {
   width: 100%;
   height: 100%;
   display: flex;
@@ -632,7 +629,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -857,6 +854,7 @@ export default {
           max-width: 100%;
           max-height: 100%;
           display: block;
+          box-shadow: 0 0 10px var(--black);
         }
         
         #grids {

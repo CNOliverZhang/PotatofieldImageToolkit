@@ -28,101 +28,103 @@
               <div class="el-upload__text">将图片拖到此处，或<em>点击选择图片</em></div>
             </el-upload>
           </div>
-          <div id="colors" v-if="colors != null">
-            <div class="controller">
-              <div class="row">
-                <div class="subtitle">图片的主色调</div>
-              </div>
-              <div class="row">
-                <div class="color-preview" :style="{
-                  'background-color': colors.mainColor.hex
-                }"></div>
-                <div class="color-codes">
-                  <div class="row">
-                    <div class="color-code">RGB：({{ colors.mainColor.rgb.r }}, {{ colors.mainColor.rgb.g }}, {{ colors.mainColor.rgb.b }})</div>
+          <div id="colors-wrapper" v-if="colors != null">
+            <div id="colors">
+              <div class="controller">
+                <div class="row">
+                  <div class="subtitle">图片的主色调</div>
+                </div>
+                <div class="row">
+                  <div class="color-preview" :style="{
+                    'background-color': colors.mainColor.hex
+                  }"></div>
+                  <div class="color-codes">
+                    <div class="row">
+                      <div class="color-code">RGB：({{ colors.mainColor.rgb.r }}, {{ colors.mainColor.rgb.g }}, {{ colors.mainColor.rgb.b }})</div>
+                      <div
+                        class="color-code-copy"
+                        @click="copyColorCode('(' + colors.mainColor.rgb.r + ', ' + colors.mainColor.rgb.g + ', ' + colors.mainColor.rgb.b + ')')">复制 RGB 代码</div>
+                    </div>
+                    <div class="row">
+                      <div class="color-code">HEX：{{ colors.mainColor.hex }}</div>
+                      <div class="color-code-copy" @click="copyColorCode(colors.mainColor.hex)">复制十六进制代码</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="subtitle">从图片提取的色盘</div>
+                </div>
+                <div id="palette-colors" class="row">
+                  <div v-for="(color, index) in colors.palette" :key="index">
                     <div
-                      class="color-code-copy"
-                      @click="copyColorCode('(' + colors.mainColor.rgb.r + ', ' + colors.mainColor.rgb.g + ', ' + colors.mainColor.rgb.b + ')')">复制 RGB 代码</div>
-                  </div>
-                  <div class="row">
-                    <div class="color-code">HEX：{{ colors.mainColor.hex }}</div>
-                    <div class="color-code-copy" @click="copyColorCode(colors.mainColor.hex)">复制十六进制代码</div>
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="subtitle">从图片提取的色盘</div>
-              </div>
-              <div id="palette-colors" class="row">
-                <div v-for="(color, index) in colors.palette" :key="index">
-                  <div
-                    class="color-preview"
-                    :style="{
-                      'background-color': color.hex,
-                      'border-color': index == chosenColor ? 'var(--main-color)' : '',
-                      'border-width': index == chosenColor ? '3px' : ''
-                    }"
-                    @click="chooseColor(index)"></div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="color-preview" :style="{
-                  'background-color': colors.palette[chosenColor].hex
-                }"></div>
-                <div class="color-codes">
-                  <div class="row">
-                    <div class="color-code">RGB：({{ colors.palette[chosenColor].rgb.r }}, {{ colors.palette[chosenColor].rgb.g }}, {{ colors.palette[chosenColor].rgb.b }})</div>
-                    <div class="color-code-copy"
-                      @click="copyColorCode('(' + colors.palette[chosenColor].rgb.r + ', ' + colors.palette[chosenColor].rgb.g + ', ' + colors.palette[chosenColor].rgb.b + ')')">复制 RGB 代码</div>
-                  </div>
-                  <div class="row">
-                    <div class="color-code">HEX：{{ colors.palette[chosenColor].hex }}</div>
-                    <div class="color-code-copy" @click="copyColorCode(colors.palette[chosenColor].hex)">复制十六进制代码</div>
+                      class="color-preview"
+                      :style="{
+                        'background-color': color.hex,
+                        'border-color': index == chosenColor ? 'var(--main-color)' : '',
+                        'border-width': index == chosenColor ? '3px' : ''
+                      }"
+                      @click="chooseColor(index)"></div>
                   </div>
                 </div>
+                <div class="row">
+                  <div class="color-preview" :style="{
+                    'background-color': colors.palette[chosenColor].hex
+                  }"></div>
+                  <div class="color-codes">
+                    <div class="row">
+                      <div class="color-code">RGB：({{ colors.palette[chosenColor].rgb.r }}, {{ colors.palette[chosenColor].rgb.g }}, {{ colors.palette[chosenColor].rgb.b }})</div>
+                      <div class="color-code-copy"
+                        @click="copyColorCode('(' + colors.palette[chosenColor].rgb.r + ', ' + colors.palette[chosenColor].rgb.g + ', ' + colors.palette[chosenColor].rgb.b + ')')">复制 RGB 代码</div>
+                    </div>
+                    <div class="row">
+                      <div class="color-code">HEX：{{ colors.palette[chosenColor].hex }}</div>
+                      <div class="color-code-copy" @click="copyColorCode(colors.palette[chosenColor].hex)">复制十六进制代码</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="subtitle">导出色盘为图片</div>
+                </div>
               </div>
-              <div class="row">
-                <div class="subtitle">导出色盘为图片</div>
+              <div id="palette-image">
+                <div
+                  v-for="(color, index) in colors.palette"
+                  :key="index"
+                  class="color"
+                  :style="{
+                    'background-color': color.hex
+                  }"></div>
               </div>
-            </div>
-            <div id="palette-image">
-              <div
-                v-for="(color, index) in colors.palette"
-                :key="index"
-                class="color"
-                :style="{
-                  'background-color': color.hex
-                }"></div>
-            </div>
-            <div class="controller">
-              <div class="control-row">
-                <div class="text">导出选项</div>
-                <el-switch
-                  v-model="withOriginalImage"
-                  active-color="var(--main-color)"
-                  inactive-color="var(--main-color)"
-                  active-text="与原图拼接"
-                  inactive-text="单独导出"
-                  class="control"></el-switch>
-              </div>
-              <div class="control-row">
-                <div class="text">存储位置</div>
-                <el-input disabled size="mini" v-model="distDirectory" class="control">
-                  <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
-                </el-input>
-              </div>
-              <div class="control-row">
-                <div class="text">文件名</div>
-                <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
-                  <el-select v-model="mimeType" size="mini" slot="append">
-                    <el-option label=".jpg" value="jpeg"/>
-                    <el-option label=".webp" value="webp"/>
-                    <el-option label=".png" value="png"/>
-                  </el-select>
-                </el-input>
-              </div>
-              <div class="row">
-                <el-button type="primary" size="mini" @click="save" class="bar-button">导出</el-button>
+              <div class="controller">
+                <div class="control-row">
+                  <div class="text">导出选项</div>
+                  <el-switch
+                    v-model="withOriginalImage"
+                    active-color="var(--main-color)"
+                    inactive-color="var(--main-color)"
+                    active-text="与原图拼接"
+                    inactive-text="单独导出"
+                    class="control"></el-switch>
+                </div>
+                <div class="control-row">
+                  <div class="text">存储位置</div>
+                  <el-input disabled size="mini" v-model="distDirectory" class="control">
+                    <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
+                  </el-input>
+                </div>
+                <div class="control-row">
+                  <div class="text">文件名</div>
+                  <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
+                    <el-select v-model="mimeType" size="mini" slot="append">
+                      <el-option label=".jpg" value="jpeg"/>
+                      <el-option label=".webp" value="webp"/>
+                      <el-option label=".png" value="png"/>
+                    </el-select>
+                  </el-input>
+                </div>
+                <div class="row">
+                  <el-button type="primary" size="mini" @click="save" class="bar-button">导出</el-button>
+                </div>
               </div>
             </div>
           </div>
@@ -274,8 +276,8 @@ export default {
         } else {
           dialog.change({
             type: 'error',
-            title: '格式不正确',
-            text: '仅支持读取 JPEG 文件及 PNG 文件！',
+            title: '不支持该文件格式',
+            text: '您选择的文件格式不受支持，无法读取。请选择常见格式的图片文件。',
             showConfirm: true
           })
         }
@@ -413,7 +415,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -611,23 +613,23 @@ export default {
     
     .el-input-group {
       display: flex;
-    }
     
-    .el-input-group__prepend {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+      .el-input-group__prepend {
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
     
-    .el-input-group__append {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      .el-input-group__append {
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-      .el-select .el-input {
-        width: 80px;
+        .el-select .el-input {
+          width: 80px;
+        }
       }
     }
     
@@ -637,8 +639,9 @@ export default {
     }
       
     #image-container {
-      flex-grow: 1;
+      width: 0;
       height: 100%;
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -659,6 +662,7 @@ export default {
           max-width: 100%;
           max-height: 100%;
           display: block;
+          box-shadow: 0 0 10px var(--black);
         }
       }
       
@@ -701,78 +705,83 @@ export default {
       }
     }
     
-    #colors {
-      width: calc(50% - 5px);
+    #colors-wrapper {
+      width: 0;
       height: 100%;
-      flex-shrink: 0;
-      margin-left: 10px;
-      overflow-x: hidden;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      
-      .color-preview {
-        width: 40px;
-        height: 40px;
-        border-radius: 6px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: var(--light-gray);
-        box-sizing: border-box;
-      }
-      
-      .color-codes {
-        flex-grow: 1;
-        margin-left: 15px;
-        font-size: 14px;
+      flex-grow: 1;
+      margin-left: 20px;
+
+      #colors {
+        width: 100;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
         
-        .row {
-          margin-bottom: 0;
-          margin-top: 0;
+        .color-preview {
+          width: 40px;
+          height: 40px;
+          border-radius: 6px;
+          border-style: solid;
+          border-width: 1px;
+          border-color: var(--light-gray);
+          box-sizing: border-box;
         }
         
-        .color-code-copy {
-          cursor: pointer;
-          transition: 0.2s;
+        .color-codes {
+          flex-grow: 1;
+          margin-left: 15px;
+          font-size: 14px;
           
-          &:hover {
-            color: var(--main-color);
+          .row {
+            margin-bottom: 0;
+            margin-top: 0;
+          }
+          
+          .color-code-copy {
+            cursor: pointer;
+            transition: 0.2s;
+            
+            &:hover {
+              color: var(--main-color);
+            }
           }
         }
-      }
-      
-      .controller {
-        margin-bottom: 10px;
-        margin-top: 10px;
         
-        &:first-child {
-          margin-top: 0;
+        .controller {
+          margin-bottom: 10px;
+          margin-top: 10px;
+          
+          &:first-child {
+            margin-top: 0;
+          }
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
         }
         
-        &:last-child {
-          margin-bottom: 0;
+        #palette-colors {
+          .color-preview {
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+          }
         }
-      }
-      
-      #palette-colors {
-        .color-preview {
-          width: 36px;
-          height: 36px;
-          cursor: pointer;
-        }
-      }
-      
-      #palette-image {
-        width: 100%;
-        height: 0;
-        flex-grow: 1;
-        display: flex;
         
-        .color {
+        #palette-image {
           width: 100%;
-          height: 100%;
+          height: 0;
           flex-grow: 1;
-          flex-shrink: 1;
+          display: flex;
+          
+          .color {
+            width: 100%;
+            height: 100%;
+            flex-grow: 1;
+            flex-shrink: 1;
+          }
         }
       }
     }

@@ -11,7 +11,7 @@
               <span class="fa fa-envelope"></span>
             </el-badge>
           </div>
-          <div key="noNnreadMessage" v-else>
+          <div key="noUnreadMessage" v-else>
             <span class="fa fa-envelope"></span>
           </div>
           <div>消息中心</div>
@@ -36,70 +36,70 @@
       <div id="small-cards-holder" key="small" v-if="this.$store.state.settings.smallHomeIcon">
         <div id="wrapper">
           <div class="container" @click="open('/watermark', '图片加水印工具')">
-            <el-card class="card">
+            <div class="card">
               <i class="fas fa-feather-alt icon"></i>
               <div class="title">图片加水印</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/splicer', '长图拼接工具')">
-            <el-card class="card">
+            <div class="card">
               <i class="fas fa-images icon"></i>
               <div class="title">长图拼接</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/cropper', '图片裁剪工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-crop-alt icon"></span>
               <div class="title">图片裁剪</div>
-            </el-card>
+            </div>
           </div>
-          <div class="container" @click="open('/slice', '图片分割工具')">
-            <el-card class="card">
+          <div class="container" @click="open('/slicer', '图片分割工具')">
+            <div class="card">
               <i class="fas fa-th icon"></i>
               <div class="title">图片分割</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/textToImage', '富文本制图工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-file-alt icon"></span>
               <div class="title">富文本制图</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/resizer', '尺寸调整工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-compress icon"></span>
               <div class="title">尺寸调整</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/compress', '图片压缩工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-compress-arrows-alt icon"></span>
               <div class="title">图片压缩</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/convert', '格式转换工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-sync-alt icon"></span>
               <div class="title">格式转换</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/exif', 'EXIF 读取工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-camera icon"></span>
               <div class="title">EXIF 读取</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/palette', '色彩提取工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-palette icon"></span>
               <div class="title">色彩提取</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/fonts', '字体管理工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-font icon"></span>
               <div class="title">字体管理</div>
-            </el-card>
+            </div>
           </div>
         </div>
       </div>
@@ -107,70 +107,70 @@
         <div id="scroll">
           <div class="space">&nbsp;</div>
           <div class="container" @click="open('/watermark', '图片加水印工具')">
-            <el-card class="card">
+            <div class="card">
               <i class="fas fa-feather-alt icon"></i>
               <div class="title">图片加水印工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/splicer', '长图拼接工具')">
-            <el-card class="card">
+            <div class="card">
               <i class="fas fa-images icon"></i>
               <div class="title">长图拼接工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/cropper', '图片裁剪工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-crop-alt icon"></span>
               <div class="title">图片裁剪工具</div>
-            </el-card>
+            </div>
           </div>
-          <div class="container" @click="open('/slice', '图片分割工具')">
-            <el-card class="card">
+          <div class="container" @click="open('/slicer', '图片分割工具')">
+            <div class="card">
               <i class="fas fa-th icon"></i>
               <div class="title">图片分割工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/textToImage', '富文本制图工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-file-alt icon"></span>
               <div class="title">富文本制图工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/resizer', '尺寸调整工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-compress icon"></span>
               <div class="title">尺寸调整工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/compress', '图片压缩工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-compress-arrows-alt icon"></span>
               <div class="title">图片压缩工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/convert', '格式转换工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-sync-alt icon"></span>
               <div class="title">格式转换工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/exif', 'EXIF 读取工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-camera icon"></span>
               <div class="title">EXIF 读取工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/palette', '色彩提取工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-palette icon"></span>
               <div class="title">色彩提取工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="container" @click="open('/fonts', '字体管理工具')">
-            <el-card class="card">
+            <div class="card">
               <span class="fas fa-font icon"></span>
               <div class="title">字体管理工具</div>
-            </el-card>
+            </div>
           </div>
           <div class="space">&nbsp;</div>
         </div>
@@ -181,6 +181,7 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import AES from 'crypto-js/aes';
 
 export default {
   name: 'index',
@@ -207,7 +208,7 @@ export default {
           showCancel: true,
           confirmFunction: () => {
             this.$store.dispatch('watermark/fileListEmpty')
-            this.$store.dispatch('slice/fileListEmpty')
+            this.$store.dispatch('slicer/fileListEmpty')
             this.$store.dispatch('splicer/fileListEmpty')
             this.$store.dispatch('textToImage/contentReset')
             this.$store.dispatch('cropper/fileListEmpty')
@@ -251,9 +252,6 @@ export default {
     }
   },
   mounted() {
-    this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
-      this.totalMessages = res.data.length
-    })
     ipcRenderer.on('exit', () => {
       this.exit()
     })
@@ -346,244 +344,270 @@ export default {
         }
       })
     })
+    document.body.id = 'index-wrapper'
+    this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
+      this.totalMessages = res.data.length
+    }).catch(() => {})
+    let version = ipcRenderer.sendSync('version')
+    if (this.$store.state.settings.identifier) {
+      this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
+        identifier: this.$store.state.settings.identifier,
+        version: version
+      })
+    } else {
+      let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), version).toString()
+      this.$store.dispatch('settings/setIdentifier', identifier).then(() => {
+        this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
+          identifier: identifier,
+          version: version
+        })
+      })
+    }
   }
 }
 </script>
 
 <style lang="scss">
-#index {
-  width: 100%;
-  height: 100%;
-  padding: 10px;
-  box-sizing: border-box;
-  -webkit-app-region: drag;
+#index-wrapper {
 
-  #content {
+  .v-modal {
+    margin: 6px;
+    border-radius: 20px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: unset;
+    height: unset;
+  }
+
+  #index {
     width: 100%;
     height: 100%;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(136, 136, 136, 0.5);
-    background-color: #FFFFFF;
-    padding: 60px;
+    padding: 6px;
     box-sizing: border-box;
-    
-    #title-bar {
+    -webkit-app-region: drag;
+
+    #content {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+      background-color: #FFFFFF;
+      padding: 60px;
+      box-sizing: border-box;
       display: flex;
+      flex-direction: column;
       justify-content: space-between;
-      align-items: center;
       
-      #logo {
-        width: 50px;
-        height: 50px;
-        object-fit: contain;
-      }
-      
-      #title {
-        margin-left: 10px;
-      }
-      
-      #title-bar-space {
-        flex-grow: 1;
-      }
-      
-      .control-button {
+      #title-bar {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
+        justify-content: space-between;
         align-items: center;
-        cursor: pointer;
-        font-size: 12px;
-        width: 4em;
-        margin-left: 3px;
-        margin-right: 3px;
-        transition: 0.2s;
+        
+        #logo {
+          width: 50px;
+          height: 50px;
+          object-fit: contain;
+        }
+        
+        #title {
+          margin-left: 10px;
+        }
+        
+        #title-bar-space {
+          flex-grow: 1;
+        }
+        
+        .control-button {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          cursor: pointer;
+          font-size: 12px;
+          width: 4em;
+          margin-left: 3px;
+          margin-right: 3px;
+          transition: 0.2s;
+          -webkit-app-region: no-drag;
+          
+          svg {
+            font-size: 20px;
+            margin: 5px;
+          }
+          
+          &:hover {
+            color: var(--main-color);
+          }
+          
+          &:active {
+            filter: brightness(0.9);
+          }
+        }
+      }
+      
+      #small-cards-holder {
+        width: 100%;
+        -webkit-app-region: no-drag;
+
+        #wrapper {
+          display: flex;
+          flex-wrap: wrap;
+
+          .container {
+            width: calc(100% / 6);
+            padding: 5px;
+            box-sizing: border-box;
+
+            .card {
+              width: 100%;
+              height: 120px;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              cursor: pointer;
+              font-size: 14px;
+              text-align: center;
+              box-shadow: 0 0 12px var(--card-shadow);
+              transition: 0.2s;
+              
+              .icon {
+                font-size: 40px;
+              }
+              
+              .title {
+                font-size: 12px;
+                margin-top: 10px;
+              }
+              
+              &:hover {
+                transform: scale(1.05);
+                color: var(--main-color);
+              }
+              
+              &:active {
+                filter: brightness(0.9);
+              }
+            }
+          }
+        }
+      }
+
+      #big-cards-holder {
+        width: 100%;
+        position: relative;
         -webkit-app-region: no-drag;
         
-        svg {
-          font-size: 20px;
-          margin: 5px;
-        }
-        
-        &:hover {
-          color: var(--main-color);
-        }
-        
-        &:active {
-          filter: brightness(0.9);
-        }
-      }
-    }
-    
-    #small-cards-holder {
-      width: 100%;
-      margin-top: 50px;
-      -webkit-app-region: no-drag;
-
-      #wrapper {
-        display: flex;
-        flex-wrap: wrap;
-
-        .container {
-          width: calc(100% / 6);
-          padding: 5px;
+        #scroll {
+          overflow-y: hidden;
+          overflow-x: auto;
+          display: flex;
+          padding-top: 15px;
+          padding-bottom: 15px;
           box-sizing: border-box;
-
-          .card {
-            width: 100%;
-            height: 120px;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--dark-gray);
-            text-align: center;
-            
-            .icon {
-              font-size: 40px;
-            }
-            
-            .title {
-              font-size: 12px;
-              margin-top: 10px;
-            }
-            
-            &:hover {
-              transform: scale(1.05);
-              color: var(--main-color);
-            }
-            
-            &:active {
-              filter: brightness(0.9);
-            }
-          }
-
-          .el-card {
-            border-radius: 12px;
-
-            .el-card__body {
-              padding: 0;
-            }
-          }
-        }
-      }
-    }
-
-    #big-cards-holder {
-      width: 100%;
-      margin-top: 50px;
-      position: relative;
-      -webkit-app-region: no-drag;
-      
-      #scroll {
-        overflow-y: hidden;
-        overflow-x: auto;
-        display: flex;
-        padding-top: 15px;
-        padding-bottom: 15px;
-        box-sizing: border-box;
-        
-        .container {
-          margin: 10px;
           
-          .card {
-            width: 200px;
-            height: 200px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--dark-gray);
-            text-align: center;
+          .container {
+            margin: 10px;
             
-            .icon {
-              font-size: 80px;
-            }
-            
-            .title {
-              font-size: 16px;
-              margin-top: 10px;
-            }
-            
-            &:hover {
-              transform: scale(1.05);
-              color: var(--main-color);
-            }
-            
-            &:active {
-              filter: brightness(0.9);
-            }
-            
-            &:first-child {
-              margin-left: 0;
-            }
-            
-            &:last-child {
-              margin-right: 0;
+            .card {
+              width: 200px;
+              height: 200px;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              cursor: pointer;
+              font-size: 14px;
+              text-align: center;
+              box-shadow: 0 0 12px var(--card-shadow);
+              transition: 0.2s;
+              
+              .icon {
+                font-size: 80px;
+              }
+              
+              .title {
+                font-size: 16px;
+                margin-top: 10px;
+              }
+              
+              &:hover {
+                transform: scale(1.05);
+                color: var(--main-color);
+              }
+              
+              &:active {
+                filter: brightness(0.9);
+              }
+              
+              &:first-child {
+                margin-left: 0;
+              }
+              
+              &:last-child {
+                margin-right: 0;
+              }
             }
           }
-
-          .el-card {
-            border-radius: 12px;
+          
+          .space {
+            width: 15px;
+            height: 100%;
+          }
+          
+          &::-webkit-scrollbar {
+            height: 10px;
+            z-index: 3;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            z-index: 3;
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            z-index: 3;
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
           }
         }
         
-        .space {
+        &:before {
+          content: '';
+          position: absolute;
           width: 15px;
-          height: 100%;
+          height: calc(100% - 10px);
+          top: 0;
+          left: 0;
+          z-index: 2;
+          background-image: linear-gradient(to right, var(--white), var(--transparent));
         }
         
-        &::-webkit-scrollbar {
-          height: 10px;
-          z-index: 3;
+        &:after {
+          content: '';
+          position: absolute;
+          width: 15px;
+          height: calc(100% - 10px);
+          top: 0;
+          right: 0;
+          z-index: 2;
+          background-image: linear-gradient(to left, var(--white), var(--transparent));
         }
-            
-        &::-webkit-scrollbar-track {
-          border-radius: 5px;
-          background-color: var(--transparent);
-          z-index: 3;
-          
-          &:hover {
-            background-color: var(--white-gray);
-          }
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          border-radius: 5px;
-          background-color: var(--light-gray);
-          z-index: 3;
-          transition: 0.2s;
-          
-          &:hover {
-            background-color: var(--gray);
-          }
-        }
-      }
-      
-      &:before {
-        content: '';
-        position: absolute;
-        width: 15px;
-        height: calc(100% - 10px);
-        top: 0;
-        left: 0;
-        z-index: 2;
-        background-image: linear-gradient(to right, var(--white), var(--transparent));
-      }
-      
-      &:after {
-        content: '';
-        position: absolute;
-        width: 15px;
-        height: calc(100% - 10px);
-        top: 0;
-        right: 0;
-        z-index: 2;
-        background-image: linear-gradient(to left, var(--white), var(--transparent));
       }
     }
   }

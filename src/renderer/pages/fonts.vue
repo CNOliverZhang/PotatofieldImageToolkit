@@ -18,7 +18,7 @@
               v-for="font in localChineseFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <img :src="font.image" class="font-preview">
                   <div class="row">
@@ -50,7 +50,7 @@
                     <div>删除本地字体</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
           <div class="container" v-if="!localFontsChinese && localEnglishFonts.length != 0">
@@ -58,7 +58,7 @@
               v-for="font in localEnglishFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <img :src="font.image" class="font-preview">
                   <div class="row">
@@ -90,7 +90,7 @@
                     <div>删除本地字体</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
           <div class="container" v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)">
@@ -142,7 +142,7 @@
               v-for="font in onlineChineseFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <img :src="font.image" class="font-preview">
                   <div class="row">
@@ -170,7 +170,7 @@
                     <div>用浏览器下载</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
           <div class="container" v-if="!onlineFontsChinese && onlineEnglishFonts.length != 0">
@@ -178,7 +178,7 @@
               v-for="font in onlineEnglishFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <img :src="font.image" class="font-preview">
                   <div class="row">
@@ -206,7 +206,7 @@
                     <div>用浏览器下载</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
           <div class="container" v-if="onlineFonts.length == 0">
@@ -522,7 +522,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -715,49 +715,47 @@ export default {
         .card {
           width: 100%;
           height: 100%;
-          color: var(--dark-gray);
+          padding: 20px;
+          box-sizing: border-box;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 0 12px var(--card-shadow);
+          transition: 0.2s;
           
-          .el-card__body {
+          .font-preview {
             width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+          }
+          
+          .actions {
+            width: 100%;
+            flex-grow: 1;
+            align-items: flex-end;
             
-            .font-preview {
+            .action {
               width: 100%;
+              display: flex;
+              align-items: center;
+              color: var(--gray);
+              font-size: 12px;
+              transition: 0.2s;
+              
+              svg {
+                font-size: 14px;
+                margin-right: 5px;
+              }
             }
             
-            .actions {
-              width: 100%;
-              flex-grow: 1;
-              align-items: flex-end;
+            .active {
+              color: var(--dark-gray);
+              cursor: pointer;
               
-              .action {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                color: var(--gray);
-                font-size: 12px;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 14px;
-                  margin-right: 5px;
-                }
+              &:hover {
+                color: var(--main-color);
               }
               
-              .active {
-                color: var(--dark-gray);
-                cursor: pointer;
-                
-                &:hover {
-                  color: var(--main-color);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
+              &:active {
+                filter: brightness(0.9);
               }
             }
           }

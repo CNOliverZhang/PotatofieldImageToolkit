@@ -1,5 +1,5 @@
 <template>
-  <div id="slice">
+  <div id="slicer">
     <div id="header">
       <div id="title">图片分割工具</div>
       <div id="minimize" class="control-button" @click="minimize">
@@ -57,7 +57,7 @@ import ReadDirectory from '../utils/ReadDirectory'
 const path = require('path')
 
 export default {
-  name: 'slice',
+  name: 'slicer',
   data () {
     return {
       fileList: [],
@@ -187,8 +187,8 @@ export default {
       })
     },
     edit() {
-      this.$store.dispatch('slice/fileListAssign', this.fileList).then(() => {
-        this.$router.replace('slice/editor')
+      this.$store.dispatch('slicer/fileListAssign', this.fileList).then(() => {
+        this.$router.replace('slicer/editor')
       })
     }
   },
@@ -199,7 +199,7 @@ export default {
 </script>
 
 <style lang="scss">
-#slice {
+#slicer {
   width: 100%;
   height: 100%;
   display: flex;
@@ -214,7 +214,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -394,7 +394,7 @@ export default {
         transition: 0.5s;
         
         &.half {
-          width: calc(50% - 5px);
+          width: calc(50% - 10px);
         }
         
         .el-upload {
@@ -429,7 +429,7 @@ export default {
       }
       
       #file-list {
-        width: calc(50% - 5px);
+        width: calc(50% - 10px);
         height: 100%;
         display: flex;
         flex-direction: column;

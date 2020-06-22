@@ -214,7 +214,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -394,7 +394,7 @@ export default {
         transition: 0.5s;
         
         &.half {
-          width: calc(50% - 5px);
+          width: calc(50% - 10px);
         }
         
         .el-upload {
@@ -429,7 +429,7 @@ export default {
       }
       
       #file-list {
-        width: calc(50% - 5px);
+        width: calc(50% - 10px);
         height: 100%;
         display: flex;
         flex-direction: column;

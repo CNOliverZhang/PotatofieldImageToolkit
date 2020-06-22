@@ -62,14 +62,14 @@ export default new Router({
       component: require('@/pages/cropper/editor').default
     },
     {
-      path: '/slice',
-      name: 'slice',
-      component: require('@/pages/slice').default
+      path: '/slicer',
+      name: 'slicer',
+      component: require('@/pages/slicer').default
     },
     {
-      path: '/slice/editor',
-      name: 'sliceEditor',
-      component: require('@/pages/slice/editor').default
+      path: '/slicer/editor',
+      name: 'slicerEditor',
+      component: require('@/pages/slicer/editor').default
     },
     {
       path: '/textToImage',

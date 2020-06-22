@@ -11,14 +11,14 @@
     </div>
     <el-tabs type="card" tab-position="top" id="content">
       <el-tab-pane>
-        <span slot="label"><i class="fas fa-envelope"></i> 消息中心</span>
+        <span slot="label"><i class="fas fa-envelope"></i> 未读消息</span>
         <div class="tab-content">
-          <div class="container" v-if="onlyUnread && unreadMessages.length != 0">
+          <div class="container" v-if="unreadMessages.length != 0">
             <div
-              v-for="message in unreadMessages.slice(messageListPage * 6 - 6, messageListPage * 6)"
+              v-for="message in unreadMessages.slice(unreadMessageListPage * 6 - 6, unreadMessageListPage * 6)"
               :key="message.id"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <div class="row">
                     <div class="subtitle">{{ message.title }}</div>
@@ -36,15 +36,40 @@
                     <div>{{ message.pub_date }}</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
-          <div class="container" v-if="!onlyUnread && messages.length != 0">
+          <div class="container" v-else>
+            <div  class="empty-container">
+              <div class="empty">
+                <i class="fas fa-envelope"></i>
+                <div>没有未读消息</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <el-pagination
+              small
+              background
+              layout="prev, pager, next"
+              :pager-count="5"
+              :page-size="6"
+              :total="unreadMessages.length"
+              :current-page="unreadMessageListPage"
+              @current-change="unreadMessageListPageChange">
+            </el-pagination>
+          </div>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-envelope-open"></i> 全部消息</span>
+        <div class="tab-content">
+          <div class="container" v-if="messages.length != 0">
             <div
               v-for="message in messages.slice(messageListPage * 6 - 6, messageListPage * 6)"
               :key="message.id"
               class="card-container">
-              <el-card class="card">
+              <div class="card">
                 <div>
                   <div class="row">
                     <div class="subtitle">{{ message.title }}</div>
@@ -74,10 +99,10 @@
                     <div>{{ message.pub_date }}</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
-          <div class="container" v-if="(onlyUnread && unreadMessages.length == 0) || (!onlyUnread && messages.length == 0)">
+          <div class="container" v-else>
             <div  class="empty-container">
               <div class="empty">
                 <i class="fas fa-envelope"></i>
@@ -87,18 +112,6 @@
           </div>
           <div class="row">
             <el-pagination
-              v-if="onlyUnread"
-              small
-              background
-              layout="prev, pager, next"
-              :pager-count="5"
-              :page-size="6"
-              :total="unreadMessages.length"
-              :current-page="messageListPage"
-              @current-change="messageListPageChange">
-            </el-pagination>
-            <el-pagination
-              v-else
               small
               background
               layout="prev, pager, next"
@@ -108,11 +121,6 @@
               :current-page="messageListPage"
               @current-change="messageListPageChange">
             </el-pagination>
-            <el-switch
-              v-model="onlyUnread"
-              active-text="仅显示未读消息"
-              inactive-text="显示全部消息"
-              @change="switchMessage"></el-switch>
           </div>
         </div>
       </el-tab-pane>
@@ -129,7 +137,7 @@ export default {
     return {
       messages: [],
       messageListPage: 1,
-      onlyUnread: true
+      unreadMessageListPage: 1
     }
   },
   computed: {
@@ -150,8 +158,8 @@ export default {
     messageListPageChange(page) {
       this.messageListPage = page
     },
-    switchMessage() {
-      this.messageListPage = 1
+    unreadMessageListPageChange(page) {
+      this.unreadMessageListPage = page
     },
     showMessage(message) {
       this.$dialog({
@@ -209,7 +217,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -402,54 +410,52 @@ export default {
         .card {
           width: 100%;
           height: 100%;
-          color: var(--dark-gray);
-          
-          .el-card__body {
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+          padding: 20px;
+          box-sizing: border-box;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 0 12px var(--card-shadow);
+          transition: 0.2s;
             
-            .subtitle {
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
+          .subtitle {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
 
-            .text {
-              text-indent: 2em;
+          .text {
+            text-indent: 2em;
+          }
+          
+          .actions {
+            width: 100%;
+            flex-grow: 1;
+            align-items: flex-end;
+            
+            .action {
+              display: flex;
+              align-items: center;
+              color: var(--gray);
+              font-size: 12px;
+              transition: 0.2s;
+              
+              svg {
+                font-size: 14px;
+                margin-right: 5px;
+              }
             }
             
-            .actions {
-              width: 100%;
-              flex-grow: 1;
-              align-items: flex-end;
+            .active {
+              color: var(--dark-gray);
+              cursor: pointer;
               
-              .action {
-                display: flex;
-                align-items: center;
-                color: var(--gray);
-                font-size: 12px;
-                transition: 0.2s;
-                
-                svg {
-                  font-size: 14px;
-                  margin-right: 5px;
-                }
+              &:hover {
+                color: var(--main-color);
               }
               
-              .active {
-                color: var(--dark-gray);
-                cursor: pointer;
-                
-                &:hover {
-                  color: var(--main-color);
-                }
-                
-                &:active {
-                  filter: brightness(0.9);
-                }
+              &:active {
+                filter: brightness(0.9);
               }
             }
           }

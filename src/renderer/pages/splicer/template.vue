@@ -463,12 +463,6 @@ export default {
 </script>
 
 <style lang="scss">  
-.el-color-dropdown {
-  button {
-    font-family: var(--main-font);
-  }
-}
-
 #splicer-template {
   width: 100%;
   height: 100%;
@@ -488,7 +482,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -693,6 +687,7 @@ export default {
           width: 400px;
           box-sizing: border-box;
           display: inline-block;
+          box-shadow: 0 0 10px var(--black);
           
           .sample-container {
             width: 100%;
@@ -750,6 +745,7 @@ export default {
           width: fit-content;
           box-sizing: border-box;
           white-space: nowrap;
+          box-shadow: 0 0 10px var(--black);
           
           .sample-container {
             height: 100%;

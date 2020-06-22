@@ -50,13 +50,13 @@
               <h3>图片分割工具</h3>
               <p>将完整的图片分割为小块，可以自定义行数和列数。支持锁定每块为正方形，也支持批量分割图片。</p>
               <figure>
-                <img src="static/sample/slice.png" />
+                <img src="static/sample/slicer.png" />
                 <figcaption>图片分割工具</figcaption>
               </figure>
               <h3>富文本制图工具</h3>
               <p>将富文本内容输出为图片，支持文本、标题、项目列表、图片和引用内容。支持自定义样式，支持模板功能。</p>
               <figure>
-                <img src="static/sample/text.png" />
+                <img src="static/sample/textToImage.png" />
                 <figcaption>富文本制图工具</figcaption>
               </figure>
               <h3>尺寸调整工具</h3>
@@ -69,7 +69,7 @@
               <p>对 JPEG 和 WEBP 格式文件进行压缩，减小文件体积。支持自定义输出质量。</p>
               <figure>
                 <img src="static/sample/compress.png" />
-                <figcaption>JPEG 压缩工具</figcaption>
+                <figcaption>图片压缩工具</figcaption>
               </figure>
               <h3>格式转换工具</h3>
               <p>将图片文件转换为其他格式，支持 JPEG 文件和 PNG 文件以及 WEBP 文件之间的相互转化。</p>
@@ -98,6 +98,9 @@
               <blockquote>
                 <p>洋芋田图像工具箱基于 MIT 协议开源。目前提供适用于 Windows 的构建版本，使用其他平台的用户可以自行下载源码并构建。</p>
               </blockquote>
+              <figure>
+                <img src="static/sample/settings.png" />
+              </figure>
               <p>洋芋田图像工具箱在开发过程中使用了下列开源组件和库：</p>
               <ul>
                 <li>Electron</li>
@@ -115,6 +118,7 @@
                 <li>EXIF.js</li>
                 <li>Cropper.js</li>
                 <li>Color Thief</li>
+                <li>Crypto-JS</li>
               </ul>
             </div>
           </div>
@@ -1345,16 +1349,6 @@ export default {
 </script>
 
 <style lang="scss">  
-.el-color-dropdown {
-  button {
-    font-family: var(--main-font);
-  }
-}
-
-.el-popper {
-  -webkit-app-region: no-drag;
-}
-
 #text-to-image-template {
   width: 100%;
   height: 100%;
@@ -1374,7 +1368,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -1512,24 +1506,6 @@ export default {
     }
   }
 
-  .el-input-group {
-    display: flex;
-
-    .el-input-group__prepend {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .el-input-group__append {
-      width: 60px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-  }
-  
   #left {
     flex-grow: 1;
     height: 100%;
@@ -1581,6 +1557,9 @@ export default {
       #preview-container {
         width: 100%;
         height: 100%;
+        border-color: var(--light-gray);
+        border-style: solid;
+        border-width: 1px;
         border-radius: 6px;
         box-sizing: border-box;
         overflow-x: hidden;

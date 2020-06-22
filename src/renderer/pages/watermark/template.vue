@@ -20,11 +20,7 @@
           </div>
         </div>
         <div id="sample-wrapper">
-          <div
-            id="sample-container"
-            :style="{
-              'background-color': background == 'var(--black-gray)' ? 'var(--white-gray)' : 'var(--black-gray)'
-            }">
+          <div id="sample-container">
             <div
               id="sample"
               :style="{
@@ -1067,12 +1063,6 @@ export default {
 </script>
 
 <style lang="scss">
-.el-color-dropdown {
-  button {
-    font-family: var(--main-font);
-  }
-}
-
 #watermark-template {
   width: 100%;
   height: 100%;
@@ -1092,7 +1082,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -1281,7 +1271,6 @@ export default {
       #sample-container {
         width: 100%;
         height: 100%;
-        flex-shrink: 0;
         background-color: var(--black-gray);
         border-radius: 6px;
         display: flex;
@@ -1293,6 +1282,7 @@ export default {
         #sample {
           max-width: 100%;
           max-height: 100%;
+          box-shadow: 0 0 10px var(--black)
         }
         
         #watermark-container {

@@ -179,7 +179,7 @@ app.on('ready', () => {
           click: () => {
             openWindow({
               title: '图片分割工具',
-              path: '#/slice'
+              path: '#/slicer'
             })
           }
         },

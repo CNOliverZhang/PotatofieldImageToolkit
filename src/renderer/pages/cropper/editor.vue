@@ -238,9 +238,10 @@ export default {
       })
     },
     close() {
-      this.$store.dispatch('cropper/fileListEmpty')
-      ipcRenderer.send('close')
-      this.$destroy()
+      this.$store.dispatch('cropper/fileListEmpty').then(() => {
+        ipcRenderer.send('close')
+        this.$destroy()
+      })
     },
     handleDelete(index) {
       if (this.$store.state.cropper.fileList.length > 1) {
@@ -426,10 +427,6 @@ export default {
 </script>
 
 <style lang="scss">
-.el-popper {
-  -webkit-app-region: no-drag;
-}
-
 #cropper-editor {
   width: 100%;
   height: 100%;
@@ -449,7 +446,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -673,6 +670,7 @@ export default {
           max-width: 100%;
           max-height: 100%;
           display: block;
+          box-shadow: 0 0 10px var(--black);
         }
         
         .cropper-container {

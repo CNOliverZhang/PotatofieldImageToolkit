@@ -30,7 +30,7 @@
               v-for="(template, index) in this.$store.state.textToImage.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
               :key="index"
               class="template-container">
-              <el-card class="card">
+              <div class="card">
                 <div class="row">
                   <div class="subtitle">{{ template.title }}</div>
                 </div>
@@ -57,7 +57,7 @@
                     <div>删除</div>
                   </div>
                 </div>
-              </el-card>
+              </div>
             </div>
           </div>
           <div v-else id="empty-container">
@@ -69,7 +69,6 @@
           <div class="row">
             <el-pagination
               v-if="this.$store.state.textToImage.templates.length > 6"
-            
               small
               background
               layout="prev, pager, next"
@@ -313,7 +312,7 @@ export default {
     padding-right: 20px;
     box-sizing: border-box;
     flex-basis: 40px;
-    background-color: var(--dark-gray);
+    background-color: var(--black-gray);
     display: flex;
     align-items: center;
     z-index: 3000;
@@ -494,17 +493,6 @@ export default {
       display: flex;
       flex-direction: column;
     }
-    
-    .el-input-group {
-      display: flex;
-    }
-    
-    .el-input-group__prepend {
-      width: fit-content;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
       
     #editor {
       width: 100%;
@@ -591,49 +579,62 @@ export default {
           .card {
             width: 100%;
             height: 100%;
-            color: var(--dark-gray);
-            
-            .el-card__body {
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 12px var(--card-shadow);
+            transition: 0.2s;
+              
+            .subtitle {
               width: 100%;
-              height: 100%;
-              box-sizing: border-box;
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .text {
               display: flex;
-              flex-direction: column;
+              align-items: center;
               
-              .subtitle {
-                width: 100%;
-                overflow: hidden;
-                white-space: nowrap;
-                text-overflow: ellipsis;
+              .color-sample {
+                width: 1em;
+                height: 1em;
+                border-color: var(--light-gray);
+                border-style: solid;
+                border-radius: 3px;
+                border-width: 1px;
+                box-sizing: border-box;
               }
+            }
+            
+            .actions {
+              width: 100%;
+              flex-grow: 1;
+              align-items: flex-end;
               
-              .actions {
-                width: 100%;
-                flex-grow: 1;
-                align-items: flex-end;
+              .action {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                font-size: 12px;
+                width: 32px;
+                transition: 0.2s;
                 
-                .action {
-                  display: flex;
-                  flex-direction: column;
-                  justify-content: center;
-                  align-items: center;
-                  cursor: pointer;
-                  font-size: 12px;
-                  width: 32px;
-                  transition: 0.2s;
-                  
-                  svg {
-                    font-size: 20px;
-                    margin: 5px;
-                  }
-                  
-                  &:hover {
-                    color: var(--main-color);
-                  }
-                  
-                  &:active {
-                    filter: brightness(0.9);
-                  }
+                svg {
+                  font-size: 20px;
+                  margin: 5px;
+                }
+                
+                &:hover {
+                  color: var(--main-color);
+                }
+                
+                &:active {
+                  filter: brightness(0.9);
                 }
               }
             }
