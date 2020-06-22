@@ -54,8 +54,7 @@
     "win": {
       "icon": "build/icons/icon.ico",
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ]
     }
   },
@@ -100,10 +99,10 @@
     "del": "^3.0.0",
     "devtron": "^1.4.0",
     "electron": "^8.3.3",
-    "electron-builder": "^22.7.0",
+    "electron-builder": "^20.44.4",
     "electron-debug": "^3.1.0",
     "electron-devtools-installer": "^3.0.0",
-    "electron-updater": "^4.3.1",
+    "electron-updater": "^4.0.0",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "0.4.0",
