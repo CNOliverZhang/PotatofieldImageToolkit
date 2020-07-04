@@ -1,1 +1,0 @@
-git log --author="CNOliverZhang" --pretty=tformat: --numstat | awk '{ add += $1; subs += $2; loc += $1 - $2 } END { printf "添加行数: %s\n删除行数: %s\n总行数: %s\n", add, subs, loc }'
