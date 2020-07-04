@@ -86,106 +86,108 @@ export default {
 </script>
 
 <style lang="scss">
-.el-dialog__wrapper {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  
-  .el-dialog {
-    width: 400px;
-    margin: 0!important;
-  
-    .el-dialog__header {
-      margin-top: 20px;
-      margin-left: 20px;
-      margin-right: 20px;
-      font-size: 14px;
-      padding: 0;
-        
-      .el-icon-success {
-        color: #67C23A;
-      }
-      
-      .el-icon-warning {
-        color: #E6A23C;
-      }
-      
-      .el-icon-error {
-        color: #F56C6C;
-      }
-    }
+.potatofield-image-toolkit {
+  .el-dialog__wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     
-    .el-dialog__body {
-      margin: 20px;
-      padding: 0;
+    .el-dialog {
+      width: 400px;
+      margin: 0!important;
+    
+      .el-dialog__header {
+        margin-top: 20px;
+        margin-left: 20px;
+        margin-right: 20px;
+        font-size: 14px;
+        padding: 0;
+          
+        .el-icon-success {
+          color: var(--success-green);
+        }
+        
+        .el-icon-warning {
+          color: var(--notice-yellow);
+        }
+        
+        .el-icon-error {
+          color: var(--warning-red);
+        }
+      }
       
-      .content {
-        width: 100%;
-        max-height: 250px;
-        overflow-x: hidden;
-        overflow-y: auto;
+      .el-dialog__body {
+        margin: 20px;
+        padding: 0;
         
-        p {
-          margin: 0;
-          line-height: 18px;
-          font-size: 12px;
-          text-align: justify;
-          text-indent: 2em;
-        }
-        
-        div {
-          margin-top: 10px;
-          margin-bottom: 10px;
-          
-          &:first-child {
-            margin-top: 0;
-          }
-          
-          &:last-child {
-            margin-bottom: 0;
-          }
-        }
-        
-        img {
-          display: block;
+        .content {
           width: 100%;
-          height: auto;
-        }
-        
-        &::-webkit-scrollbar {
-          width: 10px;
-        }
-            
-        &::-webkit-scrollbar-track {
-          border-radius: 5px;
-          background-color: rgba(255, 255, 255, 0);
+          max-height: 250px;
+          overflow-x: hidden;
+          overflow-y: auto;
           
-          &:hover {
-            background-color: #F5F7FA;
+          p {
+            margin: 0;
+            line-height: 18px;
+            font-size: 12px;
+            text-align: justify;
+            text-indent: 2em;
           }
-        }
-        
-        &::-webkit-scrollbar-thumb {
-          border-radius: 5px;
-          background-color: #DCDFE6;
-          transition: 0.2s;
           
-          &:hover {
-            background-color: #C0C4CC;
+          div {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            
+            &:first-child {
+              margin-top: 0;
+            }
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+          
+          img {
+            display: block;
+            width: 100%;
+            height: auto;
+          }
+          
+          &::-webkit-scrollbar {
+            width: 10px;
+          }
+              
+          &::-webkit-scrollbar-track {
+            border-radius: 5px;
+            background-color: var(--transparent);
+            
+            &:hover {
+              background-color: var(--white-gray);
+            }
+          }
+          
+          &::-webkit-scrollbar-thumb {
+            border-radius: 5px;
+            background-color: var(--light-gray);
+            transition: 0.2s;
+            
+            &:hover {
+              background-color: var(--gray);
+            }
           }
         }
       }
-    }
-    
-    .el-dialog__footer {
-      margin-bottom: 20px;
-      margin-left: 20px;
-      margin-right: 20px;
-      padding: 0;
       
-      button {
-        font-family: var(--main-font);
+      .el-dialog__footer {
+        margin-bottom: 20px;
+        margin-left: 20px;
+        margin-right: 20px;
+        padding: 0;
+        
+        button {
+          font-family: var(--main-font);
+        }
       }
     }
   }

@@ -1,14 +1,14 @@
 <template>
   <div id="watermark-template">
-    <div id="header">
-      <div id="title">图片加水印工具 - 模板编辑器</div>
-      <div id="minimize" class="control-button" @click="minimize">
+    <div class="page-header">
+      <div class="page-title">图片加水印工具 - 模板编辑器</div>
+      <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="maximize" class="control-button" @click="maximize">
+      <div class="control-button maximize" @click="maximize">
         <object data="static/images/maximize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="close" class="control-button" @click="close">
+      <div class="control-button close" @click="close">
         <object data="static/images/close.svg" type="image/svg+xml"></object>
       </div>
     </div>
@@ -108,7 +108,7 @@
                   <div class="text">参照背景颜色</div>
                 </div>
                 <div class="control-row">
-                  <el-select v-model="background" placeholder="请选择" size="mini" class="control">
+                  <el-select v-model="background" placeholder="请选择" size="mini" class="full-width-control">
                     <el-option label="深色" value="var(--black-gray)"/>
                     <el-option label="浅色" value="var(--white-gray)"/>
                   </el-select>
@@ -130,7 +130,7 @@
                       <div class="text">文本字体</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="font" placeholder="请选择" size="mini" class="control">
+                      <el-select v-model="font" placeholder="请选择" size="mini" class="full-width-control">
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
@@ -147,7 +147,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="relativeFontSize"
-                        class="control"
+                        class="full-width-control"
                         :min="1"
                         :max="100"
                         :step="1"
@@ -166,7 +166,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="backgroundSize"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="300"
                         :step="1"
@@ -185,7 +185,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="textShadowX"
-                        class="control"
+                        class="full-width-control"
                         :min="-1"
                         :max="1"
                         :step="0.01"
@@ -198,7 +198,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="textShadowY"
-                        class="control"
+                        class="full-width-control"
                         :min="-1"
                         :max="1"
                         :step="0.01"
@@ -211,7 +211,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="textShadowBlur"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="1"
                         :step="0.01"
@@ -228,7 +228,7 @@
                       <div class="text">文本位置基准</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="control">
+                      <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="full-width-control">
                         <el-option label="中央" value="center"/>
                         <el-option label="左上角" value="left-top"/>
                         <el-option label="右上角" value="right-top"/>
@@ -247,7 +247,7 @@
                       <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
                       <el-slider
                         v-model="offsetX"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="100"
                         :step="1"
@@ -261,7 +261,7 @@
                       <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
                       <el-slider
                         v-model="offsetY"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="100"
                         :step="1"
@@ -274,7 +274,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="rotation"
-                        class="control"
+                        class="full-width-control"
                         :min="-180"
                         :max="180"
                         :step="1"
@@ -287,7 +287,7 @@
                       <div class="text">文本排版方向</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="writingMode" placeholder="请选择" size="mini" class="control">
+                      <el-select v-model="writingMode" placeholder="请选择" size="mini" class="full-width-control">
                         <el-option label="水平" value="horizontal-tb"/>
                         <el-option label="垂直从右至左" value="vertical-rl"/>
                         <el-option label="垂直从左至右" value="vertical-lr"/>
@@ -297,7 +297,7 @@
                       <div class="text">多行文本对齐方式</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="textAlign" placeholder="请选择" size="mini" class="control">
+                      <el-select v-model="textAlign" placeholder="请选择" size="mini" class="full-width-control">
                         <el-option label="居中对齐" value="center"/>
                         <el-option label="行首对齐" value="left"/>
                         <el-option label="行尾对其" value="right"/>
@@ -309,7 +309,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="lineHeight"
-                        class="control"
+                        class="full-width-control"
                         :min="1"
                         :max="10"
                         :step="0.1"
@@ -322,7 +322,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="letterSpacing"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="100"
                         :step="1"
@@ -365,7 +365,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="imageSize"
-                        class="control"
+                        class="full-width-control"
                         :min="1"
                         :max="100"
                         :step="1"
@@ -378,7 +378,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="imageOpacity"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="1"
                         :step="0.01"
@@ -391,7 +391,7 @@
                       <div class="text">图片位置基准</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="control">
+                      <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="full-width-control">
                         <el-option label="中央" value="center"/>
                         <el-option label="左上角" value="left-top"/>
                         <el-option label="右上角" value="right-top"/>
@@ -410,7 +410,7 @@
                       <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
                       <el-slider
                         v-model="imageOffsetX"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="100"
                         :step="1"
@@ -424,7 +424,7 @@
                       <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
                       <el-slider
                         v-model="imageOffsetY"
-                        class="control"
+                        class="full-width-control"
                         :min="0"
                         :max="100"
                         :step="1"
@@ -437,7 +437,7 @@
                     <div class="control-row">
                       <el-slider
                         v-model="imageRotation"
-                        class="control"
+                        class="full-width-control"
                         :min="-180"
                         :max="180"
                         :step="1"
@@ -1068,85 +1068,6 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
-  button {
-    font-family: var(--main-font);
-  }
-  
-  input {
-    font-family: var(--main-font);
-  }
-
-  #header {
-    padding-left: 20px;
-    padding-right: 20px;
-    box-sizing: border-box;
-    flex-basis: 40px;
-    background-color: var(--black-gray);
-    display: flex;
-    align-items: center;
-    z-index: 3000;
-    -webkit-app-region: drag;
-
-    #title {
-      color: var(--white);
-      font-size: 16px;
-      flex-grow: 1;
-    }
-
-    .control-button {
-      -webkit-app-region: no-drag;
-      width: 20px;
-      height: 20px;
-      margin-left: 5px;
-      margin-right: 5px;
-      border-radius: 10px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      object {
-        width: 50%;
-        color: var(--white);
-      }
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      &:hover::after {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    #minimize {
-      background-color: var(--success-green);
-    }
-
-    #maximize {
-      background-color: var(--notice-yellow);
-    }
-
-    #close {
-      background-color: var(--warning-red);
-    }
-  }
 
   #content {
     height: 0;
@@ -1156,68 +1077,6 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .control-row {
-    width: 100%;
-    height: 28px;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .control {
-      width: 100%;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .row {
-    width: 100%;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .bar-button {
-    width: 0;
-    height: 28px;
-    flex-grow: 1;
-    box-sizing: border-box;
-    border: none;
-    margin-left: 5px;
-    margin-right: 5px;
-    
-    &:first-child {
-      margin-left: 0;
-    }
-    
-    &:last-child {
-      margin-right: 0;
-    }
   }
   
   #left {
@@ -1278,11 +1137,11 @@ export default {
         align-items: center;
         overflow: hidden;
         position: relative;
-          
+        
         #sample {
           max-width: 100%;
           max-height: 100%;
-          box-shadow: 0 0 10px var(--black)
+          box-shadow: 0 0 10px var(--black);
         }
         
         #watermark-container {

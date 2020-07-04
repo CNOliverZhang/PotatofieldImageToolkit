@@ -1,11 +1,11 @@
 <template>
   <div id="settings">
-    <div id="header">
-      <div id="title">设置</div>
-      <div id="minimize" class="control-button" @click="minimize">
+    <div class="page-header">
+      <div class="page-title">设置</div>
+      <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="close" class="control-button" @click="close">
+      <div class="control-button close" @click="close">
         <object data="static/images/close.svg" type="image/svg+xml"></object>
       </div>
     </div>
@@ -155,7 +155,6 @@
           </div>
           <div id="scale" class="row">
             <el-select v-model="scale" size="mini" class="scale">
-              <el-option label="50%" :value="0.5"/>
               <el-option label="75%" :value="0.75"/>
               <el-option label="100%" :value="1.0"/>
               <el-option label="125%" :value="1.25"/>
@@ -583,77 +582,6 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
-  button {
-    font-family: var(--main-font);
-  }
-  
-  #header {
-    padding-left: 20px;
-    padding-right: 20px;
-    box-sizing: border-box;
-    flex-basis: 40px;
-    background-color: var(--black-gray);
-    display: flex;
-    align-items: center;
-    z-index: 3000;
-    -webkit-app-region: drag;
-
-    #title {
-      color: var(--white);
-      font-size: 16px;
-      flex-grow: 1;
-    }
-
-    .control-button {
-      -webkit-app-region: no-drag;
-      width: 20px;
-      height: 20px;
-      margin-left: 5px;
-      margin-right: 5px;
-      border-radius: 10px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      object {
-        width: 50%;
-        color: var(--white);
-      }
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      &:hover::after {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    #minimize {
-      background-color: var(--success-green);
-    }
-
-    #close {
-      background-color: var(--warning-red);
-    }
-  }
 
   #content {
     height: 0;
@@ -709,46 +637,6 @@ export default {
   
     .tab-content {
       padding: 20px;
-    }
-    
-    .control-row {
-      width: 100%;
-      height: 28px;
-      flex-shrink: 0;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-size: 14px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      
-      &:first-child {
-        margin-top: 0;
-      }
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-    
-    .row {
-      width: 100%;
-      flex-shrink: 0;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      
-      &:first-child {
-        margin-top: 0;
-      }
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
     }
     
     .subtext {

@@ -1,11 +1,11 @@
 <template>
   <div id="resizer">
-    <div id="header">
-      <div id="title">尺寸调整工具</div>
-      <div id="minimize" class="control-button" @click="minimize">
+    <div class="page-header">
+      <div class="page-title">尺寸调整工具</div>
+      <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="close" class="control-button" @click="close">
+      <div class="control-button close" @click="close">
         <object data="static/images/close.svg" type="image/svg+xml"></object>
       </div>
     </div>
@@ -47,7 +47,7 @@
           <div v-if="this.fileList.length != 0" id="controller">
             <div class="control-row">
               <div class="text">目标尺寸参考基准</div>
-              <el-radio-group v-model="standard" class="control">
+              <el-radio-group v-model="standard" class="half-width-control">
                 <el-radio label="percentage">百分比</el-radio>
                 <el-radio label="short">固定短边</el-radio>
                 <el-radio label="long">固定长边</el-radio>
@@ -57,7 +57,7 @@
               <div class="text">目标百分比设置</div>
               <el-slider
                 v-model="percentage"
-                class="control"
+                class="half-width-control"
                 :min="1"
                 :max="100"
                 :step="1"
@@ -66,7 +66,7 @@
             </div>
             <div v-else class="control-row">
               <div class="text">目标尺寸设置</div>
-              <el-input size="mini" v-model="length" class="control">
+              <el-input size="mini" v-model="length" class="half-width-control">
                 <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
                 <template v-else slot="prepend">固定较长边长度</template>
                 <template slot="append">像素</template>
@@ -76,7 +76,7 @@
               <div class="text">图像质量</div>
               <el-slider
                 v-model="quality"
-                class="control"
+                class="half-width-control"
                 :min="1"
                 :max="100"
                 :step="1"
@@ -91,17 +91,17 @@
                 inactive-color="var(--main-color)"
                 active-text="自定义路径"
                 inactive-text="保存在原路径"
-                class="control"></el-switch>
+                class="half-width-control"></el-switch>
             </div>
             <div v-if="customDistDirectory" class="control-row">
               <div class="text">自定义存储位置</div>
-              <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control">
+              <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="half-width-control">
                 <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
               </el-input>
             </div>
             <div class="control-row">
               <div class="text">保存的图片格式</div>
-              <el-radio-group v-model="mimeType" size="mini" class="control">
+              <el-radio-group v-model="mimeType" size="mini" class="half-width-control">
                 <el-radio-button label="JPEG"></el-radio-button>
                 <el-radio-button label="WEBP"></el-radio-button>
                 <el-radio-button label="PNG"></el-radio-button>
@@ -110,7 +110,7 @@
             </div>
             <div class="control-row">
               <div class="text">文件名后缀</div>
-              <el-input size="mini" v-model="append" maxlength="30" class="control"></el-input>
+              <el-input size="mini" v-model="append" maxlength="30" class="half-width-control"></el-input>
             </div>
             <div class="row">
               <el-button type="primary" size="mini" @click="start" class="bar-button">开始处理</el-button>
@@ -128,7 +128,7 @@
                 active-text="包含子目录"
                 inactive-text="不包含子目录"
                ></el-switch>
-              <el-input disabled size="mini" v-model="srcDirectory" class="control">
+              <el-input disabled size="mini" v-model="srcDirectory" class="half-width-control">
                 <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
               </el-input>
             </div>
@@ -174,7 +174,7 @@
             <div>
               <div class="control-row">
                 <div class="text">目标尺寸参考基准</div>
-                <el-radio-group v-model="standard" class="control">
+                <el-radio-group v-model="standard" class="half-width-control">
                   <el-radio label="percentage">百分比</el-radio>
                   <el-radio label="short">固定短边</el-radio>
                   <el-radio label="long">固定长边</el-radio>
@@ -184,7 +184,7 @@
                 <div class="text">目标百分比设置</div>
                 <el-slider
                   v-model="percentage"
-                  class="control"
+                  class="half-width-control"
                   :min="1"
                   :max="100"
                   :step="1"
@@ -193,7 +193,7 @@
               </div>
               <div v-else class="control-row">
                 <div class="text">目标尺寸设置</div>
-                <el-input size="mini" v-model="length" class="control">
+                <el-input size="mini" v-model="length" class="half-width-control">
                   <template v-if="standard == 'short'" slot="prepend">固定较短边长度</template>
                   <template v-else slot="prepend">固定较长边长度</template>
                   <template slot="append">像素</template>
@@ -203,7 +203,7 @@
                 <div class="text">图像质量</div>
                 <el-slider
                   v-model="quality"
-                  class="control"
+                  class="half-width-control"
                   :min="1"
                   :max="100"
                   :step="1"
@@ -218,11 +218,11 @@
                   inactive-color="var(--main-color)"
                   active-text="自定义路径"
                   inactive-text="保存在原路径"
-                  class="control"></el-switch>
+                  class="half-width-control"></el-switch>
               </div>
               <div v-if="customDistDirectory" class="control-row">
                 <div class="text">自定义存储位置</div>
-                <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="control">
+                <el-input disabled size="mini" v-model="distDirectory" v-if="customDistDirectory" class="half-width-control">
                   <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
                 </el-input>
               </div>
@@ -232,11 +232,11 @@
                   v-model="keepDirectoryStructure"
                   active-text="保持目录结构"
                   inactive-text="不保持目录结构"
-                  class="control"></el-switch>
+                  class="half-width-control"></el-switch>
               </div>
               <div class="control-row">
                 <div class="text">保存的图片格式</div>
-                <el-radio-group v-model="mimeType" size="mini" class="control">
+                <el-radio-group v-model="mimeType" size="mini" class="half-width-control">
                   <el-radio-button label="JPEG"></el-radio-button>
                   <el-radio-button label="WEBP"></el-radio-button>
                   <el-radio-button label="PNG"></el-radio-button>
@@ -245,7 +245,7 @@
               </div>
               <div class="control-row">
                 <div class="text">文件名后缀</div>
-                <el-input size="mini" v-model="append" maxlength="30" class="control"></el-input>
+                <el-input size="mini" v-model="append" maxlength="30" class="half-width-control"></el-input>
               </div>
               <div class="row">
                 <el-button type="primary" size="mini" @click="start" class="bar-button">开始处理</el-button>
@@ -690,77 +690,6 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
-  button {
-    font-family: var(--main-font);
-  }
-  
-  #header {
-    padding-left: 20px;
-    padding-right: 20px;
-    box-sizing: border-box;
-    flex-basis: 40px;
-    background-color: var(--black-gray);
-    display: flex;
-    align-items: center;
-    z-index: 3000;
-    -webkit-app-region: drag;
-
-    #title {
-      color: var(--white);
-      font-size: 16px;
-      flex-grow: 1;
-    }
-
-    .control-button {
-      -webkit-app-region: no-drag;
-      width: 20px;
-      height: 20px;
-      margin-left: 5px;
-      margin-right: 5px;
-      border-radius: 10px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      object {
-        width: 50%;
-        color: var(--white);
-      }
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      &:hover::after {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    #minimize {
-      background-color: var(--success-green);
-    }
-
-    #close {
-      background-color: var(--warning-red);
-    }
-  }
 
   #content {
     height: 0;
@@ -829,74 +758,6 @@ export default {
           display: flex;
           justify-content: space-between;
         }
-      }
-    }
-  
-    .control-row {
-      width: 100%;
-      height: 28px;
-      flex-shrink: 0;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      font-size: 14px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      
-      .control {
-        width: 70%;
-      }
-      
-      &:first-child {
-        margin-top: 0;
-      }
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-    
-    .row {
-      width: 100%;
-      flex-shrink: 0;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-
-      .control {
-        width: 60%;
-      }
-      
-      &:first-child {
-        margin-top: 0;
-      }
-      
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-    
-    .bar-button {
-      width: 0;
-      height: 28px;
-      flex-grow: 1;
-      box-sizing: border-box;
-      border: none;
-      padding-left: 0;
-      padding-right: 0;
-      margin-left: 5px;
-      margin-right: 5px;
-      
-      &:first-child {
-        margin-left: 0;
-      }
-      
-      &:last-child {
-        margin-right: 0;
       }
     }
     
@@ -1197,31 +1058,6 @@ export default {
           &:hover {
             background-color: var(--gray);
           }
-        }
-      }
-      
-      .el-pagination {
-        padding: 0;
-        margin-right: 10px;
-        
-        li {
-          min-width: 24px;
-          height: 28px;
-          line-height: 28px;
-        }
-        
-        .btn-prev {
-          width: 24px;
-          height: 28px;
-          line-height: 28px;
-          margin-left: 0;
-        }
-        
-        .btn-next {
-          width: 24px;
-          height: 28px;
-          line-height: 28px;
-          margin-right: 0;
         }
       }
     }

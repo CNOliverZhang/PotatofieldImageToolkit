@@ -43,7 +43,7 @@ function createWindow(args) {
     closable: false,
     show: false,
     parent: args.modal ? args.parent : null,
-    minimizable: false,
+    minimizable: true,
     maximizable: false,
     transparent: args.transparent,
     webPreferences: {
@@ -61,18 +61,36 @@ function createWindow(args) {
   }
 
   newWindow.on('restore', () => {
-    newWindow.setBounds({
-      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale),
-      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale)
-    })
+    if (!newWindow.isMaximized()) {
+      newWindow.setSize(
+        args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale),
+        args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale)
+      )
+    }
+  })
+
+  newWindow.on('maximize', () => {
+    newWindow.webContents.setZoomFactor(zoomFactor * scale)
+  })
+
+  newWindow.on('unmaximize', () => {
+    newWindow.setSize(
+      args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale),
+      args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale)
+    )
+    newWindow.webContents.setZoomFactor(zoomFactor * scale)
   })
 
   newWindow.once('ready-to-show', () => {
     newWindow.show()
-    newWindow.setBounds({
-      height: args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale),
-      width: args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale)
-    })
+    newWindow.setSize(
+      args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale),
+      args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale)
+    )
+    newWindow.setMinimumSize(
+      args.width ? Math.round(args.width * zoomFactor * scale) : Math.round(900 * zoomFactor * scale),
+      args.height ? Math.round(args.height * zoomFactor * scale) : Math.round(600 * zoomFactor * scale)
+    )
     newWindow.webContents.setZoomFactor(zoomFactor * scale)
     newWindow.center()
   })
@@ -96,10 +114,7 @@ function openWindow(args) {
   if (windowTitles.has(args.title)) {
     windows.forEach((window) => {
       if (window.webContents.browserWindowOptions.title == args.title) {
-        if (window.isMinimized()) {
-          window.restore()
-        }
-        window.focus()
+        window.show()
       }
     })
   } else {
@@ -202,11 +217,20 @@ app.on('ready', () => {
           }
         },
         {
-          label: 'JPEG 压缩工具',
+          label: '图片压缩工具',
           click: () => {
             openWindow({
-              title: 'JPEG 压缩工具',
+              title: '图片压缩工具',
               path: '#/compress'
+            })
+          }
+        },
+        {
+          label: '格式转换工具',
+          click: () => {
+            openWindow({
+              title: '格式转换工具',
+              path: '#/convert'
             })
           }
         },
@@ -284,9 +308,12 @@ app.on('window-all-closed', () => {
 
 app.on('activate', (event, hasVisibleWindows) => {
   if (!hasVisibleWindows) {
-    createWindow({
+    mainWindow = createWindow({
       title: '洋芋田图像工具箱',
-      path: '#/'
+      path: '#/',
+      width: 800,
+      height: 500,
+      transparent: true
     })
   }
 })
@@ -327,9 +354,6 @@ ipcMain.on('hide', (event) => {
 
 ipcMain.on('show', (event) => {
   let currentWindow = BrowserWindow.fromWebContents(event.sender)
-  if (currentWindow.isMinimized()) {
-    currentWindow.restore()
-  }
   currentWindow.show()
 })
 
@@ -358,10 +382,7 @@ ipcMain.on('close', (event) => {
     let parent = currentWindow.webContents.browserWindowOptions.parent
     currentWindow.destroy()
     parent.webContents.send('modal-window-closed')
-    if (parent.isMinimized()) {
-      parent.restore()
-    }
-    parent.focus()
+    parent.show()
   } else {
     currentWindow.destroy()
   }

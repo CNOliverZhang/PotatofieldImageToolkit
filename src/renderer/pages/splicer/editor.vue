@@ -1,14 +1,14 @@
 <template>
   <div id="splicer-editor">
-    <div id="header">
-      <div id="title">长图拼接工具 - 编辑器</div>
-      <div id="minimize" class="control-button" @click="minimize">
+    <div class="page-header">
+      <div class="page-title">长图拼接工具 - 编辑器</div>
+      <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="maximize" class="control-button" @click="maximize">
+      <div class="control-button maximize" @click="maximize">
         <object data="static/images/maximize.svg" type="image/svg+xml"></object>
       </div>
-      <div id="close" class="control-button" @click="close">
+      <div class="control-button close" @click="close">
         <object data="static/images/close.svg" type="image/svg+xml"></object>
       </div>
     </div>
@@ -142,7 +142,7 @@
                     inactive-color="var(--main-color)"
                     active-text="纵向拼接"
                     inactive-text="横向拼接"
-                    class="control"
+                    class="full-width-control"
                     @change="changeDirection"></el-switch>
                 </div>
                 <div class="row">
@@ -158,7 +158,7 @@
                 <div class="control-row">
                   <el-slider
                     v-model="padding"
-                    class="control"
+                    class="full-width-control"
                     :min="0"
                     :max="100"
                     :step="1"
@@ -171,7 +171,7 @@
                 <div class="control-row">
                   <el-slider
                     v-model="spacing"
-                    class="control"
+                    class="full-width-control"
                     :min="0"
                     :max="100"
                     :step="1"
@@ -184,7 +184,7 @@
                 <div class="control-row">
                   <el-slider
                     v-model="borderRadius"
-                    class="control"
+                    class="full-width-control"
                     :min="0"
                     :max="100"
                     :step="1"
@@ -202,7 +202,7 @@
                 <div class="control-row">
                   <el-slider
                     v-model="quality"
-                    class="control"
+                    class="full-width-control"
                     :min="1"
                     :max="100"
                     :step="1"
@@ -213,7 +213,7 @@
                   <div class="text">存储位置</div>
                 </div>
                 <div class="control-row">
-                  <el-input disabled size="mini" v-model="distDirectory" class="control">
+                  <el-input disabled size="mini" v-model="distDirectory" class="full-width-control">
                     <el-button @click="selectSaveFolder" slot="prepend">选择</el-button>
                   </el-input>
                 </div>
@@ -221,7 +221,7 @@
                   <div class="text">文件名</div>
                 </div>
                 <div class="control-row">
-                  <el-input size="mini" v-model="filename" class="control" placeholder="请输入文件名">
+                  <el-input size="mini" v-model="filename" class="full-width-control" placeholder="请输入文件名">
                     <el-select v-model="mimeType" size="mini" slot="append">
                       <el-option label=".jpg" value="jpeg"/>
                       <el-option label=".webp" value="webp"/>
@@ -795,85 +795,6 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
-  button {
-    font-family: var(--main-font);
-  }
-  
-  input {
-    font-family: var(--main-font);
-  }
-
-  #header {
-    padding-left: 20px;
-    padding-right: 20px;
-    box-sizing: border-box;
-    flex-basis: 40px;
-    background-color: var(--black-gray);
-    display: flex;
-    align-items: center;
-    z-index: 3000;
-    -webkit-app-region: drag;
-
-    #title {
-      color: var(--white);
-      font-size: 16px;
-      flex-grow: 1;
-    }
-
-    .control-button {
-      -webkit-app-region: no-drag;
-      width: 20px;
-      height: 20px;
-      margin-left: 5px;
-      margin-right: 5px;
-      border-radius: 10px;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      object {
-        width: 50%;
-        color: var(--white);
-      }
-
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
-
-      &::after {
-        content: '';
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      &:hover::after {
-        background-color: rgba(0, 0, 0, 0.1);
-      }
-    }
-
-    #minimize {
-      background-color: var(--success-green);
-    }
-
-    #maximize {
-      background-color: var(--notice-yellow);
-    }
-
-    #close {
-      background-color: var(--warning-red);
-    }
-  }
 
   #content {
     height: 0;
@@ -884,68 +805,6 @@ export default {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .control-row {
-    width: 100%;
-    height: 28px;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 14px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    .control {
-      width: 100%;
-    }
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .row {
-    width: 100%;
-    flex-shrink: 0;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    
-    &:first-child {
-      margin-top: 0;
-    }
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-  
-  .bar-button {
-    width: 0;
-    height: 28px;
-    flex-grow: 1;
-    box-sizing: border-box;
-    border: none;
-    margin-left: 5px;
-    margin-right: 5px;
-    
-    &:first-child {
-      margin-left: 0;
-    }
-    
-    &:last-child {
-      margin-right: 0;
-    }
   }
   
   .el-input-group {
@@ -1027,6 +886,7 @@ export default {
         overflow-x: hidden;
         overflow-y: auto;
         text-align: center;
+        font-size: 0;
           
         #sample {
           width: 400px;
