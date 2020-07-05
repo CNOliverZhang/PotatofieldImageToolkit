@@ -24,7 +24,7 @@
             <div
               id="sample"
               :style="{
-                'background-color': background,
+                'background-image': background,
                 'width': sampleWidth + 'px',
                 'height': sampleHeight + 'px'
               }"></div>
@@ -109,8 +109,8 @@
                 </div>
                 <div class="control-row">
                   <el-select v-model="background" placeholder="请选择" size="mini" class="full-width-control">
-                    <el-option label="深色" value="var(--black-gray)"/>
-                    <el-option label="浅色" value="var(--white-gray)"/>
+                    <el-option label="深色" value="linear-gradient(135deg, var(--dark-gray), var(--black-gray))"/>
+                    <el-option label="浅色" value="linear-gradient(135deg, var(--gray), var(--white-gray))"/>
                   </el-select>
                 </div>
                 <div class="row">
@@ -516,7 +516,7 @@ export default {
       imageWidth: 0,
       imageHeight: 0,
       ratio: 1,
-      background: 'var(--black-gray)',
+      background: 'linear-gradient(135deg, var(--dark-gray), var(--black-gray))',
       templateTitle: ''
     }
   },

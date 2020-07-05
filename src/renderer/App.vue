@@ -351,6 +351,16 @@ export default {
     }
   }
 
+  .el-collapse {
+    .el-collapse-item__header {
+      color: var(--dark-gray);
+    }
+
+    .el-collapse-item__content {
+      color: var(--dark-gray);
+    }
+  }
+
   .el-pagination {
     padding: 0;
     margin-right: 10px;
