@@ -181,7 +181,9 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import AES from 'crypto-js/aes';
+import AES from 'crypto-js/aes'
+
+const os = require('os')
 
 export default {
   name: 'index',
@@ -349,17 +351,19 @@ export default {
       this.totalMessages = res.data.length
     }).catch(() => {})
     let version = ipcRenderer.sendSync('version')
+    let platform = os.platform()
     if (this.$store.state.settings.identifier) {
       this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
         identifier: this.$store.state.settings.identifier,
         version: version
       })
     } else {
-      let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), version).toString()
+      let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), platform).toString()
       this.$store.dispatch('settings/setIdentifier', identifier).then(() => {
         this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
           identifier: identifier,
-          version: version
+          version: version,
+          platform: platform
         })
       })
     }
