@@ -229,6 +229,8 @@
                       class="control-row">
                       <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
                       <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
+                    </div>
+                    <div class="control-row">
                       <el-slider
                         v-model="offsetY"
                         class="full-width-control"
