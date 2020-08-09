@@ -358,7 +358,7 @@ export default {
         version: version
       })
     } else {
-      let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), platform).toString()
+      let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), version).toString()
       this.$store.dispatch('settings/setIdentifier', identifier).then(() => {
         this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
           identifier: identifier,
