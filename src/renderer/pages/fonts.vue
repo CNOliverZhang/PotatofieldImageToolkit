@@ -9,13 +9,19 @@
         <object data="static/images/close.svg" type="image/svg+xml"></object>
       </div>
     </div>
-    <el-tabs type="card" tab-position="top" id="content">
+    <el-tabs type="card" tab-position="top" id="content" @tab-click="clearSearch">
       <el-tab-pane>
         <span slot="label"><i class="fas fa-font"></i> 本地字体</span>
         <div class="tab-content">
-          <div class="container" v-if="localFontsChinese && localChineseFonts.length != 0">
+          <div class="row">
+            <el-input size="mini" placeholder="请输入搜索关键词以搜索字体" v-model="searchKeyword">
+              <el-button slot="append" size="mini" @click="clearSearch">清除关键词</el-button>
+            </el-input>
+            <el-button type="primary" size="mini" @click="openDirectory" id="open-directory">打开字体目录</el-button>
+          </div>
+          <div class="container" v-if="localDisplayFonts.length != 0">
             <div
-              v-for="font in localChineseFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
+              v-for="font in localDisplayFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
               <div class="card">
@@ -53,47 +59,7 @@
               </div>
             </div>
           </div>
-          <div class="container" v-if="!localFontsChinese && localEnglishFonts.length != 0">
-            <div
-              v-for="font in localEnglishFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
-              :key="font.fontFamily"
-              class="card-container">
-              <div class="card">
-                <div>
-                  <img :src="font.image" class="font-preview">
-                  <div class="row">
-                    <div class="text">名称：{{ font.verbose }}</div>
-                  </div>
-                  <div class="row">
-                    <div class="text">字形：{{ font.style }}</div>
-                  </div>
-                </div>
-                <div class="row actions">
-                  <div v-if="font.isDefault" class="action">
-                    <span class="fa fa-cog"></span>
-                    <div>当前默认字体</div>
-                  </div>
-                  <div v-else class="action active" @click="setDefaultFont(font.fontFamily)">
-                    <span class="fa fa-cog"></span>
-                    <div>设为默认字体</div>
-                  </div>
-                  <div v-if="font.builtin" class="action">
-                    <span class="fa fa-trash-alt"></span>
-                    <div>内置字体无法删除</div>
-                  </div>
-                  <div v-if="font.isDefault && !font.builtin" class="action">
-                    <span class="fa fa-trash-alt"></span>
-                    <div>默认字体无法删除</div>
-                  </div>
-                  <div v-if="!font.isDefault && !font.builtin" class="action active" @click="deleteFont(font.originalIndex)">
-                    <span class="fa fa-trash-alt"></span>
-                    <div>删除本地字体</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="container" v-if="(localFontsChinese && localChineseFonts.length == 0) || (!localFontsChinese && localEnglishFonts.length == 0)">
+          <div class="container" v-else>
             <div  class="empty-container">
               <div class="empty">
                 <i class="fas fa-folder-open"></i>
@@ -103,24 +69,12 @@
           </div>
           <div class="row">
             <el-pagination
-              v-if="localFontsChinese"
               small
               background
               layout="prev, pager, next"
               :pager-count="5"
               :page-size="6"
-              :total="localChineseFonts.length"
-              :current-page="localFontListPage"
-              @current-change="localFontListPageChange">
-            </el-pagination>
-            <el-pagination
-              v-else
-              small
-              background
-              layout="prev, pager, next"
-              :pager-count="5"
-              :page-size="6"
-              :total="localEnglishFonts.length"
+              :total="localDisplayFonts.length"
               :current-page="localFontListPage"
               @current-change="localFontListPageChange">
             </el-pagination>
@@ -137,9 +91,14 @@
       <el-tab-pane>
         <span slot="label"><i class="fas fa-globe"></i> 在线字体</span>
         <div class="tab-content">
-          <div class="container" v-if="onlineFontsChinese && onlineChineseFonts.length != 0">
+          <div class="row">
+            <el-input size="mini" placeholder="请输入搜索关键词以搜索字体" v-model="searchKeyword">
+              <el-button slot="append" size="mini" @click="clearSearch">清除关键词</el-button>
+            </el-input>
+          </div>
+          <div class="container" v-if="onlineDisplayFonts.length != 0">
             <div
-              v-for="font in onlineChineseFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
+              v-for="font in onlineDisplayFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
               :key="font.fontFamily"
               class="card-container">
               <div class="card">
@@ -173,43 +132,7 @@
               </div>
             </div>
           </div>
-          <div class="container" v-if="!onlineFontsChinese && onlineEnglishFonts.length != 0">
-            <div
-              v-for="font in onlineEnglishFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
-              :key="font.fontFamily"
-              class="card-container">
-              <div class="card">
-                <div>
-                  <img :src="font.image" class="font-preview">
-                  <div class="row">
-                    <div class="text">名称：{{ font.verbose }}</div>
-                  </div>
-                  <div class="row">
-                    <div class="text">字形：{{ font.style }}</div>
-                  </div>
-                </div>
-                <div class="row actions">
-                  <div v-if="font.downloaded" key="downloaded" class="action">
-                    <span class="fa fa-check"></span>
-                    <div>已下载字体</div>
-                  </div>
-                  <div v-else key="download" class="action active" @click="downloadFont(font)">
-                    <span class="fa fa-download"></span>
-                    <div>下载字体</div>
-                  </div>
-                  <div v-if="font.downloaded" key="install" class="action active" @click="installFont(font.fontFamily)">
-                    <span class="fa fa-desktop"></span>
-                    <div>安装到操作系统</div>
-                  </div>
-                  <div v-else key="explorer" class="action active" @click="downloadFontUsingExplorer(font.src)">
-                    <span class="fab fa-chrome"></span>
-                    <div>用浏览器下载</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="container" v-if="onlineFonts.length == 0">
+          <div class="container" v-else>
             <div class="empty-container">
               <div class="empty">
                 <i class="fas fa-folder-open"></i>
@@ -219,27 +142,15 @@
           </div>
           <div class="row">
             <el-pagination
-              v-if="onlineFontsChinese"
               small
               background
               layout="prev, pager, next"
               :pager-count="5"
               :page-size="6"
-              :total="onlineChineseFonts.length"
+              :total="onlineDisplayFonts.length"
               :current-page="onlineFontListPage"
               @current-change="onlineFontListPageChange">
             </el-pagination>
-            <el-pagination
-              v-else
-              small
-              background
-              layout="prev, pager, next"
-              :pager-count="5"
-              :page-size="6"
-              :total="onlineEnglishFonts.length"
-              :current-page="onlineFontListPage"
-              @current-change="onlineFontListPageChange">
-              </el-pagination>
             <el-switch
               v-model="onlineFontsChinese"
               active-color="var(--main-color)"
@@ -271,7 +182,8 @@ export default {
       localFontListPage: 1,
       localFontsChinese: true,
       onlineFontListPage: 1,
-      onlineFontsChinese: true
+      onlineFontsChinese: true,
+      searchKeyword: '',
     }
   },
   computed: {
@@ -282,38 +194,45 @@ export default {
       })
       return fonts
     },
-    localChineseFonts() {
+    localDisplayFonts() {
+      let language
+      if (this.localFontsChinese) {
+        language = '中文'
+      } else {
+        language = '英文'
+      }
       return this.$store.state.fonts.fontList.slice().map((font, index) => {
         font.originalIndex = index
         font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
         return font
       }).filter((font) => {
-        return font.language == '中文'
+        if (this.searchKeyword != '' && !font.verbose.includes(this.searchKeyword)) {
+          return false
+        }
+        if (font.language != language) {
+          return false
+        }
+        return true
       })
     },
-    localEnglishFonts() {
-      return this.$store.state.fonts.fontList.slice().map((font, index) => {
-        font.originalIndex = index
-        font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
-        return font
-      }).filter((font) => {
-        return font.language == '英文'
-      })
-    },
-    onlineChineseFonts() {
+    onlineDisplayFonts() {
+      let language
+      if (this.onlineFontsChinese) {
+        language = '中文'
+      } else {
+        language = '英文'
+      }
       return this.onlineFonts.map((font) => {
         font.downloaded = this.localFonts.has(font.fontFamily)
         return font
       }).filter((font) => {
-        return font.language == '中文'
-      })
-    },
-    onlineEnglishFonts() {
-      return this.onlineFonts.map((font) => {
-        font.downloaded = this.localFonts.has(font.fontFamily)
-        return font
-      }).filter((font) => {
-        return font.language == '英文'
+        if (this.searchKeyword != '' && !font.verbose.includes(this.searchKeyword)) {
+          return false
+        }
+        if (font.language != language) {
+          return false
+        }
+        return true
       })
     }
   },
@@ -334,6 +253,21 @@ export default {
     switchLanguage() {
       this.localFontListPage = 1
       this.onlineFontListPage = 1
+      this.clearSearch()
+    },
+    clearSearch() {
+      this.searchKeyword = ''
+    },
+    openDirectory() {
+      this.$dialog({
+        type: 'warning',
+        title: '操作确认',
+        text: '即将打开字体库目录，您可以随意查看和使用已下载的字体。但为保证本程序正常工作，请勿从目录中删除或修改任何文件。',
+        showCancel: true,
+        confirmFunction: () => {
+          shell.openExternal(this.fontsPath)
+        }
+      })
     },
     setDefaultFont(fontFamily) {
       this.$dialog({
@@ -357,13 +291,8 @@ export default {
             fs.unlinkSync(this.$store.state.fonts.fontList[index].image)
             fs.rmdirSync(path.join(this.fontsPath, this.$store.state.fonts.fontList[index].verbose))
             if (this.localFontListPage != 1) {
-              if (this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localChineseFonts.length / 6))) {
-                if (this.localChineseFonts.length % 6 == 1) {
-                  this.localFontListPage -= 1
-                }
-              }
-              if (!this.localFontsChinese && (this.localFontListPage == Math.ceil(this.localEnglishFonts.length / 6))) {
-                if (this.localEnglishFonts.length % 6 == 1) {
+              if (this.localFontListPage == Math.ceil(this.localDisplayFonts.length / 6)) {
+                if (this.localDisplayFonts.length % 6 == 1) {
                   this.localFontListPage -= 1
                 }
               }
@@ -582,6 +511,10 @@ export default {
           justify-content: space-between;
         }
       }
+    }
+
+    #open-directory {
+      margin-left: 10px;
     }
     
     .container {
