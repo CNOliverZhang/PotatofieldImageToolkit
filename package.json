@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2020 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "字体管理工具添加字体搜索功能。\n字体管理工具支持打开字体库目录。"
+      "releaseNotes": "修复图片加水印工具编辑器显示错误的问题。"
     },
     "publish": [
       {
