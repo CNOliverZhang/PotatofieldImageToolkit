@@ -67,7 +67,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.13.1",
     "@fortawesome/free-solid-svg-icons": "^5.13.1",
     "@fortawesome/vue-fontawesome": "^0.1.10",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "colorthief": "^2.3.0",
     "cropperjs": "^1.5.7",
     "crypto-js": "^4.0.0",
