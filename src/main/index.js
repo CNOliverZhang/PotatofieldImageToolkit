@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, nativeImage, Menu, Tray, screen } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain, dialog, nativeImage, Menu, Tray, screen } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import '../renderer/store'
 
@@ -42,23 +42,18 @@ function createWindow(args) {
     resizable: true,
     closable: false,
     show: false,
-    parent: args.modal ? args.parent : null,
     minimizable: true,
     maximizable: false,
     transparent: args.transparent,
     webPreferences: {
       webSecurity: false,
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
+      allowRunningInsecureContent: true,
     }
   })
 
   newWindow.loadURL(baseURL + args.path)
-  
-  if (args.modal) {
-    newWindow.on('minimize', () => {
-      args.parent.minimize()
-    })
-  }
 
   newWindow.on('restore', () => {
     if (!newWindow.isMaximized()) {
@@ -122,10 +117,6 @@ function openWindow(args) {
       title: args.title,
       path: args.path,
     }
-    if (args.modal) {
-      targetArgs.parent = args.parent
-      targetArgs.modal = true
-    }
     if (args.width) {
       targetArgs.width = args.width
       targetArgs.height = args.height
@@ -143,6 +134,12 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 app.on('ready', () => {
+  if (process.env.NODE_ENV === 'development') {
+    protocol.interceptFileProtocol('file', (req, callback) => {
+      const url = req.url.substr(8);
+      callback(decodeURI(url));
+    }, () => {})
+  }
   zoomFactor = screen.getPrimaryDisplay().workAreaSize.height / devWindowHeight * scale
   mainWindow = createWindow({
     title: '洋芋田图像工具箱',
@@ -330,7 +327,8 @@ ipcMain.on('download-update', () => {
 })
 
 ipcMain.on('update-now', () => {
-  autoUpdater.quitAndInstall(true, true)
+  autoUpdater.quitAndInstall(false, false)
+  app.exit()
 })
 
 ipcMain.on('scale', (event, arg) => {
@@ -378,18 +376,11 @@ ipcMain.on('change-maximize-status', (event) => {
 
 ipcMain.on('close', (event) => {
   let currentWindow = BrowserWindow.fromWebContents(event.sender)
-  if (currentWindow.webContents.browserWindowOptions.parent) {
-    let parent = currentWindow.webContents.browserWindowOptions.parent
-    currentWindow.destroy()
-    parent.webContents.send('modal-window-closed')
-    parent.show()
-  } else {
-    currentWindow.destroy()
-  }
+  currentWindow.destroy()
 })
 
 ipcMain.on('index-only', (event) => {
-  if (windows.size == 1) {
+  if (windows.size <= 1) {
     event.returnValue = true
   } else {
     event.returnValue = false
@@ -398,27 +389,20 @@ ipcMain.on('index-only', (event) => {
 
 ipcMain.on('exit', () => {
   windows.forEach((window) => {
-    if (window.isModal()) {
-      window.destroy()
-    }
+    window.destroy()
   })
   app.exit()
 })
 
 ipcMain.on('relaunch', () => {
   windows.forEach((window) => {
-    if (window.isModal()) {
-      window.destroy()
-    }
+    window.destroy()
   })
   app.relaunch()
   app.exit()
 })
 
 ipcMain.on('open', (event, args) => {
-  if (args.modal) {
-    args.parent = BrowserWindow.fromWebContents(event.sender)
-  }
   openWindow(args)
 })
 

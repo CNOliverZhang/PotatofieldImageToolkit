@@ -27,7 +27,7 @@
             <div class="subtitle">开发者信息</div>
           </div>
           <div class="control-row">
-            <div class="text">Copyright © 2020 张志毅</div>
+            <div class="text">Copyright © 2021 张志毅</div>
             <div class="text link" @click="copyEmail">联系开发者</div>
           </div>
           <div class="row">
@@ -365,16 +365,11 @@ export default {
           dialog.change({
             type: 'success',
             title: '更新下载完成',
-            text: '新版本的安装文件已经下载完成，即将开始更新。',
+            text: '新版本的安装文件已经下载完成，即将退出程序以安装更新。',
             content: null,
             showConfirm: true,
             confirmFunction: () => {
               ipcRenderer.send('update-now')
-              this.$dialog({
-                title: '正在安装更新',
-                text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
-                showConfirm: false
-              })
             }
           }).then(() => {
             ipcRenderer.removeAllListeners('update-download-progress')

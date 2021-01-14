@@ -310,16 +310,11 @@ export default {
               dialog.change({
                 type: 'success',
                 title: '更新下载完成',
-                text: '新版本的安装文件已经下载完成，即将开始更新。',
+                text: '新版本的安装文件已经下载完成，即将退出程序以安装更新。',
                 content: null,
                 showConfirm: true,
                 confirmFunction: () => {
                   ipcRenderer.send('update-now')
-                  this.$dialog({
-                    title: '正在安装更新',
-                    text: '更新完成后本程序将自动重启，在此期间无需其他操作，请您耐心等待。',
-                    showConfirm: false
-                  })
                 }
               }).then(() => {
                 ipcRenderer.removeAllListeners('update-download-progress')
