@@ -335,7 +335,6 @@ export default {
       })
     },
     confirmUpdate() {
-      ipcRenderer.send('download-update')
       this.$dialog({
         title: '正在下载更新',
         content: this.$createElement('el-progress', {
@@ -386,6 +385,7 @@ export default {
             ipcRenderer.removeAllListeners('update-download-progress')
           })
         })
+        ipcRenderer.send('download-update')
       })
     },
     selectSaveFolder() {
