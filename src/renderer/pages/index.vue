@@ -206,7 +206,7 @@ export default {
         this.$dialog({
           type: 'warning',
           title: '操作确认',
-          text: '关闭主页面的同时将退出程序，正在运行的所有工具都将关闭。您确定要退出吗？',
+          text: '即将退出程序，正在运行的所有工具都将关闭。您确定要退出吗？',
           showCancel: true,
           confirmFunction: () => {
             this.$store.dispatch('watermark/fileListEmpty')

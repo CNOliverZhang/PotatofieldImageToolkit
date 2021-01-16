@@ -45,6 +45,7 @@ function createWindow(args) {
     minimizable: true,
     maximizable: false,
     transparent: args.transparent,
+    hasShadow: args.hideShadow ? false : true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
@@ -146,7 +147,8 @@ app.on('ready', () => {
     path: '#/',
     width: 800,
     height: 500,
-    transparent: true
+    transparent: true,
+    hideShadow: true
   })
   let icon = nativeImage.createFromPath(path.join(__static, 'images/icon.ico'))
   let menu = Menu.buildFromTemplate([
@@ -272,7 +274,7 @@ app.on('ready', () => {
     {
       label: '退出',
       click: () => {
-        if (windows.size != 1) {
+        if (windows.size > 1) {
           mainWindow.show()
           mainWindow.webContents.send('exit')
         } else {
@@ -303,6 +305,16 @@ app.on('window-all-closed', () => {
   }
 })
 
+app.on('before-quit', () => {
+  console.log(windows.size)
+  if (windows.size > 1) {
+    mainWindow.show()
+    mainWindow.webContents.send('exit')
+  } else {
+    app.exit()
+  }
+})
+
 app.on('activate', (event, hasVisibleWindows) => {
   if (!hasVisibleWindows) {
     mainWindow = createWindow({
@@ -310,7 +322,8 @@ app.on('activate', (event, hasVisibleWindows) => {
       path: '#/',
       width: 800,
       height: 500,
-      transparent: true
+      transparent: true,
+      hideShadow: true
     })
   }
 })
@@ -388,16 +401,10 @@ ipcMain.on('index-only', (event) => {
 })
 
 ipcMain.on('exit', () => {
-  windows.forEach((window) => {
-    window.destroy()
-  })
   app.exit()
 })
 
 ipcMain.on('relaunch', () => {
-  windows.forEach((window) => {
-    window.destroy()
-  })
   app.relaunch()
   app.exit()
 })
