@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2021 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新底层库 Electron 到最新的 11.2.0 版本，优化兼容性和性能。\n正式发布 Mac 版本。\n适配使用 Apple M1 芯片的 Mac 设备。"
+      "releaseNotes": "更新底层库 Electron 到最新的 11.2.0 版本，优化兼容性和性能。\n正式发布 Mac 版本。\n适配使用 Apple M1 芯片的 Mac 设备。\n修复了消息中心显示异常的问题。"
     },
     "publish": [
       {
@@ -78,7 +78,6 @@
     "exif-js": "^2.3.0",
     "html2canvas": "^1.0.0-rc.7",
     "vue": "^2.6.12",
-    "vue-clamp": "^0.3.1",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.9",
     "vuex": "^3.6.0",

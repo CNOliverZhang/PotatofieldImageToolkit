@@ -110,7 +110,6 @@
                 <li>Vue Router</li>
                 <li>Vuex</li>
                 <li>Vuex Electron</li>
-                <li>vue-clamp</li>
                 <li>Element UI</li>
                 <li>Font Awesome</li>
                 <li>html2canvas</li>

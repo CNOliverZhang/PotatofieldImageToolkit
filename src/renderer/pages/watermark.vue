@@ -115,7 +115,7 @@
                 <div class="row">
                   <div class="subtitle">{{ template.title }}</div>
                 </div>
-                <v-clamp autoresize :max-lines="2" class="text">{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
+                <div class="text clamp">{{ template.text != '' ? template.text : '[图片]' }}</div>
                 <div class="row actions">
                   <div class="action" @click="editTemplate(index + (templateListPage - 1) * 6)">
                     <span class="fa fa-edit"></span>

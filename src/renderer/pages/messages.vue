@@ -24,7 +24,7 @@
                     <div class="subtitle">{{ message.title }}</div>
                   </div>
                   <div class="row">
-                    <v-clamp autoresize :max-lines="3" class="text">{{ message.text }}</v-clamp>
+                    <div class="text clamp">{{ message.text }}</div>
                   </div>
                 </div>
                 <div class="row actions">
@@ -75,7 +75,7 @@
                     <div class="subtitle">{{ message.title }}</div>
                   </div>
                   <div class="row">
-                    <v-clamp autoresize :max-lines="3" class="text">{{ message.text }}</v-clamp>
+                    <div class="text clamp">{{ message.text }}</div>
                   </div>
                 </div>
                 <div class="row actions">
@@ -311,6 +311,14 @@ export default {
 
           .text {
             text-indent: 2em;
+          }
+
+          .clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
           }
           
           .actions {

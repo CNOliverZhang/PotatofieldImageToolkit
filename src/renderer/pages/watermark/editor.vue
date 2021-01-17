@@ -541,7 +541,7 @@
                     </div>
                   </div>
                   <div class="text">{{ template.title }}</div>
-                  <v-clamp :max-lines="2" class="subtext">内容：{{ template.text != '' ? template.text : '[图片]' }}</v-clamp>
+                  <div class="subtext clamp">内容：{{ template.text != '' ? template.text : '[图片]' }}</div>
                 </div>
               </div>
               <div v-else id="empty-container">
@@ -1873,6 +1873,14 @@ export default {
               width: 100%;
               overflow: hidden;
               white-space: nowrap;
+              text-overflow: ellipsis;
+            }
+
+            .clamp {
+              display: -webkit-box;
+              -webkit-line-clamp: 3;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
               text-overflow: ellipsis;
             }
             
