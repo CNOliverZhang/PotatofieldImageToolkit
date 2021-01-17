@@ -180,6 +180,14 @@ export default {
               box-sizing: border-box;
             }
           }
+
+          .clamp {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
           
           .actions {
             width: 100%;

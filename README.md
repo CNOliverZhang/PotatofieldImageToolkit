@@ -127,8 +127,6 @@ npm run build
 
 [Vuex Electron](https://github.com/vue-electron/vuex-electron)
 
-[vue-clamp](https://github.com/Justineo/vue-clamp)
-
 [Element UI](https://github.com/ElemeFE/element)
 
 [Font Awesome](https://github.com/FortAwesome/Font-Awesome)

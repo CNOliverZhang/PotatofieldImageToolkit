@@ -42,7 +42,7 @@
                       'background-color': template.backgroundColor
                     }"></div>
                 </div>
-                <v-clamp autoresize :max-lines="2" class="text">{{ template.text }}</v-clamp>
+                <div class="text clamp">{{ template.text }}</div>
                 <div class="row actions">
                   <div class="action" @click="editTemplate(index + (templateListPage - 1) * 6)">
                     <span class="fa fa-edit"></span>

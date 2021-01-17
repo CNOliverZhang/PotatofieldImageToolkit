@@ -239,10 +239,6 @@ export default {
           url: 'https://github.com/vue-electron/vuex-electron'
         },
         {
-          title: 'vue-clamp',
-          url: 'https://github.com/Justineo/vue-clamp'
-        },
-        {
           title: 'Element UI',
           url: 'https://github.com/ElemeFE/element'
         },
