@@ -386,6 +386,10 @@
                       class="control-row">
                       <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
                       <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
+                    </div>
+                    <div
+                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
+                      class="control-row">
                       <el-slider
                         v-model="imageOffsetX"
                         class="full-width-control"
@@ -400,6 +404,10 @@
                       class="control-row">
                       <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
                       <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
+                    </div>
+                    <div
+                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
+                      class="control-row">
                       <el-slider
                         v-model="imageOffsetY"
                         class="full-width-control"
@@ -1165,7 +1173,21 @@ export default {
           let shadow = watermark.style['text-shadow'].split(' ')
           shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
           watermark.style['text-shadow'] = shadow.join(' ')
-          // 完成匹配
+          // 将图片水印转 canvas
+          if (this.image) {
+            let image = document.getElementById('watermark-image')
+            let width = image.naturalWidth
+            let height = image.naturalHeight
+            let canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            let context = canvas.getContext('2d')
+            context.globalAlpha = this.imageOpacity
+            context.drawImage(image, 0, 0, width, height)
+            let bin = canvas.toDataURL('image/png')
+            image.src = bin
+            image.style['opacity'] = 1
+          }
           html2canvas(document.getElementById('watermark-container'), {
             canvas: canvas,
             scale: scale,
@@ -1250,6 +1272,21 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
+          // 将图片水印转 canvas
+          if (this.image) {
+            let image = document.getElementById('watermark-image')
+            let width = image.naturalWidth
+            let height = image.naturalHeight
+            let canvas = document.createElement('canvas')
+            canvas.width = width
+            canvas.height = height
+            let context = canvas.getContext('2d')
+            context.globalAlpha = this.imageOpacity
+            context.drawImage(image, 0, 0, width, height)
+            let bin = canvas.toDataURL('image/png')
+            image.src = bin
+            image.style['opacity'] = 1
+          }
           let handleSingle = (file, index) => {
             return new Promise((resolve, reject) => {
               dialog.change({
@@ -1352,7 +1389,6 @@ export default {
                         let shadow = watermark.style['text-shadow'].split(' ')
                         shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
                         watermark.style['text-shadow'] = shadow.join(' ')
-                        // 完成匹配
                         html2canvas(document.getElementById('watermark-container'), {
                           canvas: canvas,
                           scale: scale,
