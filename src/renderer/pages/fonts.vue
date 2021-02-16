@@ -399,7 +399,7 @@ export default {
     installFont(fontFamily) {
       for (let i = 0; i < this.$store.state.fonts.fontList.length; i++) {
         if (this.$store.state.fonts.fontList[i].fontFamily == fontFamily) {
-          shell.openItem(this.$store.state.fonts.fontList[i].src)
+          shell.openPath(this.$store.state.fonts.fontList[i].src)
           return
         }
       }
