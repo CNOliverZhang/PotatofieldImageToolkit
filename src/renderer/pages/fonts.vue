@@ -171,7 +171,6 @@ import CreateDirectory from '../utils/CreateDirectory'
 
 const path = require('path')
 const fs = require('fs')
-const stream = require('stream')
 
 export default {
   name: 'fonts',
@@ -259,6 +258,9 @@ export default {
       this.searchKeyword = ''
     },
     openDirectory() {
+      if (!fs.existsSync(this.fontsPath) || !fs.statSync(this.fontsPath).isDirectory()) {
+        CreateDirectory(this.fontsPath)
+      }
       this.$dialog({
         type: 'warning',
         title: '操作确认',
@@ -399,7 +401,7 @@ export default {
     installFont(fontFamily) {
       for (let i = 0; i < this.$store.state.fonts.fontList.length; i++) {
         if (this.$store.state.fonts.fontList[i].fontFamily == fontFamily) {
-          shell.openItem(this.$store.state.fonts.fontList[i].src)
+          shell.openPath(this.$store.state.fonts.fontList[i].src)
           return
         }
       }
