@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2021 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "更新底层库 Electron 到最新的 11.2.0 版本，优化兼容性和性能。\n正式发布 Mac 版本。\n适配使用 Apple M1 芯片的 Mac 设备。\n修复了消息中心显示异常的问题。"
+      "releaseNotes": "图片压缩工具支持 PNG 压缩。\n修复了图片水印透明度失效的问题。\n修复了字体管理工具安装字体到系统失败的问题。"
     },
     "publish": [
       {
@@ -36,6 +36,7 @@
     "files": [
       "dist/electron/**/*"
     ],
+    "asar": false,
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
@@ -77,6 +78,10 @@
     "element-ui": "^2.14.1",
     "exif-js": "^2.3.0",
     "html2canvas": "^1.0.0-rc.7",
+    "imagemin": "^7.0.1",
+    "imagemin-mozjpeg": "^9.0.0",
+    "imagemin-pngquant": "^9.0.1",
+    "imagemin-webp": "^6.0.0",
     "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.9",

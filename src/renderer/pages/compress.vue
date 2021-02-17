@@ -76,6 +76,7 @@
               <div class="text">保存的图片格式</div>
               <el-radio-group v-model="mimeType" size="mini" class="half-width-control">
                 <el-radio-button label="JPEG"></el-radio-button>
+                <el-radio-button label="PNG"></el-radio-button>
                 <el-radio-button label="WEBP"></el-radio-button>
                 <el-radio-button label="保持原格式"></el-radio-button>
               </el-radio-group>
@@ -202,6 +203,10 @@ import EXIF from 'exif-js'
 
 const path = require('path')
 const fs = require('fs')
+const imagemin = require('imagemin')
+const imageminMozjpeg = require('imagemin-mozjpeg')
+const imageminPngquant = require('imagemin-pngquant')
+const imageminWebp = require('imagemin-webp')
 
 export default {
   name: 'compress',
@@ -257,7 +262,7 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      let formats = new Set(['jpg', 'jpeg', 'webp'])
+      let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
       if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
@@ -280,7 +285,7 @@ export default {
           text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
           showConfirm: false
         }).then((dialog) => {
-          let formats = new Set(['jpeg', 'jpg', 'webp'])
+          let formats = new Set(['jpeg', 'jpg', 'webp', 'png'])
           let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
           this.fileList = result.fileList
           this.fileSet = new Set(result.fileList)
@@ -429,18 +434,39 @@ export default {
               }).then(() => {
                 let imageInfo = this.fileList[index]
                 let distExt
-                if (this.mimeType == '保持原格式') {
-                  distExt = imageInfo.ext
-                } else if (this.mimeType == 'JPEG') {
+                let plugin
+                if (this.mimeType == 'JPEG') {
                   distExt = 'jpg'
-                } else {
+                  plugin = imageminMozjpeg({
+                    quality: this.quality
+                  })
+                } else if (this.mimeType == 'WEBP') {
                   distExt = 'webp'
-                }
-                let mimeType
-                if (distExt == 'jpg') {
-                  mimeType = 'jpeg'
+                  plugin = imageminWebp({
+                    quality: this.quality
+                  })
+                } else if (this.mimeType == 'PNG') {
+                  distExt = 'png'
+                  plugin = imageminPngquant({
+                    quality: [Math.max(1, this.quality - 5) / 100, Math.min(100, this.quality + 5) / 100],
+                    speed: 10
+                  })
                 } else {
-                  mimeType = distExt
+                  distExt = imageInfo.ext
+                  if (imageInfo.ext == 'png') {
+                    plugin = imageminPngquant({
+                      quality: [Math.max(1, this.quality - 5) / 100, Math.min(100, this.quality + 5) / 100],
+                      speed: 10
+                    })
+                  } else if (imageInfo.ext == 'webp') {
+                    plugin = imageminWebp({
+                      quality: this.quality
+                    })
+                  } else {
+                    plugin = imageminMozjpeg({
+                      quality: this.quality
+                    })
+                  }
                 }
                 let distFilename = imageInfo.filename + this.append + '.' + distExt
                 let distPath
@@ -454,59 +480,19 @@ export default {
                   distPath = imageInfo.filepath
                 }
                 let distFullpath = path.join(distPath, distFilename)
-                let image = document.createElement('img')
-                image.src = imageInfo.fullpath
-                image.onerror = () => {
+                CreateDirectory(distPath)
+                if (imageInfo.fullpath != distFullpath) {
+                  fs.copyFileSync(imageInfo.fullpath, distFullpath)
+                }
+                imagemin([distFullpath.replace(/\\/g, "/")], {
+                  destination: distPath.replace(/\\/g, "/"),
+                  plugins: [plugin]
+                }).then(() => {
+                  resolve()
+                }).catch(() => {
                   this.errorList.push(imageInfo.fullpath)
                   resolve()
-                }
-                image.onload = () => {
-                  EXIF.getData(image, () => {
-                    let orientation = EXIF.getTag(image, 'Orientation')
-                    let canvas = document.createElement('canvas')
-                    let width, height, x, y, rotation
-                    if (orientation == 3) {
-                      width = image.width
-                      height = image.height
-                      x = -width
-                      y = -height
-                      rotation = 180
-                    } else if (orientation == 6) {
-                      width = image.height
-                      height = image.width
-                      x = 0
-                      y = -width
-                      rotation = 90
-                    } else if (orientation == 8) {
-                      width = image.height
-                      height = image.width
-                      x = -height
-                      y = 0
-                      rotation = 270
-                    } else {
-                      width = image.width
-                      height = image.height
-                      x = 0
-                      y = 0
-                      rotation = 0
-                    }
-                    canvas.height = height
-                    canvas.width = width
-                    let context = canvas.getContext("2d")
-                    context.rotate(rotation * Math.PI / 180)
-                    context.drawImage(image, x, y, image.width, image.height)
-                    context.rotate(-rotation * Math.PI / 180)
-                    let url = canvas.toDataURL('image/' + mimeType, this.quality / 100).replace(/^data:image\/\w+;base64,/, "")
-                    let buffer = new Buffer.from(url, 'base64')
-                    CreateDirectory(distPath)
-                    fs.writeFile(distFullpath, buffer, (error) => {
-                      if (error) {
-                        this.errorList.push(imageInfo.fullpath)
-                      }
-                      resolve()
-                    })
-                  })
-                }
+                })
               })
             })
           }
