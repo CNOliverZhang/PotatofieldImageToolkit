@@ -317,7 +317,8 @@ export default {
             releaseNotes: info.releaseNotes.split('\n'),
             releaseDate: Number(info.releaseDate.slice(0, 4)) + " 年 "
             + Number(info.releaseDate.slice(5, 7)) + " 月 "
-            + Number(info.releaseDate.slice(8, 10)) + " 日"
+            + Number(info.releaseDate.slice(8, 10)) + " 日",
+            path: info.path
           }
         })
         ipcRenderer.once('error', () => {
@@ -332,61 +333,14 @@ export default {
     },
     confirmUpdate() {
       this.$dialog({
-        title: '正在下载更新',
-        content: this.$createElement('el-progress', {
-          'style': {
-            'height': '20px'
-          },
-          'props': {
-            'text-inside': true,
-            'stroke-width': 20,
-            'percentage': 0
-          }
-        }),
-        showConfirm: false
-      }).then((dialog) => {
-        ipcRenderer.on('update-download-progress', (event, progress) => {
-          dialog.change({
-            content: this.$createElement('el-progress', {
-              'props': {
-                'text-inside': true,
-                'stroke-width': 20,
-                'percentage': Math.round(progress)
-              }
-            })
-          })
-        })
-        ipcRenderer.once('update-downloaded', () => {
-          dialog.change({
-            type: 'success',
-            title: '更新下载完成',
-            text: '新版本的安装文件已经下载完成，即将退出程序以安装更新。',
-            content: null,
-            showConfirm: true,
-            confirmFunction: () => {
-              ipcRenderer.send('update-now')
-            }
-          }).then(() => {
-            ipcRenderer.removeAllListeners('update-download-progress')
-          })
-        })
-        ipcRenderer.once('error', () => {
-          dialog.change({
-            type: 'error',
-            title: '出现错误',
-            text: '下载更新的过程中出现错误。请您检查网络连接状态并重试，或手动下载最新版本安装包进行覆盖安装。',
-            content: null,
-            showConfirm: true,
-            showCancel: true,
-            confirmText: '手动下载',
-            confirmFunction: () => {
-              shell.openExternal(`https://files.potatofield.cn/ImageToolkit/Packages/${info.path}`)
-            }
-          }).then(() => {
-            ipcRenderer.removeAllListeners('update-download-progress')
-          })
-        })
-        ipcRenderer.send('download-update')
+        title: '请您手动下载最新版本安装包',
+        text: '因为 Apple 应用程序开发者数字签名政策限制，本软件无法支持自动更新。请您手动下载最新版本安装包进行覆盖安装，您的应用数据将会保留。',
+        showCancel: true,
+        confirmText: '下载',
+        cancelText: '取消',
+        confirmFunction: () => {
+          shell.openExternal(`https://files.potatofield.cn/ImageToolkit/Packages/${this.update.path}`)
+        }
       })
     },
     selectSaveFolder() {
