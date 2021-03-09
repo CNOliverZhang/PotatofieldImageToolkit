@@ -315,9 +315,9 @@ export default {
           this.update = {
             version: info.version,
             releaseNotes: info.releaseNotes.split('\n'),
-            releaseDate: info.releaseDate.slice(0, 4) + " 年 "
-            + info.releaseDate.slice(5, 7) + " 月 "
-            + info.releaseDate.slice(8, 10) + " 日"
+            releaseDate: Number(info.releaseDate.slice(0, 4)) + " 年 "
+            + Number(info.releaseDate.slice(5, 7)) + " 月 "
+            + Number(info.releaseDate.slice(8, 10)) + " 日"
           }
         })
         ipcRenderer.once('error', () => {
@@ -374,9 +374,14 @@ export default {
           dialog.change({
             type: 'error',
             title: '出现错误',
-            text: '下载更新的过程中出现错误，请您检查网络连接状态或稍候重试。',
+            text: '下载更新的过程中出现错误。请您检查网络连接状态并重试，或手动下载最新版本安装包进行覆盖安装。',
             content: null,
-            showConfirm: true
+            showConfirm: true,
+            showCancel: true,
+            confirmText: '手动下载',
+            confirmFunction: () => {
+              shell.openExternal(`https://files.potatofield.cn/ImageToolkit/Packages/${info.path}`)
+            }
           }).then(() => {
             ipcRenderer.removeAllListeners('update-download-progress')
           })

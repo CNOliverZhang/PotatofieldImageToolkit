@@ -190,6 +190,7 @@ export default {
   data() {
     return {
       totalMessages: 0,
+      changeLog: [],
     }
   },
   methods: {
@@ -254,6 +255,9 @@ export default {
     }
   },
   mounted() {
+    this.$http.get('https://api.potatofield.cn/imagetoolkit/versions/').then((res) => {
+      this.changeLog = res.data
+    })
     ipcRenderer.on('exit', () => {
       this.exit()
     })
@@ -263,19 +267,83 @@ export default {
       this.checkMessage()
     })
     ipcRenderer.once('update-available', (event, info) => {
+      const releaseDate = Number(info.releaseDate.slice(0, 4)) + " 年 "
+      + Number(info.releaseDate.slice(5, 7)) + " 月 "
+      + Number(info.releaseDate.slice(8, 10)) + " 日"
       this.$dialog({
         title: '发现新版本',
-        text: '当前最新版本为 ' + info.version + ' ，新版本特性如下：',
-        content: this.$createElement('div', null, info.releaseNotes.split('\n').map((releaseNote) => {
-          return this.$createElement('p', {
+        text: '当前最新版本为 ' + info.version + `，发布于 ${releaseDate}。`,
+        content: this.$createElement('div', null, [
+          this.$createElement('p', {
             style: {
               'line-height': '24px',
               'font-size': '12px',
               'text-align': 'justify',
               'text-indent': '0'
             }
-          }, releaseNote)
-        })),
+          }, '新版本特性如下：'),
+          this.$createElement('ul', {
+            style: {
+              'padding-inline-start': '2em'
+            }
+          }, info.releaseNotes.split('\n').map((releaseNote) => {
+            return this.$createElement('li', {
+              style: {
+                'line-height': '24px',
+                'font-size': '12px',
+                'text-align': 'justify',
+                'text-indent': '0'
+              }
+            }, releaseNote)
+          })),
+          this.$createElement('p', {
+            style: {
+              'line-height': '24px',
+              'font-size': '12px',
+              'text-align': 'justify',
+              'text-indent': '0'
+            }
+          }, '版本历史：'),
+          this.$createElement('ul', {
+            style: {
+              'padding-inline-start': '2em'
+            }
+          }, [
+            this.changeLog.slice(1, 10).map((log, index) => {
+              return [
+                this.$createElement('li', {
+                  style: {
+                    'line-height': '24px',
+                    'font-size': '12px',
+                    'text-align': 'justify',
+                    'text-indent': '0',
+                    'margin-block-start': index == 0 ? '0' : '1em'
+                  }
+                }, `版本号：${log.code}`),
+                ...(log.features.split('\n').map((feature) => {
+                  return this.$createElement('li', {
+                    style: {
+                      'line-height': '24px',
+                      'font-size': '12px',
+                      'text-align': 'justify',
+                      'text-indent': '0',
+                      'margin-left': '1em',
+                      'list-style': 'circle'
+                    }
+                  }, feature)
+                }))
+              ]
+            })
+          ]),
+          this.$createElement('p', {
+            style: {
+              'line-height': '24px',
+              'font-size': '12px',
+              'text-align': 'justify',
+              'text-indent': '0'
+            }
+          }, '更多历史版本请访问官方网站查看。')
+        ]),
         showCancel: true,
         cancelText: '忽略',
         confirmText: '更新',
