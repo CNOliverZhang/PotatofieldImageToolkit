@@ -391,11 +391,12 @@ export default {
               dialog.change({
                 type: 'error',
                 title: '出现错误',
-                text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以进入“关于”页面手动更新。',
+                text: '下载更新的过程中出现错误。您可以在下次启动程序时重试，也可以点击“确定”按钮手动下载最新版本安装包进行覆盖安装。',
                 content: null,
                 showConfirm: true,
+                showCancel: true,
                 confirmFunction: () => {
-                  dialog.close()
+                  shell.openExternal(`https://files.potatofield.cn/ImageToolkit/Packages/${info.path}`)
                 }
               }).then(() => {
                 ipcRenderer.removeAllListeners('update-download-progress')
