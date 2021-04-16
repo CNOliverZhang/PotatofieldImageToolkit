@@ -118,6 +118,10 @@
                 <li>Cropper.js</li>
                 <li>Color Thief</li>
                 <li>Crypto-JS</li>
+                <li>imagemin</li>
+                <li>imagemin-mozjpeg</li>
+                <li>imagemin-pngquant</li>
+                <li>imagemin-webp</li>
               </ul>
             </div>
           </div>
