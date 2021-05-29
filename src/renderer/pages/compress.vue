@@ -480,83 +480,26 @@ export default {
                   distPath = imageInfo.filepath
                 }
                 let distFullpath = path.join(distPath, distFilename)
-                if (imageInfo.ext == distExt || (imageInfo.ext == 'jpeg' && distExt == 'jpg')) {
-                  CreateDirectory(distPath)
-                  if (imageInfo.fullpath != distFullpath) {
-                    fs.copyFileSync(imageInfo.fullpath, distFullpath)
-                  }
-                  imagemin([distFullpath.replace(/\\/g, "/")], {
-                    destination: distPath.replace(/\\/g, "/"),
-                    plugins: [plugin]
-                  }).then(() => {
-                    resolve()
-                  }).catch(() => {
+                fs.readFile(imageInfo.fullpath, (err, buffer) => {
+                  if (err) {
                     this.errorList.push(imageInfo.fullpath)
                     resolve()
-                  })
-                } else {
-                  let image = document.createElement('img')
-                  image.src = imageInfo.fullpath
-                  image.onerror = () => {
-                    this.errorList.push(imageInfo.fullpath)
-                    resolve()
-                  }
-                  image.onload = () => {
-                    EXIF.getData(image, () => {
-                      let orientation = EXIF.getTag(image, 'Orientation')
-                      let canvas = document.createElement('canvas')
-                      let width, height, x, y, rotation
-                      if (orientation == 3) {
-                        width = image.width
-                        height = image.height
-                        x = -width
-                        y = -height
-                        rotation = 180
-                      } else if (orientation == 6) {
-                        width = image.height
-                        height = image.width
-                        x = 0
-                        y = -width
-                        rotation = 90
-                      } else if (orientation == 8) {
-                        width = image.height
-                        height = image.width
-                        x = -height
-                        y = 0
-                        rotation = 270
-                      } else {
-                        width = image.width
-                        height = image.height
-                        x = 0
-                        y = 0
-                        rotation = 0
-                      }
-                      canvas.height = height
-                      canvas.width = width
-                      let context = canvas.getContext("2d")
-                      context.rotate(rotation * Math.PI / 180)
-                      context.drawImage(image, x, y, image.width, image.height)
-                      context.rotate(-rotation * Math.PI / 180)
-                      let url = canvas.toDataURL('image/' + this.mimeType, 1).replace(/^data:image\/\w+;base64,/, "")
-                      let buffer = new Buffer.from(url, 'base64')
-                      CreateDirectory(distPath)
-                      fs.writeFile(distFullpath, buffer, (error) => {
-                        if (error) {
+                  } else {
+                    imagemin.buffer(buffer, {
+                      plugins: [plugin]
+                    }).then((processedBuffer) => {
+                      fs.writeFile(distFullpath, processedBuffer, (err) => {
+                        if (err) {
                           this.errorList.push(imageInfo.fullpath)
                         }
-                        imagemin([distFullpath.replace(/\\/g, "/")], {
-                          destination: distPath.replace(/\\/g, "/"),
-                          plugins: [plugin]
-                        }).then(() => {
-                          resolve()
-                        }).catch(() => {
-                          this.errorList.push(imageInfo.fullpath)
-                          resolve()
-                        })
+                        resolve()
                       })
+                    }).catch(() => {
+                      this.errorList.push(imageInfo.fullpath)
+                      resolve()
                     })
                   }
-                }
+                })
               })
             })
           }
