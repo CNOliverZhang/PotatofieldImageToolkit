@@ -20,7 +20,7 @@
 
 ## 使用发行版或自行编译
 
-目前仅提供Windows平台的发行版。如果您是海外用户，可以[点此下载](https://github.com/CNOliverZhang/PotatofieldImageToolkit/releases/latest)；如果您是国内用户，请[点此下载](https://imagetoolkit.potatofield.cn/)。使用Mac和Linux的用户可以自行构建,自行构建需安装Node.js，克隆源码后在项目目录中执行：
+目前仅提供Windows平台的发行版。如果您是海外用户，可以[点此下载](https://github.com/CNOliverZhang/PotatofieldImageToolkit/releases/latest)；如果您是国内用户，请[点此下载](https://www.potatofield.cn/imagetoolkit)。使用Linux的用户可以自行构建,自行构建需安装Node.js，克隆源码后在项目目录中执行：
 
 ```javascript
 npm install
@@ -29,7 +29,7 @@ npm run build
 
 ## 详细介绍
 
-您可以[访问网站](https://imagetoolkit.potatofield.cn)了解图文详情。
+您可以[访问网站](https://www.potatofield.cn/imagetoolkit)了解图文详情。
 
 ### 图片加水印工具
 
@@ -142,3 +142,11 @@ npm run build
 [Color Thief](https://github.com/lokesh/color-thief)
 
 [Crypto-JS](https://github.com/brix/crypto-js)
+
+[imagemin](https://github.com/imagemin/imagemin)
+
+[imagemin-mozjpeg](https://github.com/imagemin/imagemin-mozjpeg)
+
+[imagemin-pngquant](https://github.com/imagemin/imagemin-pngquant)
+
+[imagemin-webp](https://github.com/imagemin/imagemin-webp)
