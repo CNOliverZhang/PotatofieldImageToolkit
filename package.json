@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "3.1.3",
+  "version": "3.2.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2021 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "修复了图片压缩工具文件路径包含括号时压缩失效的问题。"
+      "releaseNotes": "修复了 Mac 版本图片压缩工具压缩 webp 图片失败的问题。\n升级新版字体库 API 并兼容旧数据，为后续大版本升级作准备。\n修复打开字体文件夹失败的问题。"
     },
     "publish": [
       {
