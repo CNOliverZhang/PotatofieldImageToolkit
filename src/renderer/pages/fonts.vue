@@ -22,16 +22,16 @@
           <div class="container" v-if="localDisplayFonts.length != 0">
             <div
               v-for="font in localDisplayFonts.slice(localFontListPage * 6 - 6, localFontListPage * 6)"
-              :key="font.fontFamily"
+              :key="`${font.fontFamily}（${font.fontStyle}）`"
               class="card-container">
               <div class="card">
                 <div>
-                  <img :src="font.image" class="font-preview">
+                  <img :src="font.previewImage" class="font-preview">
                   <div class="row">
-                    <div class="text">名称：{{ font.verbose }}</div>
+                    <div class="text">名称：{{ font.fontFamily }}</div>
                   </div>
                   <div class="row">
-                    <div class="text">字形：{{ font.style }}</div>
+                    <div class="text">字形：{{ font.fontStyle }}</div>
                   </div>
                 </div>
                 <div class="row actions">
@@ -39,7 +39,7 @@
                     <span class="fa fa-cog"></span>
                     <div>当前默认字体</div>
                   </div>
-                  <div v-else class="action active" @click="setDefaultFont(font.fontFamily)">
+                  <div v-else class="action active" @click="setDefaultFont(font)">
                     <span class="fa fa-cog"></span>
                     <div>设为默认字体</div>
                   </div>
@@ -99,16 +99,16 @@
           <div class="container" v-if="onlineDisplayFonts.length != 0">
             <div
               v-for="font in onlineDisplayFonts.slice(onlineFontListPage * 6 - 6, onlineFontListPage * 6)"
-              :key="font.fontFamily"
+              :key="`${font.fontFamily}（${font.fontStyle}）`"
               class="card-container">
               <div class="card">
                 <div>
-                  <img :src="font.image" class="font-preview">
+                  <img :src="font.previewImage" class="font-preview">
                   <div class="row">
-                    <div class="text">名称：{{ font.verbose }}</div>
+                    <div class="text">名称：{{ font.fontFamily }}</div>
                   </div>
                   <div class="row">
-                    <div class="text">字形：{{ font.style }}</div>
+                    <div class="text">字形：{{ font.fontStyle }}</div>
                   </div>
                 </div>
                 <div class="row actions">
@@ -120,11 +120,11 @@
                     <span class="fa fa-download"></span>
                     <div>下载字体</div>
                   </div>
-                  <div v-if="font.downloaded" key="install" class="action active" @click="installFont(font.fontFamily)">
+                  <div v-if="font.downloaded" key="install" class="action active" @click="installFont(`${font.fontFamily}（${font.fontStyle}）`)">
                     <span class="fa fa-desktop"></span>
                     <div>安装到操作系统</div>
                   </div>
-                  <div v-else key="explorer" class="action active" @click="downloadFontUsingExplorer(font.src)">
+                  <div v-else key="explorer" class="action active" @click="downloadFontUsingExplorer(font.fontFile)">
                     <span class="fab fa-chrome"></span>
                     <div>用浏览器下载</div>
                   </div>
@@ -189,23 +189,23 @@ export default {
     localFonts() {
       let fonts = new Set()
       this.$store.state.fonts.fontList.forEach((font) => {
-        fonts.add(font.fontFamily)
+        fonts.add(`${font.fontFamily}（${font.fontStyle}）`)
       })
       return fonts
     },
     localDisplayFonts() {
       let language
       if (this.localFontsChinese) {
-        language = '中文'
+        language = 1
       } else {
-        language = '英文'
+        language = 2
       }
       return this.$store.state.fonts.fontList.slice().map((font, index) => {
         font.originalIndex = index
-        font.isDefault = font.fontFamily == this.$store.state.fonts.defaultFont
+        font.isDefault = `${font.fontFamily}（${font.fontStyle}）` == this.$store.state.fonts.defaultFont
         return font
       }).filter((font) => {
-        if (this.searchKeyword != '' && !font.verbose.includes(this.searchKeyword)) {
+        if (this.searchKeyword != '' && !font.fontFamily.includes(this.searchKeyword)) {
           return false
         }
         if (font.language != language) {
@@ -217,15 +217,15 @@ export default {
     onlineDisplayFonts() {
       let language
       if (this.onlineFontsChinese) {
-        language = '中文'
+        language = 1
       } else {
-        language = '英文'
+        language = 2
       }
       return this.onlineFonts.map((font) => {
-        font.downloaded = this.localFonts.has(font.fontFamily)
+        font.downloaded = this.localFonts.has(`${font.fontFamily}（${font.fontStyle}）`)
         return font
       }).filter((font) => {
-        if (this.searchKeyword != '' && !font.verbose.includes(this.searchKeyword)) {
+        if (this.searchKeyword != '' && !font.fontFamily.includes(this.searchKeyword)) {
           return false
         }
         if (font.language != language) {
@@ -267,17 +267,17 @@ export default {
         text: '即将打开字体库目录，您可以随意查看和使用已下载的字体。但为保证本程序正常工作，请勿从目录中删除或修改任何文件。',
         showCancel: true,
         confirmFunction: () => {
-          shell.openExternal(this.fontsPath)
+          shell.openPath(this.fontsPath)
         }
       })
     },
-    setDefaultFont(fontFamily) {
+    setDefaultFont(font) {
       this.$dialog({
         title: '操作确认',
         text: '更改默认字体后本程序将重启，确定执行操作吗？',
         showCancel: true,
         confirmFunction: () => {
-          this.$store.dispatch('fonts/setDefaultFont', fontFamily)
+          this.$store.dispatch('fonts/setDefaultFont', `${font.fontFamily}（${font.fontStyle}）`)
           ipcRenderer.send('relaunch')
         }
       })
@@ -289,9 +289,9 @@ export default {
         showCancel: true,
         confirmFunction: () => {
           try {
-            fs.unlinkSync(this.$store.state.fonts.fontList[index].src)
-            fs.unlinkSync(this.$store.state.fonts.fontList[index].image)
-            fs.rmdirSync(path.join(this.fontsPath, this.$store.state.fonts.fontList[index].verbose))
+            fs.unlinkSync(this.$store.state.fonts.fontList[index].fontFile)
+            fs.unlinkSync(this.$store.state.fonts.fontList[index].previewImage)
+            fs.rmdirSync(path.join(this.fontsPath, this.$store.state.fonts.fontList[index].fontFamily))
             if (this.localFontListPage != 1) {
               if (this.localFontListPage == Math.ceil(this.localDisplayFonts.length / 6)) {
                 if (this.localDisplayFonts.length % 6 == 1) {
@@ -323,7 +323,7 @@ export default {
       }).then((dialog) => {
         let image, fontFile
         this.$http({
-          url: font.image,
+          url: font.previewImage,
           method: 'get',
           responseType: 'arraybuffer'
         }).catch((error) => {
@@ -336,7 +336,7 @@ export default {
         }).then((res) => {
           image = new Uint8Array(res.data)
           this.$http({
-            url: font.src,
+            url: font.fontFile,
             method: 'get',
             responseType: 'arraybuffer',
             onDownloadProgress: (download) => {
@@ -362,21 +362,21 @@ export default {
             })
           }).then((res) => {
             fontFile = new Uint8Array(res.data)
-            let fontFilename = decodeURI(font.src.split('/').pop())
-            let imageFilename = decodeURI(font.image.split('/').pop())
+            let fontFileExt = decodeURI(font.fontFile.split('.').pop())
+            let imageFilename = decodeURI(font.previewImage.split('/').pop())
             try {
-              let directory = path.join(this.fontsPath, font.verbose)
+              let directory = path.join(this.fontsPath, font.fontFamily)
               CreateDirectory(directory)
-              fs.writeFileSync(path.join(directory, fontFilename), fontFile, 'binary')
+              fs.writeFileSync(path.join(directory, `${font.fontFamily}（${font.fontStyle}）.${fontFileExt}`), fontFile, 'binary')
               fs.writeFileSync(path.join(directory, imageFilename), image, 'binary')
               this.$store.dispatch('fonts/fontListPush', {
+                fontFile: path.join(directory, `${font.fontFamily}（${font.fontStyle}）.${fontFileExt}`).split(path.sep).join('/'),
+                previewImage: path.join(directory, imageFilename).split(path.sep).join('/'),
                 fontFamily: font.fontFamily,
-                verbose: font.verbose,
-                style: font.style,
+                fontStyle: font.fontStyle,
                 language: font.language,
-                src: path.join(directory, fontFilename).split(path.sep).join('/'),
-                image: path.join(directory, imageFilename).split(path.sep).join('/'),
-                builtin: false
+                idDefault: false,
+                builtin: false,
               })
               dialog.change({
                 type: 'success',
@@ -398,10 +398,10 @@ export default {
         })
       })
     },
-    installFont(fontFamily) {
+    installFont(fontName) {
       for (let i = 0; i < this.$store.state.fonts.fontList.length; i++) {
-        if (this.$store.state.fonts.fontList[i].fontFamily == fontFamily) {
-          shell.openPath(this.$store.state.fonts.fontList[i].src)
+        if (`${this.$store.state.fonts.fontList[i].fontFamily}（${this.$store.state.fonts.fontList[i].fontStyle}）` == fontName) {
+          shell.openPath(this.$store.state.fonts.fontList[i].fontFile)
           return
         }
       }
@@ -417,7 +417,7 @@ export default {
       text: '正在向服务器请求在线字体数据，请稍候。',
       showConfirm: false
     }).then((dialog) => {
-      this.$http.get('https://api.potatofield.cn/fontlibrary/fonts').catch((error) => {
+      this.$http.get('https://api.potatofield.cn/font_library/font/list').catch((error) => {
         dialog.change({
           type: 'error',
           title: '出现错误',
@@ -425,11 +425,7 @@ export default {
           showConfirm: true
         })
       }).then((res) => {
-        res.data.forEach((font) => {
-          font.fontFamily = font.font_family
-          delete font.font_family
-        })
-        this.onlineFonts = res.data
+        this.onlineFonts = res.data.list
         dialog.close()
       })
     })

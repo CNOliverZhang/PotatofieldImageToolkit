@@ -227,7 +227,7 @@ export default {
       })
     },
     checkMessage() {
-      this.$http.get('https://api.potatofield.cn/imagetoolkit/messages/latest').then((res) => {
+      this.$http.get('https://api.potatofield.cn/image_toolkit/message/latest').then((res) => {
         let message = res.data
         if (this.$store.state.messages.messageList.indexOf(message.id) == -1) {
           this.$dialog({
@@ -255,8 +255,20 @@ export default {
     }
   },
   mounted() {
-    this.$http.get('https://api.potatofield.cn/imagetoolkit/versions/').then((res) => {
-      this.changeLog = res.data
+    if (this.$store.state.fonts.fontList.length && this.$store.state.fonts.fontList[0].verbose) {
+      const newFontList = this.$store.state.fonts.fontList.map(font => ({
+        fontFile: font.src,
+        previewImage: font.image,
+        fontFamily: font.verbose,
+        fontStyle: font.style,
+        language: font.language === '中文' ? 1 : 2,
+        isDefault: font.isDefault,
+        builtin: font.builtin,
+      }))
+      this.$store.dispatch('fonts/fontListAssign', newFontList)
+    }
+    this.$http.get('https://api.potatofield.cn/image_toolkit/version/list').then((res) => {
+      this.changeLog = res.data.list
     })
     ipcRenderer.on('exit', () => {
       this.exit()
@@ -411,20 +423,20 @@ export default {
       })
     })
     document.body.id = 'index-wrapper'
-    this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').then((res) => {
-      this.totalMessages = res.data.length
+    this.$http.get('https://api.potatofield.cn/image_toolkit/message/list').then((res) => {
+      this.totalMessages = res.data.count
     }).catch(() => {})
     let version = ipcRenderer.sendSync('version')
     let platform = os.platform()
     if (this.$store.state.settings.identifier) {
-      this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
+      this.$http.post('https://api.potatofield.cn/image_toolkit/client/register', {
         identifier: this.$store.state.settings.identifier,
         version: version
       })
     } else {
       let identifier = AES.encrypt('potatofield' + String(new Date()) + String(Math.random()), version).toString()
       this.$store.dispatch('settings/setIdentifier', identifier).then(() => {
-        this.$http.post('https://api.potatofield.cn/imagetoolkit/register', {
+        this.$http.post('https://api.potatofield.cn/image_toolkit/client/register', {
           identifier: identifier,
           version: version,
           platform: platform
