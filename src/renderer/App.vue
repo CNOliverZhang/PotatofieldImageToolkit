@@ -12,8 +12,8 @@ export default {
     this.$store.state.fonts.fontList.forEach((font) => {
       style.appendChild(document.createTextNode(`
         @font-face {
-            font-family: ${font.fontFamily};
-            src: url("${font.src}");
+            font-family: ${font.fontFamily}（${font.fontStyle}）;
+            src: url("${font.fontFile}");
         }
       `))
     })
@@ -26,7 +26,7 @@ export default {
 
 <style lang="scss">
 :root {
-  --main-font: "NotoSansSCThin";
+  --main-font: "思源黑体（极细）";
   --main-color: #2196F3;
   --success-green: #67C23A;
   --notice-yellow: #E6A23C;

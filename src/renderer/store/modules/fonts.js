@@ -5,13 +5,12 @@ export default {
     defaultFont: 'NotoSansSCThin',
     fontList: [
       {
-        fontFamily: 'NotoSansSCThin',
-        verbose: '思源黑体',
-        style: '极细',
-        language: '中文',
-        src: 'static/fonts/NotoSansSC-Thin.otf',
-        image: 'static/fonts/思源黑体（极细）.png',
-        builtin: true
+        fontFile: 'static/fonts/NotoSansSC-Thin.otf',
+        previewImage: 'static/fonts/思源黑体（极细）.png',
+        fontFamily: '思源黑体',
+        fontStyle: '极细',
+        language: 1,
+        builtin: true,
       }
     ]
   },

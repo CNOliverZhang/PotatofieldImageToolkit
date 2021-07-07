@@ -177,7 +177,7 @@ export default {
       text: '正在向服务器请求消息列表，请稍候。',
       showConfirm: false
     }).then((dialog) => {
-      this.$http.get('https://api.potatofield.cn/imagetoolkit/messages').catch((error) => {
+      this.$http.get('https://api.potatofield.cn/image_toolkit/message/list').catch((error) => {
         dialog.change({
           type: 'error',
           title: '出现错误',
@@ -188,7 +188,7 @@ export default {
           }
         })
       }).then((res) => {
-        this.messages = res.data.map((message) => {
+        this.messages = res.data.list.map((message) => {
           let list = message.pub_date.split('-')
           let pub_date = list[0] + ' 年 ' + list[1] + ' 月 ' + list[2] + ' 日'
           message.pub_date = pub_date

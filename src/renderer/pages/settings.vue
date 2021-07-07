@@ -21,7 +21,7 @@
                 <div class="text">一个专为摄影师设计的图像工具箱</div>
               </div>
             </div>
-            <div class="text link" @click="open('https://imagetoolkit.potatofield.cn')">访问网站</div>
+            <div class="text link" @click="open('https://www.potatofield.cn/imagetoolkit')">访问网站</div>
           </div>
           <div class="row">
             <div class="subtitle">开发者信息</div>
