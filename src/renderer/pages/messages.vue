@@ -33,7 +33,7 @@
                     <div>阅读消息</div>
                   </div>
                   <div class="action">
-                    <div>{{ message.pub_date }}</div>
+                    <div>{{ message.pubDate }}</div>
                   </div>
                 </div>
               </div>
@@ -96,7 +96,7 @@
                     <div>阅读消息</div>
                   </div>
                   <div class="action">
-                    <div>{{ message.pub_date }}</div>
+                    <div>{{ message.pubDate }}</div>
                   </div>
                 </div>
               </div>
@@ -189,9 +189,9 @@ export default {
         })
       }).then((res) => {
         this.messages = res.data.list.map((message) => {
-          let list = message.pub_date.split('-')
-          let pub_date = list[0] + ' 年 ' + list[1] + ' 月 ' + list[2] + ' 日'
-          message.pub_date = pub_date
+          let list = message.pubDate.split('-')
+          let pubDate = list[0] + ' 年 ' + list[1] + ' 月 ' + list[2] + ' 日'
+          message.pubDate = pubDate
           return message
         })
         dialog.close()
