@@ -52,13 +52,13 @@
                 <div class="control-row">
                   <el-select v-model="row" @change="preview" size="mini" class="grid-count">
                     <el-option
-                      v-for="(object, index) in Array.from({ length: 9 })"
+                      v-for="(object, index) in Array.from({ length: 100 })"
                       :key="index"
                       :label="(index + 1) + ' 行'" :value="index + 1"/>
                   </el-select>
                   <el-select v-model="column" @change="preview" size="mini" class="grid-count">
                     <el-option
-                      v-for="(object, index) in Array.from({ length: 9 })"
+                      v-for="(object, index) in Array.from({ length: 100 })"
                       :key="index"
                       :label="(index + 1) + ' 列'" :value="index + 1"/>
                   </el-select>

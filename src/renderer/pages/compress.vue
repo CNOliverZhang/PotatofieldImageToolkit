@@ -207,6 +207,7 @@ const imagemin = require('imagemin')
 const imageminMozjpeg = require('imagemin-mozjpeg')
 const imageminPngquant = require('imagemin-pngquant')
 const imageminWebp = require('imagemin-webp')
+const imageminJpegtran = require('imagemin-jpegtran')
 
 export default {
   name: 'compress',
@@ -435,11 +436,14 @@ export default {
                 let imageInfo = this.fileList[index]
                 let distExt
                 let plugin
+                let fallbackPlugin
                 if (this.mimeType == 'JPEG') {
                   distExt = 'jpg'
                   plugin = imageminMozjpeg({
-                    quality: this.quality
+                    quality: this.quality,
+                    progressive: false
                   })
+                  fallbackPlugin = imageminJpegtran()
                 } else if (this.mimeType == 'WEBP') {
                   distExt = 'webp'
                   plugin = imageminWebp({
@@ -464,8 +468,10 @@ export default {
                     })
                   } else {
                     plugin = imageminMozjpeg({
-                      quality: this.quality
+                      quality: this.quality,
+                      progressive: false
                     })
+                    fallbackPlugin = imageminJpegtran()
                   }
                 }
                 let distFilename = imageInfo.filename + this.append + '.' + distExt
@@ -495,8 +501,24 @@ export default {
                         resolve()
                       })
                     }).catch(() => {
-                      this.errorList.push(imageInfo.fullpath)
-                      resolve()
+                      if (fallbackPlugin) {
+                        imagemin.buffer(buffer, {
+                          plugins: [fallbackPlugin]
+                        }).then((fallbackProcessedBuffer) => {
+                          fs.writeFile(distFullpath, fallbackProcessedBuffer, (err) => {
+                            if (err) {
+                              this.errorList.push(imageInfo.fullpath)
+                            }
+                            resolve()
+                          })
+                        }).catch(() => {
+                          this.errorList.push(imageInfo.fullpath)
+                          resolve()
+                        })
+                      } else {
+                        this.errorList.push(imageInfo.fullpath)
+                        resolve()
+                      }
                     })
                   }
                 })
