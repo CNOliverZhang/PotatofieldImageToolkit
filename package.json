@@ -83,6 +83,7 @@
     "imagemin-mozjpeg": "^9.0.0",
     "imagemin-pngquant": "^9.0.1",
     "imagemin-webp": "^6.0.0",
+    "moment": "^2.29.1",
     "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.9",
