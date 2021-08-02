@@ -130,6 +130,7 @@
 
 <script>
 import { ipcRenderer } from 'electron'
+import moment from 'moment'
 
 export default {
   name: 'messages',
@@ -189,8 +190,7 @@ export default {
         })
       }).then((res) => {
         this.messages = res.data.list.map((message) => {
-          let list = message.pubDate.split('-')
-          let pubDate = list[0] + ' 年 ' + list[1] + ' 月 ' + list[2] + ' 日'
+          let pubDate = moment(message.pubDate).format('YYYY年MM月DD日')
           message.pubDate = pubDate
           return message
         })
