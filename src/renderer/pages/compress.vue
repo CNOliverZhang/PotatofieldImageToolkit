@@ -197,17 +197,11 @@
 
 <script>
 import { ipcRenderer } from 'electron'
-import CreateDirectory from '../utils/CreateDirectory'
 import ReadDirectory from '../utils/ReadDirectory'
 import EXIF from 'exif-js'
+import sharp from 'sharp'
 
 const path = require('path')
-const fs = require('fs')
-const imagemin = require('imagemin')
-const imageminMozjpeg = require('imagemin-mozjpeg')
-const imageminPngquant = require('imagemin-pngquant')
-const imageminWebp = require('imagemin-webp')
-const imageminJpegtran = require('imagemin-jpegtran')
 
 export default {
   name: 'compress',
@@ -434,44 +428,26 @@ export default {
                 text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = this.fileList[index]
+                let rawImage = sharp(imageInfo.fullpath)
+                let parsedImage
                 let distExt
-                let plugin
-                let fallbackPlugin
                 if (this.mimeType == 'JPEG') {
+                  parsedImage = rawImage.jpeg({ quality: this.quality })
                   distExt = 'jpg'
-                  plugin = imageminMozjpeg({
-                    quality: this.quality,
-                    progressive: false
-                  })
-                  fallbackPlugin = imageminJpegtran()
                 } else if (this.mimeType == 'WEBP') {
+                  parsedImage = rawImage.webp({ quality: this.quality })
                   distExt = 'webp'
-                  plugin = imageminWebp({
-                    quality: this.quality
-                  })
                 } else if (this.mimeType == 'PNG') {
+                  parsedImage = rawImage.png({ quality: this.quality })
                   distExt = 'png'
-                  plugin = imageminPngquant({
-                    quality: [Math.max(1, this.quality - 5) / 100, Math.min(100, this.quality + 5) / 100],
-                    speed: 10
-                  })
                 } else {
                   distExt = imageInfo.ext
                   if (imageInfo.ext == 'png') {
-                    plugin = imageminPngquant({
-                      quality: [Math.max(1, this.quality - 5) / 100, Math.min(100, this.quality + 5) / 100],
-                      speed: 10
-                    })
+                    parsedImage = rawImage.png({ quality: this.quality })
                   } else if (imageInfo.ext == 'webp') {
-                    plugin = imageminWebp({
-                      quality: this.quality
-                    })
+                    parsedImage = rawImage.webp({ quality: this.quality })
                   } else {
-                    plugin = imageminMozjpeg({
-                      quality: this.quality,
-                      progressive: false
-                    })
-                    fallbackPlugin = imageminJpegtran()
+                    parsedImage = rawImage.jpeg({ quality: this.quality })
                   }
                 }
                 let distFilename = imageInfo.filename + this.append + '.' + distExt
@@ -486,41 +462,11 @@ export default {
                   distPath = imageInfo.filepath
                 }
                 let distFullpath = path.join(distPath, distFilename)
-                fs.readFile(imageInfo.fullpath, (err, buffer) => {
-                  if (err) {
-                    this.errorList.push(imageInfo.fullpath)
-                    resolve()
-                  } else {
-                    imagemin.buffer(buffer, {
-                      plugins: [plugin]
-                    }).then((processedBuffer) => {
-                      fs.writeFile(distFullpath, processedBuffer, (err) => {
-                        if (err) {
-                          this.errorList.push(imageInfo.fullpath)
-                        }
-                        resolve()
-                      })
-                    }).catch(() => {
-                      if (fallbackPlugin) {
-                        imagemin.buffer(buffer, {
-                          plugins: [fallbackPlugin]
-                        }).then((fallbackProcessedBuffer) => {
-                          fs.writeFile(distFullpath, fallbackProcessedBuffer, (err) => {
-                            if (err) {
-                              this.errorList.push(imageInfo.fullpath)
-                            }
-                            resolve()
-                          })
-                        }).catch(() => {
-                          this.errorList.push(imageInfo.fullpath)
-                          resolve()
-                        })
-                      } else {
-                        this.errorList.push(imageInfo.fullpath)
-                        resolve()
-                      }
-                    })
-                  }
+                parsedImage.toFile(distFullpath).then(() => {
+                  resolve()
+                }).catch(() => {
+                  this.errorList.push(imageInfo.fullpath)
+                  resolve()
                 })
               })
             })

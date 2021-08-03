@@ -271,21 +271,9 @@ export default {
           url: 'https://github.com/brix/crypto-js'
         },
         {
-          title: 'imagemin',
-          url: 'https://github.com/imagemin/imagemin'
+          title: 'sharp',
+          url: 'https://github.com/lovell/sharp'
         },
-        {
-          title: 'imagemin-mozjpeg',
-          url: 'https://github.com/imagemin/imagemin-mozjpeg'
-        },
-        {
-          title: 'imagemin-pngquant',
-          url: 'https://github.com/imagemin/imagemin-pngquant'
-        },
-        {
-          title: 'imagemin-webp',
-          url: 'https://github.com/imagemin/imagemin-webp'
-        }
       ],
       version: null,
       updateChecked: false,

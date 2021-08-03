@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2021 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "修复了 Windows 版本图片压缩工具某些特定情况下压缩 jpeg 图片失败的问题。\n修复了消息中心消息加载失败的问题。\n图片分割工具最大支持分割为 100 行和 100 列。"
+      "releaseNotes": "优化图像压缩算法，提升压缩速度，提高压缩比。\n修复了图片加水印工具字体失效的问题。\n修复了消息中心时间显示错误的问题。"
     },
     "publish": [
       {
@@ -78,11 +78,8 @@
     "element-ui": "^2.14.1",
     "exif-js": "^2.3.0",
     "html2canvas": "^1.0.0-rc.7",
-    "imagemin": "^7.0.1",
-    "imagemin-jpegtran": "^7.0.0",
-    "imagemin-mozjpeg": "^9.0.0",
-    "imagemin-pngquant": "^9.0.1",
-    "imagemin-webp": "^6.0.0",
+    "moment": "^2.29.1",
+    "sharp": "^0.28.3",
     "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
     "vue-router": "^3.4.9",
