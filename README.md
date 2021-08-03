@@ -143,10 +143,4 @@ npm run build
 
 [Crypto-JS](https://github.com/brix/crypto-js)
 
-[imagemin](https://github.com/imagemin/imagemin)
-
-[imagemin-mozjpeg](https://github.com/imagemin/imagemin-mozjpeg)
-
-[imagemin-pngquant](https://github.com/imagemin/imagemin-pngquant)
-
-[imagemin-webp](https://github.com/imagemin/imagemin-webp)
+[sharp](https://github.com/lovell/sharp)
