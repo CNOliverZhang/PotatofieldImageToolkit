@@ -202,6 +202,7 @@ import EXIF from 'exif-js'
 import sharp from 'sharp'
 
 const path = require('path')
+const fs = require('fs')
 
 export default {
   name: 'compress',
@@ -462,8 +463,13 @@ export default {
                   distPath = imageInfo.filepath
                 }
                 let distFullpath = path.join(distPath, distFilename)
-                parsedImage.toFile(distFullpath).then(() => {
-                  resolve()
+                parsedImage.toBuffer().then((buffer) => {
+                  fs.writeFile(distFullpath, buffer, (error) => {
+                    if (error) {
+                      this.errorList.push(imageInfo.fullpath)
+                    }
+                    resolve()
+                  })
                 }).catch(() => {
                   this.errorList.push(imageInfo.fullpath)
                   resolve()
