@@ -41,6 +41,12 @@
               <div class="title">图片加水印</div>
             </div>
           </div>
+          <div class="container" @click="open('/globalWatermark', '全屏水印工具')">
+            <div class="card">
+              <i class="fas fa-stamp icon"></i>
+              <div class="title">全屏水印工具</div>
+            </div>
+          </div>
           <div class="container" @click="open('/splicer', '长图拼接工具')">
             <div class="card">
               <i class="fas fa-images icon"></i>
@@ -110,6 +116,12 @@
             <div class="card">
               <i class="fas fa-feather-alt icon"></i>
               <div class="title">图片加水印工具</div>
+            </div>
+          </div>
+          <div class="container" @click="open('/globalWatermark', '全屏水印工具')">
+            <div class="card">
+              <i class="fas fa-stamp icon"></i>
+              <div class="title">全屏水印工具</div>
             </div>
           </div>
           <div class="container" @click="open('/splicer', '长图拼接工具')">

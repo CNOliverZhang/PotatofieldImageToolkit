@@ -1,7 +1,7 @@
 <template>
-  <div id="watermark-editor">
+  <div id="global-watermark-editor">
     <div class="page-header">
-      <div class="page-title">图片加水印工具 - 编辑器</div>
+      <div class="page-title">全屏水印工具 - 编辑器</div>
       <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -28,51 +28,58 @@
                 'width': sampleWidth + 'px',
                 'height': sampleHeight + 'px'
               }">
-              <div
-                id="watermark"
-                :style="{
-                  'left': (position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'center' || position == 'top' || position == 'bottom') ? x + 'px' : null,
-                  'right': (position == 'right-top' || position == 'right-bottom' || position == 'right') ? x + 'px' : null,
-                  'top': (position == 'left-top' || position == 'right-top' || position == 'top' || position == 'center' || position == 'left' || position == 'right') ? y + 'px' : null,
-                  'bottom': (position == 'left-bottom' || position == 'right-bottom' || position == 'bottom') ? y + 'px' : null,
-                  'color': color,
-                  'font-family': font,
-                  'font-size': fontSize + 'px',
-                  'transform': 'rotate(' + rotation + 'deg)',
-                  'writing-mode': writingMode,
-                  'text-align': textAlign,
-                  'padding': backgroundSize / 100 + 'em',
-                  'background-color': backgroundColor,
-                  'text-shadow': textShadow
-                }">
-                <div
-                  v-for="(line, index) in text.split('\n')"
-                  :key="index"
-                  :style="{
-                    'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
-                  }">
-                  <span
-                    v-for="(char, index) in line"
-                    :key="index"
+              <div v-for="(item, index) in new Array(rowCount)" class="watermark-line">
+                <template v-if="!image">
+                  <div
+                    class="watermark"
+                    v-for="(item, index) in new Array(columnCount)"
                     :style="{
-                      'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
-                    }">{{ char }}</span>
-                </div>
+                      'color': color,
+                      'font-family': font,
+                      'font-size': fontSize + 'px',
+                      'transform': 'rotate(' + rotation + 'deg)',
+                      'writing-mode': writingMode,
+                      'text-align': textAlign,
+                      'padding': backgroundSize / 100 + 'em',
+                      'background-color': backgroundColor,
+                      'text-shadow': textShadow,
+                      'margin-top': marginY * sizeBaseY + 'px',
+                      'margin-bottom': marginY * sizeBaseY + 'px',
+                      'margin-left': marginX * sizeBaseX + 'px',
+                      'margin-right': marginX * sizeBaseX + 'px',
+                    }">
+                    <div
+                      v-for="(line, index) in text.split('\n')"
+                      :key="index"
+                      :style="{
+                        'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
+                      }">
+                      <span
+                        v-for="(char, index) in line"
+                        :key="index"
+                        :style="{
+                          'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
+                        }">{{ char }}</span>
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  <img
+                    class="watermark-image"
+                    v-for="(item, index) in new Array(columnCount)"
+                    @load="initImageSize"
+                    :src="`file://${image}`"
+                    :style="{
+                      'width': imageSize * sizeBaseX + 'px',
+                      'opacity': imageOpacity,
+                      'transform': 'rotate(' + imageRotation + 'deg)',
+                      'margin-top': marginY * sizeBaseY + 'px',
+                      'margin-bottom': marginY * sizeBaseY + 'px',
+                      'margin-left': marginX * sizeBaseX + 'px',
+                      'margin-right': marginX * sizeBaseX + 'px',
+                    }"/>
+                </template>
               </div>
-              <img
-                v-if="image != ''"
-                id="watermark-image"
-                @load="initImageSize"
-                :src="image"
-                :style="{
-                  'width': imageSize * sizeBaseX + 'px',
-                  'left': (imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'center' || imagePosition == 'top' || imagePosition == 'bottom') ? imageX + 'px' : null,
-                  'right': (imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right') ? imageX + 'px' : null,
-                  'top': (imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top' || imagePosition == 'center' || imagePosition == 'left' || imagePosition == 'right') ? imageY + 'px' : null,
-                  'bottom': (imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom') ? imageY + 'px' : null,
-                  'opacity': imageOpacity,
-                  'transform': 'rotate(' + imageRotation + 'deg)'
-                }"/>
             </div>
           </div>
         </div>
@@ -206,60 +213,6 @@
                       <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
-                  <el-collapse-item title="水印文本位置" name="position">
-                    <div class="control-row">
-                      <div class="text">文本位置基准</div>
-                    </div>
-                    <div class="control-row">
-                      <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="full-width-control">
-                        <el-option label="中央" value="center"/>
-                        <el-option label="左上角" value="left-top"/>
-                        <el-option label="右上角" value="right-top"/>
-                        <el-option label="左下角" value="left-bottom"/>
-                        <el-option label="右下角" value="right-bottom"/>
-                        <el-option label="上方" value="top"/>
-                        <el-option label="下方" value="bottom"/>
-                        <el-option label="左侧" value="left"/>
-                        <el-option label="右侧" value="right"/>
-                      </el-select>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-                      class="control-row">
-                      <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">文本与左边缘的距离</div>
-                      <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-                      class="control-row">
-                      <el-slider
-                        v-model="offsetX"
-                        class="full-width-control"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        :show-input="true"
-                        input-size="mini"></el-slider>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-                      class="control-row">
-                      <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
-                      <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-                      class="control-row">
-                      <el-slider
-                        v-model="offsetY"
-                        class="full-width-control"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        :show-input="true"
-                        input-size="mini"></el-slider>
-                    </div>
-                  </el-collapse-item>
                   <el-collapse-item title="水印文本排版" name="typesetting">
                     <div class="control-row">
                       <div class="text">文本排版方向</div>
@@ -332,7 +285,7 @@
                         </div>
                       </div>
                       <div v-if="image != ''" id="image-preview-container">
-                        <img :src="image" id="image-preview">
+                        <img :src="`file://${image}`" id="image-preview">
                       </div>
                     </div>
                   </el-collapse-item>
@@ -377,34 +330,13 @@
                         input-size="mini"></el-slider>
                     </div>
                   </el-collapse-item>
-                  <el-collapse-item title="水印图片位置" name="image-position">
+                  <el-collapse-item title="水印平铺间距" name="margin">
                     <div class="control-row">
-                      <div class="text">图片位置基准</div>
+                      <div class="text">水平间距</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="full-width-control">
-                        <el-option label="中央" value="center"/>
-                        <el-option label="左上角" value="left-top"/>
-                        <el-option label="右上角" value="right-top"/>
-                        <el-option label="左下角" value="left-bottom"/>
-                        <el-option label="右下角" value="right-bottom"/>
-                        <el-option label="上方" value="top"/>
-                        <el-option label="下方" value="bottom"/>
-                        <el-option label="左侧" value="left"/>
-                        <el-option label="右侧" value="right"/>
-                      </el-select>
-                    </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
-                      class="control-row">
-                      <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
-                      <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
-                      class="control-row">
                       <el-slider
-                        v-model="imageOffsetX"
+                        v-model="marginX"
                         class="full-width-control"
                         :min="0"
                         :max="100"
@@ -412,17 +344,12 @@
                         :show-input="true"
                         input-size="mini"></el-slider>
                     </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
-                      class="control-row">
-                      <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
-                      <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
+                    <div class="control-row">
+                      <div class="text">垂直间距</div>
                     </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
-                      class="control-row">
+                    <div class="control-row">
                       <el-slider
-                        v-model="imageOffsetY"
+                        v-model="marginY"
                         class="full-width-control"
                         :min="0"
                         :max="100"
@@ -505,7 +432,7 @@
             <div id="file-list">
               <div id="list">
                 <div
-                  v-for="(file, index) in this.$store.state.watermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+                  v-for="(file, index) in this.$store.state.globalWatermark.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
                   :key="file.fullpath"
                   class="file"
                   @click="preview(index + (fileListPage - 1) * 100)">
@@ -515,14 +442,14 @@
                   </div>
                 </div>
               </div>
-              <div v-if="this.$store.state.watermark.fileList.length > 100" class="row">
+              <div v-if="this.$store.state.globalWatermark.fileList.length > 100" class="row">
                 <el-pagination
                   small
                   background
                   layout="pager"
                   :pager-count="5"
                   :page-size="100"
-                  :total="this.$store.state.watermark.fileList.length"
+                  :total="this.$store.state.globalWatermark.fileList.length"
                   :current-page="fileListPage"
                   :hide-on-single-page="true"
                   @current-change="pageChange">
@@ -533,9 +460,9 @@
           <el-tab-pane>
             <span slot="label">模板列表</span>
             <div id="template-list">
-              <div v-if="this.$store.state.watermark.templates.length != 0" id="list">
+              <div v-if="this.$store.state.globalWatermark.templates.length != 0" id="list">
                 <div
-                  v-for="(template, index) in this.$store.state.watermark.templates"
+                  v-for="(template, index) in this.$store.state.globalWatermark.templates"
                   :key="template.title"
                   class="template">
                   <div class="cover">
@@ -581,7 +508,7 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'watermarkEditor',
+  name: 'globalWatermarkEditor',
   data () {
     return  {
       quality: 90,
@@ -598,9 +525,6 @@ export default {
       textAlign: 'center',
       lineHeight: 1,
       letterSpacing: 0,
-      position: 'center',
-      offsetX: 0,
-      offsetY: 0,
       rotation: 0,
       color: 'rgba(255, 255, 255, 1)',
       font: this.$store.state.fonts.defaultFont,
@@ -613,9 +537,6 @@ export default {
       textShadowColor: 'rgba(255, 255, 255, 0)',
       image: '',
       imageSize: 30,
-      imagePosition: 'center',
-      imageOffsetX: 0,
-      imageOffsetY: 0,
       imageRotation: 0,
       imageOpacity: 1,
       sizeBaseX: 0,
@@ -626,6 +547,8 @@ export default {
       watermarkHeight: 0,
       imageWidth: 0,
       imageHeight: 0,
+      marginX: 0,
+      marginY: 0,
       templateTitle: '',
       errorList: []
     }
@@ -634,41 +557,33 @@ export default {
     fontSize() {
       return this.relativeFontSize * this.sizeBaseX
     },
-    x() {
-      if (this.position == 'top' || this.position == 'bottom' || this.position == 'center') {
-        return ((this.sampleWidth - this.watermarkWidth) / 2)
-      } else {
-        let ratio = 1 - this.watermarkWidth / this.sampleWidth
-        return this.offsetX * this.sizeBaseX * (ratio)
-      }
-    },
-    y() {
-      if (this.position == 'left' || this.position == 'right' || this.position == 'center') {
-        return ((this.sampleHeight - this.watermarkHeight) / 2)
-      } else {
-        let ratio = 1 - this.watermarkHeight / this.sampleHeight
-        return this.offsetY * this.sizeBaseY * (ratio)
-      }
-    },
-    imageX() {
-      if (this.imagePosition == 'top' || this.imagePosition == 'bottom' || this.imagePosition == 'center') {
-        return ((this.sampleWidth - this.imageWidth) / 2)
-      } else {
-        let ratio = 1 - this.imageWidth / this.sampleWidth
-        return this.imageOffsetX * this.sizeBaseX * (ratio)
-      }
-    },
-    imageY() {
-      if (this.imagePosition == 'left' || this.imagePosition == 'right' || this.imagePosition == 'center') {
-        return ((this.sampleHeight - this.imageHeight) / 2)
-      } else {
-        let ratio = 1 - this.imageHeight / this.sampleHeight
-        return this.imageOffsetY * this.sizeBaseY * (ratio)
-      }
-    },
     textShadow() {
       return this.textShadowX * this.fontSize + 'px ' + this.textShadowY * this.fontSize + 'px ' + this.textShadowBlur * this.fontSize + 'px ' + this.textShadowColor
-    }
+    },
+    columnCount() {
+      let count = 1
+      if (this.image) {
+        count = Math.ceil(this.sampleWidth / (+this.imageWidth + 2 * this.marginX * this.sizeBaseX))
+      } else {
+        count = Math.ceil(this.sampleWidth / (+this.watermarkWidth + 2 * this.marginX * this.sizeBaseX))
+      }
+      if (count && count !== Infinity) {
+        return count
+      }
+      return 1
+    },
+    rowCount() {
+      let count = 1
+      if (this.image) {
+        count = Math.ceil(this.sampleHeight / (+this.imageHeight + 2 * this.marginY * this.sizeBaseY))
+      } else {
+        count = Math.ceil(this.sampleHeight / (+this.watermarkHeight + 2 * this.marginY * this.sizeBaseY))
+      }
+      if (count && count !== Infinity) {
+        return count
+      }
+      return 1
+    },
   },
   watch: {
     text() {
@@ -720,12 +635,12 @@ export default {
       ipcRenderer.send('change-maximize-status')
     },
     back() {
-      this.$store.dispatch('watermark/fileListEmpty').then(() => {
-        this.$router.replace('/watermark')
+      this.$store.dispatch('globalWatermark/fileListEmpty').then(() => {
+        this.$router.replace('/globalWatermark')
       })
     },
     close() {
-      this.$store.dispatch('watermark/fileListEmpty').then(() => {
+      this.$store.dispatch('globalWatermark/fileListEmpty').then(() => {
         ipcRenderer.send('close')
         this.$destroy()
       })
@@ -734,15 +649,15 @@ export default {
       this.fileListPage = page
     },
     handleDelete(index) {
-      if (this.$store.state.watermark.fileList.length > 1) {
-        if (this.$store.state.watermark.fileList.length % 100 == 1) {
-          if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
+      if (this.$store.state.globalWatermark.fileList.length > 1) {
+        if (this.$store.state.globalWatermark.fileList.length % 100 == 1) {
+          if (this.fileListPage == Math.ceil(this.$store.state.globalWatermark.fileList.length / 100)) {
             if (this.fileListPage != 1) {
               this.fileListPage -= 1
             }
           }
         }
-        this.$store.dispatch('watermark/fileListDelete', index).then(() => {
+        this.$store.dispatch('globalWatermark/fileListDelete', index).then(() => {
           if (this.fileIndex > index) {
             this.fileIndex -= 1
           } else if (this.fileIndex == index) {
@@ -754,14 +669,14 @@ export default {
       }
     },
     initWatermarkSize() {
-      let watermarkStyle = window.getComputedStyle(document.getElementById('watermark'))
+      let watermarkStyle = window.getComputedStyle(document.getElementsByClassName('watermark')[0])
       let watermarkWidth = watermarkStyle.getPropertyValue('width').slice(0, -2)
       let watermarkHeight = watermarkStyle.getPropertyValue('height').slice(0, -2)
       this.watermarkWidth = watermarkWidth
       this.watermarkHeight = watermarkHeight
     },
     initImageSize() {
-      let imageStyle = window.getComputedStyle(document.getElementById('watermark-image'))
+      let imageStyle = window.getComputedStyle(document.getElementsByClassName('watermark-image')[0])
       let imageWidth = imageStyle.getPropertyValue('width').slice(0, -2)
       let imageHeight = imageStyle.getPropertyValue('height').slice(0, -2)
       this.imageWidth = imageWidth
@@ -773,15 +688,15 @@ export default {
         text: '即将完成，请稍候。',
         showConfirm: false
       }).then((dialog) => {
-        if (index >= this.$store.state.watermark.fileList.length) {
-          this.fileIndex = this.$store.state.watermark.fileList.length - 1
+        if (index >= this.$store.state.globalWatermark.fileList.length) {
+          this.fileIndex = this.$store.state.globalWatermark.fileList.length - 1
         } else {
           this.fileIndex = index
         }
         let image = document.createElement('img')
-        image.src = `file://${this.$store.state.watermark.fileList[this.fileIndex].fullpath}`
+        image.src =  `file://${this.$store.state.globalWatermark.fileList[this.fileIndex].fullpath}`
         image.onerror = () => {
-          if (this.$store.state.watermark.fileList.length == 1) {
+          if (this.$store.state.globalWatermark.fileList.length == 1) {
             dialog.change({
               type: 'error',
               title: '出现错误',
@@ -792,7 +707,7 @@ export default {
               }
             })
           } else {
-            this.$store.dispatch('watermark/fileListDelete', index)
+            this.$store.dispatch('globalWatermark/fileListDelete', index)
             dialog.change({
               type: 'error',
               title: '出现错误',
@@ -866,14 +781,6 @@ export default {
         }
       })
     },
-    changePosition() {
-      this.offsetX = 0
-      this.offsetY = 0
-    },
-    changeImagePosition() {
-      this.imageOffsetX = 0
-      this.imageOffsetY = 0
-    },
     selectImage(file) {
       let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
@@ -900,15 +807,12 @@ export default {
       this.distDirectory = ipcRenderer.sendSync('select-folder')
     },
     applyTemplate(index) {
-      let template = this.$store.state.watermark.templates[index]
+      let template = this.$store.state.globalWatermark.templates[index]
       this.text = template.text !== undefined ? template.text : this.text
       this.writingMode = template.writingMode !== undefined ? template.writingMode : this.writingMode
       this.textAlign = template.textAlign !== undefined ? template.textAlign : this.textAlign
       this.lineHeight = template.lineHeight !== undefined ? template.lineHeight : this.lineHeight
       this.letterSpacing = template.letterSpacing !== undefined ? template.letterSpacing : this.letterSpacing
-      this.position = template.position !== undefined ? template.position : this.position
-      this.offsetX = template.offsetX !== undefined ? template.offsetX : this.offsetX
-      this.offsetY = template.offsetY !== undefined ? template.offsetY : this.offsetY
       this.rotation = template.rotation !== undefined ? template.rotation : this.rotation
       this.color = template.color !== undefined ? template.color : this.color
       this.font = template.font !== undefined ? template.font : this.font
@@ -921,11 +825,10 @@ export default {
       this.textShadowColor = template.textShadowColor !== undefined ? template.textShadowColor : this.textShadowColor
       this.image = template.image !== undefined ? template.image : this.image
       this.imageSize = template.imageSize !== undefined ? template.imageSize : this.imageSize
-      this.imagePosition = template.imagePosition !== undefined ? template.imagePosition : this.imagePosition
-      this.imageOffsetX = template.imageOffsetX !== undefined ? template.imageOffsetX : this.imageOffsetX
-      this.imageOffsetY = template.imageOffsetY !== undefined ? template.imageOffsetY : this.imageOffsetY
       this.imageRotation = template.imageRotation !== undefined ? template.imageRotation : this.imageRotation
       this.imageOpacity = template.imageOpacity !== undefined ? template.imageOpacity : this.imageOpacity
+      this.marginX = template.marginX !== undefined ? template.marginX : this.marginX
+      this.marginY = template.marginY !== undefined ? template.marginY : this.marginY
       this.$dialog({
         type: 'success',
         title: '成功',
@@ -937,7 +840,7 @@ export default {
       })
     },
     deleteTemplate(index) {
-      let template = this.$store.state.watermark.templates[index]
+      let template = this.$store.state.globalWatermark.templates[index]
       if (this.image == template.image && this.image != '') {
         this.$dialog({
           type: 'error',
@@ -956,7 +859,7 @@ export default {
                 fs.unlinkSync(template.image)
               } catch (error) {}
             }
-            this.$store.dispatch('watermark/templateDelete', index)
+            this.$store.dispatch('globalWatermark/templateDelete', index)
           }
         })
       }
@@ -975,9 +878,6 @@ export default {
           textAlign: this.textAlign,
           lineHeight: this.lineHeight,
           letterSpacing: this.letterSpacing,
-          position: this.position,
-          offsetX: this.offsetX,
-          offsetY: this.offsetY,
           rotation: this.rotation,
           color: this.color,
           font: this.font,
@@ -990,11 +890,10 @@ export default {
           textShadowColor: this.textShadowColor,
           image: this.image,
           imageSize: this.imageSize,
-          imagePosition: this.imagePosition,
-          imageOffsetX: this.imageOffsetX,
-          imageOffsetY: this.imageOffsetY,
           imageRotation: this.imageRotation,
-          imageOpacity: this.imageOpacity
+          imageOpacity: this.imageOpacity,
+          marginX: this.marginX,
+          marginY: this.marginY
         }
         let checkName = (title) => {
           if (title == '') {
@@ -1005,7 +904,7 @@ export default {
               showCancel: true,
               confirmFunction: () => {
                 this.$dialog({
-                  title: '请输入水印模板标题',
+                  title: '请输入全屏水印模板标题',
                   content: this.$createElement('div', {
                     'class': 'el-input el-input--mini'
                   }, [
@@ -1036,8 +935,8 @@ export default {
               }
             })
           } else {
-            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-              if (title == this.$store.state.watermark.templates[i].title) {
+            for (let i = 0; i < this.$store.state.globalWatermark.templates.length; i++) {
+              if (title == this.$store.state.globalWatermark.templates[i].title) {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
@@ -1045,7 +944,7 @@ export default {
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
-                      title: '请输入水印模板标题',
+                      title: '请输入全屏水印模板标题',
                       content: this.$createElement('div', {
                         'class': 'el-input el-input--mini'
                       }, [
@@ -1082,7 +981,7 @@ export default {
             if (this.image != '') {
               let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
               let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
-              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'globalWatermarkImages')
               let fullpath = path.join(imagepath, filename)
               if (!fs.existsSync(imagepath)) {
                 CreateDirectory(imagepath)
@@ -1091,16 +990,16 @@ export default {
               template.image = fullpath
               this.image = fullpath
             }
-            this.$store.dispatch('watermark/templatePush', template)
+            this.$store.dispatch('globalWatermark/templatePush', template)
             this.$dialog({
               type: 'success',
               title: '成功',
-              text: '水印模板保存成功。'
+              text: '全屏水印模板保存成功。'
             })
           }
         }
         this.$dialog({
-          title: '请输入水印模板标题',
+          title: '请输入全屏水印模板标题',
           content: this.$createElement('div', {
             'class': 'el-input el-input--mini'
           }, [
@@ -1137,7 +1036,7 @@ export default {
           text: '即将完成，请稍候。',
           showConfirm: false
         }).then((dialog) => {
-          let imageInfo = this.$store.state.watermark.fileList[this.fileIndex]
+          let imageInfo = this.$store.state.globalWatermark.fileList[this.fileIndex]
           let distExt
           if (this.mimeType == '保持原格式') {
             distExt = imageInfo.ext
@@ -1168,14 +1067,16 @@ export default {
           let distFullpath = path.join(distPath, distFilename)
           let canvas = document.getElementById('sample')
           let scale = canvas.width / this.sampleWidth
-          let watermark = document.getElementById('watermark')
           // 匹配模糊半径，等待 html2canvas 作者更新
-          let shadow = watermark.style['text-shadow'].split(' ')
-          shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
-          watermark.style['text-shadow'] = shadow.join(' ')
+          let watermarks = document.getElementsByClassName('watermark')
+          Array.from(watermarks).forEach((watermark) => {
+            let shadow = watermark.style['text-shadow'].split(' ')
+            shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
+            watermark.style['text-shadow'] = shadow.join(' ')
+          })
           // 将图片水印转 canvas
           if (this.image) {
-            let image = document.getElementById('watermark-image')
+            let image = document.getElementsByClassName('watermark-image')[0]
             let width = image.naturalWidth
             let height = image.naturalHeight
             let canvas = document.createElement('canvas')
@@ -1206,21 +1107,21 @@ export default {
                   showConfirm: true
                 })
               } else {
-                if (this.$store.state.watermark.fileList.length > 1) {
+                if (this.$store.state.globalWatermark.fileList.length > 1) {
                   dialog.change({
                     type: 'success',
                     title: '成功',
-                    text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                    text: '处理完成，添加全屏水印后的图片已保存到目标文件夹。',
                     showConfirm: true,
                     confirmFunction: () => {
                       if (this.fileListPage != 1) {
-                        if (this.fileListPage == Math.ceil(this.$store.state.watermark.fileList.length / 100)) {
-                          if (this.$store.state.watermark.fileList.length % 100 == 1) {
+                        if (this.fileListPage == Math.ceil(this.$store.state.globalWatermark.fileList.length / 100)) {
+                          if (this.$store.state.globalWatermark.fileList.length % 100 == 1) {
                             this.fileListPage -= 1
                           }
                         }
                       }
-                      this.$store.dispatch('watermark/fileListDelete', this.fileIndex).then(() => {
+                      this.$store.dispatch('globalWatermark/fileListDelete', this.fileIndex).then(() => {
                         this.preview(this.fileIndex)
                       })
                     }
@@ -1229,7 +1130,7 @@ export default {
                   dialog.change({
                     type: 'success',
                     title: '成功',
-                    text: '处理完成，添加水印后的图片已保存到目标文件夹。',
+                    text: '处理完成，添加全屏水印后的图片已保存到目标文件夹。',
                     showConfirm: true,
                     confirmFunction: () => {
                       this.back()
@@ -1274,7 +1175,7 @@ export default {
         }).then((dialog) => {
           // 将图片水印转 canvas
           if (this.image) {
-            let image = document.getElementById('watermark-image')
+            let image = document.getElementsByClassName('watermark-image')[0]
             let width = image.naturalWidth
             let height = image.naturalHeight
             let canvas = document.createElement('canvas')
@@ -1290,7 +1191,7 @@ export default {
           let handleSingle = (file, index) => {
             return new Promise((resolve, reject) => {
               dialog.change({
-                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.watermark.fileList.length) + ' 张。'
+                text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.$store.state.globalWatermark.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = file
                 let distExt
@@ -1386,9 +1287,12 @@ export default {
                       }
                       this.$nextTick(() => {
                         // 匹配模糊半径，等待 html2canvas 作者更新
-                        let shadow = watermark.style['text-shadow'].split(' ')
-                        shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
-                        watermark.style['text-shadow'] = shadow.join(' ')
+                        let watermarks = document.getElementsByClassName('watermark')
+                        Array.from(watermarks).forEach((watermark) => {
+                          let shadow = watermark.style['text-shadow'].split(' ')
+                          shadow[shadow.length - 1] = shadow[shadow.length - 1].slice(0, -2) * scale + 'px'
+                          watermark.style['text-shadow'] = shadow.join(' ')
+                        })
                         html2canvas(document.getElementById('watermark-container'), {
                           canvas: canvas,
                           scale: scale,
@@ -1413,7 +1317,7 @@ export default {
             })
           }
           let progress = Promise.resolve()
-          this.$store.state.watermark.fileList.forEach((file, index) => {
+          this.$store.state.globalWatermark.fileList.forEach((file, index) => {
             progress = progress.then(() => {
               return handleSingle(file, index)
             })
@@ -1429,7 +1333,7 @@ export default {
                   this.back()
                 }
               }).then(() => {
-                let notification = new Notification('图片加水印工具', {
+                let notification = new Notification('全屏水印工具', {
                   body: '队列中的图片已处理完成。',
                   icon: path.join(__static, 'images/icon.ico')
                 })
@@ -1460,7 +1364,7 @@ export default {
                   this.back()
                 }
               }).then(() => {
-                let notification = new Notification('图片加水印工具', {
+                let notification = new Notification('全屏水印工具', {
                   body: '队列中的图片已处理完成。',
                   icon: path.join(__static, 'images/icon.ico')
                 })
@@ -1504,7 +1408,7 @@ export default {
 </script>
 
 <style lang="scss">  
-#watermark-editor {
+#global-watermark-editor {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1609,20 +1513,23 @@ export default {
         }
         
         #watermark-container {
+          display: flex;
+          flex-wrap: wrap;
           position: absolute;
           overflow: hidden;
           white-space: nowrap;
-          
-          #watermark {
-            position: absolute;
-            width: fit-content;
-            height: fit-content;
-            box-sizing: border-box;
-            line-height: 1em;
-          }
 
-          #watermark-image {
-            position: absolute;
+          .watermark-line {
+            min-width: 100%;
+            font-size: 0;
+          
+            .watermark {
+              display: inline-block;
+              width: fit-content;
+              height: fit-content;
+              box-sizing: border-box;
+              line-height: 1em;
+            }
           }
         }
       }

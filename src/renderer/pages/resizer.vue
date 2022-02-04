@@ -409,7 +409,7 @@ export default {
       }).then((dialog) => {
         let url = this.fileList[index].fullpath
         let image = document.createElement('img')
-        image.src = url
+        image.src = `file://${url}`
         image.onerror = () => {
           dialog.change({
             type: 'error',
@@ -528,7 +528,7 @@ export default {
                 }
                 let distFullpath = path.join(distPath, distFilename)
                 let image = document.createElement('img')
-                image.src = imageInfo.fullpath
+                image.src = `file://${imageInfo.fullpath}`
                 image.onerror = () => {
                   this.errorList.push(imageInfo.fullpath)
                   resolve()

@@ -653,7 +653,7 @@ export default {
             text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(total) + ' 张。'
           }).then(() => {
             let image = document.createElement('img')
-            image.src = this.$store.state.splicer.fileList[index].fullpath
+            image.src = `file://${this.$store.state.splicer.fileList[index].fullpath}`
             image.onerror = () => {
               this.errorList.push(this.$store.state.splicer.fileList[index].fullpath)
               this.$store.dispatch('splicer/fileListDelete', index).then(() => {
