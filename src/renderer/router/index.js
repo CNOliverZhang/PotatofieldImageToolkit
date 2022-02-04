@@ -37,6 +37,21 @@ export default new Router({
       component: require('@/pages/watermark/template').default
     },
     {
+      path: '/globalWatermark',
+      name: 'globalWatermark',
+      component: require('@/pages/globalWatermark').default,
+    },
+    {
+      path: '/globalWatermark/editor',
+      name: 'globalWatermarkEditor',
+      component: require('@/pages/globalWatermark/editor').default
+    },
+    {
+      path: '/globalWatermark/template',
+      name: 'globalWatermarkTemplate',
+      component: require('@/pages/globalWatermark/template').default
+    },
+    {
       path: '/splicer',
       name: 'splicer',
       component: require('@/pages/splicer').default,

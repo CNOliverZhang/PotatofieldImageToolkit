@@ -118,7 +118,7 @@ export default {
       }).then((dialog) => {
         let url = this.fileList[index].fullpath
         let image = document.createElement('img')
-        image.src = url
+        image.src = `file://${url}`
         image.onerror = () => {
           dialog.change({
             type: 'error',

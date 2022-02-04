@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "3.4.1",
+  "version": "3.5.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
   "copyright": "Copyright © 2021 张志毅",
@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "修复了图片压缩工具覆盖保存失败的问题。"
+      "releaseNotes": "添加了全屏水印功能。"
     },
     "publish": [
       {
@@ -77,7 +77,7 @@
     "electron-promise-ipc": "^2.2.4",
     "element-ui": "^2.14.1",
     "exif-js": "^2.3.0",
-    "html2canvas": "^1.0.0-rc.7",
+    "html2canvas": "^1.4.1",
     "moment": "^2.29.1",
     "sharp": "^0.28.3",
     "vue": "^2.6.12",

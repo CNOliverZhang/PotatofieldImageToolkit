@@ -1,7 +1,7 @@
 <template>
-  <div id="watermark-template">
+  <div id="global-watermark-template">
     <div class="page-header">
-      <div class="page-title">图片加水印工具 - 模板编辑器</div>
+      <div class="page-title">全屏水印工具 - 模板编辑器</div>
       <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -34,51 +34,58 @@
                 'width': sampleWidth + 'px',
                 'height': sampleHeight + 'px'
               }">
-              <div
-                id="watermark"
-                :style="{
-                  'left': (position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'center' || position == 'top' || position == 'bottom') ? x + 'px' : null,
-                  'right': (position == 'right-top' || position == 'right-bottom' || position == 'right') ? x + 'px' : null,
-                  'top': (position == 'left-top' || position == 'right-top' || position == 'top' || position == 'center' || position == 'left' || position == 'right') ? y + 'px' : null,
-                  'bottom': (position == 'left-bottom' || position == 'right-bottom' || position == 'bottom') ? y + 'px' : null,
-                  'color': color,
-                  'font-family': font,
-                  'font-size': fontSize + 'px',
-                  'transform': 'rotate(' + rotation + 'deg)',
-                  'writing-mode': writingMode,
-                  'text-align': textAlign,
-                  'padding': backgroundSize / 100 + 'em',
-                  'background-color': backgroundColor,
-                  'text-shadow': textShadow
-                }">
-                <div
-                  v-for="(line, index) in text.split('\n')"
-                  :key="index"
-                  :style="{
-                    'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
-                  }">
-                  <span
-                    v-for="(char, index) in line"
-                    :key="index"
+              <div v-for="(item, index) in new Array(rowCount)" class="watermark-line">
+                <template v-if="!image">
+                  <div
+                    class="watermark"
+                    v-for="(item, index) in new Array(columnCount)"
                     :style="{
-                      'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
-                    }">{{ char }}</span>
-                </div>
+                      'color': color,
+                      'font-family': font,
+                      'font-size': fontSize + 'px',
+                      'transform': 'rotate(' + rotation + 'deg)',
+                      'writing-mode': writingMode,
+                      'text-align': textAlign,
+                      'padding': backgroundSize / 100 + 'em',
+                      'background-color': backgroundColor,
+                      'text-shadow': textShadow,
+                      'margin-top': marginY * sizeBaseY + 'px',
+                      'margin-bottom': marginY * sizeBaseY + 'px',
+                      'margin-left': marginX * sizeBaseX + 'px',
+                      'margin-right': marginX * sizeBaseX + 'px',
+                    }">
+                    <div
+                      v-for="(line, index) in text.split('\n')"
+                      :key="index"
+                      :style="{
+                        'margin-top': index == 0 ? 0 : String(lineHeight - 1) + 'em'
+                      }">
+                      <span
+                        v-for="(char, index) in line"
+                        :key="index"
+                        :style="{
+                          'margin-left': index == 0 ? 0 : letterSpacing / 10 + 'em'
+                        }">{{ char }}</span>
+                    </div>
+                  </div>
+                </template>
+                <template v-else>
+                  <img
+                    class="watermark-image"
+                    v-for="(item, index) in new Array(columnCount)"
+                    @load="initImageSize"
+                    :src="image ? `file://${image}` : undefined"
+                    :style="{
+                      'width': imageSize * sizeBaseX + 'px',
+                      'opacity': imageOpacity,
+                      'transform': 'rotate(' + imageRotation + 'deg)',
+                      'margin-top': marginY * sizeBaseY + 'px',
+                      'margin-bottom': marginY * sizeBaseY + 'px',
+                      'margin-left': marginX * sizeBaseX + 'px',
+                      'margin-right': marginX * sizeBaseX + 'px',
+                    }"/>
+                </template>
               </div>
-              <img
-                v-if="image != ''"
-                id="watermark-image"
-                @load="initImageSize"
-                :src="image"
-                :style="{
-                  'width': imageSize * sizeBaseX + 'px',
-                  'left': (imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'center' || imagePosition == 'top' || imagePosition == 'bottom') ? imageX + 'px' : null,
-                  'right': (imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right') ? imageX + 'px' : null,
-                  'top': (imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top' || imagePosition == 'center' || imagePosition == 'left' || imagePosition == 'right') ? imageY + 'px' : null,
-                  'bottom': (imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom') ? imageY + 'px' : null,
-                  'opacity': imageOpacity,
-                  'transform': 'rotate(' + imageRotation + 'deg)'
-                }"/>
             </div>
           </div>
         </div>
@@ -236,60 +243,6 @@
                       <el-color-picker v-model="textShadowColor" size="mini" :show-alpha="true"></el-color-picker>
                     </div>
                   </el-collapse-item>
-                  <el-collapse-item title="水印文本位置" name="position">
-                    <div class="control-row">
-                      <div class="text">文本位置基准</div>
-                    </div>
-                    <div class="control-row">
-                      <el-select v-model="position" @change="changePosition" placeholder="请选择" size="mini" class="full-width-control">
-                        <el-option label="中央" value="center"/>
-                        <el-option label="左上角" value="left-top"/>
-                        <el-option label="右上角" value="right-top"/>
-                        <el-option label="左下角" value="left-bottom"/>
-                        <el-option label="右下角" value="right-bottom"/>
-                        <el-option label="上方" value="top"/>
-                        <el-option label="下方" value="bottom"/>
-                        <el-option label="左侧" value="left"/>
-                        <el-option label="右侧" value="right"/>
-                      </el-select>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-                      class="control-row">
-                      <div v-if="position == 'left-top' || position == 'left-bottom' || position == 'left'" class="text">文本与左边缘的距离</div>
-                      <div v-if="position == 'right-top' || position == 'right-bottom' || position == 'right'" class="text">文本与右边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'left' || position == 'right-top' || position == 'right-bottom' || position == 'right'"
-                      class="control-row">
-                      <el-slider
-                        v-model="offsetX"
-                        class="full-width-control"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        :show-input="true"
-                        input-size="mini"></el-slider>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-                      class="control-row">
-                      <div v-if="position == 'left-top' || position == 'right-top' || position == 'top'" class="text">文本与上边缘的距离</div>
-                      <div v-if="position == 'left-bottom' || position == 'right-bottom' || position == 'bottom'" class="text">文本与下边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="position == 'left-top' || position == 'left-bottom' || position == 'top' || position == 'right-top' || position == 'right-bottom' || position == 'bottom'"
-                      class="control-row">
-                      <el-slider
-                        v-model="offsetY"
-                        class="full-width-control"
-                        :min="0"
-                        :max="100"
-                        :step="1"
-                        :show-input="true"
-                        input-size="mini"></el-slider>
-                    </div>
-                  </el-collapse-item>
                   <el-collapse-item title="水印文本排版" name="typesetting">
                     <div class="control-row">
                       <div class="text">文本排版方向</div>
@@ -362,7 +315,7 @@
                         </div>
                       </div>
                       <div v-if="image != ''" id="image-preview-container">
-                        <img :src="image" id="image-preview">
+                        <img :src="`file://${image}`" id="image-preview">
                       </div>
                     </div>
                   </el-collapse-item>
@@ -407,34 +360,13 @@
                         input-size="mini"></el-slider>
                     </div>
                   </el-collapse-item>
-                  <el-collapse-item title="水印图片位置" name="image-position">
+                  <el-collapse-item title="水印平铺间距" name="margin">
                     <div class="control-row">
-                      <div class="text">图片位置基准</div>
+                      <div class="text">水平间距</div>
                     </div>
                     <div class="control-row">
-                      <el-select v-model="imagePosition" @change="changeImagePosition" placeholder="请选择" size="mini" class="full-width-control">
-                        <el-option label="中央" value="center"/>
-                        <el-option label="左上角" value="left-top"/>
-                        <el-option label="右上角" value="right-top"/>
-                        <el-option label="左下角" value="left-bottom"/>
-                        <el-option label="右下角" value="right-bottom"/>
-                        <el-option label="上方" value="top"/>
-                        <el-option label="下方" value="bottom"/>
-                        <el-option label="左侧" value="left"/>
-                        <el-option label="右侧" value="right"/>
-                      </el-select>
-                    </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
-                      class="control-row">
-                      <div v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left'" class="text">图片与左边缘的距离</div>
-                      <div v-if="imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'" class="text">图片与右边缘的距离</div>
-                    </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'left' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'right'"
-                      class="control-row">
                       <el-slider
-                        v-model="imageOffsetX"
+                        v-model="marginX"
                         class="full-width-control"
                         :min="0"
                         :max="100"
@@ -442,17 +374,12 @@
                         :show-input="true"
                         input-size="mini"></el-slider>
                     </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
-                      class="control-row">
-                      <div v-if="imagePosition == 'left-top' || imagePosition == 'right-top' || imagePosition == 'top'" class="text">图片与上边缘的距离</div>
-                      <div v-if="imagePosition == 'left-bottom' || imagePosition == 'right-bottom' || imagePosition == 'bottom'" class="text">图片与下边缘的距离</div>
+                    <div class="control-row">
+                      <div class="text">垂直间距</div>
                     </div>
-                    <div
-                      v-if="imagePosition == 'left-top' || imagePosition == 'left-bottom' || imagePosition == 'top' || imagePosition == 'right-top' || imagePosition == 'right-bottom' || imagePosition == 'bottom'"
-                      class="control-row">
+                    <div class="control-row">
                       <el-slider
-                        v-model="imageOffsetY"
+                        v-model="marginY"
                         class="full-width-control"
                         :min="0"
                         :max="100"
@@ -493,7 +420,7 @@ const path = require('path')
 const fs = require('fs')
 
 export default {
-  name: 'watermarkTemplate',
+  name: 'globalWatermarkTemplate',
   data () {
     return  {
       index: this.$route.query.index,
@@ -502,9 +429,6 @@ export default {
       textAlign: 'center',
       lineHeight: 1,
       letterSpacing: 0,
-      position: 'center',
-      offsetX: 0,
-      offsetY: 0,
       rotation: 0,
       color: 'rgba(255, 255, 255, 1)',
       font: this.$store.state.fonts.defaultFont,
@@ -518,9 +442,6 @@ export default {
       image: '',
       originalImage: '',
       imageSize: 30,
-      imagePosition: 'center',
-      imageOffsetX: 0,
-      imageOffsetY: 0,
       imageRotation: 0,
       imageOpacity: 1,
       sizeBaseX: 0,
@@ -531,6 +452,8 @@ export default {
       watermarkHeight: 0,
       imageWidth: 0,
       imageHeight: 0,
+      marginX: 0,
+      marginY: 0,
       ratio: 1,
       background: 'linear-gradient(135deg, var(--dark-gray), var(--black-gray))',
       templateTitle: ''
@@ -540,41 +463,33 @@ export default {
     fontSize() {
       return this.relativeFontSize * this.sizeBaseX
     },
-    x() {
-      if (this.position == 'top' || this.position == 'bottom' || this.position == 'center') {
-        return ((this.sampleWidth - this.watermarkWidth) / 2)
-      } else {
-        let ratio = 1 - this.watermarkWidth / this.sampleWidth
-        return this.offsetX * this.sizeBaseX * (ratio)
-      }
-    },
-    y() {
-      if (this.position == 'left' || this.position == 'right' || this.position == 'center') {
-        return ((this.sampleHeight - this.watermarkHeight) / 2)
-      } else {
-        let ratio = 1 - this.watermarkHeight / this.sampleHeight
-        return this.offsetY * this.sizeBaseY * (ratio)
-      }
-    },
-    imageX() {
-      if (this.imagePosition == 'top' || this.imagePosition == 'bottom' || this.imagePosition == 'center') {
-        return ((this.sampleWidth - this.imageWidth) / 2)
-      } else {
-        let ratio = 1 - this.imageWidth / this.sampleWidth
-        return this.imageOffsetX * this.sizeBaseX * (ratio)
-      }
-    },
-    imageY() {
-      if (this.imagePosition == 'left' || this.imagePosition == 'right' || this.imagePosition == 'center') {
-        return ((this.sampleHeight - this.imageHeight) / 2)
-      } else {
-        let ratio = 1 - this.imageHeight / this.sampleHeight
-        return this.imageOffsetY * this.sizeBaseY * (ratio)
-      }
-    },
     textShadow() {
       return this.textShadowX + 'em ' + this.textShadowY + 'em ' + this.textShadowBlur + 'em ' + this.textShadowColor
-    }
+    },
+    columnCount() {
+      let count = 1
+      if (this.image) {
+        count = Math.ceil(this.sampleWidth / (+this.imageWidth + 2 * this.marginX * this.sizeBaseX))
+      } else {
+        count = Math.ceil(this.sampleWidth / (+this.watermarkWidth + 2 * this.marginX * this.sizeBaseX))
+      }
+      if (count && count !== Infinity) {
+        return count
+      }
+      return 1
+    },
+    rowCount() {
+      let count = 1
+      if (this.image) {
+        count = Math.ceil(this.sampleHeight / (+this.imageHeight + 2 * this.marginY * this.sizeBaseY))
+      } else {
+        count = Math.ceil(this.sampleHeight / (+this.watermarkHeight + 2 * this.marginY * this.sizeBaseY))
+      }
+      if (count && count !== Infinity) {
+        return count
+      }
+      return 1
+    },
   },
   watch: {
     text() {
@@ -650,21 +565,21 @@ export default {
       this.initSampleSize()
     },
     back() {
-      this.$router.replace('/watermark')
+      this.$router.replace('/globalWatermark')
     },
     close() {
       ipcRenderer.send('close')
       this.$destroy()
     },
     initWatermarkSize() {
-      let watermarkStyle = window.getComputedStyle(document.getElementById('watermark'))
+      let watermarkStyle = window.getComputedStyle(document.getElementsByClassName('watermark')[0])
       let watermarkWidth = watermarkStyle.getPropertyValue('width').slice(0, -2)
       let watermarkHeight = watermarkStyle.getPropertyValue('height').slice(0, -2)
       this.watermarkWidth = watermarkWidth
       this.watermarkHeight = watermarkHeight
     },
     initImageSize() {
-      let imageStyle = window.getComputedStyle(document.getElementById('watermark-image'))
+      let imageStyle = window.getComputedStyle(document.getElementsByClassName('watermark-image')[0])
       let imageWidth = imageStyle.getPropertyValue('width').slice(0, -2)
       let imageHeight = imageStyle.getPropertyValue('height').slice(0, -2)
       this.imageWidth = imageWidth
@@ -737,9 +652,6 @@ export default {
           textAlign: this.textAlign,
           lineHeight: this.lineHeight,
           letterSpacing: this.letterSpacing,
-          position: this.position,
-          offsetX: this.offsetX,
-          offsetY: this.offsetY,
           rotation: this.rotation,
           color: this.color,
           font: this.font,
@@ -752,11 +664,10 @@ export default {
           textShadowColor: this.textShadowColor,
           image: this.image,
           imageSize: this.imageSize,
-          imagePosition: this.imagePosition,
-          imageOffsetX: this.imageOffsetX,
-          imageOffsetY: this.imageOffsetY,
           imageRotation: this.imageRotation,
-          imageOpacity: this.imageOpacity
+          imageOpacity: this.imageOpacity,
+          marginX: this.marginX,
+          marginY: this.marginY
         }
         let checkName = (title) => {
           if (title == '') {
@@ -767,7 +678,7 @@ export default {
               showCancel: true,
               confirmFunction: () => {
                 this.$dialog({
-                  title: '请输入水印模板标题',
+                  title: '请输入全屏水印模板标题',
                   content: this.$createElement('div', {
                     'class': 'el-input el-input--mini'
                   }, [
@@ -798,8 +709,8 @@ export default {
               }
             })
           } else {
-            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-              if (title == this.$store.state.watermark.templates[i].title && this.index != i) {
+            for (let i = 0; i < this.$store.state.globalWatermark.templates.length; i++) {
+              if (title == this.$store.state.globalWatermark.templates[i].title && this.index != i) {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
@@ -807,7 +718,7 @@ export default {
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
-                      title: '请输入水印模板标题',
+                      title: '请输入全屏水印模板标题',
                       content: this.$createElement('div', {
                         'class': 'el-input el-input--mini'
                       }, [
@@ -851,7 +762,7 @@ export default {
               if (this.image != '') {
                 let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
                 let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
-                let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+                let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'globalWatermarkImages')
                 let fullpath = path.join(imagepath, filename)
                 if (!fs.existsSync(imagepath)) {
                   CreateDirectory(imagepath)
@@ -862,7 +773,7 @@ export default {
                 this.image = fullpath
               }
             }
-            this.$store.dispatch('watermark/templateReplace', {
+            this.$store.dispatch('globalWatermark/templateReplace', {
               index: this.index,
               template: template
             })
@@ -894,9 +805,6 @@ export default {
           textAlign: this.textAlign,
           lineHeight: this.lineHeight,
           letterSpacing: this.letterSpacing,
-          position: this.position,
-          offsetX: this.offsetX,
-          offsetY: this.offsetY,
           rotation: this.rotation,
           color: this.color,
           font: this.font,
@@ -909,11 +817,10 @@ export default {
           textShadowColor: this.textShadowColor,
           image: this.image,
           imageSize: this.imageSize,
-          imagePosition: this.imagePosition,
-          imageOffsetX: this.imageOffsetX,
-          imageOffsetY: this.imageOffsetY,
           imageRotation: this.imageRotation,
-          imageOpacity: this.imageOpacity
+          imageOpacity: this.imageOpacity,
+          marginX: this.marginX,
+          marginY: this.marginY
         }
         let checkName = (title) => {
           if (title == '') {
@@ -924,7 +831,7 @@ export default {
               showCancel: true,
               confirmFunction: () => {
                 this.$dialog({
-                  title: '请输入水印模板标题',
+                  title: '请输入全屏水印模板标题',
                   content: this.$createElement('div', {
                     'class': 'el-input el-input--mini'
                   }, [
@@ -951,8 +858,8 @@ export default {
               }
             })
           } else {
-            for (let i = 0; i < this.$store.state.watermark.templates.length; i++) {
-              if (title == this.$store.state.watermark.templates[i].title) {
+            for (let i = 0; i < this.$store.state.globalWatermark.templates.length; i++) {
+              if (title == this.$store.state.globalWatermark.templates[i].title) {
                 this.$dialog({
                   type: 'warning',
                   title: '需要重命名',
@@ -960,7 +867,7 @@ export default {
                   showCancel: true,
                   confirmFunction: () => {
                     this.$dialog({
-                      title: '请输入水印模板标题',
+                      title: '请输入全屏水印模板标题',
                       content: this.$createElement('div', {
                         'class': 'el-input el-input--mini'
                       }, [
@@ -993,7 +900,7 @@ export default {
             if (this.image != '') {
               let ext = this.image.substring(this.image.lastIndexOf(".") + 1, this.image.length).toLowerCase()
               let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
-              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'watermarkImages')
+              let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'globalWatermarkImages')
               let fullpath = path.join(imagepath, filename)
               if (!fs.existsSync(imagepath)) {
                 CreateDirectory(imagepath)
@@ -1003,7 +910,7 @@ export default {
               this.originalImage = fullpath
               this.image = fullpath
             }
-            this.$store.dispatch('watermark/templatePush', template)
+            this.$store.dispatch('globalWatermark/templatePush', template)
             this.$dialog({
               type: 'success',
               title: '成功',
@@ -1013,7 +920,7 @@ export default {
                 this.back()
               },
               cancelFunction: () => {
-                this.index = this.$store.state.watermark.templates.length - 1
+                this.index = this.$store.state.globalWatermark.templates.length - 1
               }
             })
           }
@@ -1033,7 +940,7 @@ export default {
               fs.unlinkSync(this.originalImage)
             } catch (error) {}
           }
-          this.$store.dispatch('watermark/templateDelete', this.index)
+          this.$store.dispatch('globalWatermark/templateDelete', this.index)
           this.back()
         }
       })
@@ -1041,16 +948,13 @@ export default {
   },
   mounted() {
     if (this.$route.query.index != -1) {
-      let template = this.$store.state.watermark.templates[this.$route.query.index]
+      let template = this.$store.state.globalWatermark.templates[this.$route.query.index]
       this.templateTitle = template.title !== undefined ? template.title : this.templateTitle
       this.text = template.text !== undefined ? template.text : this.text
       this.writingMode = template.writingMode !== undefined ? template.writingMode : this.writingMode
       this.textAlign = template.textAlign !== undefined ? template.textAlign : this.textAlign
       this.lineHeight = template.lineHeight !== undefined ? template.lineHeight : this.lineHeight
       this.letterSpacing = template.letterSpacing !== undefined ? template.letterSpacing : this.letterSpacing
-      this.position = template.position !== undefined ? template.position : this.position
-      this.offsetX = template.offsetX !== undefined ? template.offsetX : this.offsetX
-      this.offsetY = template.offsetY !== undefined ? template.offsetY : this.offsetY
       this.rotation = template.rotation !== undefined ? template.rotation : this.rotation
       this.color = template.color !== undefined ? template.color : this.color
       this.font = template.font !== undefined ? template.font : this.font
@@ -1064,11 +968,10 @@ export default {
       this.image = template.image !== undefined ? template.image : this.image
       this.originalImage = this.image
       this.imageSize = template.imageSize !== undefined ? template.imageSize : this.imageSize
-      this.imagePosition = template.imagePosition !== undefined ? template.imagePosition : this.imagePosition
-      this.imageOffsetX = template.imageOffsetX !== undefined ? template.imageOffsetX : this.imageOffsetX
-      this.imageOffsetY = template.imageOffsetY !== undefined ? template.imageOffsetY : this.imageOffsetY
       this.imageRotation = template.imageRotation !== undefined ? template.imageRotation : this.imageRotation
       this.imageOpacity = template.imageOpacity !== undefined ? template.imageOpacity : this.imageOpacity
+      this.marginX = template.marginX !== undefined ? template.marginX : this.marginX
+      this.marginY = template.marginY !== undefined ? template.marginY : this.marginY
       this.$dialog({
         text: '您正在编辑一个已保存的模板。如果您希望修改后覆盖原模板请点击“保存”，如果您希望将修改后的模板存储为副本请点击“另存”。'
       })
@@ -1079,7 +982,7 @@ export default {
 </script>
 
 <style lang="scss">
-#watermark-template {
+#global-watermark-template {
   width: 100%;
   height: 100%;
   display: flex;
@@ -1161,20 +1064,23 @@ export default {
         }
         
         #watermark-container {
+          display: flex;
+          flex-wrap: wrap;
           position: absolute;
           overflow: hidden;
           white-space: nowrap;
-          
-          #watermark {
-            position: absolute;
-            width: fit-content;
-            height: fit-content;
-            box-sizing: border-box;
-            line-height: 1em;
-          }
 
-          #watermark-image {
-            position: absolute;
+          .watermark-line {
+            min-width: 100%;
+            font-size: 0;
+          
+            .watermark {
+              display: inline-block;
+              width: fit-content;
+              height: fit-content;
+              box-sizing: border-box;
+              line-height: 1em;
+            }
           }
         }
       }

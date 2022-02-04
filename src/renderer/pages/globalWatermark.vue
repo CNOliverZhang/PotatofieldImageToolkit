@@ -1,7 +1,7 @@
 <template>
-  <div id="splicer">
+  <div id="global-watermark">
     <div class="page-header">
-      <div class="page-title">长图拼接工具</div>
+      <div class="page-title">全屏水印工具</div>
       <div class="control-button minimize" @click="minimize">
         <object data="static/images/minimize.svg" type="image/svg+xml"></object>
       </div>
@@ -12,7 +12,7 @@
     <el-tabs type="card" tab-position="top" id="content" @tab-click="clear">
       <el-tab-pane>
         <span slot="label"><i class="fas fa-image"></i> 导入图片</span>
-        <div id="file-input" class="tab-content">
+        <div id="single" class="tab-content">
           <el-upload
             id="upload-dragger"
             action=""
@@ -29,7 +29,7 @@
             <div id="list">
               <div
                 v-for="(file, index) in this.fileList"
-                :key="index"
+                :key="file.fullpath"
                 class="file"
                 @click="preview(index)">
                 <div class="filename">{{ file.filename + '.' + file.ext }}</div>
@@ -40,26 +40,82 @@
             </div>
             <div class="row">
               <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button">清空列表</el-button>
-              <el-button type="primary" size="mini" @click="edit" class="bar-button">进入长图拼接编辑器</el-button>
+              <el-button type="primary" size="mini" @click="edit" class="bar-button">进入全屏水印编辑器</el-button>
             </div>
           </div>
         </div>
       </el-tab-pane>
       <el-tab-pane>
-        <span slot="label"><i class="fas fa-images"></i> 拼接模板库</span>
+        <span slot="label"><i class="fas fa-folder-open"></i> 选择文件夹</span>
+        <div id="multiple" class="tab-content">
+          <div class="wrapper" v-if="this.fileList.length == 0">
+            <div class="row">
+              <el-switch
+                v-model="childDirectoryIncluded"
+                active-text="包含子目录"
+                inactive-text="不包含子目录"
+               ></el-switch>
+              <el-input disabled size="mini" v-model="srcDirectory" class="half-width-control">
+                <el-button @click="selectSourceFolder" slot="prepend">选择</el-button>
+              </el-input>
+            </div>
+            <el-button
+              @click="handleFolder"
+              type="primary"
+              size="mini"
+             >扫描文件夹</el-button>
+            <div id="file-list" class="row">
+              <div id="empty">
+                <i class="fas fa-folder-open"></i>
+                <div>未导入图片</div>
+              </div>
+            </div>
+          </div>
+          <div class="wrapper" v-else>
+            <div id="file-list">
+              <div
+                v-for="(file, index) in this.fileList.slice(fileListPage * 100 - 100, fileListPage * 100)"
+                :key="file.fullpath"
+                class="file"
+                @click="preview(index + (fileListPage - 1) * 100)">
+                <div class="filename">{{ file.filename + '.' + file.ext }}</div>
+                <div class="path">{{ file.filepath }}</div>
+                <div @click.stop="handleDelete(index + (fileListPage - 1) * 100)">
+                  <i class="fas fa-trash-alt delete"></i>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <el-pagination
+                small
+                background
+                layout="prev, pager, next"
+                :pager-count="5"
+                :page-size="100"
+                :total="this.fileList.length"
+                :current-page="fileListPage"
+                :hide-on-single-page="true"
+                @current-change="fileListPageChange">
+              </el-pagination>
+              <el-button type="primary" size="mini" @click="clearConfirm" class="bar-button">清空列表</el-button>
+              <el-button type="primary" size="mini" @click="edit" class="bar-button">进入全屏水印编辑器</el-button>
+            </div>
+          </div>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane>
+        <span slot="label"><i class="fas fa-feather-alt"></i> 全屏水印模板库</span>
         <div class="tool-templates tab-content">
-          <div class="templates-container" v-if="this.$store.state.splicer.templates.length != 0">
+          <div class="templates-container" v-if="this.$store.state.globalWatermark.templates.length != 0">
             <div
-              v-for="(template, index) in this.$store.state.splicer.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
-              :key="index"
+              v-for="(template, index) in this.$store.state.globalWatermark.templates.slice(templateListPage * 6 - 6, templateListPage * 6)"
+              :key="template.title"
               class="template-container">
               <div class="card">
                 <div class="row">
                   <div class="subtitle">{{ template.title }}</div>
                 </div>
-                <div class="text">外框宽度：{{ template.padding != 0 ? template.padding : '无外框' }}</div>
-                <div class="text">图片间距：{{ template.spacing != 0 ? template.spacing : '无间距' }}</div>
-                <div class="text clamp">{{ template.text }}</div>
+                <div class="text clamp">{{ template.text != '' ? template.text : '[图片]' }}</div>
                 <div class="row actions">
                   <div class="action" @click="editTemplate(index + (templateListPage - 1) * 6)">
                     <span class="fa fa-edit"></span>
@@ -85,19 +141,19 @@
           </div>
           <div class="row">
             <el-pagination
-              v-if="this.$store.state.splicer.templates.length > 6"
+              v-if="this.$store.state.globalWatermark.templates.length > 6"
               small
               background
               layout="prev, pager, next"
               :pager-count="5"
               :page-size="6"
-              :total="this.$store.state.splicer.templates.length"
+              :total="this.$store.state.globalWatermark.templates.length"
               :current-page="templateListPage"
               :hide-on-single-page="true"
               @current-change="templateListPageChange">
             </el-pagination>
-            <el-button type="primary" size="mini" @click="importTemplate" class="bar-button">导入长图拼接模板</el-button>
-            <el-button type="primary" size="mini" @click="createTemplate" class="bar-button">创建长图拼接模板</el-button>
+            <el-button type="primary" size="mini" @click="importTemplate" class="bar-button">导入全屏水印模板</el-button>
+            <el-button type="primary" size="mini" @click="createTemplate" class="bar-button">创建全屏水印模板</el-button>
           </div>
         </div>
       </el-tab-pane>
@@ -108,16 +164,23 @@
 <script>
 import { ipcRenderer, clipboard } from 'electron'
 import EXIF from 'exif-js'
+import ReadDirectory from '../utils/ReadDirectory'
+import CreateDirectory from '../utils/CreateDirectory'
 
-const ReadDirectory = require('../utils/ReadDirectory')
 const path = require('path')
+const fs = require('fs')
 
 export default {
-  name: 'splicer',
+  name: 'globalWatermark',
   data () {
     return {
       fileList: [],
+      fileSet: new Set(),
+      errorList: [],
+      fileListPage: 1,
       templateListPage: 1,
+      childDirectoryIncluded: false,
+      srcDirectory: '',
       templateTitle: ''
     }
   },
@@ -131,6 +194,11 @@ export default {
     },
     clear() {
       this.fileList = []
+      this.fileSet = new Set()
+      this.errorList = []
+      this.fileListPage = 1
+      this.childDirectoryIncluded = false
+      this.srcDirectory = ''
     },
     clearConfirm() {
       this.$dialog({
@@ -147,16 +215,77 @@ export default {
       let ext = file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length).toLowerCase()
       let filename = file.name.substring(0, file.name.lastIndexOf("."))
       let filepath = path.dirname(file.raw.path)
-      let formats = new Set(['jpg', 'jpeg','webp', 'png'])
-      if (formats.has(ext)) {
+      let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
+      if (formats.has(ext) && !this.fileSet.has(file.raw.path)) {
         this.fileList.push({
           fullpath: file.raw.path,
+          filepath: filepath,
           filename: filename,
           ext: ext
+        })
+        this.fileSet.add(file.raw.path)
+      }
+    },
+    handleFolder() {
+      if (this.srcDirectory == '') {
+        this.$dialog({
+          type: 'warning',
+          text: '您还没有选择需要扫描的文件夹！'
+        })
+      } else {
+        this.$dialog({
+          title: '正在扫描文件夹',
+          text: '扫描时间与您的文件数量及大小有关，请您耐心等待……',
+          showConfirm: false
+        }).then((dialog) => {
+          let formats = new Set(['jpg', 'jpeg', 'webp', 'png'])
+          let result = ReadDirectory(this.srcDirectory, this.childDirectoryIncluded, formats)
+          this.fileList = result.fileList
+          this.fileSet = new Set(result.fileList)
+          this.errorList = result.errorList
+          dialog.change({
+            type: 'success',
+            title: '完成',
+            text: '已扫描完您选择的文件夹，共发现 ' + result.fileList.length + ' 个可处理的图片文件，接下来您可以继续执行下一步操作。',
+            showConfirm: true
+          })
+          if (this.errorList.length != 0) {
+            dialog.change({
+              content: this.$createElement('div', null, [
+                this.$createElement('div', null, [
+                  this.$createElement('p', null, '扫描下列文件或文件夹的过程中出现错误，请您检查相关文件或文件夹的权限。这不影响您处理列表中显示的已导入文件。')
+                ]),
+                this.$createElement('div', null, this.errorList.map((file) => {
+                  return this.$createElement('p', {
+                    style: {
+                      'line-height': '24px',
+                      'font-size': '12px',
+                      'width': '100%',
+                      'overflow': 'hidden',
+                      'text-overflow': 'ellipsis',
+                      'white-space': 'nowrap',
+                      'text-indent': '0'
+                    }
+                  }, file)
+                }))
+              ]),
+              confirmFunction: () => {
+                this.errorList = []
+              }
+            })
+          }
         })
       }
     },
     handleDelete(index) {
+      if (this.fileListPage != 1) {
+        if (this.fileListPage == Math.ceil(this.fileList.length / 100)) {
+          if (this.fileList.length % 100 == 1) {
+            this.fileListPage -= 1
+          }
+        }
+      }
+      this.fileSet.delete(this.fileList[index].fullpath)
       this.fileList.splice(index, 1)
     },
     preview(index) {
@@ -178,7 +307,6 @@ export default {
         }
         image.onload = () => {
           EXIF.getData(image, () => {
-            EXIF.getAllTags(image)
             let orientation = EXIF.getTag(image, 'Orientation')
             if (orientation == 3 || orientation == 6 || orientation == 8) {
               let canvas = document.createElement('canvas')
@@ -208,7 +336,6 @@ export default {
               context.rotate(rotation * Math.PI / 180)
               context.drawImage(image, x, y)
               dialog.change({
-                title: '图像预览',
                 text: '',
                 showConfirm: true,
                 content: this.$createElement('img', {
@@ -224,7 +351,6 @@ export default {
               })
             } else {
               dialog.change({
-                title: '图像预览',
                 text: '',
                 showConfirm: true,
                 content: this.$createElement('img', {
@@ -238,26 +364,44 @@ export default {
         }
       })
     },
+    fileListPageChange(page) {
+      this.fileListPage = page
+    },
     templateListPageChange(page) {
       this.templateListPage = page
     },
     edit() {
-      this.$store.dispatch('splicer/fileListAssign', this.fileList).then(() => {
-        this.$router.replace('/splicer/editor')
+      this.$store.dispatch('globalWatermark/fileListAssign', this.fileList).then(() => {
+        this.$router.replace('/globalWatermark/editor?srcDirectory=' + this.srcDirectory)
       })
     },
+    selectSourceFolder() {
+      this.srcDirectory = ipcRenderer.sendSync('select-folder')
+    },
     editTemplate(index) {
-      this.$router.replace('/splicer/template?index=' + String(index))
+      this.$router.replace('/globalWatermark/template?index=' + String(index))
     },
     shareTemplate(index) {
-      clipboard.writeText(btoa(encodeURI(JSON.stringify({
-        type: 'splicerTemplate',
-        content: this.$store.state.splicer.templates[index]
-      }))))
       this.$dialog({
-        type: 'success',
-        title: '成功',
-        text: '已成功将长图拼接模板复制到剪贴板。'
+        title: '正在处理',
+        text: '即将完成，请稍候。',
+        showConfirm: false
+      }).then((dialog) => {
+        let template = JSON.parse(JSON.stringify(this.$store.state.globalWatermark.templates[index]))
+        if (template.image) {
+          template.imageData = fs.readFileSync(template.image).toString('base64')
+          template.image = path.basename(template.image)
+        }
+        clipboard.writeText(btoa(encodeURI(JSON.stringify({
+          type: 'globalWatermarkTemplate',
+          content: template
+        }))))
+        dialog.change({
+          type: 'success',
+          title: '成功',
+          text: '已成功将全屏水印模板复制到剪贴板。',
+          showConfirm: true
+        })
       })
     },
     deleteTemplate(index) {
@@ -268,20 +412,26 @@ export default {
         showCancel: true,
         confirmFunction: () => {
           if (this.templateListPage != 1) {
-            if (this.templateListPage == Math.ceil(this.$store.state.splicer.templates.length / 6)) {
-              if (this.$store.state.splicer.templates.length % 6 == 1) {
+            if (this.templateListPage == Math.ceil(this.$store.state.globalWatermark.templates.length / 6)) {
+              if (this.$store.state.globalWatermark.templates.length % 6 == 1) {
                 this.templateListPage -= 1
               }
             }
           }
-          this.$store.dispatch('splicer/templateDelete', index)
+          let template = this.$store.state.globalWatermark.templates[index]
+          if (template.image) {
+            try {
+              fs.unlinkSync(template.image)
+            } catch (error) {}
+          }
+          this.$store.dispatch('globalWatermark/templateDelete', index)
         }
       })
     },
     importTemplate() {
       try {
         let template = JSON.parse(decodeURI(atob(clipboard.readText())))
-        if (template.type != 'splicerTemplate') {
+        if (template.type != 'globalWatermarkTemplate') {
           throw false
         } else {
           template = template.content
@@ -294,7 +444,7 @@ export default {
                 showCancel: true,
                 confirmFunction: () => {
                   this.$dialog({
-                    title: '请输入长图拼接模板标题',
+                    title: '请输入全屏水印模板标题',
                     content: this.$createElement('div', {
                       'class': 'el-input el-input--mini'
                     }, [
@@ -325,8 +475,8 @@ export default {
                 }
               })
             } else {
-              for (let i = 0; i < this.$store.state.splicer.templates.length; i++) {
-                if (title == this.$store.state.splicer.templates[i].title) {
+              for (let i = 0; i < this.$store.state.globalWatermark.templates.length; i++) {
+                if (title == this.$store.state.globalWatermark.templates[i].title) {
                   this.$dialog({
                     type: 'warning',
                     title: '存在同名模板',
@@ -334,7 +484,7 @@ export default {
                     showCancel: true,
                     confirmFunction: () => {
                       this.$dialog({
-                        title: '请输入长图拼接模板标题',
+                        title: '请输入全屏水印模板标题',
                         content: this.$createElement('div', {
                           'class': 'el-input el-input--mini'
                         }, [
@@ -368,11 +518,24 @@ export default {
                 }
               }
               template.title = title
-              this.$store.dispatch('splicer/templatePush', template)
+              if (template.image) {
+                let imagepath = path.join(ipcRenderer.sendSync('app-data-path'), 'globalWatermarkImages')
+                if (!fs.existsSync(imagepath)) {
+                  CreateDirectory(imagepath)
+                }
+                let ext = template.image.substring(template.image.lastIndexOf(".") + 1, template.image.length).toLowerCase()
+                let filename = Math.random((new Date())).toString(36).slice(2).toUpperCase() + '.' + ext
+                let fullpath = path.join(imagepath, filename)
+                let buffer = new Buffer.from(template.imageData, 'base64')
+                fs.writeFileSync(fullpath, buffer)
+                template.image = fullpath
+                delete template.imageData
+              }
+              this.$store.dispatch('globalWatermark/templatePush', template)
               this.$dialog({
                 type: 'success',
                 title: '成功',
-                text: '长图拼接模板导入成功。'
+                text: '全屏水印模板导入成功。'
               })
             }
           }
@@ -382,12 +545,12 @@ export default {
         this.$dialog({
           type: 'error',
           title: '导入失败',
-          text: '未能从您的剪贴板中读取到长图拼接模板信息！'
+          text: '未能从您的剪贴板中读取到全屏水印模板信息！'
         })
       }
     },
     createTemplate() {
-      this.$router.replace('/splicer/template?index=-1')
+      this.$router.replace('/globalWatermark/template?index=-1')
     }
   },
   mounted() {
@@ -397,7 +560,7 @@ export default {
 </script>
 
 <style lang="scss">
-#splicer {
+#global-watermark {
   width: 100%;
   height: 100%;
   display: flex;
@@ -472,8 +635,26 @@ export default {
         }
       }
     }
+    
+    .wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .el-input-group {
+      display: flex;
+    }
+    
+    .el-input-group__prepend {
+      width: fit-content;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
       
-    #file-input {
+    #single {
       flex-direction: row;
       
       #upload-dragger {
@@ -596,6 +777,116 @@ export default {
             &:hover {
               background-color: var(--gray);
             }
+          }
+        }
+      }
+    }
+    
+    #multiple {
+      flex-direction: column;
+      
+      #file-list {
+        width: 100%;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--white-gray);
+        box-sizing: border-box;
+        border-radius: 6px;
+        border-color: var(--light-gray);
+        border-style: solid;
+        border-width: 1px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        
+        #empty {
+          width: 100%;
+          flex-grow: 1;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          font-size: 14px;
+          
+          svg {
+            font-size: 40px;
+            margin: 14px;
+          }
+        }
+        
+        .file {
+          height: 28px;
+          width: 100%;
+          flex-shrink: 0;
+          line-height: 24px;
+          font-size: 12px;
+          padding-left: 5px;
+          padding-right: 5px;
+          box-sizing: border-box;
+          background-color: var(--white);
+          border-bottom-color: var(--light-gray);
+          border-bottom-style: solid;
+          border-bottom-width: 1px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          transition: 0.2s;
+          
+          &:hover {
+            background-color: var(--white-gray);
+          }
+          
+          .filename {
+            width: 50%;
+            flex-shrink: 1;
+            padding-right: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+          }
+          
+          .path {
+            width: 50%;
+            flex-shrink: 1;
+            padding-right: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            box-sizing: border-box;
+          }
+          
+          .delete {
+            color: var(--light-gray);
+            cursor: pointer;
+            transition: 0.2s;
+            
+            &:hover {
+              color: var(--warning-red);
+            }
+          }
+        }
+        
+        &::-webkit-scrollbar {
+          width: 10px;
+        }
+            
+        &::-webkit-scrollbar-track {
+          border-radius: 5px;
+          background-color: var(--transparent);
+          
+          &:hover {
+            background-color: var(--white-gray);
+          }
+        }
+        
+        &::-webkit-scrollbar-thumb {
+          border-radius: 5px;
+          background-color: var(--light-gray);
+          transition: 0.2s;
+          
+          &:hover {
+            background-color: var(--gray);
           }
         }
       }
