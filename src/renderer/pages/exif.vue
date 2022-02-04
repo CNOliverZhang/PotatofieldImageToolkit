@@ -155,7 +155,7 @@ export default {
         if (formats.has(ext)) {
           this.image = file.raw.path
           let image = document.createElement('img')
-          image.src = this.image
+          image.src = `file://${this.image}`
           image.onerror = () => {
             dialog.change({
               type: 'error',
