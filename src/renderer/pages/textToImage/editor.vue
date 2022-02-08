@@ -70,10 +70,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>
@@ -163,10 +163,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>
@@ -256,10 +256,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>
@@ -349,10 +349,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>
@@ -448,10 +448,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>
@@ -573,10 +573,10 @@
                         <el-option
                           v-for="(font, index) in this.$store.state.fonts.fontList"
                           :key="index"
-                          :label="font.verbose + '（' + font.style + '）'"
-                          :value="font.fontFamily"
+                          :label="font.fontFamily + '（' + font.fontStyle + '）'"
+                          :value="font.fontFamily + '（' + font.fontStyle + '）'"
                           :style="{
-                            'font-family': font.fontFamily
+                            'font-family': font.fontFamily + '（' + font.fontStyle + '）'
                           }"/>
                       </el-select>
                     </div>

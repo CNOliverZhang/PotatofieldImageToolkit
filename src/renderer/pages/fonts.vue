@@ -26,7 +26,7 @@
               class="card-container">
               <div class="card">
                 <div>
-                  <img :src="font.previewImage" class="font-preview">
+                  <img :src="font.previewImage.startsWith('static') ? font.previewImage : `file://${font.previewImage}`" class="font-preview">
                   <div class="row">
                     <div class="text">名称：{{ font.fontFamily }}</div>
                   </div>
