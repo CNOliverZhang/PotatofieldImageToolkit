@@ -13,7 +13,7 @@ export default {
       style.appendChild(document.createTextNode(`
         @font-face {
             font-family: ${font.fontFamily}（${font.fontStyle}）;
-            src: url("${font.fontFile}");
+            src: url("${font.fontFile.startsWith('static') ? font.fontFile : `file://${font.fontFile}`}");
         }
       `))
     })

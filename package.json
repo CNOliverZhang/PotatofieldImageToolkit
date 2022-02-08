@@ -22,7 +22,7 @@
     "appId": "cn.potatofield.imagetoolkit",
     "artifactName": "potatofield-image-toolkit-${version}.${ext}",
     "releaseInfo": {
-      "releaseNotes": "添加了全屏水印功能。"
+      "releaseNotes": "添加了全屏水印功能。\n修复富文本制图工具字体失效问题。"
     },
     "publish": [
       {
