@@ -3,7 +3,7 @@
   "version": "3.5.0",
   "author": "张志毅",
   "description": "一个为设计师和摄影师等创意行业从业者设计的多功能图片工具箱。",
-  "copyright": "Copyright © 2021 张志毅",
+  "copyright": "Copyright © 2022 张志毅",
   "license": "MIT",
   "main": "./dist/electron/main.js",
   "scripts": {
