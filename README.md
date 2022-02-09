@@ -5,6 +5,7 @@
 软件目前有如下工具：
 
 - 图片加水印工具
+- 全屏水印工具
 - 长图拼接工具
 - 图片裁剪工具
 - 图片分割工具
@@ -20,7 +21,7 @@
 
 ## 使用发行版或自行编译
 
-目前仅提供Windows平台的发行版。如果您是海外用户，可以[点此下载](https://github.com/CNOliverZhang/PotatofieldImageToolkit/releases/latest)；如果您是国内用户，请[点此下载](https://www.potatofield.cn/imagetoolkit)。使用Linux的用户可以自行构建,自行构建需安装Node.js，克隆源码后在项目目录中执行：
+目前仅提供 Windows 和 Mac OS 的发行版。如果您是海外用户，可以[点此下载](https://github.com/CNOliverZhang/PotatofieldImageToolkit/releases/latest)；如果您是国内用户，请[点此下载](https://www.potatofield.cn/imagetoolkit)。使用Linux的用户可以自行构建,自行构建需安装Node.js，克隆源码后在项目目录中执行：
 
 ```javascript
 npm install
@@ -35,7 +36,7 @@ npm run build
 
 ![预览图](https://files.potatofield.cn/ImageToolkit/Tools/Images/watermark.png)
 
-能够为单张图片添加水印，也可以手动为多张图片依次添加水印，还可以设置好水印参数后自动批量添加水印。可以自行设置水印内容、颜色、字体、大小、角度和位置，几乎一切都可以随心自定义。
+能够为单张图片添加水印，也可以手动为多张图片依次添加水印，还可以设置好水印参数后自动批量添加水印。可以自行设置水印内容、颜色、字体、大小、角度和位置，几乎一切都可以随心自定义。支持全屏水印。
 
 添加水印后导出的图片所见即所得，且处理迅速。在主流配置的轻薄本实测，由Sony A7R3拍摄的四千万像素的照片，每张处理时间大约1秒；尺寸较小的图片，每张处理时间普遍在0.5秒以内。
 
