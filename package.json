@@ -78,7 +78,7 @@
     "element-ui": "^2.14.1",
     "exif-js": "^2.3.0",
     "html2canvas": "^1.4.1",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "sharp": "^0.28.3",
     "vue": "^2.6.12",
     "vue-electron": "^1.0.6",
