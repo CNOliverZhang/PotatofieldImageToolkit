@@ -429,7 +429,7 @@ export default {
                 text: '正在处理第 ' + String(index + 1) + ' 张，共 ' + String(this.fileList.length) + ' 张。'
               }).then(() => {
                 let imageInfo = this.fileList[index]
-                let rawImage = sharp(imageInfo.fullpath)
+                let rawImage = sharp(imageInfo.fullpath).withMetadata().rotate();
                 let parsedImage
                 let distExt
                 if (this.mimeType == 'JPEG') {
