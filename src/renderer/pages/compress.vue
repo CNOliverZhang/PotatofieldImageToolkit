@@ -81,6 +81,13 @@
                 <el-radio-button label="保持原格式"></el-radio-button>
               </el-radio-group>
             </div>
+            <div v-if="mimeType === 'WEBP'" class="control-row">
+              <div class="text">WebP 格式</div>
+              <el-radio-group v-model="webpFormat" size="mini" class="half-width-control">
+                <el-radio-button label="VP8X"></el-radio-button>
+                <el-radio-button label="VP8"></el-radio-button>
+              </el-radio-group>
+            </div>
             <div class="control-row">
               <div class="text">文件名后缀</div>
               <el-input size="mini" v-model="append" maxlength="30" class="half-width-control"></el-input>
@@ -214,6 +221,7 @@ export default {
       errorList: [],
       quality: 90,
       mimeType: '保持原格式',
+      webpFormat: 'VP8X',
       append: '_compressed',
       srcDirectory: '',
       distDirectory: '',
@@ -436,7 +444,13 @@ export default {
                   parsedImage = rawImage.jpeg({ quality: this.quality })
                   distExt = 'jpg'
                 } else if (this.mimeType == 'WEBP') {
-                  parsedImage = rawImage.webp({ quality: this.quality })
+                  if (this.webpFormat === 'VP8') {
+                    // 剥离 ICC/EXIF 等元数据，输出简单 VP8 容器（体积更小）
+                    parsedImage = sharp(imageInfo.fullpath).rotate().webp({ quality: this.quality })
+                  } else {
+                    // VP8X：保留元数据（默认行为）
+                    parsedImage = rawImage.webp({ quality: this.quality })
+                  }
                   distExt = 'webp'
                 } else if (this.mimeType == 'PNG') {
                   parsedImage = rawImage.png({ quality: this.quality })
