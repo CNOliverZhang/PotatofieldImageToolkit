@@ -185,6 +185,13 @@
 - 批量输出文件名是否加后缀由保存位置的「添加后缀名」开关（`addSuffix`，默认开）决定；关闭时输出名与原文件同名，会走到冲突三选一。新增批量工具必须把这个开关传进 `useBatchRunner`。
 - `uniquePath` 每次候选都要 `fileExists` 复核磁盘，不能只在内存集合里避让。
 
+### 5.7 拖放取路径与打包后限制
+
+- **拖放进来的文件取本地路径必须用 `window.api.fs.getPathOfFile(file)`**（preload 走 `webUtils.getPathForFile`）。
+  Electron 新版本已**移除 `File.path`**（实测 `File.prototype` 上没有该 getter），直接读 `(file as any).path` 会拿到空字符串，表现为「拖进来没反应」。
+- `ImagePicker` 已内置拖放（未选图落占位框、已选图落预览区可直接替换），各单图页只需监听 `@drop` 并调用 `setImage(path)`（`useSingleTool` 提供）+ 各自的加载流程。
+- **打包版禁用开发者工具**：`windows.ts` 在 `app.isPackaged` 时拦截 `before-input-event` 的 F12 / Ctrl+Shift+I、J、C / ⌘⌥I，并对 `devtools-opened` 兜底关闭。dev 模式不受影响（仍自动打开）。
+
 ## 6. 新增工具的检查清单
 
 1. 页面放在 `src/renderer/pages/`，路由加到 `router/index.ts`（独立窗口加 `meta: { standalone: true, title }`；

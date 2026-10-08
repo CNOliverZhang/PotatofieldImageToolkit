@@ -96,6 +96,8 @@ export interface ImageToolkitApi {
     stat: (path: string) => Promise<{ size: number; isDirectory: boolean } | null>;
     /** 删除文件或目录（不存在也不报错） */
     remove: (path: string) => Promise<void>;
+    /** 取拖放文件的本地绝对路径（File.path 已被 Electron 移除，走 preload 的 webUtils） */
+    getPathOfFile: (file: File) => string;
   };
   font: {
     /** 列出系统已安装字体（force 跳过缓存立即重读） */

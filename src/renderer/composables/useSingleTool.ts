@@ -23,12 +23,18 @@ export function useSingleTool() {
     }
   }
 
+  /** 直接指定图片（拖放导入等场景）：与 pickImage 走同一套状态更新 */
+  function setImage(path: string): boolean {
+    if (!path) return false;
+    inputPath.value = path;
+    inputName.value = path.split(/[\\/]/).pop() || '';
+    return true;
+  }
+
   async function pickImage(): Promise<boolean> {
     const files = await selectImageFiles(false);
     if (!files || !files.length) return false;
-    inputPath.value = files[0];
-    inputName.value = inputPath.value.split(/[\\/]/).pop() || '';
-    return true;
+    return setImage(files[0]);
   }
 
   function setPreviewBuffer(buf: ArrayBuffer) {
@@ -96,7 +102,7 @@ export function useSingleTool() {
     if (previewTimer) window.clearTimeout(previewTimer);
   });
 
-  return { inputPath, inputName, previewUrl, processing, pickImage, schedulePreview, runSave };
+  return { inputPath, inputName, previewUrl, processing, pickImage, setImage, schedulePreview, runSave };
 }
 
 export function evVal(e: Event): string {

@@ -414,6 +414,13 @@ pinia 持久化
 - [ ] **待定**：模板码（templateCode）能力是否保留（老版水印/拼接有）
 - [ ] 主题/默认路径/参数接入全页面 + 自动更新联调 + win/mac 打包
 
+## 本轮（2026-10-08）已完成：拖放选图 + 打包禁用 DevTools
+
+- [x] `ImagePicker` 支持把图片拖进来：未选图落占位框、已选图落预览区可直接替换；悬停时整块描边 + 「松开鼠标以替换」遮罩；非图片格式给出提示
+- [x] 8 个单图页面全部接入 `@drop`（compress / convert / resizer / slicer / cropper / watermark / exif / palette）；`useSingleTool` 新增 `setImage(path)`，与 `pickImage` 共用状态更新
+- [x] 关键坑：Electron 新版**已移除 `File.path`**，改用 preload 暴露的 `webUtils.getPathForFile`（`window.api.fs.getPathOfFile`），否则拖放静默失效
+- [x] 打包版禁用开发者工具：`before-input-event` 拦截 F12 / Ctrl+Shift+I、J、C / ⌘⌥I + `devtools-opened` 兜底关闭（dev 模式仍自动打开，不受影响）
+
 ## 本轮（2026-10-08）已完成：输出路径冲突与覆盖策略统一
 
 - [x] 修复用户反馈「输出目录选原目录报错 `Cannot use same file for input and output`」

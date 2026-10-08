@@ -6,8 +6,9 @@
       :src="previewUrl"
       :name="fileName"
       icon="palette"
-      hint="选择一张图片以提取主要色彩"
+      hint="选择一张图片以提取主要色彩，或将图片拖到这里"
       @pick="selectImage"
+      @drop="onDrop"
       @load="onImgLoad"
     />
 
@@ -103,13 +104,22 @@ function toHex(c: [number, number, number]): string {
   return `#${c.map((v) => v.toString(16).padStart(2, '0')).join('')}`;
 }
 
+/** 载入图片（选择图片与拖入图片共用） */
+async function useFile(path: string) {
+  imagePath.value = path;
+  colors.value = [];
+  imgLoaded.value = false;
+  await loadPreview(path);
+}
+
 async function selectImage() {
   const files = await selectImageFiles(false);
   if (!files || !files.length) return;
-  imagePath.value = files[0];
-  colors.value = [];
-  imgLoaded.value = false;
-  await loadPreview(imagePath.value);
+  await useFile(files[0]);
+}
+
+async function onDrop(path: string) {
+  await useFile(path);
 }
 
 /** 预览图加载完成：拿到 img 元素供 ColorThief 读取像素 */

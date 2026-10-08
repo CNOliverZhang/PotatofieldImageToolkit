@@ -4,8 +4,9 @@
       :src="previewUrl"
       :name="inputName"
       icon="file-zipper"
-      hint="选择一张图片开始压缩"
+      hint="选择一张图片开始压缩，或将图片拖到这里"
       @pick="onPick"
+      @drop="onDrop"
     />
     <aside class="controls-pane">
       <div class="batch-entry">
@@ -60,7 +61,7 @@ import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
-const { inputPath, inputName, previewUrl, processing, pickImage, schedulePreview, runSave } =
+const { inputPath, inputName, previewUrl, processing, pickImage, setImage, schedulePreview, runSave } =
   useSingleTool();
 
 /** 输出格式/质量：默认取设置页「默认输出」（与其它工具一致） */
@@ -84,6 +85,11 @@ async function refresh(): Promise<ArrayBuffer | undefined> {
 
 async function onPick() {
   if (await pickImage()) schedulePreview(refresh);
+}
+
+/** 拖入图片：与选择图片走同一套加载流程 */
+async function onDrop(path: string) {
+  if (setImage(path)) schedulePreview(refresh);
 }
 
 async function onSave() {

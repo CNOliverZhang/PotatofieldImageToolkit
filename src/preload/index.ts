@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import type { ImageToolkitApi } from '../shared/api-types';
 import type { UpdaterStatus } from '../shared/types';
 
@@ -56,7 +56,9 @@ const api: ImageToolkitApi = {
     ensureDir: (path) => ipcRenderer.invoke('fs:ensureDir', path),
     exists: (path) => ipcRenderer.invoke('fs:exists', path),
     stat: (path) => ipcRenderer.invoke('fs:stat', path),
-    remove: (path) => ipcRenderer.invoke('fs:remove', path)
+    remove: (path) => ipcRenderer.invoke('fs:remove', path),
+    /** 取拖放/选择文件的本地绝对路径（新版 Electron 已移除 File.path，官方推荐 webUtils） */
+    getPathOfFile: (file: File) => webUtils.getPathForFile(file)
   },
   font: {
     listInstalled: (force?: boolean) => ipcRenderer.invoke('font:listInstalled', force),

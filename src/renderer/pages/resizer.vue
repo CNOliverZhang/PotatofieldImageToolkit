@@ -4,8 +4,9 @@
       :src="previewUrl"
       :name="inputName"
       icon="maximize"
-      hint="选择一张图片开始调整尺寸"
+      hint="选择一张图片开始调整尺寸，或将图片拖到这里"
       @pick="onPick"
+      @drop="onDrop"
     />
     <aside class="controls-pane">
       <div class="batch-entry">
@@ -90,7 +91,7 @@ import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue
 import NumInput from '@renderer/components/NumInput.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
-const { inputPath, inputName, previewUrl, processing, pickImage, schedulePreview, runSave } =
+const { inputPath, inputName, previewUrl, processing, pickImage, setImage, schedulePreview, runSave } =
   useSingleTool();
 const { message } = useDialog();
 
@@ -130,6 +131,11 @@ async function refresh(): Promise<ArrayBuffer | undefined> {
 
 async function onPick() {
   if (await pickImage()) schedulePreview(refresh);
+}
+
+/** 拖入图片：与选择图片走同一套加载流程 */
+async function onDrop(path: string) {
+  if (setImage(path)) schedulePreview(refresh);
 }
 
 async function onSave() {

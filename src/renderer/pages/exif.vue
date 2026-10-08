@@ -4,8 +4,9 @@
       :src="previewUrl"
       :name="inputName"
       icon="circle-info"
-      hint="选择一张图片读取 EXIF / 元数据"
+      hint="选择一张图片读取 EXIF / 元数据，或将图片拖到这里"
       @pick="onPick"
+      @drop="onDrop"
     />
     <!-- 右栏整列不滚动：读取前是虚线占位框（同色彩提取工具），读取后元数据在带边框底色的容器内滚动 -->
     <aside class="controls-pane">
@@ -40,31 +41,38 @@ import type { MetaSection } from '@shared/types';
 import { useSingleTool } from '@renderer/composables/useSingleTool';
 import ImagePicker from '@renderer/components/ImagePicker.vue';
 
-const { inputPath, inputName, previewUrl, pickImage, schedulePreview } = useSingleTool();
+const { inputPath, inputName, previewUrl, pickImage, setImage, schedulePreview } = useSingleTool();
 
 const sections = ref<MetaSection[]>([]);
 const totalCount = computed(() =>
   sections.value.reduce((n, s) => n + s.entries.length, 0)
 );
 
-async function onPick() {
-  if (await pickImage()) {
-    schedulePreview(async () => {
-      sections.value = [];
-      const res = await window.api.image.process({ op: 'metadata', inputPath: inputPath.value });
-      // 只展示主进程筛好的「摄影 / 设计关注」字段
-      sections.value = res.meta?.sections ?? [];
-      // 本工具不产生处理结果，但仍需一张可显示的预览图：
-      // 不能 file:// 直读（渲染进程加载 file 子资源会被拦 → 裂图），
-      // 由主进程缩放后回传 buffer 转 blob（与模板缩略图同一套做法）
-      const preview = await window.api.image.process({
-        op: 'resize',
-        inputPath: inputPath.value,
-        options: { width: 1600, height: 1600, fit: 'inside' }
-      });
-      return preview.buffer;
+/** 读取元数据并生成预览图（选择图片与拖入图片共用） */
+function loadMeta() {
+  schedulePreview(async () => {
+    sections.value = [];
+    const res = await window.api.image.process({ op: 'metadata', inputPath: inputPath.value });
+    // 只展示主进程筛好的「摄影 / 设计关注」字段
+    sections.value = res.meta?.sections ?? [];
+    // 本工具不产生处理结果，但仍需一张可显示的预览图：
+    // 不能 file:// 直读（渲染进程加载 file 子资源会被拦 → 裂图），
+    // 由主进程缩放后回传 buffer 转 blob（与模板缩略图同一套做法）
+    const preview = await window.api.image.process({
+      op: 'resize',
+      inputPath: inputPath.value,
+      options: { width: 1600, height: 1600, fit: 'inside' }
     });
-  }
+    return preview.buffer;
+  });
+}
+
+async function onPick() {
+  if (await pickImage()) loadMeta();
+}
+
+async function onDrop(path: string) {
+  if (setImage(path)) loadMeta();
 }
 </script>
 

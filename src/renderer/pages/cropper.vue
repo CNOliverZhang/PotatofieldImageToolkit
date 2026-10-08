@@ -4,8 +4,9 @@
       :src="originalUrl"
       :name="inputName"
       icon="crop"
-      hint="选择一张图片开始裁剪"
+      hint="选择一张图片开始裁剪，或将图片拖到这里"
       @pick="onPick"
+      @drop="onDrop"
     >
       <!-- cropper 画布：单图与批量共用同一个组件（见 components/CropCanvas.vue） -->
       <template #stage>
@@ -80,7 +81,7 @@ import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
-const { inputPath, inputName, processing, pickImage, runSave } = useSingleTool();
+const { inputPath, inputName, processing, pickImage, setImage, runSave } = useSingleTool();
 
 interface Meta {
   width: number;
@@ -141,13 +142,20 @@ function buildOptions() {
   };
 }
 
+/** 载入当前图片：读尺寸 + 生成画布用的 data URI（选择图片与拖入图片共用） */
+async function loadInput() {
+  await fetchMeta();
+  // 画布按原图尺寸挂载（cropper.js 需要真实图片），初始区域由 CropCanvas 给出
+  const b64 = await window.api.fs.readFileBase64(inputPath.value);
+  originalUrl.value = `data:${mimeOf(inputPath.value)};base64,${b64}`;
+}
+
 async function onPick() {
-  if (await pickImage()) {
-    await fetchMeta();
-    // 画布按原图尺寸挂载（cropper.js 需要真实图片），初始区域由 CropCanvas 给出
-    const b64 = await window.api.fs.readFileBase64(inputPath.value);
-    originalUrl.value = `data:${mimeOf(inputPath.value)};base64,${b64}`;
-  }
+  if (await pickImage()) await loadInput();
+}
+
+async function onDrop(path: string) {
+  if (setImage(path)) await loadInput();
 }
 
 async function onSave() {

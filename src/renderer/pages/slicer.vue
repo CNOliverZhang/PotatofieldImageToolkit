@@ -4,8 +4,9 @@
       :src="previewUrl"
       :name="inputName"
       icon="grip"
-      hint="选择一张图片开始分割"
+      hint="选择一张图片开始分割，或将图片拖到这里"
       @pick="onPick"
+      @drop="onDrop"
     >
       <!-- 整图预览 + 分割网格：预览必须是完整图片（不能只裁第一块），
            上面的线才是「会切成几行几列」的示意 -->
@@ -84,7 +85,8 @@ import NumInput from '@renderer/components/NumInput.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
 const { message } = useDialog();
-const { inputPath, inputName, previewUrl, processing, pickImage, schedulePreview } = useSingleTool();
+const { inputPath, inputName, previewUrl, processing, pickImage, setImage, schedulePreview } =
+  useSingleTool();
 
 interface Meta {
   width: number;
@@ -151,11 +153,18 @@ const gridStyle = computed(() => ({
   ].join(',')
 }));
 
+/** 载入当前图片：读尺寸 + 刷新预览（选择图片与拖入图片共用） */
+async function loadInput() {
+  await fetchMeta();
+  schedulePreview(refresh);
+}
+
 async function onPick() {
-  if (await pickImage()) {
-    await fetchMeta();
-    schedulePreview(refresh);
-  }
+  if (await pickImage()) await loadInput();
+}
+
+async function onDrop(path: string) {
+  if (setImage(path)) await loadInput();
 }
 
 async function onSave() {

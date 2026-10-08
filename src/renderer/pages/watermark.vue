@@ -5,8 +5,9 @@
       :src="previewUrl"
       :name="inputName"
       icon="stamp"
-      hint="选择一张图片开始添加水印"
+      hint="选择一张图片开始添加水印，或将图片拖到这里"
       @pick="pickImage"
+      @drop="onDrop"
     />
 
     <!-- 参数面板：顶部入口固定，中部独立滚动，底部按钮固定（内容不从头/尾按钮底下穿过） -->
@@ -64,7 +65,7 @@ import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 
 const { message, prompt } = useDialog();
 /** 与其它单图工具一致：保存时再选目录 */
-const { inputPath, inputName, previewUrl, processing, runSave } = useSingleTool();
+const { inputPath, inputName, previewUrl, processing, setImage, runSave } = useSingleTool();
 
 let previewTimer: number | undefined;
 
@@ -146,8 +147,13 @@ async function saveAsTemplate(): Promise<void> {
 async function pickImage() {
   const files = await selectImageFiles(false);
   if (!files || !files.length) return;
-  inputPath.value = files[0];
-  inputName.value = inputPath.value.split(/[\\/]/).pop() || '';
+  setImage(files[0]);
+  updatePreview();
+}
+
+/** 拖入图片：与选择图片走同一套加载流程 */
+async function onDrop(path: string) {
+  setImage(path);
   updatePreview();
 }
 
