@@ -232,6 +232,22 @@ export function openWindow(options: OpenWindowOptions = {}): BrowserWindow {
   // dev 模式自动打开 DevTools（独立窗口，方便定位样式/逻辑问题）
   if (!app.isPackaged) {
     win.webContents.openDevTools({ mode: 'detach' });
+  } else {
+    // 打包版禁用开发者工具：
+    // 1) 拦截系统默认快捷键（F12 / Ctrl+Shift+I、J、C / macOS ⌘⌥I），在输入阶段就吃掉
+    // 2) 兜底：任何其它途径（菜单、程序化调用）打开的 DevTools 立即关闭
+    win.webContents.on('before-input-event', (event, input) => {
+      const key = (input.key || '').toLowerCase();
+      const accel = input.control || input.meta;
+      const isDevTools =
+        key === 'f12' ||
+        (accel && input.shift && (key === 'i' || key === 'j' || key === 'c')) ||
+        (input.meta && input.alt && key === 'i');
+      if (isDevTools) event.preventDefault();
+    });
+    win.webContents.on('devtools-opened', () => {
+      win.webContents.closeDevTools();
+    });
   }
 
   win.on('closed', () => {
