@@ -1,8 +1,8 @@
 # 新老版本对比文档（实现方案 / 功能表现 / 性能）
 
-> 新版：`potatofield-image-toolkit`（Electron 28 + Vue 3 + electron-vite + 主进程 sharp）
+> 新版：`potatofield-image-toolkit`（Electron 44 + Vue 3 + electron-vite + Fluent v3 + 主进程 sharp）
 > 老版：`PotatofieldImageToolkit`（Electron 11 + Vue 2 + electron-vue/Webpack4）
-> 梳理时间：2026-09-29
+> 梳理时间：2026-09-29 · 2026-10-08 修订（更新版本号；§5 三项差异**仍未处理**，非过时）
 
 ---
 
@@ -44,7 +44,7 @@
 | 尺寸调整 | canvas `drawImage` + `toDataURL(quality)` | sharp `resize` | 新版质量更好（libvips 重采样）、无 canvas 限制 |
 | 压缩 | **唯一用 sharp 的地方**（`withMetadata().rotate()` → 按格式输出） | sharp `compress` op | 新版少了 `.rotate()`（见 §5） |
 | 格式转换 | canvas + `toDataURL` | sharp `toFormat` | 新版支持更完整的格式参数 |
-| EXIF | exif-js | 计划/已用 `exifr`（见 §5） | — |
+| EXIF | exif-js | `exifr`（已落地，`main/image.ts` 的 `readImageMeta`） | — |
 | 色彩提取 | colorthief | colorthief | 一致 |
 | 字体管理 | 在线字体库下载安装 + 字体库目录 | 双 Tab（线上/系统）+ 安装到系统 + 缓存自动清理 | 新版不保留字体文件，靠系统字体名渲染 |
 

@@ -192,7 +192,8 @@ export function openWindow(options: OpenWindowOptions = {}): BrowserWindow {
     // 分层窗口：既丢系统投影、也让 roundedCorners 失效（electron/electron#47510），
     // 表现为「有亚克力但四角是硬直角」。因此只在不用原生材质时才开启透明。
     transparent: !supportsAcrylic(),
-    // 不透明窗口需要一个实底色兜底（材质未生效时不至于全黑）；透明窗口保持全透明
+    // 始终全透明：backgroundColor 是 DWM 材质「之下」的底色，给实色会把亚克力完全挡住
+    // （表现为材质消失只剩纯色），所以即使 Win11 走不透明窗口也必须保持全透明
     backgroundColor: '#00000000',
     // 系统窗口材质：macOS 玻璃质感 / Windows 11 亚克力（其余平台不支持，保持普通窗口）
     // 注意：vibrancy 的 light/dark/appearance-based 等旧值已被 Apple 移除，只能用位置类取值

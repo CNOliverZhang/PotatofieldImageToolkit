@@ -2,6 +2,12 @@
 
 > 本文件同时供「人」阅读与「AI 跨会话接续」使用。每次会话开始时先读 `PLANNING.md` + `PROGRESS.md`。
 > 最后更新：2026-07-31（会话 1：分析 + 骨架搭建）
+>
+> ⚠️ **这是 2026-07 的初期规划，部分内容已过时**：技术栈（原定 Element Plus，现为 Fluent v3）、
+> 目录结构（缺 `useBatchRunner` / `useOutputConflict` / `components/settings/` / `main/templates.ts`）、
+> 工具清单（12 → 11 项，富文本外移）均已与现状不符。
+> **现行规范看 `docs/DEVELOPMENT_GUIDE.md`，进度看 `PROGRESS.md`。**
+> 仍然有效的部分：老版本兼容约束（§2）、在线接口表（§4）。
 
 ---
 

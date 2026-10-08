@@ -1,7 +1,7 @@
 # 开发规范与统一约定
 
 > 适用范围：本仓库后续所有开发维护。
-> 最后更新：2026-09-29（单图处理阶段收尾）
+> 最后更新：2026-10-08（输出/覆盖策略、拖放、窗口材质与圆角、禁用态令牌）
 
 ---
 
@@ -12,15 +12,15 @@
 | 组件 | 用途 | 使用者 |
 |---|---|---|
 | `BatchImportPanel.vue` | 批量导入面板（选择文件 / 扫描文件夹 / 列表 / 清空） | 全部批量工具 |
-| `SaveLocationSetting.vue` | 保存位置 + 常用位置 + 保持相对目录（内部用 `SettingsGroup` / `SettingsRow`） | 全部批量工具 |
+| `SaveLocationSetting.vue` | 保存位置 + 常用位置 + **添加后缀名开关** + 保持相对目录（折叠卡形态，内部用 `SettingsCollapse` / `SettingsRow`） | 全部批量工具 |
 | `BatchTool.vue` | 批量工具壳（resizer / compress / convert） | 3 个批量工具 |
 | `WatermarkControls.vue` | 水印参数面板（含 `lockTile`、输出设置） | 水印单图 + 批量 + 全屏水印 |
 | `CropControls.vue` | 裁剪参数面板（单位 px/比例、比例预设、九宫格定位、像素输入或百分比、使用整图） | 裁剪单图 + 批量 |
 | `AppDialog.vue` | 全局对话框，支持 alert / confirm / **多选一（actions）** / **输入（prompt）** | 全局 |
 | `template/TemplateEditor.vue` | 通用模板编辑页壳：左预览 + 右参数控件（`#controls` 插槽）+ 保存/另存/取消 | 水印模板编辑窗口（未来其它工具模板复用） |
 | `template/TemplateLibrary.vue` | 通用模板库页壳：左类型侧栏 + 右模板卡片（样式对齐字体卡）+ 分体按钮（应用 + 更多） | 水印模板列表窗口（未来其它工具模板复用） |
-| `ImagePicker.vue` | 单图工具的选图/预览占位 | 单图工具 |
-| `FontSelect.vue` | 可搜索下拉（搜索 + 按字体本身渲染 + 滚动不穿透）；`fontPreview:false` 可当通用「可搜索选择器」用（如模板选择） | 水印工具（字体 / 模板选择） |
+| `ImagePicker.vue` | 单图工具的选图/预览占位，**已内置拖放**（`@drop` 回传本地路径） | 单图工具 |
+| `FontSelect.vue` | 可搜索下拉（搜索 + 按字体本身渲染 + 滚动不穿透）；`fontPreview:false` 可当通用「可搜索选择器」用（如模板选择）。弹层固定 280px 并做窗口边界钳制；**宽度由使用方的 `ctl-*` 控制，组件内不要写 `width`** | 水印工具（字体 / 模板选择） |
 | `settings/SettingsGroup.vue` | 设置分组：标题 + 圆角卡片容器（`title`、`count` 数量徽标） | **全部工具的设置区 / 应用设置页 / 批量导出（保存位置）** |
 | `settings/SettingsRow.vue` | 设置行：左标签（可带 `desc`）+ 右控件 | 全部工具 |
 | `settings/SettingsCollapse.vue` | 可折叠设置行：标题行点击展开，内部放 `SettingsRow`（`defaultOpen`） | 水印工具（位置基准 / 边距设置） |
@@ -39,6 +39,9 @@
 | `useCropGeometry.ts` | 裁剪几何换算：定位基准→对齐方式、区域钳制、比例预设计算、区域适配到目标图 |
 | `useDialog.ts` | `message` / `alert` / `confirm` / `choose` / `prompt`（**Electron 下 `window.prompt` 不可用，一律用 `prompt`**） |
 | `useLocalFonts.ts` | 系统字体枚举、按族聚合、已安装判定 |
+| `useOutputConflict.ts` | **输出文件冲突处理（单图与批量共用）**：`resolveOutputConflicts(planned, inputs)` 预检 + 三选一（自动重命名 / 覆盖 / 取消）、`uniquePath` 逐候选 `fileExists` 复核、`samePath` |
+| `useUpdater.ts` | 全局单例更新器（启动自动检查 + 发现新版本→下载→安装弹窗；「已是最新」只在手动检查时提示） |
+| `useWindowState.ts` | 窗口状态（最大化等）同步给渲染层（`html[data-maximized]`） |
 | `useOnlineApi.ts` | 在线接口（字体库、公告、版本、客户端注册） |
 | `useTheme.ts` | 深色模式 + 主题色（跨窗口同步） |
 
@@ -88,7 +91,9 @@
 - 控件宽度用全局类：`ctl-lg`(200) / `ctl-md`(160) / `ctl-num`(110) / `ctl-slider`(flex:1)；滑块旁的数值用 `.row-val`。
   - 注意：Fluent 组件自带 `min-width`（`fluent-select` 为 250px），`ctl-*` 已统一加了 `min-width: 0` 才能生效；**新增控件若宽度不生效，先查组件的 `min-width`**。
   - 注意：组件内 `<style scoped>` 的 `width: 100%` 优先级高于全局类，会顶掉使用方传的 `ctl-*`（`FontSelect` 踩过，已修：组件内不再写宽度）。
-- 禁用按钮不要靠 `opacity`（会透出下层内容），统一由 `global.css` 的 `fluent-button[disabled]::part(control)` 处理：accent 用同源淡化色 + **白字**，其余用卡片色混主文字色。
+- 禁用按钮不要靠 `opacity`（会透出下层内容）。v3 无 `::part(control)`，做法是**在宿主元素上覆盖组件消费的禁用令牌**（`global.css`）：
+  - `--colorNeutralBackgroundDisabled` / `--colorNeutralForegroundDisabled` / `--colorNeutralStrokeDisabled`
+  - 主按钮（原 accent）的覆盖规则**必须排在通用规则之后**才生效：底色 = `accent-fill-rest` 淡化 45% + `--app-card`，文字 **白色**。
 
 ---
 
@@ -178,26 +183,35 @@
 
 ---
 
-### 5.6 输出路径与覆盖
+### 5.7 输出路径与覆盖
 
 - 冲突处理**只有一个实现**：`composables/useOutputConflict.ts` 的 `resolveOutputConflicts(planned, inputs)`（预检已存在 → 三选一「自动重命名 / 覆盖 / 取消」）。单图 `useSingleTool.runSave` 与批量 `useBatchRunner` 都调它，**禁止在各自页面里再写一套同名检测**（单图侧曾完全没有，导致静默覆盖）。
 - 「覆盖」若指向**输入文件自身**（用户要覆盖原图）：主进程 `image.ts` 的 `processImage` 会先写 `xxx.pftmp` 再原子替换 —— sharp 不允许读写同一个文件，且这样处理失败也不会损坏原图。**新增 op 不要绕过这层包装**。
 - 批量输出文件名是否加后缀由保存位置的「添加后缀名」开关（`addSuffix`，默认开）决定；关闭时输出名与原文件同名，会走到冲突三选一。新增批量工具必须把这个开关传进 `useBatchRunner`。
 - `uniquePath` 每次候选都要 `fileExists` 复核磁盘，不能只在内存集合里避让。
 
-### 5.7 拖放取路径与打包后限制
+### 5.8 拖放取路径与打包后限制
 
 - **拖放进来的文件取本地路径必须用 `window.api.fs.getPathOfFile(file)`**（preload 走 `webUtils.getPathForFile`）。
   Electron 新版本已**移除 `File.path`**（实测 `File.prototype` 上没有该 getter），直接读 `(file as any).path` 会拿到空字符串，表现为「拖进来没反应」。
 - `ImagePicker` 已内置拖放（未选图落占位框、已选图落预览区可直接替换），各单图页只需监听 `@drop` 并调用 `setImage(path)`（`useSingleTool` 提供）+ 各自的加载流程。
 - **打包版禁用开发者工具**：`windows.ts` 在 `app.isPackaged` 时拦截 `before-input-event` 的 F12 / Ctrl+Shift+I、J、C / ⌘⌥I，并对 `devtools-opened` 兜底关闭。dev 模式不受影响（仍自动打开）。
 
+### 5.9 Windows 窗口材质与圆角
+
+- 材质（`backgroundMaterial: 'acrylic'`）与圆角（`roundedCorners`）是 DWM 的**两个独立属性**，都要满足才有「有亚克力 + 圆角」。
+- `roundedCorners` 对无边框窗口**默认就是 true**，不用显式设；真正的前提是**窗口不能是 transparent** —— transparent 窗口被 DWM 当分层窗口，既丢系统投影、也让圆角失效（electron#47510）。
+  因此 Win11 22H2+（`supportsAcrylic()`）走「不透明窗口 + 原生材质」；`transparent: true` 只留给 macOS vibrancy 与老 Windows 的第三方毛玻璃库。
+- `backgroundColor` 必须保持 `#00000000`：它是 DWM 材质**之下**的底色，**给实色会把亚克力完全挡住**。
+- 页面侧在 `data-material='on'` 时把 `--shell-radius` 置 0（避免与系统圆角叠成「圆角套圆角」），阴影改 inset 描边，`--window-pad` 归 0。
+
 ## 6. 新增工具的检查清单
 
 1. 页面放在 `src/renderer/pages/`，路由加到 `router/index.ts`（独立窗口加 `meta: { standalone: true, title }`；
    内容型独立窗口——如模板库/模板编辑——再加 `padMain: true`，让左右边距与主窗口一致）。
 2. **入口一律加到 `consts/tools.ts`**（工具清单单一数据源，首页卡片与侧边栏都从这里取，避免两处叫法/图标不一致）。
-3. 单图工具：用 `useSingleTool` + `ImagePicker`；批量工具：用 `BatchImportPanel` + `SaveLocationSetting`。
+3. 单图工具：用 `useSingleTool` + `ImagePicker`（**接 `@drop` 以支持拖入**，`ImagePicker` 已内置拖放）；
+   批量工具：用 `BatchImportPanel` + `SaveLocationSetting`，并把 `addSuffix` 传进 `useBatchRunner`。
 4. 需要输出设置就用 `createOutputOpts()`，并用 `outExt` / `withOutput`。
 5. 涉及大图：预览传 `maxDimension`，并处理像素超限提示。
 6. 处理完：`message(..., 'success')` + `shell.showItemInFolder`。

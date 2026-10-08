@@ -109,8 +109,6 @@ html[data-theme='dark'] {
   --app-bg: #202020;
   --app-card: #2b2b2b;
   --app-fg-secondary: #a6a6a6;
-  --btn-disabled-bg: #3b3b3b;
-  --btn-disabled-fg: #8f8f8f;
 }
 
 * {

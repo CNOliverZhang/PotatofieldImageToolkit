@@ -2,6 +2,12 @@
 
 > 本文档定义整个重写的视觉风格。所有页面、组件、弹窗必须遵循本文档的变量与规范。
 > 最后更新：2026-07-31（由液态玻璃切换为 Fluent UI）
+>
+> ⚠️ **历史文档（Fluent v2 时代）**：以下内容已随 Fluent v3 迁移失效 ——
+> 组件属性（`appearance="accent"` → `primary`）、令牌名（`--accent` / `--card-bg` / `--mica` / `--main-color` 等已不存在）、
+> 主题机制（`baseLayerLuminance` → `setTheme()` + `createLight/DarkTheme`）、
+> 窗口材质（`transparent:true` + 假圆角 → `backgroundMaterial` + 条件 transparent 的真圆角）。
+> **现行规范看 `docs/DEVELOPMENT_GUIDE.md` §3（样式规范）与 §5.9（窗口材质与圆角）。**
 
 ---
 
