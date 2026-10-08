@@ -29,7 +29,7 @@
         </SettingsRow>
       </SettingsGroup>
 
-      <SettingsGroup title="文件">
+      <SettingsGroup title="输出">
         <SettingsRow label="文件默认保存地址">
           <fluent-text-input
             class="dir-field"
@@ -38,9 +38,6 @@
           ></fluent-text-input>
           <fluent-button appearance="neutral" @click="pickDir">选择</fluent-button>
         </SettingsRow>
-      </SettingsGroup>
-
-      <SettingsGroup title="默认输出">
         <SettingsRow label="输出格式">
           <app-select class="ctl-md" :value="settings.defaultOutput.format" @change="onFormat">
             <fluent-option value="original">保持原格式</fluent-option>
@@ -61,7 +58,6 @@
           ></fluent-slider>
           <span class="row-val">{{ settings.defaultOutput.quality }}%</span>
         </SettingsRow>
-        <SettingsRow label="适用范围" desc="作为「改尺寸 / 压缩 / 格式转换 / 切片」等工具新增图片时的初始设置，工具内可单独修改" />
       </SettingsGroup>
 
       <SettingsGroup title="系统">
@@ -78,7 +74,6 @@
             <fluent-option value="2">200%</fluent-option>
           </app-select>
         </SettingsRow>
-        <SettingsRow label="说明" desc="界面缩放会作用到所有窗口，用于匹配显示器的尺寸和分辨率" />
       </SettingsGroup>
 
       <SettingsGroup title="关于">

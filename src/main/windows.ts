@@ -1,4 +1,10 @@
-import { app, BrowserWindow, nativeTheme, type BrowserWindowConstructorOptions } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  nativeTheme,
+  screen,
+  type BrowserWindowConstructorOptions
+} from 'electron';
 
 /**
  * Windows 旧系统（不支持原生 acrylic，即 Win11 22H2 以下，含 Win10）
@@ -123,13 +129,38 @@ export function getZoomFactor(): number {
   return loadZoomFactor();
 }
 
-/** 修改界面缩放：持久化后立即作用到所有已打开的窗口 */
+/**
+ * 修改界面缩放：持久化后立即作用到所有已打开的窗口。
+ *
+ * 缩放只改渲染比例、不动窗口像素尺寸，所以还要同步缩放窗口：
+ * 放大界面时窗口跟着变大，内容的**物理大小**保持不变（否则 125% 下窗口显得更小、可用空间变少）。
+ * 最大化 / 最小化 / 全屏的窗口尺寸由系统决定，不参与调整。
+ */
 export function setZoomFactor(factor: number): number {
-  saveZoomFactor(factor);
-  for (const win of windows.values()) {
-    if (!win.isDestroyed()) win.webContents.setZoomFactor(factor);
+  const prev = loadZoomFactor();
+  const next = Math.min(3, Math.max(0.5, Number(factor) || 1));
+  saveZoomFactor(next);
+  const clamp = (v: number, min: number, max: number): number => Math.min(max, Math.max(min, v));
+
+  for (const win of BrowserWindow.getAllWindows()) {
+    if (win.isDestroyed()) continue;
+    win.webContents.setZoomFactor(next);
+    if (win.isMaximized() || win.isMinimized() || win.isFullScreen()) continue;
+
+    const [w, h] = win.getSize();
+    const [minW, minH] = win.getMinimumSize();
+    const area = screen.getDisplayMatching(win.getBounds()).workArea;
+    const nextW = clamp(Math.round((w * next) / prev), minW, area.width);
+    const nextH = clamp(Math.round((h * next) / prev), minH, area.height);
+    win.setSize(nextW, nextH);
+    // 变大后可能顶出屏幕可用区域，把窗口拉回屏幕内
+    const b = win.getBounds();
+    win.setPosition(
+      clamp(b.x, area.x, Math.max(area.x, area.x + area.width - nextW)),
+      clamp(b.y, area.y, Math.max(area.y, area.y + area.height - nextH))
+    );
   }
-  return factor;
+  return next;
 }
 
 // 开发模式 electron-vite 将 preload 编译为 index.mjs，生产构建为 index.js，两者都要兼容
