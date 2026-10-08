@@ -60,7 +60,32 @@ export function clampRegion(region: CropRegion, meta: CropMeta | null): void {
 }
 
 /**
- * 无画布时按「比例预设 + 定位基准」计算裁剪区域（批量裁剪用）。
+ * 解析宽高比：支持 `3:2`、`3：2`（全角冒号）、`1.5`（纯数值=宽/高）。
+ * 非法输入返回 null（调用方应忽略，保持当前区域不变）。
+ */
+export function parseRatio(input: string): [number, number] | null {
+  const s = String(input ?? '').trim();
+  if (!s) return null;
+  const m = s.match(/^(\d+(?:\.\d+)?)\s*[:：]\s*(\d+(?:\.\d+)?)$/);
+  if (m) {
+    const a = Number(m[1]);
+    const b = Number(m[2]);
+    return a > 0 && b > 0 ? [a, b] : null;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) && n > 0 ? [n, 1] : null;
+}
+
+/** 比例字符串 → 宽高比数值（预设表里没有就按 parseRatio 解析，支持自定义比例） */
+export function ratioValue(ratio: string): number | null {
+  const preset = CROP_RATIOS[ratio];
+  if (preset) return preset[0] / preset[1];
+  const parsed = parseRatio(ratio);
+  return parsed ? parsed[0] / parsed[1] : null;
+}
+
+/**
+ * 无画布时按「比例设置 + 定位基准」计算裁剪区域（批量裁剪用）。
  * 取图片内满足比例的最大矩形，再按基准摆放。
  */
 export function applyRatioPreset(
@@ -70,8 +95,10 @@ export function applyRatioPreset(
   position: string
 ): void {
   if (!meta || ratio === 'free') return;
-  const [rw, rh] = CROP_RATIOS[ratio];
-  if (!rw || !rh) return;
+  // 预设表里没有就按自定义比例解析（如 3:2、21:9、1.85）
+  const parsed = CROP_RATIOS[ratio] ?? parseRatio(ratio);
+  if (!parsed) return;
+  const [rw, rh] = parsed;
   const iw = meta.width;
   const ih = meta.height;
   let w = iw;

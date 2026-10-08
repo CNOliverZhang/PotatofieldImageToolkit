@@ -55,6 +55,22 @@
   文字水印模板无此问题（参数自包含；字体缺失时会降级为系统字体）。
 - 备注：`decodeTemplate` 目前**没有调用方**（未做「从模板码导入」），需要的话再补入口；否则可删
 
+**裁剪自定义比例 + 自定义后缀名**
+- 裁剪：比例预设新增「自定义」，可填 `3:2` 或宽高比数值（如 `1.5`）；`useCropGeometry` 新增 `parseRatio`（支持全角冒号）/ `ratioValue`，预设表里没有就按自定义解析，画布与批量无画布两条路都生效
+- 输出文件名：后缀开关从「保存位置」子项抽出，成为独立设置项 `OutputNameSetting`（主项开关 + 子项「自定义后缀名」，说明「如不设置，则采用默认后缀名」）；
+  `useBatchRunner` 新增 `customSuffix`，留空则用各工具默认后缀（`_compressed` / `_resized` / `_watermarked` / `_cropped`）；三个批量页全部接入
+
+**自定义协议与富文本编辑器唤起**
+- 本应用注册协议 **`potatofield-image-toolkit://`**（`package.json` 的 `build.protocols` + 启动时 `setAsDefaultProtocolClient` 兜底），
+  支持 `://open`、`://tool/<route>`、`://open?route=/xxx`；Windows 冷启动 argv / second-instance、macOS open-url 三个入口都处理
+- 富文本编辑器协议约定为 **`potatofield-richtext-editor://`**（单个常量，不再列多个候选）
+- 新增 `main/companionApp.ts`：三级降级唤起 —— 协议 → 本地应用 → 返回 none（前端打开下载页）；
+  Windows 用 PowerShell 查卸载项（匹配放 PS 内部避免中文乱码）、exe 取目录下第一个非卸载程序；
+  macOS 在 /Applications 按名称找 .app
+- 引导页（textToImage）按钮联动：装了显示「打开富文本编辑器」，没装显示「前往下载」
+- 实测：检测到本机 1.3.1 → 点击走 `method: 'app'` 拉起 `C:\Program Files\potatofield-richtext-editor\洋芋田富文本编辑器.exe`（进程确认后已关闭）
+  （它目前没注册协议，注册后代码无需改动会自动走协议）
+
 **Win11 窗口圆角修复**
 - 现象：有亚克力材质但四角是硬直角。根因是窗口无条件 `transparent: true`，transparent 窗口被 DWM 当分层窗口 → 既丢系统投影、也让 `roundedCorners`（对无边框窗口**默认就是 true**）失效（electron#47510）
 - 修法：`supportsAcrylic()`（Win11 22H2+）走**不透明窗口 + 原生 `backgroundMaterial: 'acrylic'`**；`transparent` 只留给 macOS / 老 Windows

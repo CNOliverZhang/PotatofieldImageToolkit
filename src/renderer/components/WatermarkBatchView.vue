@@ -34,7 +34,10 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+            />
+            <OutputNameSetting
               v-model:add-suffix="addSuffix"
+              v-model:custom-suffix="customSuffix"
             />
           </template>
         </WatermarkControls>
@@ -73,6 +76,7 @@ import { useSettingsStore } from "@renderer/stores/settings";
 import BatchImportPanel from "@renderer/components/BatchImportPanel.vue";
 import WatermarkControls from "@renderer/components/WatermarkControls.vue";
 import SaveLocationSetting from "@renderer/components/SaveLocationSetting.vue";
+import OutputNameSetting from "@renderer/components/OutputNameSetting.vue";
 
 defineProps<{ lockTile?: boolean }>();
 
@@ -83,6 +87,8 @@ const files = ref<BatchItem[]>([]);
 const keepRelative = ref(false);
 /** 输出文件名是否加后缀（_watermarked）：关闭后输出名与原文件同名，可能覆盖原图 */
 const addSuffix = ref(true);
+/** 自定义后缀：留空则用默认后缀 _watermarked */
+const customSuffix = ref('');
 const selected = ref("");
 const params = reactive<WatermarkParams>(defaultParams());
 const saveDir = ref(
@@ -173,6 +179,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
   saveDir,
   keepRelative,
   addSuffix,
+  customSuffix,
   op: "watermark",
   suffix: "_watermarked",
   // 保持原格式时沿用各自输入图的扩展名

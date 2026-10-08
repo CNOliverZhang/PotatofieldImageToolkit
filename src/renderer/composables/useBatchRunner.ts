@@ -22,8 +22,10 @@ export interface BatchRunnerConfig {
   op: ImageProcessOp;
   /** 文件名后缀，如 '_resized'；由「添加后缀名」开关决定是否实际附加 */
   suffix: string;
-  /** 是否在输出文件名上加后缀（保存位置设置项，默认开）；关闭时输出名与原文件同名 */
+  /** 是否在输出文件名上加后缀（默认开）；关闭时输出名与原文件同名 */
   addSuffix?: Ref<boolean>;
+  /** 自定义后缀（留空则用 cfg.suffix 这个各工具的默认后缀） */
+  customSuffix?: Ref<string>;
   /** 输出扩展名（含点）；不传则沿用原扩展名 */
   extOf?: (item: BatchItem) => string | undefined;
   /** 逐张生成执行参数（可异步，如裁剪需要读图片尺寸） */
@@ -49,8 +51,10 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
 
   function outPath(item: BatchItem): string {
     const useSuffix = cfg.addSuffix?.value !== false; // 未传时视为开启
+    // 自定义后缀为空时回落到各工具的默认后缀（_compressed / _resized / ...）
+    const custom = (cfg.customSuffix?.value ?? '').trim();
     return resolveBatchOutputPath(cfg.saveDir.value, item, {
-      suffix: useSuffix ? cfg.suffix : '',
+      suffix: useSuffix ? custom || cfg.suffix : '',
       ext: cfg.extOf?.(item),
       keepStructure: cfg.keepRelative.value
     });

@@ -212,6 +212,50 @@
 - `backgroundColor` 必须保持 `#00000000`：它是 DWM 材质**之下**的底色，**给实色会把亚克力完全挡住**。
 - 页面侧在 `data-material='on'` 时把 `--shell-radius` 置 0（避免与系统圆角叠成「圆角套圆角」），阴影改 inset 描边，`--window-pad` 归 0。
 
+### 5.10 批量输出文件名与裁剪比例
+
+- **输出文件名**：批量工具用 `OutputNameSetting`（主项「添加后缀名」开关 + 子项「自定义后缀名」输入框）。
+  开关关闭 → 输出名与原文件同名（会走冲突三选一）；自定义后缀留空 → 用各工具默认后缀（`_compressed` / `_resized` / `_converted` / `_watermarked` / `_cropped`）
+- **裁剪比例**：`ratio` 既可以是预设键（`1:1`、`4:3`、`16:9`…），也可以是自定义值（`21:9`、`1.85`）；
+  解析统一走 `useCropGeometry` 的 `parseRatio` / `ratioValue`（预设表 `CROP_RATIOS` 查不到就解析字符串）。**不要假设 ratio 一定在预设表里**
+
+### 5.11 自定义协议与跨应用互通
+
+**协议名（约定，不要随意改）**
+
+| 应用 | 协议 |
+|---|---|
+| 洋芋田图像工具箱（本应用，被唤起方） | `potatofield-image-toolkit://` |
+| 洋芋田富文本编辑器（唤起目标） | `potatofield-richtext-editor://` |
+
+**本应用被唤起（`main/index.ts` + `package.json` 的 `build.protocols`）**
+
+- 声明写在 `build.protocols`（Windows 安装器写注册表、macOS 写 Info.plist），
+  启动时再 `app.setAsDefaultProtocolClient(PROTOCOL)` 兜底注册一次
+- 三个入口都要处理，缺一个就会出现"某些场景唤不起"：
+  - Windows 冷启动：协议 URL 在 `process.argv`
+  - Windows 已运行：`second-instance` 事件的 `argv`
+  - macOS：`app.on('open-url')`
+- 支持的 URL：`://open`（打开/聚焦主窗口）、`://tool/<route>`、`://open?route=/xxx`（打开指定工具），
+  统一走 `openToolInMainWindow()`（主窗口在就复用并切路由）
+
+**唤起富文本编辑器（`main/companionApp.ts`）**
+
+三级降级，顺序不能变：
+1. **协议**：`app.getApplicationNameForProtocol('potatofield-richtext-editor://')` 有值 → `shell.openExternal`
+2. **本地应用**：没协议就找已安装的程序 ——
+   - Windows：PowerShell 查卸载项，**匹配逻辑写在 PowerShell 内部**（避免主进程解析中文输出乱码）；
+     目录从 `InstallLocation` 取，为空则从 `UninstallString` 推导；exe 取目录下第一个**非卸载程序**
+     （exe 名是本地化的，如「洋芋田富文本编辑器.exe」，**不要硬编码**）
+   - macOS：在 `/Applications`、`~/Applications` 按名称找 `.app`（不依赖 Spotlight 索引）
+   - 然后 `shell.openPath()` 启动
+3. **都没有**：返回 `method: 'none'`，由渲染层打开下载页
+
+注意事项：
+- **协议名只用约定的那一个，不要列多个候选**（早期实现列过三个，已简化为单个常量 `COMPANION_PROTOCOL`）
+- **必须先检测再唤起**：不检测直接 `openExternal('xxx://')` 时，Windows 会弹「你要如何打开这个链接」的系统对话框，macOS 静默无反应
+- `getApplicationInfoForProtocol()`（拿安装路径）**只有 macOS 可靠**，Windows 会报 `Unable to retrieve installation path`，不要依赖它
+
 ## 6. 新增工具的检查清单
 
 1. 页面放在 `src/renderer/pages/`，路由加到 `router/index.ts`（独立窗口加 `meta: { standalone: true, title }`；

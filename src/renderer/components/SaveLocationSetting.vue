@@ -22,13 +22,6 @@
       </app-select>
     </SettingsRow>
 
-    <SettingsRow v-if="addSuffix !== undefined" label="添加后缀名" desc="输出文件添加后缀名以避免覆盖原文件">
-      <fluent-switch
-        :checked="props.addSuffix ?? true"
-        @change="emit('update:addSuffix', evChk($event))"
-      ></fluent-switch>
-    </SettingsRow>
-
     <SettingsRow v-if="keepRelative !== undefined" label="保持相对目录" desc="按导入时的目录结构整体保存">
       <fluent-switch
         :checked="props.keepRelative ?? false"

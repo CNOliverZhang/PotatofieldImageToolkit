@@ -30,7 +30,8 @@ import {
   hAlignOf,
   vAlignOf,
   type CropMeta,
-  type CropRegion
+  type CropRegion,
+  ratioValue
 } from '@renderer/composables/useCropGeometry';
 
 const props = withDefaults(
@@ -41,7 +42,7 @@ const props = withDefaults(
     region: CropRegion;
     /** 当前参考图尺寸 */
     meta: CropMeta | null;
-    /** 比例预设：free / 1:1 / 4:3 / 16:9 / 3:2 / 2:3 */
+    /** 比例设置：free / 1:1 / 4:3 / 16:9 / 3:2 / 2:3，或自定义（"3:2"、"21:9"、"1.85"） */
     ratio?: string;
     /** 定位基准（nw / n / center ...） */
     position?: string;
@@ -167,8 +168,10 @@ function updateMovable() {
 
 function applyAspect() {
   if (!cropper) return;
+  // 预设表里没有就按自定义比例解析（如 3:2、21:9、1.85）
   const r = RATIOS[props.ratio ?? 'free'];
-  cropper.setAspectRatio(r ? r[0] / r[1] : NaN);
+  const v = r ? r[0] / r[1] : ratioValue(props.ratio ?? '');
+  cropper.setAspectRatio(v ?? NaN);
 }
 
 /** region → 画布 */

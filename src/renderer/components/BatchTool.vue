@@ -93,7 +93,10 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+            />
+            <OutputNameSetting
               v-model:add-suffix="addSuffix"
+              v-model:custom-suffix="customSuffix"
             />
           </template>
 
@@ -125,7 +128,10 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+            />
+            <OutputNameSetting
               v-model:add-suffix="addSuffix"
+              v-model:custom-suffix="customSuffix"
             />
           </template>
         </SettingsGroup>
@@ -157,7 +163,10 @@
           <SaveLocationSetting
             v-model="saveDir"
             v-model:keepRelative="keepRelative"
+          />
+          <OutputNameSetting
             v-model:add-suffix="addSuffix"
+            v-model:custom-suffix="customSuffix"
           />
         </SettingsGroup>
       </div>
@@ -200,6 +209,7 @@ import { useBatchRunner } from "@renderer/composables/useBatchRunner";
 import { useSettingsStore } from "@renderer/stores/settings";
 import BatchImportPanel from "@renderer/components/BatchImportPanel.vue";
 import SaveLocationSetting from "@renderer/components/SaveLocationSetting.vue";
+import OutputNameSetting from "@renderer/components/OutputNameSetting.vue";
 import SettingsGroup from "@renderer/components/settings/SettingsGroup.vue";
 import SettingsRow from "@renderer/components/settings/SettingsRow.vue";
 import SettingsCollapse from "@renderer/components/settings/SettingsCollapse.vue";
@@ -226,6 +236,8 @@ const files = ref<BatchItem[]>([]);
 const keepRelative = ref(false);
 /** 输出文件名是否加后缀（如 _compressed）：关闭后输出名与原文件同名，可能覆盖原图 */
 const addSuffix = ref(true);
+/** 自定义后缀：留空则用各工具的默认后缀 */
+const customSuffix = ref('');
 const selected = ref("");
 const saveDir = ref(
   settings.defaultSaveDirectory || settings.recentSaveDirs[0] || "",
@@ -312,6 +324,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
   saveDir,
   keepRelative,
   addSuffix,
+  customSuffix,
   op: config[props.tool].op,
   suffix: config[props.tool].suffix,
   extOf: (item) =>
