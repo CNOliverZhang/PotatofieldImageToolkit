@@ -46,6 +46,13 @@
               <fluent-menu-list>
                 <fluent-menu-item @click="emit('edit', item)">编辑</fluent-menu-item>
                 <fluent-menu-item @click="emit('rename', item)">重命名</fluent-menu-item>
+                <!--
+                  「分享模板」入口暂时隐藏（交互方案待定）。
+                  原因：模板码只编码参数，不含图片素材 —— 图片水印模板分享出去对方用不了。
+                  功能代码已就绪：`utils/templateCode.ts` + 本组件的 `share` 事件 + 使用方的 share 处理，
+                  方案定下来后在上面补一行菜单项即可恢复：
+                  <fluent-menu-item @click="emit('share', item)">分享模板</fluent-menu-item>
+                -->
                 <fluent-menu-item @click="emit('remove', item)">删除</fluent-menu-item>
               </fluent-menu-list>
             </fluent-menu>
@@ -86,7 +93,8 @@ const props = withDefaults(
     thumb?: (item: TemplateItem) => string;
   }>(),
   {
-    thumb: undefined
+    // 给个默认实现，模板里就能直接调用（可选 prop 直接调用会报「可能为未定义」）
+    thumb: () => ''
   }
 );
 
@@ -96,6 +104,8 @@ const emit = defineEmits<{
   apply: [item: TemplateItem];
   edit: [item: TemplateItem];
   rename: [item: TemplateItem];
+  /** 分享（复制模板码）；无对应能力的使用方可以不监听 */
+  share: [item: TemplateItem];
   remove: [item: TemplateItem];
 }>();
 

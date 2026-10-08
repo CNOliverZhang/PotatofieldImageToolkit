@@ -9,6 +9,7 @@
     @apply="apply"
     @edit="openEditor"
     @rename="rename"
+    @share="share"
     @remove="remove"
   />
 </template>
@@ -19,6 +20,7 @@ import type { TemplateItem, WatermarkParams } from '@shared/types';
 import { useSettingsStore } from '@renderer/stores/settings';
 import { useDialog } from '@renderer/composables/useDialog';
 import { templateTypes } from '@renderer/consts/templates';
+import { encodeTemplate } from '@renderer/utils/templateCode';
 import TemplateLibrary from '@renderer/components/template/TemplateLibrary.vue';
 
 /**
@@ -98,6 +100,18 @@ async function rename(item: TemplateItem): Promise<void> {
     return;
   }
   await settings.updateTemplate('watermark', item.id, { name: name.trim() });
+}
+
+/** 分享：把参数编码成模板码复制到剪贴板，对方用「从模板码导入」即可还原同样参数 */
+async function share(item: TemplateItem): Promise<void> {
+  const code = encodeTemplate(JSON.parse(JSON.stringify(item.params)));
+  try {
+    await navigator.clipboard.writeText(code);
+    message(`已复制「${item.name}」的模板码`, 'success');
+  } catch {
+    // 剪贴板不可用时退化为展示，至少能手动复制
+    await alert(code, `模板码 · ${item.name}`);
+  }
 }
 
 async function remove(item: TemplateItem): Promise<void> {

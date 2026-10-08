@@ -100,16 +100,6 @@ const quality = ref(90);
 const originalUrl = ref('');
 
 
-function mimeOf(path: string): string {
-  const ext = extOf(path).toLowerCase();
-  if (ext === '.png') return 'image/png';
-  if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg';
-  if (ext === '.webp') return 'image/webp';
-  if (ext === '.gif') return 'image/gif';
-  if (ext === '.bmp') return 'image/bmp';
-  return 'image/png';
-}
-
 async function fetchMeta(): Promise<void> {
   if (!inputPath.value) return;
   const res = await window.api.image.process({ op: 'metadata', inputPath: inputPath.value });
@@ -142,12 +132,24 @@ function buildOptions() {
   };
 }
 
-/** 载入当前图片：读尺寸 + 生成画布用的 data URI（选择图片与拖入图片共用） */
+/** 载入当前图片：读尺寸 + 生成画布用的预览图（选择图片与拖入图片共用） */
 async function loadInput() {
   await fetchMeta();
-  // 画布按原图尺寸挂载（cropper.js 需要真实图片），初始区域由 CropCanvas 给出
-  const b64 = await window.api.fs.readFileBase64(inputPath.value);
-  originalUrl.value = `data:${mimeOf(inputPath.value)};base64,${b64}`;
+  // 画布必须用「与输出一致」的图：主进程按 EXIF 摆正后回传（尺寸保持原图显示尺寸、不缩放），
+  // 这样裁剪框坐标与最终 extract 的坐标 1:1 对应；直接读原图会是未旋转的，坐标会错位。
+  // 用 blob URL 而不是 base64 data URI：二进制不必膨胀 33%，大图更省内存。
+  const w = meta.value?.width ?? 0;
+  const h = meta.value?.height ?? 0;
+  if (!w || !h) return;
+  const res = await window.api.image.process({
+    op: 'resize',
+    inputPath: inputPath.value,
+    options: { width: w, height: h, fit: 'fill' }
+  });
+  if (res.buffer) {
+    if (originalUrl.value) URL.revokeObjectURL(originalUrl.value);
+    originalUrl.value = URL.createObjectURL(new Blob([res.buffer], { type: 'image/png' }));
+  }
 }
 
 async function onPick() {

@@ -26,15 +26,34 @@
 - [x] textToImage —— 已外移为独立产品「洋芋田富文本编辑器」
 - [x] 设置区 UI 体系统一（settings 三组件覆盖全部工具 + 设置页）
 - [ ] 打包/公证未跑（`npm run package:win` / `package:mac`）；打包后需确认 DevTools 已禁用、圆角与亚克力观感
-- [ ] EXIF 方向自动校正（老版有、新版未做，见 `docs/LEGACY_COMPARISON.md` §5）
-- [ ] 模板码（templateCode）能力是否保留
 - [ ] 模板能力扩展到其它工具（先补 `consts/tools.ts` 的 templateRoute 与摘要适配器）
+- [ ] 「从模板码导入」入口（目前只有导出分享，`decodeTemplate` 无调用方）
+- [ ] **图片水印模板的分享形态待定**：模板码只编码参数，不含图片素材数据（见「模板码分享」的限制说明）
 
 ---
 
 ## 进度日志（倒序）
 
 ### 2026-10-08（本机 · Windows）
+
+**EXIF 方向自动校正**（老版有、新版缺失的能力补齐）
+- 主进程各 op（resize / convert / compress / extract / append / watermark）统一加 `.rotate()`（按 EXIF 摆正，无 EXIF 为 no-op）
+- 新增 `effectiveSize(meta)`：`metadata().width/height` 是未旋转尺寸，orientation 5~8 时显示尺寸宽高互换；
+  裁剪钳制、拼接对齐、水印定位、回传渲染层的尺寸全部改用它
+- 裁剪预览改用主进程摆正后的图（blob URL，替代原 base64 data URI），坐标与输出 1:1
+- 实测：400×200 且 orientation=6 的图 → 元数据 200×400、resize 输出 100×200、裁剪与拼接尺寸均正确
+
+**模板码分享（入口已隐藏，代码保留）**
+- `utils/templateCode.ts` 恢复（此前误当死代码删除）：`encodeTemplate` / `decodeTemplate`
+- 链路已通：模板列表卡片「更多」→ `share` 事件 → 使用方编码参数并复制到剪贴板（剪贴板不可用时退化为弹窗展示）
+- **入口暂时不显示**：模板列表菜单里的「分享模板」菜单项已注释掉（交互方案待定，见下条限制）。
+  恢复方式：`TemplateLibrary.vue` 菜单里加回 `<fluent-menu-item @click="emit('share', item)">分享模板</fluent-menu-item>`（注释里写了）
+- **已知限制（重要）**：模板码只编码参数对象，图片水印的素材**不在里面** ——
+  `params.watermarkPath` 存的是本机 `userData/template-assets/<hash>.png` 的**文件名**，
+  主进程 `resolveTemplateAsset()` 只在本机查这个文件（`templateAssets.ts:54`），
+  对方机器上必然不存在 → 应用该模板时水印图片读不到（`buildWatermarkComposites` 抛「未选择水印图片」）。
+  文字水印模板无此问题（参数自包含；字体缺失时会降级为系统字体）。
+- 备注：`decodeTemplate` 目前**没有调用方**（未做「从模板码导入」），需要的话再补入口；否则可删
 
 **Win11 窗口圆角修复**
 - 现象：有亚克力材质但四角是硬直角。根因是窗口无条件 `transparent: true`，transparent 窗口被 DWM 当分层窗口 → 既丢系统投影、也让 `roundedCorners`（对无边框窗口**默认就是 true**）失效（electron#47510）
@@ -81,9 +100,8 @@
 - 禁止拖拽改窗口大小（`will-resize` 拦截，保留 resizable 以留住最大化按钮）
 - 深色模式改「跟随系统 / 浅色 / 深色」三档
 
-**官网与发布物料**
+**官网（独立仓库）**
 - 官网首页重写（吸顶导航 + Hero + sticky 三幕滚动叙事 + 亮点 + 下载），深色模式改走 CSS 变量
-- 版本号跳过 4.0 直接 5.0；推文 `docs/WECHAT_ARTICLE_v5.md`
 - 坑：`.root` 的 `overflow-x:hidden` 会让内部 `position:sticky` 全部失效
 
 ### 2026-09-30
@@ -128,14 +146,13 @@
 
 ---
 
-## 未决问题
+## 待办与路线图
 
-- 后端 `/image_toolkit/usage` 接口是否存在？（见 PLANNING §4）
-- asar:false 是否必须
-- 是否在各 op 统一加 `.rotate()` 做 EXIF 方向校正
-- `SettingsGroup` 的 `count` 徽标属性当前无人使用，是否保留
-- 拼图图片列表维持自绘面板（自绘 + 固定 340px）还是改回设置卡片样式
-- 官网 4.0 版本上架后下载按钮才生效；推文截图需人工精修
+- [ ] 跑通打包与公证（`package:win` / `package:mac`），并确认打包版 DevTools 已禁用
+- [ ] 模板能力扩展到其它工具（先补 `consts/tools.ts` 的 templateRoute 与摘要适配器）
+- [ ] 确认后端 `/image_toolkit/usage` 接口形态（见 PLANNING §4）
+- [ ] 评估是否保留 `SettingsGroup` 的 `count`（当前无人使用）
+- [ ] 拼图图片列表样式最终确认（自绘面板 vs 设置卡片）
 
 ## 关键约束（勿忘）
 

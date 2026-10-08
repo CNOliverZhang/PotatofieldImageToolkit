@@ -5,19 +5,16 @@ import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
 /**
- * 数据上报（沿用老版本 3.x 的机制）。
+ * 数据上报：启动时向服务端登记一次客户端标识，用于统计安装量与活跃量。
  *
- * 老版本在首页挂载时 POST /image_toolkit/client/register，后端据此：
- *   1. 首次出现的 identifier → 新建 client（累计安装数）；
- *   2. 每次调用 → 写一条 ImageToolkit_usage（活跃数按 client 去重统计）。
- *
- * 两个老版本遗留的硬约束（不满足会被后端判为 400）：
- *   1. identifier 的明文必须包含 'potatofield'；
- *   2. identifier 必须用**当前版本号**作为 AES 密钥 —— 后端首次入库前用
- *      AES.decrypt(identifier, version) 校验，密钥不对即 invalid identifier。
+ * identifier 的构造需沿用老版本约定（明文含 'potatofield'、AES 密钥取当前版本号），
+ * 否则服务端校验不通过——升级上来的老用户也会被当成新用户重复计数。
  *
  * 放在主进程做的原因：渲染层每个窗口（主窗口 / 独立模板窗口 / 批量窗口）
  * 都会挂载 App.vue，若在那儿上报，开几个窗口就会重复记几条 usage。
+ *
+ * 注：这是「尽量不重复计数」的轻量标识，不是安全凭证，不要用它做鉴权。
+ * 若服务端要加强校验，应改为服务端签发或加签，而不是依赖本文件的构造方式。
  */
 
 const API_BASE = 'https://api.potatofield.cn';

@@ -160,17 +160,7 @@ const selectedName = computed(() =>
   selected.value ? selected.value.split(/[\\/]/).pop() : "",
 );
 
-function mimeOf(path: string): string {
-  const ext = path.slice(path.lastIndexOf(".")).toLowerCase();
-  if (ext === ".png") return "image/png";
-  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
-  if (ext === ".webp") return "image/webp";
-  if (ext === ".gif") return "image/gif";
-  if (ext === ".bmp") return "image/bmp";
-  return "image/png";
-}
-
-/** 载入选中图到画布：先取尺寸，再把原图读成 data URI（与单图裁剪一致） */
+/** 载入选中图到画布：先取尺寸，再取主进程按 EXIF 摆正后的预览图（与单图裁剪一致） */
 async function loadSelected() {
   const path = selected.value;
   if (!path) {
@@ -178,9 +168,22 @@ async function loadSelected() {
     return;
   }
   await fetchSelectedMeta();
+  const w = selectedMeta.value?.width ?? 0;
+  const h = selectedMeta.value?.height ?? 0;
+  if (!w || !h) return;
   try {
-    const b64 = await window.api.fs.readFileBase64(path);
-    selectedUrl.value = `data:${mimeOf(path)};base64,${b64}`;
+    // 尺寸保持原图显示尺寸（不缩放），裁剪坐标才能 1:1 对应输出
+    const res = await window.api.image.process({
+      op: "resize",
+      inputPath: path,
+      options: { width: w, height: h, fit: "fill" },
+    });
+    if (res.buffer) {
+      if (selectedUrl.value) URL.revokeObjectURL(selectedUrl.value);
+      selectedUrl.value = URL.createObjectURL(
+        new Blob([res.buffer], { type: "image/png" }),
+      );
+    }
   } catch {
     selectedUrl.value = "";
     message("图片读取失败", "error");

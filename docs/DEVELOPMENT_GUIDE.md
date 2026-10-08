@@ -123,6 +123,13 @@
 
 ### 5.1 图像处理
 
+- **EXIF 方向**：所有 op 的 pipeline 都要 `.rotate()`（无参数 = 按 EXIF orientation 摆正，无 EXIF 时是 no-op）。
+  老版本手工做过这件事，sharp **默认不随 EXIF 旋转**，漏掉会让手机竖拍照片躺着输出（见 `docs/LEGACY_COMPARISON.md`）。
+- **尺寸换算必须用 `effectiveSize(meta)`**：`sharp.metadata().width/height` 是**未旋转**的原始尺寸，
+  orientation 5~8 时显示尺寸宽高互换。凡涉及坐标/尺寸（裁剪区域钳制、拼接对齐、水印定位、回传渲染层的尺寸）
+  一律用换算后的值，否则预览（已摆正）与输出会错位。
+- 新增 op 时：pipeline 加 `.rotate()`；用到 metadata 尺寸的地方走 `effectiveSize`；裁剪类要先摆正再 extract。
+
 - **大图必须考虑两件事**：① 预览要等比缩放（长边 ≤10000 且总像素 ≤6MP），避免生成/传输 GB 级预览；② 输出像素不得超过 libvips 上限 268402689（超限必须给中文提示并禁用保存按钮）。
 - 真实输出尺寸由主进程通过 `ImageProcessResult.width/height` 返回，**不要拿预览图尺寸当真实尺寸显示**。
 - JPG 不支持透明：任何 op 输出 jpeg 时，透明底必须兜底为白色，否则透明区变黑。

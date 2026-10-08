@@ -232,6 +232,22 @@ export async function processImage(payload: ImageProcessPayload): Promise<ImageP
   }
 }
 
+/**
+ * 换算「实际显示」尺寸。
+ *
+ * sharp 的 `metadata().width/height` 是**未经 EXIF 旋转**的像素尺寸；
+ * 而用户看到的图（以及我们 `.rotate()` 之后输出的图）在 orientation = 5~8 时宽高互换。
+ * 凡是用到坐标/尺寸的地方（裁剪区域、拼接对齐、水印定位、给渲染层的尺寸）都必须用这个值，
+ * 否则预览（已按 EXIF 摆正）与输出（未摆正）会错位。
+ */
+function effectiveSize(meta: sharp.Metadata): { width: number; height: number } {
+  const w = meta.width ?? 0;
+  const h = meta.height ?? 0;
+  // orientation 5~8：图像被旋转了 90°/270°（可能还带镜像），显示时宽高互换
+  const transposed = (meta.orientation ?? 1) >= 5;
+  return transposed ? { width: h, height: w } : { width: w, height: h };
+}
+
 async function processImageInner(payload: ImageProcessPayload): Promise<ImageProcessResult> {
   const { op, inputPath, outputPath, options = {}, extra = {} } = payload;
   if (!existsSync(inputPath)) throw new Error(`输入文件不存在: ${inputPath}`);
@@ -244,11 +260,16 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       const plain = { ...info } as Record<string, unknown>;
       delete plain.exif;
       delete plain.icc;
+      // 渲染层按「看到的尺寸」布局（裁剪框、预览），这里给出 EXIF 旋转后的尺寸才一致
+      const shown = effectiveSize(info);
+      plain.width = shown.width;
+      plain.height = shown.height;
       return { info: plain, meta };
     }
     case 'resize': {
       const { width, height, fit = 'inside', background, format, quality } = options;
-      const pipeline = sharp(inputPath).resize(width, height, { fit: fit as keyof sharp.FitEnum, background: background ?? '#ffffff' });
+      // .rotate() 无参数 = 按 EXIF orientation 摆正（无 EXIF 时是 no-op）
+      const pipeline = sharp(inputPath).rotate().resize(width, height, { fit: fit as keyof sharp.FitEnum, background: background ?? '#ffffff' });
       // 支持输出格式与质量（PNG 为无损，quality 无意义，仅在有损格式下传入）
       const applyFormat = (p: sharp.Sharp) =>
         format ? p.toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {}) : p.png();
@@ -262,7 +283,7 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
     }
     case 'convert': {
       const { format = 'png', quality } = options;
-      const pipeline = sharp(inputPath).toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {});
+      const pipeline = sharp(inputPath).rotate().toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {});
       if (outputPath) {
         await pipeline.toFile(outputPath);
         return { outputPath };
@@ -273,7 +294,7 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
     case 'compress': {
       const format = options.format;
       const quality = options.quality ?? 80;
-      let img = sharp(inputPath);
+      let img = sharp(inputPath).rotate();
       if (format) {
         img = img.toFormat(format as keyof sharp.FormatEnum, { quality });
       } else if (quality !== undefined) {
@@ -295,16 +316,18 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       const rawTop = Number(opt.top ?? 0);
       const rawWidth = Number(opt.width ?? 0);
       const rawHeight = Number(opt.height ?? 0);
-      const meta = await sharp(inputPath).metadata();
-      const iw = meta.width ?? 0;
-      const ih = meta.height ?? 0;
+      // 裁剪坐标来自渲染层（预览已按 EXIF 摆正），因此用旋转后的尺寸做钳制
+      const shown = effectiveSize(await sharp(inputPath).metadata());
+      const iw = shown.width;
+      const ih = shown.height;
       const left = Math.max(0, Math.min(Math.round(rawLeft), Math.max(0, iw - 1)));
       const top = Math.max(0, Math.min(Math.round(rawTop), Math.max(0, ih - 1)));
       const maxW = Math.max(1, iw - left);
       const maxH = Math.max(1, ih - top);
       const width = Math.max(1, Math.min(Math.max(1, Math.round(rawWidth)), maxW));
       const height = Math.max(1, Math.min(Math.max(1, Math.round(rawHeight)), maxH));
-      const pipeline = sharp(inputPath).extract({ left, top, width, height });
+      // 先按 EXIF 摆正再裁剪，坐标才与预览一致
+      const pipeline = sharp(inputPath).rotate().extract({ left, top, width, height });
       if (outputPath) {
         const format = opt.format as string | undefined;
         const quality = opt.quality as number | undefined;
@@ -331,8 +354,9 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       if (!images.length) throw new Error('append 需要 images 列表');
       const metas = await Promise.all(images.map((p) => sharp(p).metadata()));
       const n = images.length;
-      const originW = metas.map((m) => m.width ?? 0);
-      const originH = metas.map((m) => m.height ?? 0);
+      // 拼接按「看到的尺寸」对齐，因此用 EXIF 旋转后的尺寸
+      const originW = metas.map((m) => effectiveSize(m).width);
+      const originH = metas.map((m) => effectiveSize(m).height);
       const sum = (arr: number[]) => arr.reduce((a, b) => a + b, 0);
       const bg = parseColor((extra.background as string) ?? (options.background as string));
       // 边距：四周留 margin，图与图之间也留 margin；未指定底色时为透明底
@@ -394,8 +418,11 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       const parts = await Promise.all(
         images.map(async (p, i): Promise<{ input: string | Buffer; width: number; height: number }> => {
           const { w, h } = scaled[i];
-          if (originW[i] === w && originH[i] === h) return { input: p, width: w, height: h };
-          const buf = await sharp(p).resize({ width: w, height: h, fit: 'fill' }).png().toBuffer();
+          // 尺寸没变且没有 EXIF 方向时直接复用原文件（省一次编解码）；
+          // 有 EXIF 的必须走一遍 rotate，否则拼出来的图是躺着的
+          const needsRotate = (metas[i].orientation ?? 1) > 1;
+          if (!needsRotate && originW[i] === w && originH[i] === h) return { input: p, width: w, height: h };
+          const buf = await sharp(p).rotate().resize({ width: w, height: h, fit: 'fill' }).png().toBuffer();
           return { input: buf, width: w, height: h };
         })
       );
@@ -432,7 +459,8 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
     }
     case 'watermark': {
       const composites = await buildWatermarkComposites(inputPath, extra);
-      const base = sharp(inputPath).composite(composites);
+      // 先按 EXIF 摆正再合成水印，位置才与预览一致
+      const base = sharp(inputPath).rotate().composite(composites);
       if (outputPath) {
         const format = options.format;
         const quality = options.quality;
@@ -503,8 +531,10 @@ async function buildWatermarkComposites(
   extra: Record<string, unknown>
 ): Promise<sharp.OverlayOptions[]> {
   const baseMeta = await sharp(inputPath).metadata();
-  const baseW = baseMeta.width ?? 0;
-  const baseH = baseMeta.height ?? 0;
+  // 水印定位基于「看到的尺寸」（预览与合成都按 EXIF 摆正后再算坐标）
+  const shown = effectiveSize(baseMeta);
+  const baseW = shown.width;
+  const baseH = shown.height;
   const type = extra.type === 'image' ? 'image' : 'text';
   const unit: 'percent' | 'pixel' = extra.positionUnit === 'pixel' ? 'pixel' : 'percent';
 
@@ -663,12 +693,15 @@ async function prepareImageWatermark(
   const scale = clamp(Number(extra.scale ?? 0.2), 0.01, 1);
 
   // 百分比模式：宽度 = 图片宽度 × sizePct%；像素模式：沿用「相对原图短边比例」
+  // 短边按「看到的尺寸」算（baseMeta 是未旋转的原始尺寸）
+  const shown = effectiveSize(baseMeta);
   const targetW =
     targetWidth > 0
       ? Math.max(8, Math.round((targetWidth * clamp(Number(extra.sizePct ?? 20), 1, 500)) / 100))
-      : Math.max(8, Math.round((Math.min(baseMeta.width ?? 0, baseMeta.height ?? 0) || 1000) * scale));
+      : Math.max(8, Math.round((Math.min(shown.width, shown.height) || 1000) * scale));
 
-  const resized = sharp(wmPath).ensureAlpha().resize(targetW, null, { withoutEnlargement: false });
+  // 水印图片自身也可能带 EXIF，同样先摆正
+  const resized = sharp(wmPath).rotate().ensureAlpha().resize(targetW, null, { withoutEnlargement: false });
   const { data, info } = await resized.raw().toBuffer({ resolveWithObject: true });
   for (let i = 3; i < data.length; i += 4) data[i] = Math.round(data[i] * opacity);
   let wm = sharp(data, { raw: { width: info.width, height: info.height, channels: 4 } });

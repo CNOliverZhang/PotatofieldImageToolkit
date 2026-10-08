@@ -119,10 +119,9 @@
 - 去重：按 path，一致
 - 保存位置：`SaveLocationSetting`（选文件夹 + 常用位置 + 保持相对目录），一致
 
-❗**共同缺陷**：扫描返回的 `errorList`（损坏/不支持的文件）被**静默混入**待处理列表，错误原因丢弃，直到运行时才逐张报错（`BatchImportPanel.vue:55`）。
-❓是否改为「导入时提示 N 个文件无法读取，并询问是否跳过」？建议做。
+✅ **已修（2026-09-30）**：`errorList` 不再混入列表，改为导入时提示「已跳过 N 个无法读取的文件」。
 
-### 2.2 导出 —— ❗有差异，含 2 处缺陷
+### 2.2 导出 —— ✅ 已统一（2026-09-30）
 
 | 工具 | 文件名后缀 | 扩展名规则 | 子目录 | 结束后打开的文件 |
 |---|---|---|---|---|
@@ -132,11 +131,11 @@
 | cropper | `_cropped` | 恒沿用原扩展名 | 同上 | ✅ `resolveBatchOutputPath(...)` |
 | watermark | `_watermarked` | original→输入扩展名，否则按格式 | 同上 | ❌ `buildOutputPath(...)` |
 
-❗**缺陷 1（建议直接修）**：`BatchTool.vue:232-236` / `WatermarkBatchView.vue:180` 结束后「打开所在文件夹」用的是 `buildOutputPath(saveDir, 原文件名)` —— **没加后缀、也没加相对子目录**，keepRelative 时指向不存在的文件。cropper 用 `resolveBatchOutputPath` 是对的。建议统一。
+✅ **缺陷 1 已修**：结束后打开的文件统一改用真实输出路径（`resolveBatchOutputPath`），keepRelative 下也正确。
 
-❗**缺陷 2（建议直接修）**：jpeg 扩展名两处各写一套（`.jpg` vs `.jpeg`）。建议统一为 `.jpg`（`useOutputSettings.outExt` 已是 `.jpg`）。
+✅ **缺陷 2 已修**：jpeg 扩展名统一为 `.jpg`。
 
-❓**待确认：同名覆盖**。目前全部静默覆盖（无序号、无确认），`fileIO.ts` 的 `fileExists` 已定义但批量流程从未调用。是否在批量场景加「已存在则自动加序号 / 运行前提示将覆盖 N 个文件」？
+✅ **同名覆盖已实现（2026-10-08）**：单图与批量统一走 `useOutputConflict`，预检后三选一（自动重命名 / 覆盖 / 取消）；输出==输入时由主进程临时文件中转安全替换。批量另提供「添加后缀名」开关（默认开）决定是否加后缀。
 
 ### 2.3 处理逻辑 —— 基本一致，小差异
 
@@ -145,7 +144,7 @@
 | 循环 | 全部 `for...of` 串行 await |
 | 进度 | 仅按钮文案「处理中 done/total」 |
 | 单张失败 | catch 后 toast 提示并继续 |
-| 取消 | 全部不支持 |
+| 取消 | 已支持中途取消（已完成文件保留） |
 | cropper 额外 | 循环内多一次 `metadata` IPC；缺少裁剪区域合法性校验；按钮额外禁用 `files.length===0` |
 | 文案 | 「批量裁剪完成」vs「批量处理完成」 |
 
