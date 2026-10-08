@@ -38,6 +38,35 @@ function openBatchWindow(route: string): void {
   openWindow({ key: route, route });
 }
 
+/**
+ * 自定义协议：`potatofield-image-toolkit://` —— 让其它应用（如富文本编辑器）
+ * 能直接唤起本工具箱。打包后由安装器写入注册表 / Info.plist，这里再显式注册一次兜底。
+ *
+ * 支持的 URL：
+ * - `potatofield-image-toolkit://open`            → 打开/聚焦主窗口
+ * - `potatofield-image-toolkit://tool/watermark`  → 打开指定工具
+ * - `potatofield-image-toolkit://open?route=/compress` → 同上
+ */
+const PROTOCOL = 'potatofield-image-toolkit';
+
+function routeFromProtocolUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    const host = (u.host || '').toLowerCase();
+    const path = u.pathname.replace(/^\/+/, '');
+    if (host === 'tool' && path) return path.startsWith('/') ? path : `/${path}`;
+    const q = u.searchParams.get('route');
+    if (q) return q.startsWith('/') ? q : `/${q}`;
+  } catch {
+    /* 解析不了就回首页 */
+  }
+  return '/';
+}
+
+function handleProtocolUrl(url: string): void {
+  openToolInMainWindow(routeFromProtocolUrl(url));
+}
+
 /** 托盘菜单里的工具项：支持批量的工具挂二级菜单，其余直接打开 */
 function buildToolMenuItems(): MenuItemConstructorOptions[] {
   return tools.map((tool) => {
@@ -86,6 +115,16 @@ function createTray(): void {
 app.whenReady().then(() => {
   registerIpc();
   initUpdater();
+
+  // 注册自定义协议（供其它应用唤起）；macOS 的 open-url 在启动时可能先于 whenReady 触发，
+  // 因此事件监听放在模块顶层（见下方 app.on('open-url')）
+  if (process.platform === 'win32' || process.platform === 'darwin') {
+    app.setAsDefaultProtocolClient(PROTOCOL);
+  }
+  // Windows 冷启动：协议 URL 出现在 argv 里
+  const startupUrl = process.argv.find((a) => a.startsWith(`${PROTOCOL}://`));
+  if (startupUrl) handleProtocolUrl(startupUrl);
+
   openWindow({ key: 'main', route: '/' });
   createTray();
   // 数据上报（老版本 3.x 的 register 机制）：放在主进程，保证每次启动只上报一次
@@ -93,13 +132,23 @@ app.whenReady().then(() => {
   setTimeout(checkForUpdates, 3000);
 });
 
-app.on('second-instance', () => {
+// macOS：通过协议唤起（已运行时由系统投递到本事件）
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  if (url.startsWith(`${PROTOCOL}://`)) handleProtocolUrl(url);
+});
+
+app.on('second-instance', (_e, argv) => {
+  // Windows：第二个实例的 argv 里带协议 URL
+  const url = argv.find((a) => a.startsWith(`${PROTOCOL}://`));
+  const route = url ? routeFromProtocolUrl(url) : '/';
   const main = getWindows().get('main');
   if (main && !main.isDestroyed()) {
     if (main.isMinimized()) main.restore();
     main.focus();
+    if (url) main.webContents.send('window:navigate', route);
   } else {
-    openWindow({ key: 'main', route: '/' });
+    openWindow({ key: 'main', route });
   }
 });
 

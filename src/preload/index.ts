@@ -12,6 +12,11 @@ const api: ImageToolkitApi = {
     setOpenAtLogin: (open: boolean) => ipcRenderer.invoke('app:setOpenAtLogin', open),
     getZoomFactor: () => ipcRenderer.invoke('app:zoomFactor'),
     setZoomFactor: (factor: number) => ipcRenderer.invoke('app:setZoomFactor', factor),
+    /** 本机是否有「洋芋田富文本编辑器」（含已注册协议的情况） */
+    hasRichTextEditor: (): Promise<boolean> => ipcRenderer.invoke('app:hasRichTextEditor'),
+    /** 唤起它：protocol=协议、app=本地应用、none=都没有（前端应打开下载页） */
+    openRichTextEditor: (): Promise<{ ok: boolean; method: 'protocol' | 'app' | 'none'; detail?: string }> =>
+      ipcRenderer.invoke('app:openRichTextEditor'),
     // 同步读取：首帧就要用它决定页面背景（避免先用不透明再切换导致闪烁）
     windowMaterial: ipcRenderer.sendSync('app:windowMaterial') as boolean,
     acrylicLib: ipcRenderer.sendSync('app:acrylicLib') as boolean

@@ -57,6 +57,14 @@
       "output": "build",
       "buildResources": "build"
     },
+    "protocols": [
+      {
+        "name": "洋芋田图像工具箱",
+        "schemes": [
+          "potatofield-image-toolkit"
+        ]
+      }
+    ],
     "files": [
       "out/**/*",
       "package.json"

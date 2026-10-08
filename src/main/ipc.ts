@@ -18,6 +18,7 @@ import {
   ensurePlaceholderImage
 } from './templateAssets';
 import { importLegacyTemplates } from './legacy';
+import { hasRichTextEditor, openRichTextEditor } from './companionApp';
 import {
   readTemplateStore,
   addTemplate,
@@ -60,6 +61,9 @@ export function registerIpc(): void {
   ipcMain.handle('app:setOpenAtLogin', (_e, open: boolean) => setOpenAtLogin(open));
   ipcMain.handle('app:zoomFactor', () => getZoomFactor());
   ipcMain.handle('app:setZoomFactor', (_e, factor: number) => setZoomFactor(Number(factor)));
+  // 兄弟产品「洋芋田富文本编辑器」：先问在不在，点击时再唤起（协议 → 本地应用 → 由前端打开下载页）
+  ipcMain.handle('app:hasRichTextEditor', () => hasRichTextEditor());
+  ipcMain.handle('app:openRichTextEditor', () => openRichTextEditor());
   ipcMain.handle('app:appDataPath', () => app.getPath('userData'));
 
   ipcMain.handle('dialog:selectFile', async (_e, options: SelectFileOptions): Promise<string[] | null> => {

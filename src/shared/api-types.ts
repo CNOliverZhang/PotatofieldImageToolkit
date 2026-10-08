@@ -25,6 +25,14 @@ export interface ImageToolkitApi {
     /** 界面缩放比例（1 = 100%） */
     getZoomFactor: () => Promise<number>;
     setZoomFactor: (factor: number) => Promise<number>;
+    /** 本机是否有兄弟产品「洋芋田富文本编辑器」（含已注册协议的情况） */
+    hasRichTextEditor: () => Promise<boolean>;
+    /** 唤起它：protocol=协议唤起、app=启动本地应用、none=都没有（前端应打开下载页） */
+    openRichTextEditor: () => Promise<{
+      ok: boolean;
+      method: 'protocol' | 'app' | 'none';
+      detail?: string;
+    }>;
     /** 当前系统是否启用了窗口材质（macOS 玻璃 / Windows 11 亚克力）：为 true 时页面背景应全透明 */
     windowMaterial: boolean;
     /** 材质是否来自 electron-acrylic-window（Win11 22H2 以下的老 Windows）：
