@@ -414,6 +414,13 @@ pinia 持久化
 - [ ] **待定**：模板码（templateCode）能力是否保留（老版水印/拼接有）
 - [ ] 主题/默认路径/参数接入全页面 + 自动更新联调 + win/mac 打包
 
+## 本轮（2026-10-08）已完成：Win11 窗口圆角修复
+
+- [x] 修复「有亚克力材质但四角是硬直角」：根因是窗口无条件 `transparent: true`（为 macOS vibrancy / 老系统第三方库所设），transparent 窗口被 DWM 当成分层窗口 —— 既丢系统投影、也让 `roundedCorners`（对无边框窗口**默认就是 true**）失效（electron#47510）
+- [x] 修复方式：`supportsAcrylic()`（Win11 22H2+）分支改为**不透明窗口 + 原生 `backgroundMaterial: 'acrylic'`**，由 DWM 提供圆角与投影；`transparent` 仅保留给 macOS / 老 Windows；`backgroundColor` 给不透明窗口设实色兜底（浅 #f3f3f3 / 深 #202020）
+- [x] 截屏实测：窗口四角已是系统圆角（DWM 裁剪），亚克力材质正常
+- [x] 页面侧无需改动：`data-material='on'` 时 `--shell-radius: 0` 的既有规则正好配合（避免「圆角套圆角」）；global.css 过时注释已更新
+
 ## 本轮（2026-10-08）已完成：拖放选图 + 打包禁用 DevTools
 
 - [x] `ImagePicker` 支持把图片拖进来：未选图落占位框、已选图落预览区可直接替换；悬停时整块描边 + 「松开鼠标以替换」遮罩；非图片格式给出提示

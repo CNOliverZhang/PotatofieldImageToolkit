@@ -187,8 +187,12 @@ export function openWindow(options: OpenWindowOptions = {}): BrowserWindow {
     // Windows：无边框，窗口控制由右上角自绘按钮提供（见 WindowControls.vue）
     titleBarStyle: 'hidden',
     frame: false,
-    // transparent 是 vibrancy（macOS）与 acrylic（Windows）生效的前提
-    transparent: true,
+    // transparent 是 macOS vibrancy 与第三方毛玻璃（老 Windows）的前提；
+    // 但 Win11 原生材质（backgroundMaterial）不需要它，而且 transparent 窗口会被 DWM 当成
+    // 分层窗口：既丢系统投影、也让 roundedCorners 失效（electron/electron#47510），
+    // 表现为「有亚克力但四角是硬直角」。因此只在不用原生材质时才开启透明。
+    transparent: !supportsAcrylic(),
+    // 不透明窗口需要一个实底色兜底（材质未生效时不至于全黑）；透明窗口保持全透明
     backgroundColor: '#00000000',
     // 系统窗口材质：macOS 玻璃质感 / Windows 11 亚克力（其余平台不支持，保持普通窗口）
     // 注意：vibrancy 的 light/dark/appearance-based 等旧值已被 Apple 移除，只能用位置类取值
@@ -200,6 +204,10 @@ export function openWindow(options: OpenWindowOptions = {}): BrowserWindow {
     // 材质用 acrylic（亚克力，模糊壁纸+背景窗口，质感与 Win10 库的 acrylic 档一致）；
     // 通透度通过页面的 --material-tint-alpha 控制，取值对齐 Win10 库的 0x99（60%）
     ...(supportsAcrylic() ? { backgroundMaterial: 'acrylic' as const } : {}),
+    // 圆角说明：roundedCorners 对无边框窗口**默认就是 true**，无需显式设置；
+    // 真正的前提是窗口不能是 transparent（见上方 transparent 的注释）——Win11 22H2 以上
+    // 因此走「不透明窗口 + 原生材质」，由 DWM 提供圆角与投影；Win10 及以下无此能力，
+    // 页面也不自绘圆角（global.css 的 data-material 规则），保持直角。
     // 旧系统（Win10 等）：交给第三方库做毛玻璃
     ...(AcrylicBrowserWindow ? { vibrancy: buildVibrancyOptions() } : {}),
     icon: resolveAppIcon(),

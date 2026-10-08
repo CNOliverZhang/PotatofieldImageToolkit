@@ -83,10 +83,11 @@ html[data-material='on'][data-platform='win']:not([data-maximized='true']) {
   --window-pad: 0px;
   --shell-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
-/* Windows 材质下不要自绘圆角：窗口矩形是硬直角且没有系统阴影（transparent 窗口既丢
-   DWM 投影、也会让 roundedCorners 失效，见 electron/electron#47510），
-   卡片再画圆角就会在四个角露出材质缺口。
-   覆盖老 Windows（第三方库）与 Win11 原生材质两种来源；macOS 由系统提供圆角，不受影响 */
+/* Windows 材质下不要自绘圆角：
+   Win11 22H2+ 现走「不透明窗口 + 原生 backgroundMaterial」（见 windows.ts），
+   系统自带圆角与投影；页面再画圆角会与系统圆角叠加成「圆角套圆角」。
+   老 Windows（第三方库）窗口仍无系统圆角，页面同样不自绘（保持直角，避免四角露出材质缺口）。
+   macOS 由系统提供圆角，不受影响 */
 html[data-material='on'][data-platform='win'] {
   --shell-radius: 0px;
 }
