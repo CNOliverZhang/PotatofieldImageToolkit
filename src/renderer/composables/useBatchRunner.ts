@@ -1,10 +1,11 @@
 import { onBeforeUnmount, reactive, ref, watch, type Ref } from 'vue';
 import type { ImageProcessOp, ImageProcessOptions } from '@shared/types';
 import type { BatchItem } from '@renderer/utils/directoryScanner';
-import { resolveBatchOutputPath, ensureDir, fileExists } from '@renderer/utils/fileIO';
+import { resolveBatchOutputPath, ensureDir } from '@renderer/utils/fileIO';
 import { useDialog } from '@renderer/composables/useDialog';
+import { resolveOutputConflicts } from '@renderer/composables/useOutputConflict';
 
-/** 同名文件的处理策略 */
+/** 同名文件的处理策略（冲突处理已抽取到 useOutputConflict，此处仅作转发） */
 export type ConflictStrategy = 'overwrite' | 'rename';
 
 /** 每张图的执行参数：options/extra 二选一或都给；skip 非空则跳过该文件 */
@@ -19,8 +20,10 @@ export interface BatchRunnerConfig {
   saveDir: Ref<string>;
   keepRelative: Ref<boolean>;
   op: ImageProcessOp;
-  /** 文件名后缀，如 '_resized' */
+  /** 文件名后缀，如 '_resized'；由「添加后缀名」开关决定是否实际附加 */
   suffix: string;
+  /** 是否在输出文件名上加后缀（保存位置设置项，默认开）；关闭时输出名与原文件同名 */
+  addSuffix?: Ref<boolean>;
   /** 输出扩展名（含点）；不传则沿用原扩展名 */
   extOf?: (item: BatchItem) => string | undefined;
   /** 逐张生成执行参数（可异步，如裁剪需要读图片尺寸） */
@@ -45,29 +48,12 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
   const progress = reactive({ done: 0, total: 0 });
 
   function outPath(item: BatchItem): string {
+    const useSuffix = cfg.addSuffix?.value !== false; // 未传时视为开启
     return resolveBatchOutputPath(cfg.saveDir.value, item, {
-      suffix: cfg.suffix,
+      suffix: useSuffix ? cfg.suffix : '',
       ext: cfg.extOf?.(item),
       keepStructure: cfg.keepRelative.value
     });
-  }
-
-  /** 生成不冲突的路径：a.png → a_1.png → a_2.png */
-  function uniquePath(path: string, taken: Set<string>): string {
-    const slash = path.lastIndexOf('/');
-    const dir = slash > 0 ? path.slice(0, slash + 1) : '';
-    const base = slash > 0 ? path.slice(slash + 1) : path;
-    const dot = base.lastIndexOf('.');
-    const stem = dot > 0 ? base.slice(0, dot) : base;
-    const ext = dot > 0 ? base.slice(dot) : '';
-    let n = 1;
-    let candidate = `${dir}${stem}_${n}${ext}`;
-    while (taken.has(candidate)) {
-      n++;
-      candidate = `${dir}${stem}_${n}${ext}`;
-    }
-    taken.add(candidate);
-    return candidate;
   }
 
   function cancel(): void {
@@ -121,31 +107,13 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
       return;
     }
 
-    // 1) 预计算输出路径，检测同名文件
+    // 1) 预计算输出路径，并统一处理同名冲突（与单图工具共用同一套逻辑）
     const planned = files.map((item) => outPath(item));
-    const taken = new Set<string>();
-    for (const p of planned) {
-      if (await fileExists(p)) taken.add(p);
-    }
-
-    // 2) 有冲突才询问，让用户三选一
-    let strategy: ConflictStrategy = 'overwrite';
-    if (taken.size) {
-      const choice = await choose(
-        `有 ${taken.size} 个输出文件已存在（共 ${files.length} 个）。\n` +
-          `选择「自动重命名」会在文件名后加 _1、_2 依次避让；选择「覆盖」会替换原有文件。`,
-        '输出文件已存在',
-        [
-          { label: '自动重命名', value: 'rename', appearance: 'accent' },
-          { label: '覆盖', value: 'overwrite' },
-          { label: '取消', value: 'cancel' }
-        ]
-      );
-      if (choice === 'cancel') return;
-      strategy = choice === 'rename' ? 'rename' : 'overwrite';
-    }
-
-    const outs = planned.map((p) => (strategy === 'rename' && taken.has(p) ? uniquePath(p, taken) : p));
+    const { outs, cancelled: aborted } = await resolveOutputConflicts(
+      planned,
+      files.map((item) => item.path)
+    );
+    if (aborted) return;
 
     // 3) 串行执行，可取消
     processing.value = true;

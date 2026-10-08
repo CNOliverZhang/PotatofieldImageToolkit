@@ -34,6 +34,7 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+              v-model:add-suffix="addSuffix"
             />
           </template>
         </WatermarkControls>
@@ -80,6 +81,8 @@ const settings = useSettingsStore();
 
 const files = ref<BatchItem[]>([]);
 const keepRelative = ref(false);
+/** 输出文件名是否加后缀（_watermarked）：关闭后输出名与原文件同名，可能覆盖原图 */
+const addSuffix = ref(true);
 const selected = ref("");
 const params = reactive<WatermarkParams>(defaultParams());
 const saveDir = ref(
@@ -169,6 +172,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
   files,
   saveDir,
   keepRelative,
+  addSuffix,
   op: "watermark",
   suffix: "_watermarked",
   // 保持原格式时沿用各自输入图的扩展名

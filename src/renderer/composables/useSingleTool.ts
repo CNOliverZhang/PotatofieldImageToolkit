@@ -2,6 +2,7 @@ import { ref, onBeforeUnmount } from 'vue';
 import { selectImageFiles, selectDirectory } from '@renderer/utils/filePicker';
 import { useDialog } from '@renderer/composables/useDialog';
 import { buildOutputPath } from '@renderer/utils/fileIO';
+import { resolveOutputConflicts } from '@renderer/composables/useOutputConflict';
 
 /**
  * 单图工具通用逻辑：选择图片、预览（防抖）、保存目录选择。
@@ -67,12 +68,19 @@ export function useSingleTool() {
     const stem = dot > 0 ? base.slice(0, dot) : base;
     const name = buildName(stem);
     const outputPath = buildOutputPath(dir, name);
+
+    // 同名冲突处理（与批量工具共用）：自动重命名 / 覆盖 / 取消
+    // 若输出正好等于输入（如压缩保持原格式且存到原目录），由主进程用临时文件原子替换
+    const { outs, cancelled } = await resolveOutputConflicts([outputPath], [inputPath.value]);
+    if (cancelled) return;
+    const finalPath = outs[0];
+
     processing.value = true;
     try {
-      await runFn(outputPath);
-      message('已保存：' + name, 'success');
+      await runFn(finalPath);
+      message('已保存：' + (finalPath.split(/[\\/]/).pop() || name), 'success');
       try {
-        window.api.shell.showItemInFolder(outputPath);
+        window.api.shell.showItemInFolder(finalPath);
       } catch {
         /* 忽略：某些平台可能不支持 */
       }

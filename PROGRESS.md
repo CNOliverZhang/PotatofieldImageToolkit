@@ -414,6 +414,18 @@ pinia 持久化
 - [ ] **待定**：模板码（templateCode）能力是否保留（老版水印/拼接有）
 - [ ] 主题/默认路径/参数接入全页面 + 自动更新联调 + win/mac 打包
 
+## 本轮（2026-10-08）已完成：输出路径冲突与覆盖策略统一
+
+- [x] 修复用户反馈「输出目录选原目录报错 `Cannot use same file for input and output`」
+  - 根因 1：单图工具走 `useSingleTool.runSave`，**完全没有同名/同路径检测**（那套三选一只做在批量侧 `useBatchRunner`）
+  - 根因 2：压缩工具在「保持原格式」时输出名 == 原文件名（`compress.vue:91-92`），存到原目录即撞车
+  - 根因 3：主进程无任何输入==输出校验，各 op 直接 `toFile(outputPath)`
+- [x] 主进程 `processImage` 加包装：输出==输入时先写 `.pftmp` 临时文件再原子替换，失败清理临时文件 → 支持「覆盖原图」且不损坏原图（实测压缩到自身 47ms、文件被替换、无残留；分隔符/大小写差异也能识别）
+- [x] 抽出 `useOutputConflict.ts`：预检 + 三选一 + `uniquePath`（每步 `fileExists` 复核），单图与批量共用
+- [x] 单图 `runSave` 接入冲突处理（此前会静默覆盖同名文件）
+- [x] 批量侧：`useBatchRunner` 改用共享冲突处理；新增 `addSuffix` 配置
+- [x] 保存位置新增「添加后缀名」开关（默认开，文案「输出文件添加后缀名以避免覆盖原文件」），BatchTool / WatermarkBatchView / cropper-batch 三处接入
+
 ## 未决问题
 - 后端 `/image_toolkit/usage` 接口是否存在？（见 PLANNING §4）
 - cropperjs 版本（v1 vs v2）

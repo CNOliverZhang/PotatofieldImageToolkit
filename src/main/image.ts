@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import exifr from 'exifr';
-import { existsSync, statSync } from 'fs';
+import { existsSync, statSync, renameSync, unlinkSync } from 'fs';
 import { join } from 'path';
 import type {
   ImageProcessPayload,
@@ -195,7 +195,44 @@ async function readImageMeta(inputPath: string): Promise<ImageMeta> {
   return { sections };
 }
 
+/** 路径同一性比较：忽略分隔符差异与大小写（Windows 下区分大小写的路径指向同一文件） */
+function samePath(a: string, b: string): boolean {
+  const norm = (p: string) => p.replace(/\\/g, '/').replace(/\/+$/, '').toLowerCase();
+  return norm(a) === norm(b);
+}
+
+/**
+ * 统一入口：处理「输出文件就是输入文件」的场景（用户选择覆盖原图）。
+ *
+ * sharp 不允许输入输出为同一个文件（会报 Cannot use same file for input and output），
+ * 因此这里先写到同目录的临时文件，处理成功后整体替换：
+ * - 支持「覆盖原图」这个明确意图
+ * - 处理失败/中断时不会损坏原图（临时文件会被清理）
+ */
 export async function processImage(payload: ImageProcessPayload): Promise<ImageProcessResult> {
+  const selfOverwrite = !!payload.outputPath && samePath(payload.outputPath, payload.inputPath);
+  if (!selfOverwrite) return processImageInner(payload);
+
+  const target = payload.outputPath as string;
+  const tmp = `${target}.pftmp`;
+  if (existsSync(tmp)) unlinkSync(tmp);
+  try {
+    const result = await processImageInner({ ...payload, outputPath: tmp });
+    renameSync(tmp, target); // 已存在则覆盖
+    return result.outputPath ? { ...result, outputPath: target } : result;
+  } catch (err) {
+    if (existsSync(tmp)) {
+      try {
+        unlinkSync(tmp);
+      } catch {
+        /* 清理失败不影响原始错误 */
+      }
+    }
+    throw err;
+  }
+}
+
+async function processImageInner(payload: ImageProcessPayload): Promise<ImageProcessResult> {
   const { op, inputPath, outputPath, options = {}, extra = {} } = payload;
   if (!existsSync(inputPath)) throw new Error(`输入文件不存在: ${inputPath}`);
 

@@ -73,6 +73,7 @@
           <SaveLocationSetting
             v-model="saveDir"
             v-model:keepRelative="keepRelative"
+            v-model:add-suffix="addSuffix"
           />
         </SettingsGroup>
       </div>
@@ -135,6 +136,8 @@ const saveDir = ref(
   settings.defaultSaveDirectory || settings.recentSaveDirs[0] || "",
 );
 const keepRelative = ref(false);
+/** 输出文件名是否加后缀（_cropped）：关闭后输出名与原文件同名，可能覆盖原图 */
+const addSuffix = ref(true);
 /** 选中图的原图地址（data URI）：cropper.js 需要真实尺寸的图片才能给出正确的裁剪坐标 */
 const selectedUrl = ref("");
 
@@ -223,6 +226,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
   files,
   saveDir,
   keepRelative,
+  addSuffix,
   op: "extract",
   suffix: "_cropped",
   extOf: (item) =>

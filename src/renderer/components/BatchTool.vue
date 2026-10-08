@@ -93,6 +93,7 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+              v-model:add-suffix="addSuffix"
             />
           </template>
 
@@ -124,6 +125,7 @@
             <SaveLocationSetting
               v-model="saveDir"
               v-model:keepRelative="keepRelative"
+              v-model:add-suffix="addSuffix"
             />
           </template>
         </SettingsGroup>
@@ -155,6 +157,7 @@
           <SaveLocationSetting
             v-model="saveDir"
             v-model:keepRelative="keepRelative"
+            v-model:add-suffix="addSuffix"
           />
         </SettingsGroup>
       </div>
@@ -221,6 +224,8 @@ const settings = useSettingsStore();
 
 const files = ref<BatchItem[]>([]);
 const keepRelative = ref(false);
+/** 输出文件名是否加后缀（如 _compressed）：关闭后输出名与原文件同名，可能覆盖原图 */
+const addSuffix = ref(true);
 const selected = ref("");
 const saveDir = ref(
   settings.defaultSaveDirectory || settings.recentSaveDirs[0] || "",
@@ -306,6 +311,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
   files,
   saveDir,
   keepRelative,
+  addSuffix,
   op: config[props.tool].op,
   suffix: config[props.tool].suffix,
   extOf: (item) =>

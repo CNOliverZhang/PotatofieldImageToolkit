@@ -178,6 +178,13 @@
 
 ---
 
+### 5.6 输出路径与覆盖
+
+- 冲突处理**只有一个实现**：`composables/useOutputConflict.ts` 的 `resolveOutputConflicts(planned, inputs)`（预检已存在 → 三选一「自动重命名 / 覆盖 / 取消」）。单图 `useSingleTool.runSave` 与批量 `useBatchRunner` 都调它，**禁止在各自页面里再写一套同名检测**（单图侧曾完全没有，导致静默覆盖）。
+- 「覆盖」若指向**输入文件自身**（用户要覆盖原图）：主进程 `image.ts` 的 `processImage` 会先写 `xxx.pftmp` 再原子替换 —— sharp 不允许读写同一个文件，且这样处理失败也不会损坏原图。**新增 op 不要绕过这层包装**。
+- 批量输出文件名是否加后缀由保存位置的「添加后缀名」开关（`addSuffix`，默认开）决定；关闭时输出名与原文件同名，会走到冲突三选一。新增批量工具必须把这个开关传进 `useBatchRunner`。
+- `uniquePath` 每次候选都要 `fileExists` 复核磁盘，不能只在内存集合里避让。
+
 ## 6. 新增工具的检查清单
 
 1. 页面放在 `src/renderer/pages/`，路由加到 `router/index.ts`（独立窗口加 `meta: { standalone: true, title }`；
