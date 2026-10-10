@@ -1,6 +1,6 @@
 {
   "name": "potatofield-image-toolkit",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "洋芋田图像工具箱 - Electron + Vue 3 重写版",
   "author": "Potatofield",
   "license": "MIT",

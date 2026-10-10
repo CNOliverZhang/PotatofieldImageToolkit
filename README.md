@@ -1,6 +1,6 @@
 # 洋芋田图像工具箱（重写版）
 
-老项目 `PotatofieldImageToolkit`（Electron 11 + Vue 2）的现代化重写版本（当前 5.0.0）。
+老项目 `PotatofieldImageToolkit`（Electron 11 + Vue 2）的现代化重写版本（当前 5.1.0）。
 
 - 运行时：Electron 44（需 Node ≥ 22.12）、[electron-vite](https://electron-vite.org) 5
 - 框架：Vue 3（`<script setup lang="ts">`）+ Vue Router 4 + Pinia
