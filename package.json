@@ -99,7 +99,8 @@
     },
     "mac": {
       "target": [
-        "dmg"
+        "dmg",
+        "zip"
       ],
       "icon": "build/icons/icon.icns",
       "category": "public.app-category.utilities"
