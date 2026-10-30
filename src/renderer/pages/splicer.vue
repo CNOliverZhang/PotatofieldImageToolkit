@@ -48,7 +48,14 @@
       <div class="controls-body">
         <!-- 图片列表：与批量工具左侧导入面板同款容器；高度固定，条目过多时列表内部滚动
              （控制区沿用全局可滚动布局，设置项多时不会被列表挤溢出） -->
-        <div class="file-panel">
+        <div
+          class="file-panel"
+          :class="{ 'drop-active': dragging }"
+          @dragenter.prevent="onDragEnter"
+          @dragover.prevent="onDragOver"
+          @dragleave.prevent="onDragLeave"
+          @drop.prevent="onDrop"
+        >
           <div class="panel-head">
             <span class="panel-title">拼接图片</span>
             <span class="panel-count">{{ files.length }}</span>
@@ -100,6 +107,8 @@
             <span class="foot-text">按住左侧手柄拖动可调整顺序</span>
             <button class="link-btn" @click="clearAll">清空</button>
           </div>
+          <!-- 拖拽悬停提示：覆盖整个面板，明确「松手即追加导入」 -->
+          <div v-if="dragging" class="drop-mask">松开鼠标即可导入</div>
         </div>
 
         <SettingsGroup title="拼接方式">
@@ -184,6 +193,7 @@ import { scanImageDirectory, type BatchItem } from '@renderer/utils/directorySca
 import { relativePath } from '@renderer/utils/fileIO';
 import { useDialog } from '@renderer/composables/useDialog';
 import { evChk, evNum, evVal, useSingleTool } from '@renderer/composables/useSingleTool';
+import { useFileDrop } from '@renderer/composables/useFileDrop';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
@@ -335,6 +345,16 @@ function dedupe(list: BatchItem[]): BatchItem[] {
   const seen = new Set<string>();
   return list.filter((it) => (seen.has(it.path) ? false : (seen.add(it.path), true)));
 }
+
+/** 拖拽导入：图片直接追加，文件夹按「扫描文件夹」的规则递归展开 */
+const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop({
+  onFiles(list) {
+    files.value = dedupe([...files.value, ...list]);
+  },
+  onRejected(count) {
+    message(`已忽略 ${count} 个非图片文件`, 'warning');
+  }
+});
 
 async function chooseFiles() {
   const res = await selectImageFiles(true);
@@ -533,6 +553,7 @@ onBeforeUnmount(() => {
 /* 图片列表：可拖动调节顺序，因此每项带序号 + 上移/下移。
    面板高度固定、列表内部滚动；控制区沿用全局的可滚动布局，设置项多时不会被挤出可视区 */
 .file-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 340px;
@@ -542,6 +563,23 @@ onBeforeUnmount(() => {
   border: 1px solid var(--colorNeutralStroke1);
   border-radius: var(--borderRadiusXLarge);
   padding: calc(var(--design-unit) * 1px * 3);
+}
+/* 拖拽悬停：整块导入区描边强调色 */
+.file-panel.drop-active {
+  outline: 2px dashed var(--accent-base-color);
+  outline-offset: -2px;
+}
+.drop-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--colorNeutralBackground2) 82%, transparent);
+  color: var(--neutral-foreground-rest);
+  font-size: var(--fontSizeBase300);
+  pointer-events: none;
 }
 .panel-head {
   display: flex;

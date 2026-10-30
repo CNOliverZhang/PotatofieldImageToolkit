@@ -35,9 +35,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { IMAGE_EXTENSIONS } from '@renderer/utils/filePicker';
 import { useDialog } from '@renderer/composables/useDialog';
+import { useFileDrop } from '@renderer/composables/useFileDrop';
 
 withDefaults(
   defineProps<{
@@ -62,57 +61,19 @@ const emit = defineEmits<{
 }>();
 
 const { message } = useDialog();
-const dragging = ref(false);
-/** 拖拽进入/离开的嵌套计数：避免划过子元素时误判为离开 */
-let depth = 0;
 
-function hasFiles(e: DragEvent): boolean {
-  const types = e.dataTransfer?.types;
-  return !!types && Array.prototype.includes.call(types, 'Files');
-}
-
-function onDragEnter(e: DragEvent) {
-  if (!hasFiles(e)) return;
-  depth++;
-  dragging.value = true;
-}
-
-function onDragOver(e: DragEvent) {
-  if (!hasFiles(e)) return;
-  if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
-  dragging.value = true;
-}
-
-function onDragLeave() {
-  depth = Math.max(0, depth - 1);
-  if (depth === 0) dragging.value = false;
-}
-
-/** 取文件绝对路径：新版 Electron 移除了 File.path，统一用 preload 暴露的 webUtils */
-function pathOfFile(file: File): string {
-  try {
-    // 兼容旧版本 Electron 仍带 path 的情况
-    const legacy = (file as File & { path?: string }).path;
-    if (legacy) return legacy;
-    return window.api.fs.getPathOfFile(file) || '';
-  } catch {
-    return '';
-  }
-}
-
-function onDrop(e: DragEvent) {
-  depth = 0;
-  dragging.value = false;
-  const file = Array.from(e.dataTransfer?.files ?? [])[0];
-  const path = file ? pathOfFile(file) : '';
-  if (!path) return;
-  const ext = path.split('.').pop()?.toLowerCase() ?? '';
-  if (!IMAGE_EXTENSIONS.includes(ext)) {
+/** 与批量导入区共用同一套拖拽解析逻辑；单图场景只取第一张，且不展开文件夹 */
+const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop({
+  folders: false,
+  onFiles(files) {
+    const path = files[0]?.path;
+    if (path) emit('drop', path);
+  },
+  onRejected(_count, paths) {
+    const ext = paths[0]?.split('.').pop()?.toLowerCase() ?? '';
     message(`不支持的文件格式：${ext || '未知'}`, 'warning');
-    return;
   }
-  emit('drop', path);
-}
+});
 
 function onLoad(e: Event) {
   emit('load', e.target as HTMLImageElement);

@@ -1,5 +1,12 @@
 <template>
-  <div class="import-panel">
+  <div
+    class="import-panel"
+    :class="{ 'drop-active': dragging }"
+    @dragenter.prevent="onDragEnter"
+    @dragover.prevent="onDragOver"
+    @dragleave.prevent="onDragLeave"
+    @drop.prevent="onDrop"
+  >
     <div class="import-head">
       <span class="import-title">导入图片</span>
       <span class="import-count">{{ modelValue.length }}</span>
@@ -9,7 +16,7 @@
       <fluent-button appearance="neutral" @click="scanFolder">扫描文件夹</fluent-button>
     </div>
     <div class="import-list">
-      <div v-if="!modelValue.length" class="import-empty">尚未导入图片</div>
+      <div v-if="!modelValue.length" class="import-empty">尚未导入图片，可将图片或文件夹拖到这里</div>
       <div
         v-for="item in modelValue"
         :key="item.path"
@@ -24,6 +31,8 @@
       <span class="foot-text">已选：{{ selected ? selected.split(/[\\/]/).pop() : '无' }}</span>
       <button class="link-btn" @click="clear">清空</button>
     </div>
+    <!-- 拖拽悬停提示：覆盖整个面板，明确「松手即追加导入」 -->
+    <div v-if="dragging" class="drop-mask">松开鼠标即可导入</div>
   </div>
 </template>
 
@@ -32,11 +41,22 @@ import { selectImageFiles, selectDirectory } from '@renderer/utils/filePicker';
 import { scanImageDirectory, type BatchItem } from '@renderer/utils/directoryScanner';
 import { relativePath } from '@renderer/utils/fileIO';
 import { useDialog } from '@renderer/composables/useDialog';
+import { useFileDrop } from '@renderer/composables/useFileDrop';
 
 const props = defineProps<{ modelValue: BatchItem[]; selected: string }>();
 const emit = defineEmits<{ 'update:modelValue': [BatchItem[]]; 'update:selected': [string] }>();
 
 const { message } = useDialog();
+
+/** 拖拽导入：图片直接追加，文件夹按「扫描文件夹」的规则递归展开 */
+const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop({
+  onFiles(files) {
+    emit('update:modelValue', dedupe([...props.modelValue, ...files]));
+  },
+  onRejected(count) {
+    message(`已忽略 ${count} 个非图片文件`, 'warning');
+  }
+});
 
 function dedupe(list: BatchItem[]): BatchItem[] {
   const seen = new Set<string>();
@@ -82,6 +102,7 @@ function select(p: string) {
 
 <style scoped>
 .import-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -198,5 +219,23 @@ function select(p: string) {
 }
 .link-btn:hover {
   background: var(--colorNeutralBackground1Hover);
+}
+/* 拖拽悬停：整块导入区描边强调色 */
+.import-panel.drop-active {
+  outline: 2px dashed var(--accent-base-color);
+  outline-offset: -2px;
+}
+.drop-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--borderRadiusXLarge);
+  background: color-mix(in srgb, var(--colorNeutralBackground2) 82%, transparent);
+  color: var(--neutral-foreground-rest);
+  font-size: var(--fontSizeBase300);
+  pointer-events: none;
 }
 </style>
