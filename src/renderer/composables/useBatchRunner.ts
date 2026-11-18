@@ -3,6 +3,7 @@ import type { ImageProcessOp, ImageProcessOptions } from '@shared/types';
 import type { BatchItem } from '@renderer/utils/directoryScanner';
 import { resolveBatchOutputPath, ensureDir } from '@renderer/utils/fileIO';
 import { useDialog } from '@renderer/composables/useDialog';
+import type { DialogAction, DialogDetails } from '@renderer/composables/ui';
 import { resolveOutputConflicts } from '@renderer/composables/useOutputConflict';
 
 /** 同名文件的处理策略（冲突处理已抽取到 useOutputConflict，此处仅作转发） */
@@ -133,10 +134,14 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
     progress.total = files.length;
     let ok = 0;
     let skipped = 0;
+    const succeeded = new Set<string>();
+    const skippedItems: { path: string; reason: string }[] = [];
+    const failed: { path: string; reason: string }[] = [];
     let firstOut = '';
-    let savedBytes = 0;
-    let keptOriginal = 0;
     let compared = 0;
+    let totalSource = 0;
+    let totalOutput = 0;
+    let keptOriginal = 0;
 
     for (let i = 0; i < files.length; i++) {
       if (cancelled.value) break;
@@ -146,7 +151,7 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
         const task = await cfg.prepare(item);
         if (task.skip) {
           skipped++;
-          message(`跳过 ${name(item)}：${task.skip}`, 'warning');
+          skippedItems.push({ path: item.path, reason: task.skip });
         } else {
           if (cfg.keepRelative.value && item.rel.includes('/')) {
             await ensureDir(out.slice(0, out.lastIndexOf('/')));
@@ -161,37 +166,83 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
           const stats = result.outputStats;
           if (stats?.sourceBytes) {
             compared++;
-            savedBytes += stats.sourceBytes - stats.outputBytes;
+            totalSource += stats.sourceBytes;
+            totalOutput += stats.outputBytes;
             if (stats.strategy === 'original') keptOriginal++;
           }
           ok++;
+          succeeded.add(item.path);
           if (!firstOut) firstOut = out;
         }
       } catch (e) {
-        message(`失败 ${name(item)}：${(e as Error).message}`, 'error');
+        failed.push({ path: item.path, reason: normalizeReason(e) });
       }
       progress.done++;
     }
 
     processing.value = false;
 
-    // 4) 结束提示（已完成的文件不回滚）
+    // 4) 结束弹窗：模态且必须点按钮才关闭，避免 toast 一闪而过被忽略
     const total = files.length;
-    const sizeDetail = compared
-      ? `；${savedBytes >= 0 ? '共缩小' : '共增加'} ${humanBytes(savedBytes)}`
+    const lines = [
+      cancelled.value
+        ? `已完成 ${ok}/${total} 张，跳过 ${skipped} 张，失败 ${failed.length} 张。`
+        : `成功 ${ok}/${total} 张，跳过 ${skipped} 张，失败 ${failed.length} 张。`
+    ];
+    if (compared && totalSource > 0) {
+      const pct = Math.round((1 - totalOutput / totalSource) * 100);
+      lines.push(
+        `体积变化：${humanBytes(totalSource)} → ${humanBytes(totalOutput)}`
+        + `（${pct >= 0 ? '缩小' : '增加'} ${Math.abs(pct)}%）`
         + (keptOriginal ? `，${keptOriginal} 张保持原图` : '')
-      : '';
-    if (cancelled.value) {
-      message(
-        `已取消：已完成 ${ok}/${total} 张` + (skipped ? `，跳过 ${skipped} 张` : '') + sizeDetail,
-        'warning'
-      );
-    } else {
-      message(
-        `批量处理完成：${ok}/${total} 张成功` + (skipped ? `，${skipped} 张跳过` : '') + sizeDetail,
-        ok > 0 ? 'success' : 'warning'
       );
     }
+    if (skippedItems.length) {
+      lines.push(
+        `跳过：${skippedItems.slice(0, 3).map((i) => `${baseName(i.path)}（${i.reason}）`).join('；')}`
+        + (skippedItems.length > 3 ? ` 等 ${skippedItems.length} 张` : '')
+      );
+    }
+    // 失败明细走结构化列表，不再堆在正文里；不截断数量，容器可滚动看全
+    const details: DialogDetails | undefined = failed.length
+      ? {
+          title: `失败文件列表（共 ${failed.length} 个失败）`,
+          rows: failed.map((i) => ({ label: baseName(i.path), value: i.reason }))
+        }
+      : undefined;
+    if (failed.length) {
+      lines.push('失败项仍保留在列表中，建议检查后再处理。');
+    }
+
+    // 有失败时把成功项清掉、失败项留下，避免误点「开始处理」重复跑，同时不弄丢失败上下文
+    const actions: DialogAction[] = failed.length
+      ? ok > 0
+        ? [
+            { label: `清空成功项（保留 ${failed.length} 个失败）`, value: 'clear-success', appearance: 'accent' },
+            { label: '保留全部', value: 'keep', appearance: 'neutral' }
+          ]
+        : [
+            { label: '清空列表', value: 'clear-all', appearance: 'accent' },
+            { label: '保留全部', value: 'keep', appearance: 'neutral' }
+          ]
+      : [
+          { label: '清空列表', value: 'clear-all', appearance: 'accent' },
+          { label: '保留列表', value: 'keep', appearance: 'neutral' }
+        ];
+
+    const choice = await choose(
+      lines.join('\n'),
+      cancelled.value ? '批量处理已取消' : '批量处理完成',
+      actions,
+      details
+    );
+    if (choice === 'clear-success') {
+      cfg.files.value = cfg.files.value.filter((item) => !succeeded.has(item.path));
+    } else if (choice === 'clear-all') {
+      cfg.files.value = [];
+    }
+
+    // 弹窗关闭后再在文件管理器里露出第一个输出文件，避免两边同时抢焦点
     if (firstOut) {
       try {
         window.api.shell.showItemInFolder(firstOut);
@@ -204,6 +255,16 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
   return { processing, cancelled, progress, run, cancel };
 }
 
-function name(item: BatchItem): string {
-  return item.path.split(/[\\/]/).pop() || 'image';
+function baseName(path: string): string {
+  return path.split(/[\\/]/).pop() || 'image';
+}
+
+/** 去掉 Electron IPC 包装前缀、压成单行，让失败原因在列表里只占一行 */
+function normalizeReason(e: unknown): string {
+  const raw = (e as Error)?.message || String(e);
+  return raw
+    .replace(/^Error invoking remote method '[^']+':\s*/, '')
+    .replace(/^Error:\s*/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
 }

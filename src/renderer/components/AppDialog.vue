@@ -1,8 +1,18 @@
 <template>
   <fluent-dialog :hidden="!ui.dialog.visible" modal class="app-dialog">
-    <div class="dlg">
+    <div class="dlg" :class="{ 'with-details': !!ui.dialog.details }">
       <h3 v-if="ui.dialog.title" class="dlg-title">{{ ui.dialog.title }}</h3>
       <p class="dlg-msg">{{ ui.dialog.message }}</p>
+      <!-- 结构化详情（如批量处理的失败文件列表）：单行截断、超出滚动 -->
+      <div v-if="ui.dialog.details" class="dlg-details">
+        <div class="dd-title">{{ ui.dialog.details.title }}</div>
+        <div class="dd-scroll">
+          <div v-for="(row, i) in ui.dialog.details.rows" :key="i" class="dd-row">
+            <span class="dd-label" :title="row.label">{{ row.label }}</span>
+            <span class="dd-value" :title="row.value">{{ row.value }}</span>
+          </div>
+        </div>
+      </div>
       <!-- 输入型：Electron 下 window.prompt 不可用，统一走自绘对话框 -->
       <fluent-text-input
         v-if="ui.dialog.type === 'prompt'"
@@ -113,11 +123,62 @@ function submitInput(): void {
   margin: 0 0 calc(var(--design-unit) * 2 * 1px);
   font-size: 18px;
 }
+/* 带详情列表时放宽卡片，保证「文件名 / 失败原因」两列都能读 */
+.dlg.with-details {
+  width: min(560px, 88vw);
+  max-width: none;
+}
+.dlg.with-details .dlg-msg {
+  margin-bottom: calc(var(--design-unit) * 2 * 1px);
+}
 .dlg-msg {
   margin: 0 0 calc(var(--design-unit) * 5 * 1px);
   color: var(--app-fg-secondary);
   line-height: 1.5;
   white-space: pre-wrap;
+}
+.dlg-details {
+  margin-bottom: calc(var(--design-unit) * 5 * 1px);
+}
+.dd-title {
+  margin-bottom: calc(var(--design-unit) * 2 * 1px);
+  font-size: var(--fontSizeBase200);
+  color: var(--app-fg-secondary);
+}
+.dd-scroll {
+  max-height: calc(var(--design-unit) * 1px * 48);
+  overflow-y: auto;
+  border: 1px solid var(--colorNeutralStroke1);
+  border-radius: var(--borderRadiusMedium);
+  background: var(--colorNeutralBackground2);
+}
+.dd-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: calc(var(--design-unit) * 2 * 1px);
+  align-items: center;
+  padding: calc(var(--design-unit) * 1.5 * 1px) calc(var(--design-unit) * 2 * 1px);
+  font-size: var(--fontSizeBase200);
+  line-height: 1.5;
+}
+.dd-row + .dd-row {
+  border-top: 1px solid var(--colorNeutralStroke2);
+}
+.dd-row:hover {
+  background: var(--colorNeutralBackground1Hover);
+}
+.dd-label,
+.dd-value {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.dd-label {
+  color: var(--colorNeutralForeground1);
+}
+.dd-value {
+  color: var(--app-fg-secondary);
 }
 .dlg-input {
   width: 100%;

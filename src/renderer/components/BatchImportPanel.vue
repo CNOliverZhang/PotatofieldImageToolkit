@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { watch } from 'vue';
 import { selectImageFiles, selectDirectory } from '@renderer/utils/filePicker';
 import { scanImageDirectory, type BatchItem } from '@renderer/utils/directoryScanner';
 import { relativePath } from '@renderer/utils/fileIO';
@@ -47,6 +48,16 @@ const props = defineProps<{ modelValue: BatchItem[]; selected: string }>();
 const emit = defineEmits<{ 'update:modelValue': [BatchItem[]]; 'update:selected': [string] }>();
 
 const { message } = useDialog();
+
+// 批处理结束后清空列表时，同步清掉指向已移除文件的预览选中项，避免列表空了预览还挂着旧图
+watch(
+  () => props.modelValue,
+  (list) => {
+    if (props.selected && !list.some((item) => item.path === props.selected)) {
+      emit('update:selected', '');
+    }
+  }
+);
 
 /** 拖拽导入：图片直接追加，文件夹按「扫描文件夹」的规则递归展开 */
 const { dragging, onDragEnter, onDragOver, onDragLeave, onDrop } = useFileDrop({

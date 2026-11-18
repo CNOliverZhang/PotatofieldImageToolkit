@@ -26,6 +26,17 @@ export interface DialogInput {
   maxlength?: number;
 }
 
+/** 结构化详情：一行一个条目，左标题右说明，超出可滚动 */
+export interface DialogDetailRow {
+  label: string;
+  value: string;
+}
+
+export interface DialogDetails {
+  title: string;
+  rows: DialogDetailRow[];
+}
+
 export interface DialogState {
   visible: boolean;
   title: string;
@@ -33,6 +44,7 @@ export interface DialogState {
   type: DialogType;
   actions?: DialogAction[];
   input?: DialogInput;
+  details?: DialogDetails;
   resolve: ((value: boolean | string | null) => void) | null;
 }
 
@@ -45,6 +57,7 @@ export const ui = reactive({
     type: 'alert',
     actions: undefined,
     input: undefined,
+    details: undefined,
     resolve: null
   } as DialogState
 });
@@ -66,10 +79,11 @@ export function openDialog(
   message: string,
   title: string,
   actions?: DialogAction[],
-  input?: DialogInput
+  input?: DialogInput,
+  details?: DialogDetails
 ): Promise<boolean | string | null> {
   return new Promise<boolean | string | null>((resolve) => {
-    ui.dialog = { visible: true, title, message, type, actions, input, resolve };
+    ui.dialog = { visible: true, title, message, type, actions, input, details, resolve };
   });
 }
 

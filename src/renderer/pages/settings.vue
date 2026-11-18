@@ -2,11 +2,24 @@
   <div class="settings">
     <!-- 标签页：与字体工具同一套用法（组件自带指示器不生效，共享指示条自行绘制） -->
     <div ref="tabsWrapEl" class="tabs-wrap">
-      <fluent-tablist ref="tabsEl" class="settings-tabs" :activeid="tab" @change="onTabsChange">
-        <fluent-tab id="general" :class="{ 'is-active': tab === 'general' }" @click="switchTab('general')">
+      <fluent-tablist
+        ref="tabsEl"
+        class="settings-tabs"
+        :activeid="tab"
+        @change="onTabsChange"
+      >
+        <fluent-tab
+          id="general"
+          :class="{ 'is-active': tab === 'general' }"
+          @click="switchTab('general')"
+        >
           通用
         </fluent-tab>
-        <fluent-tab id="about" :class="{ 'is-active': tab === 'about' }" @click="switchTab('about')">
+        <fluent-tab
+          id="about"
+          :class="{ 'is-active': tab === 'about' }"
+          @click="switchTab('about')"
+        >
           版权信息
         </fluent-tab>
       </fluent-tablist>
@@ -17,11 +30,23 @@
     <div v-show="tab === 'general'" class="tab-panel">
       <SettingsGroup title="外观">
         <SettingsRow label="主题色">
-          <input class="color-input" type="color" :value="settings.themeColor" @input="onColor" />
+          <input
+            class="color-input"
+            type="color"
+            :value="settings.themeColor"
+            @input="onColor"
+          />
           <span class="row-val">{{ settings.themeColor }}</span>
         </SettingsRow>
-        <SettingsRow label="颜色模式" desc="跟随系统时，系统在深浅色之间切换会实时生效">
-          <app-select class="ctl-md" :value="settings.themeMode" @change="onThemeMode">
+        <SettingsRow
+          label="颜色模式"
+          desc="跟随系统时，系统在深浅色之间切换会实时生效"
+        >
+          <app-select
+            class="ctl-md"
+            :value="settings.themeMode"
+            @change="onThemeMode"
+          >
             <fluent-option value="system">跟随系统</fluent-option>
             <fluent-option value="light">浅色</fluent-option>
             <fluent-option value="dark">深色</fluent-option>
@@ -36,10 +61,16 @@
             :value="settings.defaultSaveDirectory"
             readonly
           ></fluent-text-input>
-          <fluent-button appearance="neutral" @click="pickDir">选择</fluent-button>
+          <fluent-button appearance="neutral" @click="pickDir"
+            >选择</fluent-button
+          >
         </SettingsRow>
         <SettingsRow label="输出格式">
-          <app-select class="ctl-md" :value="settings.defaultOutput.format" @change="onFormat">
+          <app-select
+            class="ctl-md"
+            :value="settings.defaultOutput.format"
+            @change="onFormat"
+          >
             <fluent-option value="original">保持原格式</fluent-option>
             <fluent-option value="png">PNG</fluent-option>
             <fluent-option value="jpeg">JPG（有损）</fluent-option>
@@ -67,10 +98,17 @@
 
       <SettingsGroup title="系统">
         <SettingsRow label="开机启动">
-          <fluent-switch :checked="openAtLogin" @change="onOpenAtLogin"></fluent-switch>
+          <fluent-switch
+            :checked="openAtLogin"
+            @change="onOpenAtLogin"
+          ></fluent-switch>
         </SettingsRow>
         <SettingsRow label="界面缩放">
-          <app-select class="ctl-md" :value="String(zoomFactor)" @change="onZoom">
+          <app-select
+            class="ctl-md"
+            :value="String(zoomFactor)"
+            @change="onZoom"
+          >
             <fluent-option value="0.75">75%</fluent-option>
             <fluent-option value="1">100%</fluent-option>
             <fluent-option value="1.25">125%</fluent-option>
@@ -83,7 +121,9 @@
 
       <SettingsGroup title="关于">
         <SettingsRow label="版本" :desc="version">
-          <button class="link-btn" @click="onUpdateClick">{{ updateLabel }}</button>
+          <button class="link-btn" @click="onUpdateClick">
+            {{ updateLabel }}
+          </button>
         </SettingsRow>
       </SettingsGroup>
     </div>
@@ -101,7 +141,9 @@
 
       <!-- 开发者信息：不套卡片，一行轻量展示 -->
       <div class="developer-line">
-        <span class="copyright">Copyright © 2019–{{ currentYear }} 张志毅</span>
+        <span class="copyright"
+          >Copyright © 2019–{{ currentYear }} 张志毅 & 陈雨</span
+        >
         <button class="link-btn" @click="copyEmail">联系开发者</button>
         <button class="link-btn" @click="open(COMMUNITY_URL)">加入社区</button>
       </div>
@@ -117,7 +159,9 @@
       </SettingsGroup>
 
       <SettingsGroup title="相关项目">
-        <div class="about-text">本程序的开发过程中使用了下列开源程序和组件：</div>
+        <div class="about-text">
+          本程序的开发过程中使用了下列开源程序和组件：
+        </div>
         <div class="resources">
           <button
             v-for="item in resources"
@@ -134,73 +178,96 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onBeforeUnmount } from 'vue';
-import { useSettingsStore } from '@renderer/stores/settings';
-import { selectDirectory } from '@renderer/utils/filePicker';
-import { useDialog } from '@renderer/composables/useDialog';
-import { useUpdaterState, manualCheckForUpdates } from '@renderer/composables/useUpdater';
-import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
-import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
-import PngModeSetting from '@renderer/components/PngModeSetting.vue';
-import type { DefaultOutputFormat } from '@renderer/stores/settings';
-import type { PngMode } from '@shared/types';
-import AppSelect from '@renderer/components/AppSelect.vue';
+import { ref, computed, nextTick, onMounted, onBeforeUnmount } from "vue";
+import { useSettingsStore } from "@renderer/stores/settings";
+import { selectDirectory } from "@renderer/utils/filePicker";
+import { useDialog } from "@renderer/composables/useDialog";
+import {
+  useUpdaterState,
+  manualCheckForUpdates,
+} from "@renderer/composables/useUpdater";
+import SettingsGroup from "@renderer/components/settings/SettingsGroup.vue";
+import SettingsRow from "@renderer/components/settings/SettingsRow.vue";
+import PngModeSetting from "@renderer/components/PngModeSetting.vue";
+import type { DefaultOutputFormat } from "@renderer/stores/settings";
+import type { PngMode } from "@shared/types";
+import AppSelect from "@renderer/components/AppSelect.vue";
 
-const SITE_URL = 'https://potatofield.cn/imagetoolkit';
-const HOME_URL = 'https://potatofield.cn';
-const MIT_URL = 'https://opensource.org/licenses/MIT';
-const COMMUNITY_URL = 'https://pd.qq.com/s/ab8f83yxa?b=9';
-const DEVELOPER_EMAIL = 'cnoliverzhang@gmail.com';
+const SITE_URL = "https://potatofield.cn/imagetoolkit";
+const HOME_URL = "https://potatofield.cn";
+const MIT_URL = "https://opensource.org/licenses/MIT";
+const COMMUNITY_URL = "https://pd.qq.com/s/ab8f83yxa?b=9";
+const DEVELOPER_EMAIL = "cnoliverzhang@gmail.com";
 
 /** 本程序依赖的开源项目（取自当前 package.json 的实际依赖） */
 const resources = [
-  { title: 'Electron', url: 'https://github.com/electron/electron' },
-  { title: 'electron-builder', url: 'https://github.com/electron-userland/electron-builder' },
-  { title: 'electron-vite', url: 'https://github.com/alex8088/electron-vite' },
-  { title: 'Vite', url: 'https://github.com/vitejs/vite' },
-  { title: '@vitejs/plugin-vue', url: 'https://github.com/vitejs/vite-plugin-vue' },
-  { title: 'Vue.js', url: 'https://github.com/vuejs/core' },
-  { title: 'Vue Router', url: 'https://github.com/vuejs/router' },
-  { title: 'Pinia', url: 'https://github.com/vuejs/pinia' },
-  { title: 'pinia-plugin-persistedstate', url: 'https://github.com/prazdevs/pinia-plugin-persistedstate' },
-  { title: 'vue-draggable-plus', url: 'https://github.com/Alfred-Skyblue/vue-draggable-plus' },
-  { title: 'TypeScript', url: 'https://github.com/microsoft/TypeScript' },
-  { title: 'vue-tsc', url: 'https://github.com/vuejs/language-tools' },
-  { title: 'Fluent UI Web Components', url: 'https://github.com/microsoft/fluentui' },
-  { title: 'Font Awesome', url: 'https://github.com/FortAwesome/Font-Awesome' },
-  { title: 'vue-fontawesome', url: 'https://github.com/FortAwesome/vue-fontawesome' },
-  { title: 'sharp', url: 'https://github.com/lovell/sharp' },
-  { title: 'cropperjs', url: 'https://github.com/fengyuanchen/cropperjs' },
-  { title: 'colorthief', url: 'https://github.com/lokesh/color-thief' },
-  { title: 'exifr', url: 'https://github.com/MikeKovarik/exifr' },
-  { title: 'crypto-js', url: 'https://github.com/brix/crypto-js' },
-  { title: 'axios', url: 'https://github.com/axios/axios' }
+  { title: "Electron", url: "https://github.com/electron/electron" },
+  {
+    title: "electron-builder",
+    url: "https://github.com/electron-userland/electron-builder",
+  },
+  { title: "electron-vite", url: "https://github.com/alex8088/electron-vite" },
+  { title: "Vite", url: "https://github.com/vitejs/vite" },
+  {
+    title: "@vitejs/plugin-vue",
+    url: "https://github.com/vitejs/vite-plugin-vue",
+  },
+  { title: "Vue.js", url: "https://github.com/vuejs/core" },
+  { title: "Vue Router", url: "https://github.com/vuejs/router" },
+  { title: "Pinia", url: "https://github.com/vuejs/pinia" },
+  {
+    title: "pinia-plugin-persistedstate",
+    url: "https://github.com/prazdevs/pinia-plugin-persistedstate",
+  },
+  {
+    title: "vue-draggable-plus",
+    url: "https://github.com/Alfred-Skyblue/vue-draggable-plus",
+  },
+  { title: "TypeScript", url: "https://github.com/microsoft/TypeScript" },
+  { title: "vue-tsc", url: "https://github.com/vuejs/language-tools" },
+  {
+    title: "Fluent UI Web Components",
+    url: "https://github.com/microsoft/fluentui",
+  },
+  { title: "Font Awesome", url: "https://github.com/FortAwesome/Font-Awesome" },
+  {
+    title: "vue-fontawesome",
+    url: "https://github.com/FortAwesome/vue-fontawesome",
+  },
+  { title: "sharp", url: "https://github.com/lovell/sharp" },
+  { title: "cropperjs", url: "https://github.com/fengyuanchen/cropperjs" },
+  { title: "colorthief", url: "https://github.com/lokesh/color-thief" },
+  { title: "exifr", url: "https://github.com/MikeKovarik/exifr" },
+  { title: "crypto-js", url: "https://github.com/brix/crypto-js" },
+  { title: "axios", url: "https://github.com/axios/axios" },
 ];
 
 const settings = useSettingsStore();
 const { confirm, message } = useDialog();
-const version = ref('');
+const version = ref("");
 const currentYear = new Date().getFullYear();
 
 /* ───────────────── 标签页 ───────────────── */
-type TabKey = 'general' | 'about';
-const tab = ref<TabKey>('general');
+type TabKey = "general" | "about";
+const tab = ref<TabKey>("general");
 const tabsWrapEl = ref<HTMLElement | null>(null);
 const tabsEl = ref<HTMLElement | null>(null);
-const indicatorStyle = ref({ left: '0px', width: '0px', opacity: '0' });
+const indicatorStyle = ref({ left: "0px", width: "0px", opacity: "0" });
 
 function updateIndicator(): void {
   const wrap = tabsWrapEl.value;
   const tabs = tabsEl.value;
   if (!wrap || !tabs) return;
-  const el = tabs.querySelector(`fluent-tab#${tab.value}`) as HTMLElement | null;
+  const el = tabs.querySelector(
+    `fluent-tab#${tab.value}`,
+  ) as HTMLElement | null;
   if (!el) return;
   const wr = wrap.getBoundingClientRect();
   const er = el.getBoundingClientRect();
   indicatorStyle.value = {
     left: `${Math.round(er.left - wr.left)}px`,
     width: `${Math.round(er.width)}px`,
-    opacity: '1'
+    opacity: "1",
   };
 }
 
@@ -209,9 +276,10 @@ function onTabsChange(e: Event): void {
   const target = e.target as (HTMLElement & { activeid?: string }) | null;
   const detail = (e as CustomEvent).detail as unknown;
   const id =
-    (typeof detail === 'string' ? detail : (detail as { id?: string } | null)?.id) ??
-    target?.activeid;
-  if (id === 'general' || id === 'about') switchTab(id);
+    (typeof detail === "string"
+      ? detail
+      : (detail as { id?: string } | null)?.id) ?? target?.activeid;
+  if (id === "general" || id === "about") switchTab(id);
 }
 
 function switchTab(next: TabKey): void {
@@ -244,28 +312,28 @@ let packaged = false;
 
 const updateLabel = computed(() => {
   switch (phase.value) {
-    case 'checking':
-      return '检查中…';
-    case 'available':
-      return '下载更新';
-    case 'downloading':
+    case "checking":
+      return "检查中…";
+    case "available":
+      return "下载更新";
+    case "downloading":
       return `下载中 ${progress.value}%`;
-    case 'downloaded':
-      return '安装更新';
-    case 'error':
-      return '重试';
+    case "downloaded":
+      return "安装更新";
+    case "error":
+      return "重试";
     default:
-      return '检查更新';
+      return "检查更新";
   }
 });
 
 /** electron-updater 的 releaseNotes 提示等流程都在 useUpdater.ts，这里只做手动检查 */
 function onUpdateClick(): void {
-  if (phase.value === 'downloaded') {
+  if (phase.value === "downloaded") {
     void promptInstall();
     return;
   }
-  if (phase.value === 'available') {
+  if (phase.value === "available") {
     void promptDownload();
     return;
   }
@@ -276,7 +344,7 @@ async function checkUpdate(): Promise<void> {
   // 未打包时 electron-updater 不会真正发起请求（启动日志里会打印 Skip checkForUpdates …），
   // 这里直接给出提示，避免按钮一直停在「检查中…」
   if (!packaged) {
-    message('开发模式下不支持检查更新，需打包后运行', 'info');
+    message("开发模式下不支持检查更新，需打包后运行", "info");
     return;
   }
   await manualCheckForUpdates();
@@ -287,16 +355,16 @@ async function open(url: string): Promise<void> {
   try {
     await window.api.shell.openExternal(url);
   } catch {
-    message('打开浏览器失败，请手动访问：' + url, 'error');
+    message("打开浏览器失败，请手动访问：" + url, "error");
   }
 }
 
 async function copyEmail(): Promise<void> {
   try {
     await navigator.clipboard.writeText(DEVELOPER_EMAIL);
-    message('已复制邮箱到剪贴板：' + DEVELOPER_EMAIL, 'success');
+    message("已复制邮箱到剪贴板：" + DEVELOPER_EMAIL, "success");
   } catch {
-    message('复制失败，开发者邮箱：' + DEVELOPER_EMAIL, 'warning');
+    message("复制失败，开发者邮箱：" + DEVELOPER_EMAIL, "warning");
   }
 }
 
@@ -305,13 +373,19 @@ function onColor(e: Event): void {
   settings.setThemeColor((e.target as HTMLInputElement).value);
 }
 function onThemeMode(e: Event): void {
-  settings.setThemeMode((e.target as HTMLInputElement).value as 'system' | 'light' | 'dark');
+  settings.setThemeMode(
+    (e.target as HTMLInputElement).value as "system" | "light" | "dark",
+  );
 }
 function onFormat(e: Event): void {
-  settings.setDefaultOutput({ format: (e.target as HTMLInputElement).value as DefaultOutputFormat });
+  settings.setDefaultOutput({
+    format: (e.target as HTMLInputElement).value as DefaultOutputFormat,
+  });
 }
 function onQuality(e: Event): void {
-  settings.setDefaultOutput({ quality: Number((e.target as HTMLInputElement).value) });
+  settings.setDefaultOutput({
+    quality: Number((e.target as HTMLInputElement).value),
+  });
 }
 function onPngMode(mode: PngMode): void {
   settings.setDefaultOutput({ pngMode: mode });
@@ -328,11 +402,11 @@ onMounted(async () => {
   openAtLogin.value = await window.api.app.getOpenAtLogin();
   zoomFactor.value = await window.api.app.getZoomFactor();
   nextTick(updateIndicator);
-  window.addEventListener('resize', updateIndicator);
+  window.addEventListener("resize", updateIndicator);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('resize', updateIndicator);
+  window.removeEventListener("resize", updateIndicator);
 });
 </script>
 
@@ -441,7 +515,8 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: calc(var(--design-unit) * 3 * 1px);
   /* 顶部 logo 行上下多留些纵向空间（视觉上是版权页的“头图”） */
-  margin: calc(var(--design-unit) * 4 * 1px) 0 calc(var(--design-unit) * 7 * 1px);
+  margin: calc(var(--design-unit) * 4 * 1px) 0
+    calc(var(--design-unit) * 7 * 1px);
 }
 /* 开发者信息：无卡片的一行（版权 + 联系开发者 + 加入社区） */
 .developer-line {
@@ -491,13 +566,20 @@ onBeforeUnmount(() => {
   background: transparent;
   color: var(--colorNeutralForeground1);
   font-size: 12px;
-  padding: calc(var(--design-unit) * 0.75 * 1px) calc(var(--design-unit) * 1.5 * 1px);
+  padding: calc(var(--design-unit) * 0.75 * 1px)
+    calc(var(--design-unit) * 1.5 * 1px);
   border-radius: 999px;
   cursor: pointer;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  transition:
+    background 0.12s ease,
+    border-color 0.12s ease;
 }
 .resource-chip:hover {
   background: color-mix(in srgb, var(--accent-base-color) 10%, transparent);
-  border-color: color-mix(in srgb, var(--accent-base-color) 45%, var(--colorNeutralStroke1));
+  border-color: color-mix(
+    in srgb,
+    var(--accent-base-color) 45%,
+    var(--colorNeutralStroke1)
+  );
 }
 </style>
