@@ -1,12 +1,13 @@
 <template>
-  <div class="batch-tool">
+  <div class="batch-tool" :class="{ busy: processing }">
     <BatchImportPanel
       v-model="files"
       v-model:selected="selected"
       class="import-col"
+      :inert="processing || undefined"
     />
 
-    <section class="preview-pane">
+    <section class="preview-pane" :inert="processing || undefined">
       <div v-if="!selected" class="dropzone">
         <font-awesome-icon icon="images" class="dz-icon" />
         <p>从左侧导入图片，点击列表项预览</p>
@@ -27,7 +28,7 @@
     </section>
 
     <aside class="controls-pane">
-      <div class="controls-body">
+      <div class="controls-body" :inert="processing || undefined">
         <SettingsGroup :title="`${config[tool].title}设置`">
           <template v-if="tool === 'resizer'">
             <SettingsRow label="宽度" desc="填 0 等比缩放">

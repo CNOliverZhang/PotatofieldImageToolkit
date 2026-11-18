@@ -1,12 +1,13 @@
 <template>
-  <div class="batch-tool">
+  <div class="batch-tool" :class="{ busy: processing }">
     <BatchImportPanel
       v-model="files"
       v-model:selected="selected"
       class="import-col"
+      :inert="processing || undefined"
     />
 
-    <section class="preview-pane">
+    <section class="preview-pane" :inert="processing || undefined">
       <div v-if="!selected" class="dropzone">
         <font-awesome-icon icon="crop" class="dz-icon" />
         <p>从左侧导入图片，点击列表项预览裁剪效果</p>
@@ -31,7 +32,7 @@
     </section>
 
     <aside class="controls-pane">
-      <div class="controls-body">
+      <div class="controls-body" :inert="processing || undefined">
         <!-- 裁剪参数：与单图裁剪共用同一组件；批量同样带 cropper 画布（use-canvas） -->
         <CropControls
           :region="region"

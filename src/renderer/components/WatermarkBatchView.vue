@@ -1,12 +1,13 @@
 <template>
-  <div class="batch-tool">
+  <div class="batch-tool" :class="{ busy: processing }">
     <BatchImportPanel
       v-model="files"
       v-model:selected="selected"
       class="import-col"
+      :inert="processing || undefined"
     />
 
-    <section class="preview-pane">
+    <section class="preview-pane" :inert="processing || undefined">
       <div v-if="!selected" class="dropzone">
         <font-awesome-icon icon="images" class="dz-icon" />
         <p>从左侧导入图片，点击列表项预览</p>
@@ -27,7 +28,7 @@
     </section>
 
     <aside class="controls-pane">
-      <div class="controls-body">
+      <div class="controls-body" :inert="processing || undefined">
         <WatermarkControls v-model="params" :lock-tile="lockTile">
           <!-- 保存位置并入水印控件的「输出设置」组 -->
           <template #output-extra>
