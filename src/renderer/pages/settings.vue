@@ -41,13 +41,13 @@
         <SettingsRow label="输出格式">
           <app-select class="ctl-md" :value="settings.defaultOutput.format" @change="onFormat">
             <fluent-option value="original">保持原格式</fluent-option>
-            <fluent-option value="png">PNG（无损）</fluent-option>
+            <fluent-option value="png">PNG</fluent-option>
             <fluent-option value="jpeg">JPG（有损）</fluent-option>
             <fluent-option value="webp">WebP（有损）</fluent-option>
           </app-select>
         </SettingsRow>
         <!-- 默认质量是通用默认值（工具里选 JPG/WebP 时才会用到），因此始终显示 -->
-        <SettingsRow label="默认质量">
+        <SettingsRow label="默认质量" desc="对 JPEG 和 WebP 生效">
           <fluent-slider
             class="ctl-slider"
             :value="settings.defaultOutput.quality"
@@ -58,6 +58,11 @@
           ></fluent-slider>
           <span class="row-val">{{ settings.defaultOutput.quality }}%</span>
         </SettingsRow>
+        <PngModeSetting
+          :model-value="settings.defaultOutput.pngMode ?? 'recommended'"
+          :format="settings.defaultOutput.format"
+          @update:model-value="onPngMode"
+        />
       </SettingsGroup>
 
       <SettingsGroup title="系统">
@@ -136,7 +141,9 @@ import { useDialog } from '@renderer/composables/useDialog';
 import { useUpdaterState, manualCheckForUpdates } from '@renderer/composables/useUpdater';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import type { DefaultOutputFormat } from '@renderer/stores/settings';
+import type { PngMode } from '@shared/types';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
 const SITE_URL = 'https://potatofield.cn/imagetoolkit';
@@ -305,6 +312,9 @@ function onFormat(e: Event): void {
 }
 function onQuality(e: Event): void {
   settings.setDefaultOutput({ quality: Number((e.target as HTMLInputElement).value) });
+}
+function onPngMode(mode: PngMode): void {
+  settings.setDefaultOutput({ pngMode: mode });
 }
 async function pickDir(): Promise<void> {
   const dir = await selectDirectory(settings.defaultSaveDirectory || undefined);

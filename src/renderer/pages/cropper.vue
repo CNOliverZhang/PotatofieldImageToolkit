@@ -39,25 +39,32 @@
         />
         <!-- 输出设置（与水印工具一致） -->
         <SettingsGroup title="输出设置">
-          <SettingsRow label="格式">
-            <app-select class="ctl-md" :value="format" @change="onFormat">
-              <fluent-option value="original">保持原格式</fluent-option>
-              <fluent-option value="png">PNG（无损）</fluent-option>
-              <fluent-option value="jpeg">JPG（有损）</fluent-option>
-              <fluent-option value="webp">WebP（有损）</fluent-option>
-            </app-select>
-          </SettingsRow>
-          <SettingsRow v-if="format === 'jpeg' || format === 'webp'" label="质量">
-            <fluent-slider
-              class="ctl-slider"
-              :value="quality"
-              :min="10"
-              :max="100"
-              :step="1"
-              @change="onQuality"
-            ></fluent-slider>
-            <span class="row-val">{{ quality }}%</span>
-          </SettingsRow>
+          <SettingsCollapse label="格式">
+            <template #control>
+              <app-select class="ctl-md" :value="format" @change="onFormat">
+                <fluent-option value="original">保持原格式</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
+                <fluent-option value="jpeg">JPG（有损）</fluent-option>
+                <fluent-option value="webp">WebP（有损）</fluent-option>
+              </app-select>
+            </template>
+            <SettingsRow
+              v-if="format === 'original' || format === 'jpeg' || format === 'webp'"
+              label="质量"
+            desc="对 JPEG 和 WebP 生效"
+            >
+              <fluent-slider
+                class="ctl-slider"
+                :value="quality"
+                :min="10"
+                :max="100"
+                :step="1"
+                @change="onQuality"
+              ></fluent-slider>
+              <span class="row-val">{{ quality }}%</span>
+            </SettingsRow>
+            <PngModeSetting v-model="pngMode" :format="format" />
+          </SettingsCollapse>
         </SettingsGroup>
       </div>
       <!-- footer 必须位于 controls-body 内部，才能继承其右侧内边距（与水印工具一致） -->
@@ -79,7 +86,11 @@ import CropCanvas from '@renderer/components/CropCanvas.vue';
 import CropControls from '@renderer/components/CropControls.vue';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
+import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
+import { useSettingsStore } from '@renderer/stores/settings';
+import type { PngMode } from '@shared/types';
 
 const { inputPath, inputName, processing, pickImage, setImage, runSave } = useSingleTool();
 
@@ -96,6 +107,7 @@ const unit = ref<'px' | 'ratio'>('px');
 const region = reactive({ left: 0, top: 0, width: 0, height: 0 });
 const format = ref<'original' | 'png' | 'jpeg' | 'webp'>('original');
 const quality = ref(90);
+const pngMode = ref<PngMode>(useSettingsStore().defaultOutput.pngMode ?? 'recommended');
 
 const originalUrl = ref('');
 
@@ -128,7 +140,11 @@ function buildOptions() {
     width: region.width,
     height: region.height,
     format: format.value === 'original' ? undefined : format.value,
-    quality: format.value === 'jpeg' || format.value === 'webp' ? quality.value : undefined
+    quality:
+      format.value === 'original' || format.value === 'jpeg' || format.value === 'webp'
+        ? quality.value
+        : undefined,
+    pngMode: pngMode.value
   };
 }
 
@@ -165,7 +181,7 @@ async function onSave() {
   await runSave(
     (stem) => `${stem}_cropped${outExt()}`,
     async (outputPath) => {
-      await window.api.image.process({
+      return await window.api.image.process({
         op: 'extract',
         inputPath: inputPath.value,
         outputPath,

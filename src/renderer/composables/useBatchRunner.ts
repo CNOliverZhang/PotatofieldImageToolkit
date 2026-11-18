@@ -8,6 +8,13 @@ import { resolveOutputConflicts } from '@renderer/composables/useOutputConflict'
 /** 同名文件的处理策略（冲突处理已抽取到 useOutputConflict，此处仅作转发） */
 export type ConflictStrategy = 'overwrite' | 'rename';
 
+function humanBytes(bytes: number): string {
+  const v = Math.abs(bytes);
+  return v >= 1024 * 1024
+    ? `${(v / 1024 / 1024).toFixed(1)} MB`
+    : `${Math.round(v / 1024)} KB`;
+}
+
 /** 每张图的执行参数：options/extra 二选一或都给；skip 非空则跳过该文件 */
 export interface BatchTask {
   options?: ImageProcessOptions;
@@ -127,6 +134,9 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
     let ok = 0;
     let skipped = 0;
     let firstOut = '';
+    let savedBytes = 0;
+    let keptOriginal = 0;
+    let compared = 0;
 
     for (let i = 0; i < files.length; i++) {
       if (cancelled.value) break;
@@ -141,13 +151,19 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
           if (cfg.keepRelative.value && item.rel.includes('/')) {
             await ensureDir(out.slice(0, out.lastIndexOf('/')));
           }
-          await window.api.image.process({
+          const result = await window.api.image.process({
             op: cfg.op,
             inputPath: item.path,
             outputPath: out,
             options: task.options,
             extra: task.extra
           });
+          const stats = result.outputStats;
+          if (stats?.sourceBytes) {
+            compared++;
+            savedBytes += stats.sourceBytes - stats.outputBytes;
+            if (stats.strategy === 'original') keptOriginal++;
+          }
           ok++;
           if (!firstOut) firstOut = out;
         }
@@ -161,14 +177,18 @@ export function useBatchRunner(cfg: BatchRunnerConfig) {
 
     // 4) 结束提示（已完成的文件不回滚）
     const total = files.length;
+    const sizeDetail = compared
+      ? `；${savedBytes >= 0 ? '共缩小' : '共增加'} ${humanBytes(savedBytes)}`
+        + (keptOriginal ? `，${keptOriginal} 张保持原图` : '')
+      : '';
     if (cancelled.value) {
       message(
-        `已取消：已完成 ${ok}/${total} 张` + (skipped ? `，跳过 ${skipped} 张` : ''),
+        `已取消：已完成 ${ok}/${total} 张` + (skipped ? `，跳过 ${skipped} 张` : '') + sizeDetail,
         'warning'
       );
     } else {
       message(
-        `批量处理完成：${ok}/${total} 张成功` + (skipped ? `，${skipped} 张跳过` : ''),
+        `批量处理完成：${ok}/${total} 张成功` + (skipped ? `，${skipped} 张跳过` : '') + sizeDetail,
         ok > 0 ? 'success' : 'warning'
       );
     }

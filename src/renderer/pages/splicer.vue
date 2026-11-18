@@ -148,12 +148,12 @@
           <SettingsCollapse label="格式">
             <template #control>
               <app-select class="ctl-md" :value="out.format" @change="onFormat">
-                <fluent-option value="png">PNG（无损）</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
                 <fluent-option value="jpeg">JPG（有损）</fluent-option>
                 <fluent-option value="webp">WebP（有损）</fluent-option>
               </app-select>
             </template>
-            <SettingsRow v-if="lossy" label="质量">
+            <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
               <fluent-slider
                 class="ctl-slider"
                 :value="out.quality"
@@ -164,6 +164,7 @@
               ></fluent-slider>
               <span class="row-val">{{ out.quality }}</span>
             </SettingsRow>
+            <PngModeSetting v-model="out.pngMode" :format="out.format" />
           </SettingsCollapse>
         </SettingsGroup>
 
@@ -196,10 +197,11 @@ import { evChk, evNum, evVal, useSingleTool } from '@renderer/composables/useSin
 import { useFileDrop } from '@renderer/composables/useFileDrop';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
 import {
   createOutputOpts,
-  isLossy,
+  needsQuality,
   outExt,
   withOutput,
   type OutputOpts
@@ -439,7 +441,7 @@ function onColor(e: Event) {
 /** 输出格式/质量：默认取设置页的「默认输出」（拼接无「保持原格式」概念，默认 PNG） */
 const out: OutputOpts = createOutputOpts();
 if (out.format === 'original') out.format = 'png';
-const lossy = computed(() => isLossy(out.format));
+const showQuality = computed(() => needsQuality(out.format));
 
 function onFormat(e: Event) {
   out.format = (e.target as HTMLInputElement).value as DefaultOutputFormat;
@@ -529,7 +531,7 @@ async function run() {
   await runSave(
     (stem) => `${stem}_spliced${outExt(out.format, files.value[0].path)}`,
     async (outputPath) => {
-      await window.api.image.process({
+      return await window.api.image.process({
         op: 'append',
         inputPath: files.value[0].path,
         outputPath,

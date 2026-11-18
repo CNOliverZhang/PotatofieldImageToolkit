@@ -199,13 +199,14 @@ async function save() {
   await runSave(
     (stem) => stem + '_watermarked' + extFor(params.format),
     async (outputPath) => {
-      await window.api.image.process({
+      return await window.api.image.process({
         op: 'watermark',
         inputPath: inputPath.value,
         outputPath,
         options: {
           format: params.format === 'original' ? undefined : params.format,
-          quality: params.quality
+          quality: params.quality,
+          pngMode: params.pngMode ?? 'recommended'
         },
         extra: { ...params } as unknown as Record<string, unknown>
       });

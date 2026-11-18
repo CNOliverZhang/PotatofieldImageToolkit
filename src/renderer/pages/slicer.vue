@@ -33,25 +33,28 @@
           />
         </SettingsGroup>
         <SettingsGroup title="输出设置">
-          <SettingsRow label="格式">
-            <app-select class="ctl-md" :value="out.format" @change="onFormat">
-              <fluent-option value="original">保持原格式</fluent-option>
-              <fluent-option value="png">PNG（无损）</fluent-option>
-              <fluent-option value="jpeg">JPG（有损）</fluent-option>
-              <fluent-option value="webp">WebP（有损）</fluent-option>
-            </app-select>
-          </SettingsRow>
-          <SettingsRow v-if="lossy" label="质量">
-            <fluent-slider
-              class="ctl-slider"
-              :value="out.quality"
-              :min="10"
-              :max="100"
-              :step="1"
-              @change="out.quality = evNum($event)"
-            ></fluent-slider>
-            <span class="row-val">{{ out.quality }}</span>
-          </SettingsRow>
+          <SettingsCollapse label="格式">
+            <template #control>
+              <app-select class="ctl-md" :value="out.format" @change="onFormat">
+                <fluent-option value="original">保持原格式</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
+                <fluent-option value="jpeg">JPG（有损）</fluent-option>
+                <fluent-option value="webp">WebP（有损）</fluent-option>
+              </app-select>
+            </template>
+            <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
+              <fluent-slider
+                class="ctl-slider"
+                :value="out.quality"
+                :min="10"
+                :max="100"
+                :step="1"
+                @change="out.quality = evNum($event)"
+              ></fluent-slider>
+              <span class="row-val">{{ out.quality }}</span>
+            </SettingsRow>
+            <PngModeSetting v-model="out.pngMode" :format="out.format" />
+          </SettingsCollapse>
         </SettingsGroup>
       </div>
       <!-- footer 必须位于 controls-body 内部，才能继承其右侧内边距（与水印工具一致） -->
@@ -69,7 +72,7 @@ import { computed, ref } from 'vue';
 import { useSingleTool, evNum, extOf } from '@renderer/composables/useSingleTool';
 import {
   createOutputOpts,
-  isLossy,
+  needsQuality,
   outExt,
   withOutput,
   type OutputOpts
@@ -78,6 +81,8 @@ import type { DefaultOutputFormat } from '@renderer/stores/settings';
 import ImagePicker from '@renderer/components/ImagePicker.vue';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
+import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import { selectDirectory } from '@renderer/utils/filePicker';
 import { buildOutputPath } from '@renderer/utils/fileIO';
 import { useDialog } from '@renderer/composables/useDialog';
@@ -99,7 +104,7 @@ const progress = ref(0);
 
 /** 输出格式/质量：默认取设置页的「默认输出」 */
 const out: OutputOpts = createOutputOpts();
-const lossy = computed(() => isLossy(out.format));
+const showQuality = computed(() => needsQuality(out.format));
 
 function onFormat(e: Event) {
   out.format = (e.target as HTMLInputElement).value as DefaultOutputFormat;

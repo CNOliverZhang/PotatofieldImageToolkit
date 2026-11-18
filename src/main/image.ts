@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import exifr from 'exifr';
-import { existsSync, statSync, renameSync, unlinkSync } from 'fs';
+import { existsSync, statSync, renameSync, unlinkSync, promises as fsp } from 'fs';
 import { join } from 'path';
 import type {
   ImageProcessPayload,
@@ -248,6 +248,110 @@ function effectiveSize(meta: sharp.Metadata): { width: number; height: number } 
   return transposed ? { width: h, height: w } : { width: w, height: h };
 }
 
+/* ===================== 统一输出管路 ===================== */
+
+interface EncodeOutputOptions {
+  /** 未指定目标格式时的默认输出格式 */
+  defaultFormat?: string;
+  /** 源文件路径，用于统计「原图 → 输出」的体积变化 */
+  sourcePath?: string;
+  /**
+   * 是否把原图本身作为候选参与择优。
+   * 只有「不改变画面内容」且源格式与目标格式相同的 op（PNG→PNG 的 compress / convert）才启用；
+   * 否则原图与处理结果不是同一个东西，比较体积没有意义。
+   */
+  allowOriginalFallback?: boolean;
+}
+
+function toArrayBuffer(buf: Buffer): ArrayBuffer {
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
+}
+
+/**
+ * 所有 op 的输出统一走这里，避免 PNG 配置散落在各分支。
+ *
+ * PNG：按 pngMode 生成候选并「择优取用」——
+ * - lossless：只做无损编码优化（compressionLevel 9 + 自适应滤波），像素不变
+ * - recommended / smaller：再生成一个调色板候选，取两者中更小的
+ * - allowOriginalFallback 时，原图也参与比较：已经优化过的 PNG 重新编码反而可能变大
+ *
+ * JPEG/WebP 等非 PNG 格式共用同一条 toFormat 分支；所有格式只要有 sourcePath 都回传体积统计，
+ * 这样批量压缩无论输出哪种格式都能提示「共缩小了多少」。
+ *
+ * 预览（无 outputPath）不做择优也不统计体积，保持单次轻量编码。
+ */
+async function encodeOutput(
+  make: () => sharp.Sharp,
+  options: ImageProcessOptions,
+  outputPath: string | undefined,
+  { defaultFormat, sourcePath, allowOriginalFallback }: EncodeOutputOptions = {}
+): Promise<ImageProcessResult> {
+  const fmt = options.format ?? defaultFormat;
+  const sourceBytes = sourcePath && outputPath ? statSync(sourcePath).size : undefined;
+
+  if (fmt !== 'png') {
+    const q = options.quality;
+    const pipeline = make().toFormat(fmt as keyof sharp.FormatEnum, q ? { quality: q } : {});
+    if (outputPath) {
+      await pipeline.toFile(outputPath);
+      return {
+        outputPath,
+        outputStats: sourceBytes === undefined ? undefined : {
+          sourceBytes,
+          outputBytes: statSync(outputPath).size,
+          strategy: 'encoded'
+        }
+      };
+    }
+    const buf = await pipeline.toBuffer();
+    return { buffer: toArrayBuffer(buf) };
+  }
+
+  // 预览只做一次轻量编码：多次择优对预览没有意义，还会拖慢刷新
+  if (!outputPath) {
+    const buf = await make().png().toBuffer();
+    return { buffer: toArrayBuffer(buf) };
+  }
+
+  const mode = options.pngMode ?? 'recommended';
+  const losslessOpts = { compressionLevel: 9, adaptiveFiltering: true };
+  let best: { buffer: Buffer; strategy: 'lossless' | 'palette' };
+
+  if (mode === 'lossless') {
+    best = { buffer: await make().png(losslessOpts).toBuffer(), strategy: 'lossless' };
+  } else {
+    const lossless = await make().png(losslessOpts).toBuffer();
+    // 自适应滤波对调色板图是有害的（实测体积反而增大约 50%），只用于全彩无损候选
+    const palette = await make().png({
+      compressionLevel: 9,
+      palette: true,
+      quality: mode === 'smaller' ? 80 : 90,
+      effort: 7
+    }).toBuffer();
+    best = palette.length < lossless.length
+      ? { buffer: palette, strategy: 'palette' }
+      : { buffer: lossless, strategy: 'lossless' };
+  }
+
+  if (
+    allowOriginalFallback && sourcePath && sourceBytes !== undefined
+    && sourceBytes <= best.buffer.length
+  ) {
+    // 选中原图：同路径覆盖由 processImage 的 .pftmp 机制处理，这里只会拿到临时路径
+    if (outputPath !== sourcePath) await fsp.copyFile(sourcePath, outputPath);
+    return {
+      outputPath,
+      outputStats: { sourceBytes, outputBytes: sourceBytes, strategy: 'original' }
+    };
+  }
+
+  await fsp.writeFile(outputPath, best.buffer);
+  return {
+    outputPath,
+    outputStats: { sourceBytes, outputBytes: best.buffer.length, strategy: best.strategy }
+  };
+}
+
 async function processImageInner(payload: ImageProcessPayload): Promise<ImageProcessResult> {
   const { op, inputPath, outputPath, options = {}, extra = {} } = payload;
   if (!existsSync(inputPath)) throw new Error(`输入文件不存在: ${inputPath}`);
@@ -267,48 +371,50 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       return { info: plain, meta };
     }
     case 'resize': {
-      const { width, height, fit = 'inside', background, format, quality } = options;
+      const { width, height, fit = 'inside', background } = options;
       // .rotate() 无参数 = 按 EXIF orientation 摆正（无 EXIF 时是 no-op）
-      const pipeline = sharp(inputPath).rotate().resize(width, height, { fit: fit as keyof sharp.FitEnum, background: background ?? '#ffffff' });
-      // 支持输出格式与质量（PNG 为无损，quality 无意义，仅在有损格式下传入）
-      const applyFormat = (p: sharp.Sharp) =>
-        format ? p.toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {}) : p.png();
-      if (outputPath) {
-        const out = format ? applyFormat(pipeline) : pipeline;
-        await out.toFile(outputPath);
-        return { outputPath };
-      }
-      const buf = await applyFormat(pipeline).toBuffer();
-      return { buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer };
+      // make() 每次返回全新 pipeline：PNG 择优时要编码两次，sharp 的 pipeline 不可复用
+      const make = () =>
+        sharp(inputPath).rotate().resize(width, height, {
+          fit: fit as keyof sharp.FitEnum,
+          background: background ?? '#ffffff'
+        });
+      return encodeOutput(make, options, outputPath, { defaultFormat: 'png' });
     }
     case 'convert': {
-      const { format = 'png', quality } = options;
-      const pipeline = sharp(inputPath).rotate().toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {});
-      if (outputPath) {
-        await pipeline.toFile(outputPath);
-        return { outputPath };
-      }
-      const buf = await pipeline.toBuffer();
-      return { buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer };
+      const srcFormat = (await sharp(inputPath).metadata()).format;
+      return encodeOutput(() => sharp(inputPath).rotate(), options, outputPath, {
+        defaultFormat: 'png',
+        sourcePath: inputPath,
+        // PNG→PNG 时原图才有资格参与择优；JPEG 源不能拿来做 PNG 的回退
+        allowOriginalFallback: srcFormat === 'png' && (options.format ?? 'png') === 'png'
+      });
     }
     case 'compress': {
-      const format = options.format;
-      const quality = options.quality ?? 80;
-      let img = sharp(inputPath).rotate();
-      if (format) {
-        img = img.toFormat(format as keyof sharp.FormatEnum, { quality });
-      } else if (quality !== undefined) {
-        const srcFormat = (await sharp(inputPath).metadata()).format;
-        if (srcFormat && srcFormat !== 'png' && srcFormat !== 'gif') {
-          img = img.toFormat(srcFormat as keyof sharp.FormatEnum, { quality });
+      const srcFormat = (await sharp(inputPath).metadata()).format;
+      // 保持原格式且源为 GIF 时沿用旧行为：不重新编码
+      if (!options.format && srcFormat === 'gif') {
+        if (outputPath) {
+          const srcBytes = statSync(inputPath).size;
+          await sharp(inputPath).rotate().toFile(outputPath);
+          return {
+            outputPath,
+            outputStats: { sourceBytes: srcBytes, outputBytes: statSync(outputPath).size, strategy: 'encoded' }
+          };
         }
+        const buf = await sharp(inputPath).rotate().png().toBuffer();
+        return { buffer: toArrayBuffer(buf) };
       }
-      if (outputPath) {
-        await img.toFile(outputPath);
-        return { outputPath };
-      }
-      const buf = await img.png().toBuffer();
-      return { buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer };
+      const target = options.format ?? srcFormat ?? 'png';
+      // 有损格式沿用原来的默认质量 80；PNG 交给 pngMode，不再暗中被 q80 调色板化
+      const finalOptions: ImageProcessOptions = target === 'png'
+        ? options
+        : { ...options, quality: options.quality ?? 80 };
+      return encodeOutput(() => sharp(inputPath).rotate(), finalOptions, outputPath, {
+        defaultFormat: target,
+        sourcePath: inputPath,
+        allowOriginalFallback: target === 'png' && srcFormat === 'png'
+      });
     }
     case 'extract': {
       const opt = options as Record<string, unknown>;
@@ -327,17 +433,8 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       const width = Math.max(1, Math.min(Math.max(1, Math.round(rawWidth)), maxW));
       const height = Math.max(1, Math.min(Math.max(1, Math.round(rawHeight)), maxH));
       // 先按 EXIF 摆正再裁剪，坐标才与预览一致
-      const pipeline = sharp(inputPath).rotate().extract({ left, top, width, height });
-      if (outputPath) {
-        const format = opt.format as string | undefined;
-        const quality = opt.quality as number | undefined;
-        let out = pipeline;
-        if (format) out = out.toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {});
-        await out.toFile(outputPath);
-        return { outputPath };
-      }
-      const buf = await pipeline.png().toBuffer();
-      return { buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer };
+      const make = () => sharp(inputPath).rotate().extract({ left, top, width, height });
+      return encodeOutput(make, options, outputPath, { defaultFormat: 'png' });
     }
     case 'append': {
       // 两种调用约定都支持：
@@ -433,45 +530,24 @@ async function processImageInner(payload: ImageProcessPayload): Promise<ImagePro
       }));
       // JPG 不支持透明：未指定底色时按白底合成，否则透明区会变黑
       const needWhite = options.format === 'jpeg' && !bg;
-      const pipeline = sharp({
-        create: {
-          width: Math.max(1, outW),
-          height: Math.max(1, outH),
-          channels: 4,
-          background: bg ?? (needWhite ? { r: 255, g: 255, b: 255, alpha: 1 } : { r: 255, g: 255, b: 255, alpha: 0 })
-        }
-      }).composite(composites);
-      // 支持输出格式与质量（PNG 无损，quality 仅在有损格式下传入）
-      const applyFormat = (p: sharp.Sharp) =>
-        options.format
-          ? p.toFormat(options.format as keyof sharp.FormatEnum, options.quality ? { quality: options.quality } : {})
-          : p.png();
-      if (outputPath) {
-        await applyFormat(pipeline).toFile(outputPath);
-        return { outputPath, width: fullW, height: fullH };
-      }
-      const buf = await applyFormat(pipeline).toBuffer();
-      return {
-        buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer,
-        width: fullW,
-        height: fullH
-      };
+      const make = () =>
+        sharp({
+          create: {
+            width: Math.max(1, outW),
+            height: Math.max(1, outH),
+            channels: 4,
+            background: bg ?? (needWhite ? { r: 255, g: 255, b: 255, alpha: 1 } : { r: 255, g: 255, b: 255, alpha: 0 })
+          }
+        }).composite(composites);
+      const result = await encodeOutput(make, options, outputPath, { defaultFormat: 'png' });
+      return { ...result, width: fullW, height: fullH };
     }
     case 'watermark': {
       const composites = await buildWatermarkComposites(inputPath, extra);
       // 先按 EXIF 摆正再合成水印，位置才与预览一致
-      const base = sharp(inputPath).rotate().composite(composites);
-      if (outputPath) {
-        const format = options.format;
-        const quality = options.quality;
-        let out = base;
-        if (format) out = out.toFormat(format as keyof sharp.FormatEnum, quality ? { quality } : {});
-        await out.toFile(outputPath);
-        return { outputPath };
-      }
-      // 无 outputPath：返回处理后图像的 buffer，供前端预览
-      const buf = await base.png().toBuffer();
-      return { buffer: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer };
+      const make = () => sharp(inputPath).rotate().composite(composites);
+      // 无 outputPath 时 encodeOutput 只做一次轻量编码，结果作为预览 buffer 返回
+      return encodeOutput(make, options, outputPath, { defaultFormat: 'png' });
     }
     default:
       throw new Error(`未支持的图像操作: ${op}`);

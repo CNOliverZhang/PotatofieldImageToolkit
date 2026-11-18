@@ -73,12 +73,12 @@
                   @change="onFormat"
                 >
                   <fluent-option value="original">保持原格式</fluent-option>
-                  <fluent-option value="png">PNG（无损）</fluent-option>
+                  <fluent-option value="png">PNG</fluent-option>
                   <fluent-option value="jpeg">JPG（有损）</fluent-option>
                   <fluent-option value="webp">WebP（有损）</fluent-option>
                 </app-select>
               </template>
-              <SettingsRow v-if="lossy" label="质量">
+              <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
                 <fluent-slider
                   class="ctl-slider"
                   :value="out.quality"
@@ -89,6 +89,7 @@
                 ></fluent-slider>
                 <span class="row-val">{{ out.quality }}</span>
               </SettingsRow>
+              <PngModeSetting v-model="out.pngMode" :format="out.format" />
             </SettingsCollapse>
             <SaveLocationSetting
               v-model="saveDir"
@@ -108,12 +109,12 @@
                   :value="out.format"
                   @change="onFormat"
                 >
-                  <fluent-option value="png">PNG（无损）</fluent-option>
+                  <fluent-option value="png">PNG</fluent-option>
                   <fluent-option value="jpeg">JPG（有损）</fluent-option>
                   <fluent-option value="webp">WebP（有损）</fluent-option>
                 </app-select>
               </template>
-              <SettingsRow v-if="lossy" label="质量">
+              <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
                 <fluent-slider
                   class="ctl-slider"
                   :value="out.quality"
@@ -124,6 +125,7 @@
                 ></fluent-slider>
                 <span class="row-val">{{ out.quality }}</span>
               </SettingsRow>
+              <PngModeSetting v-model="out.pngMode" :format="out.format" />
             </SettingsCollapse>
             <SaveLocationSetting
               v-model="saveDir"
@@ -143,12 +145,12 @@
             <template #control>
               <app-select class="ctl-md" :value="out.format" @change="onFormat">
                 <fluent-option value="original">保持原格式</fluent-option>
-                <fluent-option value="png">PNG（无损）</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
                 <fluent-option value="jpeg">JPG（有损）</fluent-option>
                 <fluent-option value="webp">WebP（有损）</fluent-option>
               </app-select>
             </template>
-            <SettingsRow v-if="lossy" label="质量">
+            <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
               <fluent-slider
                 class="ctl-slider"
                 :value="out.quality"
@@ -159,6 +161,7 @@
               ></fluent-slider>
               <span class="row-val">{{ out.quality }}</span>
             </SettingsRow>
+            <PngModeSetting v-model="out.pngMode" :format="out.format" />
           </SettingsCollapse>
           <SaveLocationSetting
             v-model="saveDir"
@@ -200,7 +203,7 @@ import type { BatchItem } from "@renderer/utils/directoryScanner";
 import { useDialog } from "@renderer/composables/useDialog";
 import {
   createOutputOpts,
-  isLossy,
+  needsQuality,
   outExt,
   withOutput,
   type OutputOpts,
@@ -212,6 +215,7 @@ import SaveLocationSetting from "@renderer/components/SaveLocationSetting.vue";
 import OutputNameSetting from "@renderer/components/OutputNameSetting.vue";
 import SettingsGroup from "@renderer/components/settings/SettingsGroup.vue";
 import SettingsRow from "@renderer/components/settings/SettingsRow.vue";
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import SettingsCollapse from "@renderer/components/settings/SettingsCollapse.vue";
 import NumInput from "@renderer/components/NumInput.vue";
 import AppSelect from "@renderer/components/AppSelect.vue";
@@ -251,7 +255,7 @@ const opts = reactive({
 /** 输出格式/质量：默认取设置页「默认输出」（convert 无「保持原格式」，回退为 png） */
 const out: OutputOpts = createOutputOpts();
 if (props.tool === "convert" && out.format === "original") out.format = "png";
-const lossy = computed(() => isLossy(out.format));
+const showQuality = computed(() => needsQuality(out.format));
 
 function onFormat(e: Event) {
   out.format = (e.target as HTMLInputElement).value as OutputOpts["format"];

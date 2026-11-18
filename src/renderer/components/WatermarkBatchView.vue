@@ -193,6 +193,7 @@ const { processing, progress, run, cancel } = useBatchRunner({
     options: {
       format: params.format === "original" ? undefined : params.format,
       quality: params.quality,
+      pngMode: params.pngMode ?? "recommended",
     },
     extra: { ...params } as unknown as Record<string, unknown>,
   }),

@@ -20,12 +20,12 @@
           <SettingsCollapse label="目标格式">
             <template #control>
               <app-select class="ctl-md" :value="opts.format" @change="onFormat">
-                <fluent-option value="png">PNG（无损）</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
                 <fluent-option value="jpeg">JPG（有损）</fluent-option>
                 <fluent-option value="webp">WebP（有损）</fluent-option>
               </app-select>
             </template>
-            <SettingsRow v-if="lossy" label="质量">
+            <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
               <fluent-slider
                 class="ctl-slider"
                 :value="opts.quality"
@@ -36,6 +36,7 @@
               ></fluent-slider>
               <span class="row-val">{{ opts.quality }}</span>
             </SettingsRow>
+            <PngModeSetting v-model="opts.pngMode" :format="opts.format" />
           </SettingsCollapse>
         </SettingsGroup>
       </div>
@@ -53,11 +54,12 @@
 import { computed, reactive, watch } from 'vue';
 import type { ImageFormat } from '@shared/types';
 import { useSingleTool, evVal, evNum, extOf } from '@renderer/composables/useSingleTool';
-import { createOutputOpts, isLossy, outExt, outQuality } from '@renderer/composables/useOutputSettings';
+import { createOutputOpts, needsQuality, outExt, outQuality } from '@renderer/composables/useOutputSettings';
 import ImagePicker from '@renderer/components/ImagePicker.vue';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
 const { inputPath, inputName, previewUrl, processing, pickImage, setImage, schedulePreview, runSave } =
@@ -67,7 +69,7 @@ const { inputPath, inputName, previewUrl, processing, pickImage, setImage, sched
 const opts = createOutputOpts();
 if (opts.format === 'original') opts.format = 'png';
 
-const lossy = computed(() => isLossy(opts.format));
+const showQuality = computed(() => needsQuality(opts.format));
 /** 传给主进程的格式（DefaultOutputFormat → ImageFormat） */
 const format = computed(() => opts.format as ImageFormat);
 
@@ -80,7 +82,7 @@ async function refresh(): Promise<ArrayBuffer | undefined> {
   const res = await window.api.image.process({
     op: 'convert',
     inputPath: inputPath.value,
-    options: { format: format.value, quality: outQuality(opts.format, opts.quality) }
+    options: { format: format.value, quality: outQuality(opts.format, opts.quality), pngMode: opts.pngMode }
   });
   return res.buffer;
 }
@@ -98,11 +100,11 @@ async function onSave() {
   await runSave(
     (stem) => `${stem}_converted${outExt(format.value, inputPath.value)}`,
     async (outputPath) => {
-      await window.api.image.process({
+      return await window.api.image.process({
         op: 'convert',
         inputPath: inputPath.value,
         outputPath,
-        options: { format: format.value, quality: outQuality(opts.format, opts.quality) }
+        options: { format: format.value, quality: outQuality(opts.format, opts.quality), pngMode: opts.pngMode }
       });
     }
   );

@@ -113,15 +113,24 @@
         <template #control>
           <app-select class="ctl-md" :value="params.format" @change="params.format = evVal($event) as 'original' | 'png' | 'jpeg' | 'webp'">
             <fluent-option value="original">保持原格式</fluent-option>
-            <fluent-option value="png">PNG（无损）</fluent-option>
+            <fluent-option value="png">PNG</fluent-option>
             <fluent-option value="jpeg">JPG（有损）</fluent-option>
             <fluent-option value="webp">WebP（有损）</fluent-option>
           </app-select>
         </template>
-        <SettingsRow v-if="params.format === 'jpeg' || params.format === 'webp'" label="质量">
+        <SettingsRow
+          v-if="params.format === 'original' || params.format === 'jpeg' || params.format === 'webp'"
+          label="质量"
+        desc="对 JPEG 和 WebP 生效"
+        >
           <fluent-slider class="ctl-slider" :value="params.quality" :min="10" :max="100" :step="1" @change="params.quality = evNum($event)"></fluent-slider>
           <span class="row-val">{{ params.quality }}%</span>
         </SettingsRow>
+        <PngModeSetting
+          :model-value="params.pngMode ?? 'recommended'"
+          :format="params.format"
+          @update:model-value="params.pngMode = $event"
+        />
       </SettingsCollapse>
       <!-- 批量水印在此追加「保存位置」等输出相关行（单图/模板编辑不传即无） -->
       <slot name="output-extra" />
@@ -139,6 +148,7 @@ import FontSelect from '@renderer/components/FontSelect.vue';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import NumInput from '@renderer/components/NumInput.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 

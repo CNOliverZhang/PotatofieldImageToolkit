@@ -1,4 +1,5 @@
 import { ref, onBeforeUnmount } from 'vue';
+import type { ImageProcessResult } from '@shared/types';
 import { selectImageFiles, selectDirectory } from '@renderer/utils/filePicker';
 import { useDialog } from '@renderer/composables/useDialog';
 import { buildOutputPath } from '@renderer/utils/fileIO';
@@ -61,7 +62,7 @@ export function useSingleTool() {
 
   async function runSave(
     buildName: (stem: string) => string,
-    runFn: (outputPath: string) => Promise<void>
+    runFn: (outputPath: string) => Promise<ImageProcessResult | void>
   ) {
     if (!inputPath.value) {
       message('请先选择图片', 'warning');
@@ -83,8 +84,20 @@ export function useSingleTool() {
 
     processing.value = true;
     try {
-      await runFn(finalPath);
-      message('已保存：' + (finalPath.split(/[\\/]/).pop() || name), 'success');
+      const result = await runFn(finalPath);
+      const stats = result?.outputStats;
+      let detail = '';
+      if (stats?.sourceBytes) {
+        if (stats.strategy === 'original') {
+          detail = '（原图更小，已保持原样）';
+        } else {
+          const saved = (1 - stats.outputBytes / stats.sourceBytes) * 100;
+          detail = saved >= 0
+            ? `（体积减少 ${saved.toFixed(0)}%）`
+            : `（体积增加 ${(-saved).toFixed(0)}%）`;
+        }
+      }
+      message('已保存：' + (finalPath.split(/[\\/]/).pop() || name) + detail, 'success');
       try {
         window.api.shell.showItemInFolder(finalPath);
       } catch {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import type { TemplateItem, TemplateStoreData, TemplateToolKey } from '@shared/types';
+import type { PngMode, TemplateItem, TemplateStoreData, TemplateToolKey } from '@shared/types';
 
 /** 默认输出格式：original 表示保持原图格式 */
 export type DefaultOutputFormat = 'original' | 'png' | 'jpeg' | 'webp';
@@ -10,6 +10,8 @@ export type ThemeMode = 'system' | 'light' | 'dark';
 interface DefaultOutput {
   format: DefaultOutputFormat;
   quality: number;
+  /** PNG 输出模式，与 JPEG/WebP 的 quality 相互独立 */
+  pngMode: PngMode;
 }
 
 interface SettingsState {
@@ -43,7 +45,7 @@ export const useSettingsStore = defineStore('settings', {
     darkMode: false,
     defaultSaveDirectory: '',
     defaultExportParams: {},
-    defaultOutput: { format: 'original', quality: 90 },
+    defaultOutput: { format: 'original', quality: 90, pngMode: 'recommended' },
     recentSaveDirs: [],
     templates: { watermark: [] },
     legacyImported: false
@@ -80,7 +82,11 @@ export const useSettingsStore = defineStore('settings', {
       // 而 v3 的 slider 在「被赋值」时也会同步抛一次 change 事件 → 写回 store → 再渲染。
       // 若这里无条件换成新对象，就会形成「渲染→赋值→change→写store→渲染」的死循环
       //（实测一次拖动触发上百次更新，界面直接卡死，直到 Vue 的递归保护中断并报错）
-      if (next.format === this.defaultOutput.format && next.quality === this.defaultOutput.quality) {
+      if (
+        next.format === this.defaultOutput.format
+        && next.quality === this.defaultOutput.quality
+        && next.pngMode === this.defaultOutput.pngMode
+      ) {
         return;
       }
       this.defaultOutput = next;

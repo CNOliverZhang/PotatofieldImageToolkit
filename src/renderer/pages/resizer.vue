@@ -42,12 +42,12 @@
             <template #control>
               <app-select class="ctl-md" :value="out.format" @change="onFormat">
                 <fluent-option value="original">保持原格式</fluent-option>
-                <fluent-option value="png">PNG（无损）</fluent-option>
+                <fluent-option value="png">PNG</fluent-option>
                 <fluent-option value="jpeg">JPG（有损）</fluent-option>
                 <fluent-option value="webp">WebP（有损）</fluent-option>
               </app-select>
             </template>
-            <SettingsRow v-if="lossy" label="质量">
+            <SettingsRow v-if="showQuality" label="质量" desc="对 JPEG 和 WebP 生效">
               <fluent-slider
                 class="ctl-slider"
                 :value="out.quality"
@@ -58,6 +58,7 @@
               ></fluent-slider>
               <span class="row-val">{{ out.quality }}</span>
             </SettingsRow>
+            <PngModeSetting v-model="out.pngMode" :format="out.format" />
           </SettingsCollapse>
         </SettingsGroup>
       </div>
@@ -78,7 +79,7 @@ import { useSingleTool, evVal, evNum } from '@renderer/composables/useSingleTool
 import { useDialog } from '@renderer/composables/useDialog';
 import {
   createOutputOpts,
-  isLossy,
+  needsQuality,
   outExt,
   withOutput,
   type OutputOpts
@@ -88,6 +89,7 @@ import ImagePicker from '@renderer/components/ImagePicker.vue';
 import SettingsGroup from '@renderer/components/settings/SettingsGroup.vue';
 import SettingsRow from '@renderer/components/settings/SettingsRow.vue';
 import SettingsCollapse from '@renderer/components/settings/SettingsCollapse.vue';
+import PngModeSetting from '@renderer/components/PngModeSetting.vue';
 import NumInput from '@renderer/components/NumInput.vue';
 import AppSelect from '@renderer/components/AppSelect.vue';
 
@@ -103,7 +105,7 @@ const opts = reactive({
 
 /** 输出格式/质量：默认取设置页的「默认输出」 */
 const out: OutputOpts = createOutputOpts();
-const lossy = computed(() => isLossy(out.format));
+const showQuality = computed(() => needsQuality(out.format));
 
 function onFormat(e: Event) {
   out.format = (e.target as HTMLInputElement).value as DefaultOutputFormat;
@@ -146,7 +148,7 @@ async function onSave() {
   await runSave(
     (stem) => `${stem}_resized${outExt(out.format, inputPath.value)}`,
     async (outputPath) => {
-      await window.api.image.process({
+      return await window.api.image.process({
         op: 'resize',
         inputPath: inputPath.value,
         outputPath,

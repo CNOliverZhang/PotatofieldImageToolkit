@@ -1,11 +1,21 @@
 export type ImageFormat = 'jpeg' | 'png' | 'webp' | 'tiff' | 'gif' | 'avif';
 
+/**
+ * PNG 输出的压缩模式。
+ * - lossless：只优化 PNG 编码参数，像素完全不变
+ * - recommended：调色板量化 q90，肉眼几乎无差别（默认）
+ * - smaller：调色板量化 q80，可能出现轻微颗粒或半透明边缘瑕疵
+ */
+export type PngMode = 'lossless' | 'recommended' | 'smaller';
+
 export interface ImageProcessOptions {
   width?: number;
   height?: number;
   fit?: 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
   format?: ImageFormat;
   quality?: number;
+  /** PNG 输出模式；只影响目标格式为 PNG 的输出，JPEG/WebP 仍用 quality */
+  pngMode?: PngMode;
   background?: string;
   /** 裁剪区域（op='extract'） */
   left?: number;
@@ -46,6 +56,12 @@ export interface ImageProcessResult {
   tags?: Record<string, unknown>;
   /** 读取元数据时返回的「精选」分组数据（op='metadata'） */
   meta?: ImageMeta;
+  /** 输出文件的体积与最终采用的策略，供界面显示压缩结果 */
+  outputStats?: {
+    sourceBytes?: number;
+    outputBytes: number;
+    strategy: 'original' | 'lossless' | 'palette' | 'encoded';
+  };
 }
 
 /** 元数据条目 */
@@ -122,6 +138,8 @@ export interface WatermarkParams {
   scale: number;
   format: 'original' | 'png' | 'jpeg' | 'webp';
   quality: number;
+  /** PNG 输出模式；水印模板里的旧数据没有该字段，渲染层展示时回落到推荐档 */
+  pngMode?: PngMode;
 }
 
 /** 模板归属的工具（未来可扩展；目前仅水印） */
